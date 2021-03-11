@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		0E389BEC25FA4606001B1088 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 0E389BEB25FA4606001B1088 /* GRDB */; };
+		0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BF825FA480C001B1088 /* AppDatabase.swift */; };
+		0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */; };
+		0E389C0525FA4931001B1088 /* Quantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C0425FA4931001B1088 /* Quantity.swift */; };
+		0E389C1325FA496C001B1088 /* Count.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C1225FA496C001B1088 /* Count.swift */; };
+		0E389C1B25FA4D5A001B1088 /* Mass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C1A25FA4D5A001B1088 /* Mass.swift */; };
+		0E389C2325FA4E67001B1088 /* Volume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C2225FA4E67001B1088 /* Volume.swift */; };
+		0E389C2825FA4EE3001B1088 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C2725FA4EE3001B1088 /* QuantityTests.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
@@ -34,6 +41,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E389BF825FA480C001B1088 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
+		0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDatabase+Persistence.swift"; sourceTree = "<group>"; };
+		0E389C0425FA4931001B1088 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
+		0E389C1225FA496C001B1088 /* Count.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Count.swift; sourceTree = "<group>"; };
+		0E389C1A25FA4D5A001B1088 /* Mass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mass.swift; sourceTree = "<group>"; };
+		0E389C2225FA4E67001B1088 /* Volume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Volume.swift; sourceTree = "<group>"; };
+		0E389C2725FA4EE3001B1088 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
 		72D6C94125F77E3600ED20FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -74,6 +88,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E389C0225FA4906001B1088 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C0325FA4924001B1088 /* Models */,
+				0E389BF825FA480C001B1088 /* AppDatabase.swift */,
+				0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		0E389C0325FA4924001B1088 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C1125FA495C001B1088 /* Units */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0E389C1125FA495C001B1088 /* Units */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C0425FA4931001B1088 /* Quantity.swift */,
+				0E389C1225FA496C001B1088 /* Count.swift */,
+				0E389C1A25FA4D5A001B1088 /* Mass.swift */,
+				0E389C2225FA4E67001B1088 /* Volume.swift */,
+			);
+			path = Units;
+			sourceTree = "<group>";
+		};
 		72D6C93325F77E3600ED20FB = {
 			isa = PBXGroup;
 			children = (
@@ -97,6 +140,7 @@
 		72D6C93E25F77E3600ED20FB /* ChopChop */ = {
 			isa = PBXGroup;
 			children = (
+				0E389C0225FA4906001B1088 /* Storage */,
 				72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */,
 				72D6C94125F77E3600ED20FB /* ContentView.swift */,
 				72D6C94325F77E3800ED20FB /* Assets.xcassets */,
@@ -118,6 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				72D6C95125F77E3800ED20FB /* ChopChopTests.swift */,
+				0E389C2725FA4EE3001B1088 /* QuantityTests.swift */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
@@ -267,8 +312,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */,
 				72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */,
+				0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */,
+				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
+				0E389C1B25FA4D5A001B1088 /* Mass.swift in Sources */,
+				0E389C1325FA496C001B1088 /* Count.swift in Sources */,
+				0E389C2325FA4E67001B1088 /* Volume.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E389C2825FA4EE3001B1088 /* QuantityTests.swift in Sources */,
 				72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
