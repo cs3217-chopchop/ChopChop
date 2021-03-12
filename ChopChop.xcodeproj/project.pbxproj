@@ -31,13 +31,6 @@
 			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
 			remoteInfo = ChopChop;
 		};
-		72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 72D6C93425F77E3600ED20FB /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
-			remoteInfo = ChopChop;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -58,8 +51,6 @@
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72D6C95E25F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,13 +63,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		72D6C94A25F77E3800ED20FB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72D6C95525F77E3800ED20FB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -132,7 +116,6 @@
 			children = (
 				72D6C93E25F77E3600ED20FB /* ChopChop */,
 				72D6C95025F77E3800ED20FB /* ChopChopTests */,
-				72D6C95B25F77E3800ED20FB /* ChopChopUITests */,
 				72D6C93D25F77E3600ED20FB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -142,7 +125,6 @@
 			children = (
 				72D6C93C25F77E3600ED20FB /* ChopChop.app */,
 				72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */,
-				72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,14 +157,6 @@
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
-			sourceTree = "<group>";
-		};
-		72D6C95B25F77E3800ED20FB /* ChopChopUITests */ = {
-			isa = PBXGroup;
-			children = (
-				72D6C95E25F77E3800ED20FB /* Info.plist */,
-			);
-			path = ChopChopUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -227,24 +201,6 @@
 			productReference = 72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		72D6C95725F77E3800ED20FB /* ChopChopUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */;
-			buildPhases = (
-				72D6C95425F77E3800ED20FB /* Sources */,
-				72D6C95525F77E3800ED20FB /* Frameworks */,
-				72D6C95625F77E3800ED20FB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				72D6C95A25F77E3800ED20FB /* PBXTargetDependency */,
-			);
-			name = ChopChopUITests;
-			productName = ChopChopUITests;
-			productReference = 72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -260,10 +216,6 @@
 					72D6C94C25F77E3800ED20FB = {
 						CreatedOnToolsVersion = 12.4;
 						LastSwiftMigration = 1240;
-						TestTargetID = 72D6C93B25F77E3600ED20FB;
-					};
-					72D6C95725F77E3800ED20FB = {
-						CreatedOnToolsVersion = 12.4;
 						TestTargetID = 72D6C93B25F77E3600ED20FB;
 					};
 				};
@@ -286,7 +238,6 @@
 			targets = (
 				72D6C93B25F77E3600ED20FB /* ChopChop */,
 				72D6C94C25F77E3800ED20FB /* ChopChopTests */,
-				72D6C95725F77E3800ED20FB /* ChopChopUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -302,13 +253,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		72D6C94B25F77E3800ED20FB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72D6C95625F77E3800ED20FB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -363,13 +307,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72D6C95425F77E3800ED20FB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -377,11 +314,6 @@
 			isa = PBXTargetDependency;
 			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
 			targetProxy = 72D6C94E25F77E3800ED20FB /* PBXContainerItemProxy */;
-		};
-		72D6C95A25F77E3800ED20FB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
-			targetProxy = 72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -593,46 +525,6 @@
 			};
 			name = Release;
 		};
-		72D6C96825F77E3800ED20FB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
-			};
-			name = Debug;
-		};
-		72D6C96925F77E3800ED20FB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -659,15 +551,6 @@
 			buildConfigurations = (
 				72D6C96525F77E3800ED20FB /* Debug */,
 				72D6C96625F77E3800ED20FB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				72D6C96825F77E3800ED20FB /* Debug */,
-				72D6C96925F77E3800ED20FB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -12,6 +12,7 @@ struct AppDatabase {
         migrator.eraseDatabaseOnSchemaChange = true
         #endif
 
+        // swiftlint:disable empty_string
         migrator.registerMigration("CreateRecipe") { db in
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
@@ -32,11 +33,10 @@ struct AppDatabase {
                     .references("recipe", onDelete: .cascade)
                 t.column("name", .text)
                     .notNull()
-                    // TODO: Unique on foreign key
-                    .unique()
                     .check { $0 != "" }
                 t.column("quantity", .text)
                     .notNull()
+                t.uniqueKey(["recipeId", "name"])
             }
         }
 
@@ -49,11 +49,10 @@ struct AppDatabase {
                     .references("recipe", onDelete: .cascade)
                 t.column("index", .integer)
                     .notNull()
-                    // TODO: Unique on foreign key
-                    .unique()
                 t.column("content", .text)
                     .notNull()
                     .check { $0 != "" }
+                t.uniqueKey(["recipeId", "index"])
             }
         }
 
@@ -77,13 +76,13 @@ struct AppDatabase {
                     .references("ingredient", onDelete: .cascade)
                 t.column("expiryDate", .date)
                     .notNull()
-                    // TODO: Unique on foreign key
-                    .unique()
                     // TODO: Check time is 0000
                 t.column("quantity", .text)
                     .notNull()
+                t.uniqueKey(["ingredientId", "expiryDate"])
             }
         }
+        // swiftlint:enable empty_string
 
         return migrator
     }
@@ -102,7 +101,11 @@ extension AppDatabase {
             let recipeIds = ingredients.compactMap { $0.recipeId } + steps.compactMap { $0.recipeId }
 
             guard recipeIds.allSatisfy({ $0 == recipe.id }) else {
-                throw DatabaseError(message: "Recipe ingredients and steps belong to the wrong recipe")
+                throw DatabaseError(message: "Recipe ingredients and steps belong to the wrong recipe.")
+            }
+
+            guard steps.map({ $0.index }).allSatisfy({ (1...steps.count).contains($0) }) else {
+                throw DatabaseError(message: "Recipe steps do not have consecutive indexes.")
             }
 
             // Delete all ingredients and steps that are not in the arrays
@@ -131,7 +134,7 @@ extension AppDatabase {
             try ingredient.save(db)
 
             guard sets.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {
-                throw DatabaseError(message: "Ingredient sets belong to the wrong ingredient")
+                throw DatabaseError(message: "Ingredient sets belong to the wrong ingredient.")
             }
 
             // Delete all sets that are not in the array
@@ -144,6 +147,30 @@ extension AppDatabase {
                 sets[index].ingredientId = ingredient.id
                 try sets[index].save(db)
             }
+        }
+    }
+
+    func deleteRecipes(ids: [Int64]) throws {
+        try dbWriter.write { db in
+            _ = try Recipe.deleteAll(db, keys: ids)
+        }
+    }
+
+    func deleteAllRecipes() throws {
+        try dbWriter.write { db in
+            _ = try Recipe.deleteAll(db)
+        }
+    }
+
+    func deleteIngredients(ids: [Int64]) throws {
+        try dbWriter.write { db in
+            _ = try Ingredient.deleteAll(db, keys: ids)
+        }
+    }
+
+    func deleteAllIngredients() throws {
+        try dbWriter.write { db in
+            _ = try Ingredient.deleteAll(db)
         }
     }
 }
