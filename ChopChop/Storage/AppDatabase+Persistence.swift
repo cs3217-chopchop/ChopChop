@@ -11,6 +11,10 @@ extension AppDatabase {
                 .appendingPathComponent("db.sqlite")
             let dbPool = try DatabasePool(path: url.path)
             let appDatabase = try AppDatabase(dbPool)
+            
+            print(url.path)
+            
+            try appDatabase.createIngredients()
 
             return appDatabase
         } catch {
