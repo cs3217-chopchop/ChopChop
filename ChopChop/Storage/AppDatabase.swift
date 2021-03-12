@@ -173,3 +173,19 @@ extension AppDatabase {
         }
     }
 }
+
+extension AppDatabase {
+    func recipesOrderedByNamePublisher() -> AnyPublisher<[Recipe], Error> {
+        ValueObservation
+            .tracking(Recipe.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[Ingredient], Error> {
+        ValueObservation
+            .tracking(Ingredient.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+}
