@@ -14,7 +14,7 @@ extension Step: Codable, FetchableRecord, MutablePersistableRecord {
         static let index = Column(CodingKeys.index)
         static let text = Column(CodingKeys.text)
     }
-    
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

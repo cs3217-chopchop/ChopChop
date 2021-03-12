@@ -1,6 +1,6 @@
-//import Foundation
+// import Foundation
 //
-//struct Mass: Quantity {
+// struct Mass: Quantity {
 //    private var value: Double
 //    
 //    var description: String {
@@ -26,9 +26,9 @@
 //    static func - (lhs: Mass, rhs: Mass) -> Mass {
 //        Mass(lhs.value - rhs.value)
 //    }
-//}
+// }
 //
-//extension Mass {
+// extension Mass {
 //    enum Unit: CustomStringConvertible {
 //        case kilogram, kilograms
 //        case gram, grams
@@ -51,4 +51,4 @@
 //            }
 //        }
 //    }
-//}
+// }

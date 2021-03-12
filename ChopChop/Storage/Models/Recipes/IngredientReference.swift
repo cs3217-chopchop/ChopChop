@@ -14,7 +14,7 @@ extension IngredientReference: Codable, FetchableRecord, MutablePersistableRecor
         static let name = Column(CodingKeys.name)
         static let quantity = Column(CodingKeys.quantity)
     }
-    
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

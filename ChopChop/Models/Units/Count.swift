@@ -1,4 +1,4 @@
-//struct Count: Quantity {
+// struct Count: Quantity {
 //    private var value: Double
 //    
 //    var description: String {
@@ -16,4 +16,4 @@
 //    static func - (lhs: Count, rhs: Count) -> Count {
 //        Count(lhs.value - rhs.value)
 //    }
-//}
+// }

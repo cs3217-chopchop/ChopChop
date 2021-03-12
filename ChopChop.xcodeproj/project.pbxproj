@@ -223,6 +223,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 72D6C96125F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChop" */;
 			buildPhases = (
+				0EA9B08125FB9CB300FF2E08 /* ShellScript */,
 				72D6C93825F77E3600ED20FB /* Sources */,
 				72D6C93925F77E3600ED20FB /* Frameworks */,
 				72D6C93A25F77E3600ED20FB /* Resources */,
@@ -345,6 +346,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0EA9B08125FB9CB300FF2E08 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint autocorrect && swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		72D6C93825F77E3600ED20FB /* Sources */ = {

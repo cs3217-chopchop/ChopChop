@@ -15,7 +15,7 @@ extension IngredientSet: Codable, FetchableRecord, MutablePersistableRecord {
         static let expiryDate = Column(CodingKeys.expiryDate)
         static let quantity = Column(CodingKeys.quantity)
     }
-    
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

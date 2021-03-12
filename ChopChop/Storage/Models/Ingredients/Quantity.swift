@@ -8,11 +8,11 @@ extension Quantity: Codable {
     enum CodingKeys: CodingKey {
         case count, mass, volume
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let key = container.allKeys.first
-        
+
         switch key {
         case .count:
             let value = try container.decode(Double.self, forKey: .count)
@@ -29,10 +29,10 @@ extension Quantity: Codable {
             )
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         switch self {
         case .count(let value):
             try container.encode(value, forKey: .count)

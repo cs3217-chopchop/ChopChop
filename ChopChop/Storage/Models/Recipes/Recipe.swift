@@ -10,7 +10,7 @@ extension Recipe: Codable, FetchableRecord, MutablePersistableRecord {
         static let id = Column(CodingKeys.id)
         static let name = Column(CodingKeys.name)
     }
-    
+
     static let ingredients = hasMany(IngredientReference.self)
     var ingredients: QueryInterfaceRequest<IngredientReference> {
         request(for: Recipe.ingredients)
@@ -20,7 +20,7 @@ extension Recipe: Codable, FetchableRecord, MutablePersistableRecord {
     var steps: QueryInterfaceRequest<Step> {
         request(for: Recipe.steps)
     }
-    
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

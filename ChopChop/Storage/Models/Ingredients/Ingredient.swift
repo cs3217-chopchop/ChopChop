@@ -10,12 +10,12 @@ extension Ingredient: Codable, FetchableRecord, MutablePersistableRecord {
         static let id = Column(CodingKeys.id)
         static let name = Column(CodingKeys.name)
     }
-    
+
     static let sets = hasMany(IngredientSet.self)
     var sets: QueryInterfaceRequest<IngredientSet> {
         request(for: Ingredient.sets)
     }
-    
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

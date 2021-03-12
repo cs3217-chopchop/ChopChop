@@ -1,6 +1,6 @@
-//import Foundation
+// import Foundation
 //
-//struct Volume: Quantity {
+// struct Volume: Quantity {
 //    private var value: Double
 //    
 //    var description: String {
@@ -26,9 +26,9 @@
 //    static func - (lhs: Volume, rhs: Volume) -> Volume {
 //        Volume(lhs.value - rhs.value)
 //    }
-//}
+// }
 //
-//extension Volume {
+// extension Volume {
 //    enum Unit: CustomStringConvertible {
 //        case litre, litres
 //        case millilitre, millilitres
@@ -51,4 +51,4 @@
 //            }
 //        }
 //    }
-//}
+// }
