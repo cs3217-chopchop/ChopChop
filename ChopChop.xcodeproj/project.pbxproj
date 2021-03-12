@@ -13,9 +13,9 @@
 		0E389C0525FA4931001B1088 /* Quantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C0425FA4931001B1088 /* Quantity.swift */; };
 		0E389C3025FA70D5001B1088 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C2F25FA70D5001B1088 /* Ingredient.swift */; };
 		0E389C4425FB3AEB001B1088 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C4325FB3AEB001B1088 /* Recipe.swift */; };
-		0E389C4F25FB3B18001B1088 /* IngredientReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C4E25FB3B18001B1088 /* IngredientReference.swift */; };
+		0E389C4F25FB3B18001B1088 /* RecipeIngredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C4E25FB3B18001B1088 /* RecipeIngredient.swift */; };
 		0E389C5425FB50FA001B1088 /* IngredientSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C5325FB50FA001B1088 /* IngredientSet.swift */; };
-		0EA9B07D25FB588F00FF2E08 /* Step.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B07C25FB588F00FF2E08 /* Step.swift */; };
+		0EA9B07D25FB588F00FF2E08 /* RecipeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B07C25FB588F00FF2E08 /* RecipeStep.swift */; };
 		0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
@@ -46,9 +46,9 @@
 		0E389C0425FA4931001B1088 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
 		0E389C2F25FA70D5001B1088 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		0E389C4325FB3AEB001B1088 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
-		0E389C4E25FB3B18001B1088 /* IngredientReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientReference.swift; sourceTree = "<group>"; };
+		0E389C4E25FB3B18001B1088 /* RecipeIngredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredient.swift; sourceTree = "<group>"; };
 		0E389C5325FB50FA001B1088 /* IngredientSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSet.swift; sourceTree = "<group>"; };
-		0EA9B07C25FB588F00FF2E08 /* Step.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Step.swift; sourceTree = "<group>"; };
+		0EA9B07C25FB588F00FF2E08 /* RecipeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStep.swift; sourceTree = "<group>"; };
 		0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabaseTests.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
@@ -103,6 +103,7 @@
 			children = (
 				0E389C5C25FB5117001B1088 /* Recipes */,
 				0E389C5B25FB5110001B1088 /* Ingredients */,
+				0E389C0425FA4931001B1088 /* Quantity.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -110,7 +111,6 @@
 		0E389C5B25FB5110001B1088 /* Ingredients */ = {
 			isa = PBXGroup;
 			children = (
-				0E389C0425FA4931001B1088 /* Quantity.swift */,
 				0E389C2F25FA70D5001B1088 /* Ingredient.swift */,
 				0E389C5325FB50FA001B1088 /* IngredientSet.swift */,
 			);
@@ -121,8 +121,8 @@
 			isa = PBXGroup;
 			children = (
 				0E389C4325FB3AEB001B1088 /* Recipe.swift */,
-				0E389C4E25FB3B18001B1088 /* IngredientReference.swift */,
-				0EA9B07C25FB588F00FF2E08 /* Step.swift */,
+				0E389C4E25FB3B18001B1088 /* RecipeIngredient.swift */,
+				0EA9B07C25FB588F00FF2E08 /* RecipeStep.swift */,
 			);
 			path = Recipes;
 			sourceTree = "<group>";
@@ -349,8 +349,8 @@
 				0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */,
 				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
-				0E389C4F25FB3B18001B1088 /* IngredientReference.swift in Sources */,
-				0EA9B07D25FB588F00FF2E08 /* Step.swift in Sources */,
+				0E389C4F25FB3B18001B1088 /* RecipeIngredient.swift in Sources */,
+				0EA9B07D25FB588F00FF2E08 /* RecipeStep.swift in Sources */,
 				0E389C4425FB3AEB001B1088 /* Recipe.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

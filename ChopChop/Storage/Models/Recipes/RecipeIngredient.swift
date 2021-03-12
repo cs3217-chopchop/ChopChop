@@ -1,13 +1,13 @@
 import GRDB
 
-struct IngredientReference {
+struct RecipeIngredient {
     var id: Int64?
     var recipeId: Int64?
     var name: String
     var quantity: Quantity
 }
 
-extension IngredientReference: Codable, FetchableRecord, MutablePersistableRecord {
+extension RecipeIngredient: Codable, FetchableRecord, MutablePersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
         static let recipeId = Column(CodingKeys.recipeId)

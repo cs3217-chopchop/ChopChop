@@ -1,18 +1,18 @@
 import GRDB
 
-struct Step {
+struct RecipeStep {
     var id: Int64?
     var recipeId: Int64?
     var index: Int
-    var text: String
+    var content: String
 }
 
-extension Step: Codable, FetchableRecord, MutablePersistableRecord {
+extension RecipeStep: Codable, FetchableRecord, MutablePersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
         static let recipeId = Column(CodingKeys.recipeId)
         static let index = Column(CodingKeys.index)
-        static let text = Column(CodingKeys.text)
+        static let content = Column(CodingKeys.content)
     }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {

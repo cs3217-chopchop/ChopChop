@@ -11,13 +11,13 @@ extension Recipe: Codable, FetchableRecord, MutablePersistableRecord {
         static let name = Column(CodingKeys.name)
     }
 
-    static let ingredients = hasMany(IngredientReference.self)
-    var ingredients: QueryInterfaceRequest<IngredientReference> {
+    static let ingredients = hasMany(RecipeIngredient.self)
+    var ingredients: QueryInterfaceRequest<RecipeIngredient> {
         request(for: Recipe.ingredients)
     }
 
-    static let steps = hasMany(Step.self)
-    var steps: QueryInterfaceRequest<Step> {
+    static let steps = hasMany(RecipeStep.self)
+    var steps: QueryInterfaceRequest<RecipeStep> {
         request(for: Recipe.steps)
     }
 
