@@ -14,8 +14,6 @@ extension AppDatabase {
 
             print(url.path)
 
-            try appDatabase.createIngredients()
-
             return appDatabase
         } catch {
             fatalError("Unresolved error \(error)")
