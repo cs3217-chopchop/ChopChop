@@ -11,22 +11,16 @@ extension Quantity: Codable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let key = container.allKeys.first
 
-        switch key {
-        case .count:
-            let value = try container.decode(Double.self, forKey: .count)
+        if let value = try container.decodeIfPresent(Double.self, forKey: .count) {
             self = .count(value)
-        case .mass:
-            let value = try container.decode(Double.self, forKey: .mass)
+        } else if let value = try container.decodeIfPresent(Double.self, forKey: .mass) {
             self = .mass(value)
-        case .volume:
-            let value = try container.decode(Double.self, forKey: .volume)
+        } else if let value = try container.decodeIfPresent(Double.self, forKey: .volume) {
             self = .volume(value)
-        default:
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: container.codingPath, debugDescription: "Unable to decode enum.")
-            )
+        } else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath,
+                                                                    debugDescription: "Unable to decode enum."))
         }
     }
 
