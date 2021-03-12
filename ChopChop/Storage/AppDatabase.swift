@@ -74,9 +74,8 @@ struct AppDatabase {
                     .notNull()
                     .indexed()
                     .references("ingredient", onDelete: .cascade)
+                // TODO: Check time is 0000
                 t.column("expiryDate", .date)
-                    .notNull()
-                    // TODO: Check time is 0000
                 t.column("quantity", .text)
                     .notNull()
                 t.uniqueKey(["ingredientId", "expiryDate"])

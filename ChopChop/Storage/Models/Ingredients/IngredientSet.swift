@@ -4,7 +4,7 @@ import GRDB
 struct IngredientSet {
     var id: Int64?
     var ingredientId: Int64?
-    var expiryDate: Date
+    var expiryDate: Date?
     var quantity: Quantity
 }
 
