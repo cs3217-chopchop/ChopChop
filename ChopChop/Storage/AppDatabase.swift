@@ -84,9 +84,33 @@ struct AppDatabase {
 }
 
 extension AppDatabase {
-    func saveIngredient(_ ingredient: inout Ingredient) throws {
+    func saveRecipe(_ recipe: inout Recipe, ingredients: inout [IngredientReference], steps: inout [Step]) throws {
+        try dbWriter.write { db in
+            try recipe.save(db)
+            try recipe.ingredients.deleteAll(db)
+            try recipe.steps.deleteAll(db)
+
+            for index in ingredients.indices {
+                ingredients[index].recipeId = recipe.id
+                try ingredients[index].save(db)
+            }
+            
+            for index in steps.indices {
+                steps[index].recipeId = recipe.id
+                try steps[index].save(db)
+            }
+        }
+    }
+    
+    func saveIngredient(_ ingredient: inout Ingredient, sets: inout [IngredientSet]) throws {
         try dbWriter.write { db in
             try ingredient.save(db)
+            try ingredient.sets.deleteAll(db)
+
+            for index in sets.indices {
+                sets[index].ingredientId = ingredient.id
+                try sets[index].save(db)
+            }
         }
     }
     
