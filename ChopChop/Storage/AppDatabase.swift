@@ -212,6 +212,15 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.annotated(with: IngredientRecord.sets
+                                                    .min(IngredientSetRecord.Columns.expiryDate))
+                        .order(literal: "minIngredientSetExpiryDate").fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord

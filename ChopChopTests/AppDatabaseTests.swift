@@ -384,6 +384,147 @@ class AppDatabaseTests: XCTestCase {
         try XCTAssertEqual(dbWriter.read(IngredientRecord.fetchCount), 0)
     }
 
+    func testRecipesOrderedByNamePublisher_publishesWellOrderedLevels() throws {
+        var recipe1 = RecipeRecord(name: "Scrambled Eggs")
+        var recipe2 = RecipeRecord(name: "Pancakes")
+
+        try dbWriter.write { db in
+            try recipe1.insert(db)
+            try recipe2.insert(db)
+        }
+
+        let exp = expectation(description: "Recipes")
+        var recipes: [RecipeRecord]?
+        let cancellable = appDatabase.recipesOrderedByNamePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            recipes = $0
+            exp.fulfill()
+        }
+
+        withExtendedLifetime(cancellable) {
+            waitForExpectations(timeout: 1, handler: nil)
+        }
+
+        XCTAssertEqual(recipes, [recipe2, recipe1])
+    }
+
+    func testRecipesOrderedByNamePublisher_publishesRightOnSubscription() throws {
+        var recipes: [RecipeRecord]?
+        _ = appDatabase.recipesOrderedByNamePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            recipes = $0
+        }
+
+        XCTAssertNotNil(recipes)
+    }
+
+    func testIngredientsOrderedByNamePublisher_publishesWellOrderedLevels() throws {
+        var ingredient1 = IngredientRecord(name: "Sugar")
+        var ingredient2 = IngredientRecord(name: "Salt")
+
+        try dbWriter.write { db in
+            try ingredient1.insert(db)
+            try ingredient2.insert(db)
+        }
+
+        let exp = expectation(description: "Ingredients")
+        var ingredients: [IngredientRecord]?
+        let cancellable = appDatabase.ingredientsOrderedByNamePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+            exp.fulfill()
+        }
+
+        withExtendedLifetime(cancellable) {
+            waitForExpectations(timeout: 1, handler: nil)
+        }
+
+        XCTAssertEqual(ingredients, [ingredient2, ingredient1])
+    }
+
+    func testIngredientsOrderedByNamePublisher_publishesRightOnSubscription() throws {
+        var ingredients: [IngredientRecord]?
+        _ = appDatabase.ingredientsOrderedByNamePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+        }
+
+        XCTAssertNotNil(ingredients)
+    }
+
+    func testIngredientsOrderedByExpiryDatePublisher_publishesWellOrderedLevels() throws {
+        var ingredient1 = IngredientRecord(name: "Sugar")
+        var ingredient2 = IngredientRecord(name: "Salt")
+        var ingredient3 = IngredientRecord(name: "Pepper")
+
+        var sets2 = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+                                quantity: .count(1))
+        ]
+        var sets3 = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(1))
+        ]
+
+        try dbWriter.write { db in
+            try ingredient1.insert(db)
+            try ingredient2.insert(db)
+            try ingredient3.insert(db)
+
+            for index in 0..<sets2.count {
+                sets2[index].ingredientId = ingredient2.id
+                try sets2[index].insert(db)
+            }
+
+            for index in 0..<sets3.count {
+                sets3[index].ingredientId = ingredient3.id
+                try sets3[index].insert(db)
+            }
+        }
+
+        let exp = expectation(description: "Ingredients")
+        var ingredients: [IngredientRecord]?
+        let cancellable = appDatabase.ingredientsOrderedByExpiryDatePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+            exp.fulfill()
+        }
+
+        withExtendedLifetime(cancellable) {
+            waitForExpectations(timeout: 1, handler: nil)
+        }
+
+        XCTAssertEqual(ingredients, [ingredient1, ingredient3, ingredient2])
+    }
+
+    func testIngredientsOrderedByExpiryDatePublisher_publishesRightOnSubscription() throws {
+        var ingredients: [IngredientRecord]?
+        _ = appDatabase.ingredientsOrderedByExpiryDatePublisher().sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+        }
+
+        XCTAssertNotNil(ingredients)
+    }
+
     func testFetchRecipe() throws {
         var recipeRecord = RecipeRecord(name: "Pancakes")
         var ingredientRecords = [
