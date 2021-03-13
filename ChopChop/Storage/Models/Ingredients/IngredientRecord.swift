@@ -29,17 +29,8 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
         order(IngredientRecord.Columns.name)
     }
 
-//    func orderedByExpiryDate() -> Self {
-//        let setAlias = TableAlias()
-//
-//        return joining(required: IngredientRecord.sets.aliased(setAlias)
-//                        .order(IngredientSetRecord.Columns.expiryDate.ascNullsLast)
-//                        .limit(1))
-//            .order(setAlias[IngredientSetRecord.Columns.expiryDate.ascNullsLast])
-//    }
-
-//    func orderedByExpiryDate() -> Self {
-//        annotated(with: IngredientRecord.sets.min(IngredientSetRecord.Columns.expiryDate))
-//            .order(literal: "minIngredientSetExpiryDate")
-//    }
+    func orderedByExpiryDate() -> Self {
+        annotated(with: IngredientRecord.sets.min(IngredientSetRecord.Columns.expiryDate))
+            .order(SQLLiteral("minIngredientSetExpiryDate").sqlExpression.ascNullsLast)
+    }
 }

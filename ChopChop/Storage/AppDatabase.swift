@@ -214,9 +214,7 @@ extension AppDatabase {
 
     func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
-            .tracking(IngredientRecord.annotated(with: IngredientRecord.sets
-                                                    .min(IngredientSetRecord.Columns.expiryDate))
-                        .order(literal: "minIngredientSetExpiryDate").fetchAll)
+            .tracking(IngredientRecord.all().orderedByExpiryDate().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

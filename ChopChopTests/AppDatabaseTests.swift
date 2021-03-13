@@ -591,7 +591,7 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
-        XCTAssertEqual(ingredients, [ingredient1, ingredient3, ingredient2])
+        XCTAssertEqual(ingredients, [ingredient3, ingredient2, ingredient1])
     }
 
     func testIngredientsOrderedByExpiryDatePublisher_publishesRightOnSubscription() throws {
