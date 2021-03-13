@@ -190,4 +190,15 @@ extension AppDatabase {
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
+
+    func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(key: recipe.id)
+                .including(all: RecipeRecord.ingredients)
+                .including(all: RecipeRecord.steps)
+
+            return try Recipe.fetchOne(db, request)
+        }
+    }
 }

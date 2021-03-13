@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5A925FC67DD000C2DCF /* Recipe.swift */; };
 		0E389BEC25FA4606001B1088 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 0E389BEB25FA4606001B1088 /* GRDB */; };
 		0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BF825FA480C001B1088 /* AppDatabase.swift */; };
 		0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E16A5A925FC67DD000C2DCF /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		0E389BF825FA480C001B1088 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0E389C0425FA4931001B1088 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
@@ -72,6 +74,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E16A5B325FC6C7F000C2DCF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0E16A5A925FC67DD000C2DCF /* Recipe.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		0E389C0225FA4906001B1088 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -132,6 +142,7 @@
 		72D6C93E25F77E3600ED20FB /* ChopChop */ = {
 			isa = PBXGroup;
 			children = (
+				0E16A5B325FC6C7F000C2DCF /* Models */,
 				0E389C0225FA4906001B1088 /* Storage */,
 				72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */,
 				72D6C94125F77E3600ED20FB /* ContentView.swift */,
@@ -296,6 +307,7 @@
 				0E389C4F25FB3B18001B1088 /* RecipeIngredientRecord.swift in Sources */,
 				0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */,
 				0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */,
+				0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
