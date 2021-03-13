@@ -1,4 +1,4 @@
-enum Quantity {
+enum Quantity: Equatable {
     case count(Double)
     case mass(Double)
     case volume(Double)

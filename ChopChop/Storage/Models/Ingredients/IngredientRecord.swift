@@ -13,7 +13,8 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
 
     static let databaseTableName = "ingredient"
 
-    static let sets = hasMany(IngredientSetRecord.self)
+    // Sorted by expiry date (nils last)
+    static let sets = hasMany(IngredientSetRecord.self).order(IngredientSetRecord.Columns.expiryDate.ascNullsLast)
     var sets: QueryInterfaceRequest<IngredientSetRecord> {
         request(for: IngredientRecord.sets)
     }

@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length function_body_length
+// swiftlint:disable type_body_length function_body_length file_length
 import XCTest
 import GRDB
 @testable import ChopChop
@@ -382,5 +382,89 @@ class AppDatabaseTests: XCTestCase {
         try appDatabase.deleteAllIngredients()
 
         try XCTAssertEqual(dbWriter.read(IngredientRecord.fetchCount), 0)
+    }
+
+    func testFetchRecipe() throws {
+        var recipeRecord = RecipeRecord(name: "Pancakes")
+        var ingredientRecords = [
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+        ]
+        var stepRecords = [
+            RecipeStepRecord(index: 1, content: """
+                In a large bowl, mix dry ingredients together until well-blended.
+                """),
+            RecipeStepRecord(index: 2, content: """
+                Add milk and mix well until smooth.
+                """),
+            RecipeStepRecord(index: 3, content: """
+                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
+                """),
+            RecipeStepRecord(index: 4, content: """
+                Beat whites until stiff and then fold into batter gently.
+                """),
+            RecipeStepRecord(index: 5, content: """
+                Pour ladles of the mixture into a non-stick pan, one at a time.
+                """),
+            RecipeStepRecord(index: 6, content: """
+                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
+                pancakes.
+                """)
+        ]
+
+        try dbWriter.write { db in
+            try recipeRecord.insert(db)
+
+            for index in 0..<ingredientRecords.count {
+                ingredientRecords[index].recipeId = recipeRecord.id
+                try ingredientRecords[index].insert(db)
+            }
+
+            for index in 0..<stepRecords.count {
+                stepRecords[index].recipeId = recipeRecord.id
+                try stepRecords[index].insert(db)
+            }
+        }
+
+        let recipe = Recipe(id: recipeRecord.id,
+                            name: recipeRecord.name,
+                            ingredients: ingredientRecords.reduce(into: [:]) {
+                                $0[$1.name] = $1.quantity
+                            },
+                            steps: stepRecords.sorted(by: { $0.index < $1.index }).map { $0.content })
+
+        try XCTAssertEqual(appDatabase.fetchRecipe(recipeRecord), recipe)
+    }
+
+    func testFetchIngredient() throws {
+        var ingredientRecord = IngredientRecord(name: "Egg")
+        var setRecords = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(12)),
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+                                quantity: .count(13)),
+            IngredientSetRecord(quantity: .count(14))
+        ]
+
+        try dbWriter.write { db in
+            try ingredientRecord.insert(db)
+
+            for index in 0..<setRecords.count {
+                setRecords[index].ingredientId = ingredientRecord.id
+                try setRecords[index].insert(db)
+            }
+        }
+
+        let ingredient = Ingredient(id: ingredientRecord.id,
+                                    name: ingredientRecord.name,
+                                    sets: setRecords.reduce(into: [:]) {
+                                        $0[$1.expiryDate] = $1.quantity
+                                    })
+
+        try XCTAssertEqual(appDatabase.fetchIngredient(ingredientRecord), ingredient)
     }
 }

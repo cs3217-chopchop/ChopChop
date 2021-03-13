@@ -1,13 +1,15 @@
-import Foundation
 import GRDB
 
-struct Recipe: FetchableRecord {
+struct Recipe: Equatable {
     var id: Int64?
     var name: String
     var ingredients: [String: Quantity]
     var steps: [String]
+}
 
+extension Recipe: FetchableRecord {
     init(row: Row) {
+        id = row["id"]
         name = row["name"]
         ingredients = row.prefetchedRows["recipeIngredients"]?.reduce(into: [String: Quantity]()) {
             let ingredient = RecipeIngredientRecord(row: $1)

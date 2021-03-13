@@ -201,4 +201,14 @@ extension AppDatabase {
             return try Recipe.fetchOne(db, request)
         }
     }
+
+    func fetchIngredient(_ ingredient: IngredientRecord) throws -> Ingredient? {
+        try dbWriter.read { db in
+            let request = IngredientRecord
+                .filter(key: ingredient.id)
+                .including(all: IngredientRecord.sets)
+
+            return try Ingredient.fetchOne(db, request)
+        }
+    }
 }
