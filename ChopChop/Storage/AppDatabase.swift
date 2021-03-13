@@ -93,6 +93,18 @@ struct AppDatabase {
 }
 
 extension AppDatabase {
+    func saveRecipe(_ recipe: Recipe) throws {
+        var recipeRecord = RecipeRecord(id: recipe.id, name: recipe.name)
+        var ingredientRecords = recipe.ingredients.map { name, quantity in
+            RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
+        }
+        var stepRecords = recipe.steps.enumerated().map { index, content in
+            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
+        }
+
+        try saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
+    }
+
     func saveRecipe(_ recipe: inout RecipeRecord,
                     ingredients: inout [RecipeIngredientRecord],
                     steps: inout [RecipeStepRecord]) throws {
@@ -128,6 +140,15 @@ extension AppDatabase {
                 try steps[index].save(db)
             }
         }
+    }
+
+    func saveIngredient(_ ingredient: Ingredient) throws {
+        var ingredientRecord = IngredientRecord(id: ingredient.id, name: ingredient.name)
+        var setRecords = ingredient.sets.map { expiryDate, quantity in
+            IngredientSetRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
+        }
+
+        try saveIngredient(&ingredientRecord, sets: &setRecords)
     }
 
     func saveIngredient(_ ingredient: inout IngredientRecord, sets: inout [IngredientSetRecord]) throws {
