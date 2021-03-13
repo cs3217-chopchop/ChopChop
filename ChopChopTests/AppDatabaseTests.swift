@@ -65,24 +65,24 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsInvalidName_throwsError() throws {
-        var recipe = Recipe(name: "")
-        var ingredients: [RecipeIngredient] = []
-        var steps: [RecipeStep] = []
+        var recipe = RecipeRecord(name: "")
+        var ingredients: [RecipeIngredientRecord] = []
+        var steps: [RecipeStepRecord] = []
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
     }
 
     func testSaveRecipe_insertsValidIngredients_success() throws {
-        var recipe = Recipe(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes")
         var ingredients = [
-            RecipeIngredient(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredient(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.250)),
-            RecipeIngredient(name: "Egg", quantity: .count(1)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
         ]
-        var steps: [RecipeStep] = []
+        var steps: [RecipeStepRecord] = []
 
         try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps)
 
@@ -96,24 +96,24 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsDuplicateIngredientsDifferentRecipes_success() throws {
-        var pancakeRecipe = Recipe(name: "Pancakes")
+        var pancakeRecipe = RecipeRecord(name: "Pancakes")
         var pancakeIngredients = [
-            RecipeIngredient(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredient(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.250)),
-            RecipeIngredient(name: "Egg", quantity: .count(1)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
         ]
-        var scrambledEggRecipe = Recipe(name: "Scrambled Eggs")
+        var scrambledEggRecipe = RecipeRecord(name: "Scrambled Eggs")
         var scrambledEggIngredients = [
-            RecipeIngredient(name: "Egg", quantity: .count(3)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.03)),
-            RecipeIngredient(name: "Butter", quantity: .volume(0.01)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.001_25)),
-            RecipeIngredient(name: "Pepper", quantity: .volume(0.002_5))
+            RecipeIngredientRecord(name: "Egg", quantity: .count(3)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.03)),
+            RecipeIngredientRecord(name: "Butter", quantity: .volume(0.01)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.001_25)),
+            RecipeIngredientRecord(name: "Pepper", quantity: .volume(0.002_5))
         ]
-        var steps: [RecipeStep] = []
+        var steps: [RecipeStepRecord] = []
 
         try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, steps: &steps)
         try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, steps: &steps)
@@ -133,57 +133,57 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsInvalidIngredients_throwsError() throws {
-        var recipe = Recipe(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes")
         var ingredients = [
-            RecipeIngredient(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredient(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.250)),
-            RecipeIngredient(name: "Egg", quantity: .count(1)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015)),
-            RecipeIngredient(name: "", quantity: .count(0))
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015)),
+            RecipeIngredientRecord(name: "", quantity: .count(0))
         ]
-        var steps: [RecipeStep] = []
+        var steps: [RecipeStepRecord] = []
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
-        var recipe = Recipe(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes")
         var ingredients = [
-            RecipeIngredient(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredient(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.250)),
-            RecipeIngredient(name: "Egg", quantity: .count(1)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
         ]
-        var steps: [RecipeStep] = []
+        var steps: [RecipeStepRecord] = []
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
     }
 
     func testSaveRecipe_insertsValidSteps_success() throws {
-        var recipe = Recipe(name: "Pancakes")
-        var ingredients: [RecipeIngredient] = []
+        var recipe = RecipeRecord(name: "Pancakes")
+        var ingredients: [RecipeIngredientRecord] = []
         var steps = [
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStep(index: 2, content: """
+            RecipeStepRecord(index: 2, content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStep(index: 3, content: """
+            RecipeStepRecord(index: 3, content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStep(index: 4, content: """
+            RecipeStepRecord(index: 4, content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStep(index: 5, content: """
+            RecipeStepRecord(index: 5, content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStep(index: 6, content: """
+            RecipeStepRecord(index: 6, content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -201,54 +201,54 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsInvalidSteps_throwsError() throws {
-        var recipe = Recipe(name: "Pancakes")
-        var ingredients: [RecipeIngredient] = []
+        var recipe = RecipeRecord(name: "Pancakes")
+        var ingredients: [RecipeIngredientRecord] = []
         var steps = [
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStep(index: 2, content: """
+            RecipeStepRecord(index: 2, content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStep(index: 3, content: """
+            RecipeStepRecord(index: 3, content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStep(index: 4, content: """
+            RecipeStepRecord(index: 4, content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStep(index: 5, content: """
+            RecipeStepRecord(index: 5, content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStep(index: 6, content: """
+            RecipeStepRecord(index: 6, content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """),
-            RecipeStep(index: 7, content: "")
+            RecipeStepRecord(index: 7, content: "")
         ]
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
     }
 
     func testSaveRecipe_insertsDuplicateStepIndex_throwsError() throws {
-        var recipe = Recipe(name: "Pancakes")
-        var ingredients: [RecipeIngredient] = []
+        var recipe = RecipeRecord(name: "Pancakes")
+        var ingredients: [RecipeIngredientRecord] = []
         var steps = [
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStep(index: 3, content: """
+            RecipeStepRecord(index: 3, content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStep(index: 4, content: """
+            RecipeStepRecord(index: 4, content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStep(index: 5, content: """
+            RecipeStepRecord(index: 5, content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStep(index: 6, content: """
+            RecipeStepRecord(index: 6, content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -258,25 +258,25 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsNonConsecutiveStepIndex_throwsError() throws {
-        var recipe = Recipe(name: "Pancakes")
-        var ingredients: [RecipeIngredient] = []
+        var recipe = RecipeRecord(name: "Pancakes")
+        var ingredients: [RecipeIngredientRecord] = []
         var steps = [
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStep(index: 3, content: """
+            RecipeStepRecord(index: 3, content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStep(index: 4, content: """
+            RecipeStepRecord(index: 4, content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStep(index: 5, content: """
+            RecipeStepRecord(index: 5, content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStep(index: 6, content: """
+            RecipeStepRecord(index: 6, content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStep(index: 7, content: """
+            RecipeStepRecord(index: 7, content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -286,33 +286,33 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testDeleteIngredients() throws {
-        var recipe1 = Recipe(name: "Pancakes")
-        var recipe2 = Recipe(name: "Scrambled Eggs")
+        var recipe1 = RecipeRecord(name: "Pancakes")
+        var recipe2 = RecipeRecord(name: "Scrambled Eggs")
         var ingredients = [
-            RecipeIngredient(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredient(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredient(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredient(name: "Milk", quantity: .volume(0.250)),
-            RecipeIngredient(name: "Egg", quantity: .count(1)),
-            RecipeIngredient(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
         ]
         var steps = [
-            RecipeStep(index: 1, content: """
+            RecipeStepRecord(index: 1, content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStep(index: 2, content: """
+            RecipeStepRecord(index: 2, content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStep(index: 3, content: """
+            RecipeStepRecord(index: 3, content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStep(index: 4, content: """
+            RecipeStepRecord(index: 4, content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStep(index: 5, content: """
+            RecipeStepRecord(index: 5, content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStep(index: 6, content: """
+            RecipeStepRecord(index: 6, content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -353,12 +353,12 @@ class AppDatabaseTests: XCTestCase {
             }
         }
 
-        try XCTAssertEqual(dbWriter.read(Recipe.fetchCount), 1)
+        try XCTAssertEqual(dbWriter.read(RecipeRecord.fetchCount), 1)
     }
 
     func testDeleteAllRecipes() throws {
-        var recipe1 = Recipe(name: "Pancakes")
-        var recipe2 = Recipe(name: "Scrambled Eggs")
+        var recipe1 = RecipeRecord(name: "Pancakes")
+        var recipe2 = RecipeRecord(name: "Scrambled Eggs")
 
         try dbWriter.write { db in
             try recipe1.insert(db)
@@ -367,12 +367,12 @@ class AppDatabaseTests: XCTestCase {
 
         try appDatabase.deleteAllRecipes()
 
-        try XCTAssertEqual(dbWriter.read(Recipe.fetchCount), 0)
+        try XCTAssertEqual(dbWriter.read(RecipeRecord.fetchCount), 0)
     }
 
     func testDeleteAllIngredients() throws {
-        var ingredient1 = Recipe(name: "Salt")
-        var ingredient2 = Recipe(name: "Sugar")
+        var ingredient1 = RecipeRecord(name: "Salt")
+        var ingredient2 = RecipeRecord(name: "Sugar")
 
         try dbWriter.write { db in
             try ingredient1.insert(db)
@@ -381,6 +381,6 @@ class AppDatabaseTests: XCTestCase {
 
         try appDatabase.deleteAllIngredients()
 
-        try XCTAssertEqual(dbWriter.read(Ingredient.fetchCount), 0)
+        try XCTAssertEqual(dbWriter.read(IngredientRecord.fetchCount), 0)
     }
 }

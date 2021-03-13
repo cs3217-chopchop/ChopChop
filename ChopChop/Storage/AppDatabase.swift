@@ -93,7 +93,9 @@ struct AppDatabase {
 }
 
 extension AppDatabase {
-    func saveRecipe(_ recipe: inout Recipe, ingredients: inout [RecipeIngredient], steps: inout [RecipeStep]) throws {
+    func saveRecipe(_ recipe: inout RecipeRecord,
+                    ingredients: inout [RecipeIngredientRecord],
+                    steps: inout [RecipeStepRecord]) throws {
         try dbWriter.write { db in
             try recipe.save(db)
 
@@ -109,10 +111,10 @@ extension AppDatabase {
 
             // Delete all ingredients and steps that are not in the arrays
             try recipe.ingredients
-                .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredient.Columns.id))
+                .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
             try recipe.steps
-                .filter(!steps.compactMap { $0.id }.contains(RecipeStep.Columns.id))
+                .filter(!steps.compactMap { $0.id }.contains(RecipeStepRecord.Columns.id))
                 .deleteAll(db)
 
             // Save recipe ingredients and steps
@@ -128,7 +130,7 @@ extension AppDatabase {
         }
     }
 
-    func saveIngredient(_ ingredient: inout Ingredient, sets: inout [IngredientSet]) throws {
+    func saveIngredient(_ ingredient: inout IngredientRecord, sets: inout [IngredientSetRecord]) throws {
         try dbWriter.write { db in
             try ingredient.save(db)
 
@@ -138,7 +140,7 @@ extension AppDatabase {
 
             // Delete all sets that are not in the array
             try ingredient.sets
-                .filter(!sets.compactMap { $0.id }.contains(IngredientSet.Columns.id))
+                .filter(!sets.compactMap { $0.id }.contains(IngredientSetRecord.Columns.id))
                 .deleteAll(db)
 
             // Save ingredient sets
@@ -151,40 +153,40 @@ extension AppDatabase {
 
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try Recipe.deleteAll(db, keys: ids)
+            _ = try RecipeRecord.deleteAll(db, keys: ids)
         }
     }
 
     func deleteAllRecipes() throws {
         try dbWriter.write { db in
-            _ = try Recipe.deleteAll(db)
+            _ = try RecipeRecord.deleteAll(db)
         }
     }
 
     func deleteIngredients(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try Ingredient.deleteAll(db, keys: ids)
+            _ = try IngredientRecord.deleteAll(db, keys: ids)
         }
     }
 
     func deleteAllIngredients() throws {
         try dbWriter.write { db in
-            _ = try Ingredient.deleteAll(db)
+            _ = try IngredientRecord.deleteAll(db)
         }
     }
 }
 
 extension AppDatabase {
-    func recipesOrderedByNamePublisher() -> AnyPublisher<[Recipe], Error> {
+    func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
-            .tracking(Recipe.all().orderedByName().fetchAll)
+            .tracking(RecipeRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[Ingredient], Error> {
+    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
-            .tracking(Ingredient.all().orderedByName().fetchAll)
+            .tracking(IngredientRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
