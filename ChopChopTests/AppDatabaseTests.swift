@@ -285,7 +285,47 @@ class AppDatabaseTests: XCTestCase {
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
     }
 
-    func testDeleteIngredients() throws {
+    func testSaveIngredient_insertsInvalidName_throwsError() throws {
+        var ingredient = IngredientRecord(name: "")
+        var sets: [IngredientSetRecord] = []
+
+        try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, sets: &sets))
+    }
+
+    func testSaveIngredient_insertsValidSets_success() throws {
+        var ingredient = IngredientRecord(name: "Egg")
+        var sets = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(12)),
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+                                quantity: .count(13)),
+            IngredientSetRecord(quantity: .count(14))
+        ]
+
+        try appDatabase.saveIngredient(&ingredient, sets: &sets)
+
+        try dbWriter.read { db in
+            try XCTAssertTrue(ingredient.exists(db))
+
+            for set in sets {
+                try XCTAssertTrue(set.exists(db))
+            }
+        }
+    }
+
+    func testSaveIngredient_insertsInvalidSets_throwsError() throws {
+        var ingredient = IngredientRecord(name: "Egg")
+        var sets = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(12)),
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(13))
+        ]
+
+        try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, sets: &sets))
+    }
+
+    func testDeleteRecipes() throws {
         var recipe1 = RecipeRecord(name: "Pancakes")
         var recipe2 = RecipeRecord(name: "Scrambled Eggs")
         var ingredients = [
@@ -368,6 +408,48 @@ class AppDatabaseTests: XCTestCase {
         try appDatabase.deleteAllRecipes()
 
         try XCTAssertEqual(dbWriter.read(RecipeRecord.fetchCount), 0)
+    }
+
+    func testDeleteIngredients() throws {
+        var ingredient1 = IngredientRecord(name: "Egg")
+        var ingredient2 = IngredientRecord(name: "Salt")
+        var ingredient3 = IngredientRecord(name: "Sugar")
+        var sets = [
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+                                quantity: .count(12)),
+            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+                                quantity: .count(13)),
+            IngredientSetRecord(quantity: .count(14))
+        ]
+
+        try dbWriter.write { db in
+            try ingredient1.insert(db)
+            try ingredient2.insert(db)
+            try ingredient3.insert(db)
+
+            for index in 0..<sets.count {
+                sets[index].ingredientId = ingredient1.id
+                try sets[index].insert(db)
+            }
+        }
+
+        guard let id = ingredient1.id else {
+            XCTFail("Ingredients should have a non-nil ID after insertion into database")
+            return
+        }
+
+        try appDatabase.deleteIngredients(ids: [id])
+
+        try dbWriter.read { db in
+            try XCTAssertFalse(ingredient1.exists(db))
+
+            // Deleting ingredients should also delete their associated sets
+            for set in sets {
+                try XCTAssertFalse(set.exists(db))
+            }
+        }
+
+        try XCTAssertEqual(dbWriter.read(IngredientRecord.fetchCount), 2)
     }
 
     func testDeleteAllIngredients() throws {
