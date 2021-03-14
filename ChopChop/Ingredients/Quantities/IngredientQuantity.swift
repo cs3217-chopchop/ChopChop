@@ -2,6 +2,8 @@
  Represents the quantity of an ingredient.
  */
 protocol IngredientQuantity: CustomStringConvertible, Comparable {
+    static var zero: Self { get }
+
     static func + (left: Self, right: Self) throws -> Self
     static func - (left: Self, right: Self) throws -> Self
     static func * (left: Self, right: Double) throws -> Self
@@ -10,9 +12,6 @@ protocol IngredientQuantity: CustomStringConvertible, Comparable {
     static func -= (left: inout Self, right: Self) throws
     static func *= (left: inout Self, right: Double) throws
     static func /= (left: inout Self, right: Double) throws
-
-    var isZero: Bool { get }
-    var type: IngredientQuantityType { get }
 }
 
 extension IngredientQuantity {
@@ -35,12 +34,6 @@ extension IngredientQuantity {
         let quotient = try left / right
         left = quotient
     }
-}
-
-enum IngredientQuantityType {
-    case count
-    case volume
-    case mass
 }
 
 enum IngredientQuantityError: Error {

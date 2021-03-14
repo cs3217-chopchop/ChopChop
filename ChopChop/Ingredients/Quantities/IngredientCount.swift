@@ -16,6 +16,8 @@ struct IngredientCount {
 }
 
 extension IngredientCount: IngredientQuantity {
+    static let zero: IngredientCount = try! IngredientCount(0)
+
     static func + (left: IngredientCount, right: IngredientCount) throws -> IngredientCount {
         try IngredientCount(left.count + right.count)
     }
@@ -46,13 +48,5 @@ extension IngredientCount: IngredientQuantity {
 
     var description: String {
         String(format: "%.\(IngredientCount.precision)f", count)
-    }
-
-    var isZero: Bool {
-        count == 0
-    }
-
-    var type: IngredientQuantityType {
-        .count
     }
 }

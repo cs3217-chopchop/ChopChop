@@ -12,10 +12,6 @@ class IngredientItem<Quantity: IngredientQuantity> {
         self.expiryDate = expiryDate
     }
 
-    var isEmpty: Bool {
-        quantity.isZero
-    }
-
     func add(_ quantity: Quantity) {
         do {
             try self.quantity += quantity
@@ -30,10 +26,6 @@ class IngredientItem<Quantity: IngredientQuantity> {
         } catch {
             return
         }
-    }
-
-    func subtractAll() {
-        subtract(self.quantity)
     }
 }
 

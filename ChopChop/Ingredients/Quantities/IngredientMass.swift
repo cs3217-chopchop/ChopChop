@@ -16,6 +16,8 @@ struct IngredientMass {
 }
 
 extension IngredientMass: IngredientQuantity {
+    static let zero: IngredientMass = try! IngredientMass(0)
+
     static func + (left: IngredientMass, right: IngredientMass) throws -> IngredientMass {
         try IngredientMass(left.mass + right.mass)
     }
@@ -46,13 +48,5 @@ extension IngredientMass: IngredientQuantity {
 
     var description: String {
         String(format: "%.\(IngredientMass.precision)f", mass)
-    }
-
-    var isZero: Bool {
-        mass == 0
-    }
-
-    var type: IngredientQuantityType {
-        .mass
     }
 }

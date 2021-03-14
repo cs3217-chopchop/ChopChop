@@ -16,6 +16,8 @@ struct IngredientVolume {
 }
 
 extension IngredientVolume: IngredientQuantity {
+    static let zero: IngredientVolume = try! IngredientVolume(0)
+
     static func + (left: IngredientVolume, right: IngredientVolume) throws -> IngredientVolume {
         try IngredientVolume(left.volume + right.volume)
     }
@@ -46,13 +48,5 @@ extension IngredientVolume: IngredientQuantity {
 
     var description: String {
         String(format: "%.\(IngredientVolume.precision)f", volume)
-    }
-
-    var isZero: Bool {
-        volume == 0
-    }
-
-    var type: IngredientQuantityType {
-        .volume
     }
 }
