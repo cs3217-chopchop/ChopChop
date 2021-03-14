@@ -320,6 +320,13 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
+        ValueObservation
+            .tracking(RecipeRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
@@ -330,6 +337,13 @@ extension AppDatabase {
     func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

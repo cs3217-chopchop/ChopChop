@@ -15,6 +15,11 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
 
     static let databaseTableName = "ingredient"
 
+    static let category = belongsTo(IngredientCategoryRecord.self)
+    var category: QueryInterfaceRequest<IngredientCategoryRecord> {
+        request(for: IngredientRecord.category)
+    }
+
     // Sorted by expiry date (nils last)
     static let sets = hasMany(IngredientSetRecord.self).order(IngredientSetRecord.Columns.expiryDate.ascNullsLast)
     var sets: QueryInterfaceRequest<IngredientSetRecord> {
@@ -34,5 +39,9 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
     func orderedByExpiryDate() -> Self {
         annotated(with: IngredientRecord.sets.min(IngredientSetRecord.Columns.expiryDate))
             .order(SQLLiteral("minIngredientSetExpiryDate").sqlExpression.ascNullsLast)
+    }
+
+    func filteredByCategory(ids: [Int64]) -> Self {
+        joining(required: IngredientRecord.category.filter(keys: ids))
     }
 }

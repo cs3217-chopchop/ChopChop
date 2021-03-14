@@ -15,6 +15,11 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
 
     static let databaseTableName = "recipe"
 
+    static let category = belongsTo(RecipeCategoryRecord.self)
+    var category: QueryInterfaceRequest<RecipeCategoryRecord> {
+        request(for: RecipeRecord.category)
+    }
+
     static let ingredients = hasMany(RecipeIngredientRecord.self)
     var ingredients: QueryInterfaceRequest<RecipeIngredientRecord> {
         request(for: RecipeRecord.ingredients)
@@ -34,5 +39,9 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
 extension DerivableRequest where RowDecoder == RecipeRecord {
     func orderedByName() -> Self {
         order(RecipeRecord.Columns.name)
+    }
+
+    func filteredByCategory(ids: [Int64]) -> Self {
+        joining(required: RecipeRecord.category.filter(keys: ids))
     }
 }
