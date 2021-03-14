@@ -1,30 +1,31 @@
 import Foundation
 
 /**
- Represents a collection of quantities of the same ingredient, grouped by expiry date.
+ Represents an ingredient, consisting of batches grouped by expiry date.
+ 
+ Invariants:
+ - All quantities are of the same type.
+ - Each batch has a unique expiry date.
  */
 class Ingredient {
+    let type: IngredientQuantityType
     private(set) var name: String
-    private(set) var items: [IngredientItem]
+    private(set) var batches: [IngredientBatch]
 
-    init(name: String) throws {
+    init(name: String, type: IngredientQuantityType) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw Error.emptyName
+            throw IngredientError.emptyName
         }
 
+        self.type = type
         self.name = name
-        self.items = []
+        self.batches = []
     }
 
-    var itemsByExpiryDate: [IngredientItem] {
-        items.sorted()
-    }
-
-    enum Error: Swift.Error {
-        case emptyName
-        case insufficientIngredients
+    var batchesByExpiryDate: [IngredientBatch] {
+        batches.sorted()
     }
 }
 
@@ -33,61 +34,140 @@ extension Ingredient {
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw Error.emptyName
+            throw IngredientError.emptyName
         }
 
         self.name = newName
     }
 
-    func add(quantity: IngredientQuantity, expiryDate: Date) {
-        guard let addedQuantity = quantity as? Quantity else {
-            return
+    func add(quantity: IngredientQuantity, expiryDate: Date) throws {
+        guard self.type == quantity.type else {
+            throw IngredientQuantityError.differentQuantityTypes
         }
 
-        let existingItems = items.filter { item in
-            item.expiryDate == expiryDate
+        let existingBatches = batches.filter { batch in
+            batch.expiryDate == expiryDate
         }
 
-        if let existingItem = existingItems.first {
-            existingItem.add(addedQuantity)
+        if let existingBatch = existingBatches.first {
+            try existingBatch.add(quantity)
         } else {
-            let addedItem = IngredientItem<Quantity>(quantity: addedQuantity, expiryDate: expiryDate)
+            let addedBatch = IngredientBatch(quantity: quantity, expiryDate: expiryDate)
 
-            items.append(addedItem)
+            batches.append(addedBatch)
         }
     }
 
-    func subtract<Q: IngredientQuantity>(quantity: Q) throws {
-        guard var subtractedQuantity = quantity as? Quantity else {
-            return
+    func subtract(quantity: IngredientQuantity, expiryDate: Date) throws {
+        guard self.type == quantity.type else {
+            throw IngredientQuantityError.differentQuantityTypes
+        }
+
+        guard let batch = getBatch(expiryDate: expiryDate) else {
+            throw IngredientError.nonExistentBatch
+        }
+
+        guard batch.quantity >= quantity else {
+            throw IngredientError.insufficientIngredients
+        }
+
+        try batch.subtract(quantity)
+
+        if batch.isEmpty {
+            removeBatch(expiryDate: expiryDate)
+        }
+    }
+
+    func use(quantity: IngredientQuantity) throws {
+        guard self.type == quantity.type else {
+            throw IngredientQuantityError.differentQuantityTypes
         }
 
         let currentDate = Date()
+        var subtractedQuantity = quantity
+        var usedBatches: [IngredientBatch] = []
 
-        for item in itemsByExpiryDate {
-            guard item.expiryDate > currentDate else {
+        for batch in BatchesByExpiryDate {
+            guard batch.expiryDate > currentDate else {
                 continue
             }
 
             do {
-                try subtractedQuantity -= item.quantity
-                item.subtractAll()
+                try subtractedQuantity -= batch.quantity
+                usedBatches.append(batch)
             } catch IngredientQuantityError.negativeQuantity {
-                item.subtract(subtractedQuantity)
+                try batch.subtract(subtractedQuantity)
+                subtractedQuantity.value = 0
                 break
             }
         }
 
-        let remainingItems = items.filter { item in
-            !item.isEmpty
+        guard subtractedQuantity.value == 0 else {
+            throw IngredientError.insufficientIngredients
         }
 
-        self.items = remainingItems
+        removeBatches(usedBatches)
     }
 
-    func combine<Q: IngredientQuantity>(with items: [IngredientItem<Q>]) {
-        for item in items {
-            add(quantity: item.quantity, expiryDate: item.expiryDate)
+    func combine(with ingredient: Ingredient) throws {
+        guard self.name == ingredient.name else {
+            throw IngredientError.differentIngredients
+        }
+
+        guard self.type == ingredient.type else {
+            throw IngredientQuantityError.differentQuantityTypes
+        }
+
+        for batch in ingredient.batches {
+            let quantity = batch.quantity
+            let expiryDate = batch.expiryDate
+            try add(quantity: quantity, expiryDate: expiryDate)
         }
     }
+
+    func removeBatch(expiryDate: Date) {
+        batches.removeAll { batch in
+            batch.expiryDate == expiryDate
+        }
+    }
+
+    func removeExpiredBatches() {
+        let currentDate = Date()
+        var removedBatches: [IngredientBatch] = []
+
+        for batch in batches {
+            if batch.expiryDate < currentDate {
+                removedBatches.append(batch)
+            }
+        }
+
+        removeBatches(removedBatches)
+    }
+
+    private func getBatch(expiryDate: Date) -> IngredientBatch? {
+        batches.filter { batch in
+            batch.expiryDate == expiryDate
+        }
+        .first
+    }
+
+    private func removeBatches(_ removedBatches: [IngredientBatch]) {
+        for batch in removedBatches {
+            removeBatch(expiryDate: batch.expiryDate)
+        }
+    }
+}
+
+extension Ingredient: Equatable {
+    static func == (lhs: Ingredient, rhs: Ingredient) -> Bool {
+        return lhs.type == rhs.type
+            && lhs.name == rhs.name
+    }
+}
+
+enum IngredientError: Error {
+    case emptyName
+    case nonExistentBatch
+    case insufficientIngredients
+    case differentIngredients
 }

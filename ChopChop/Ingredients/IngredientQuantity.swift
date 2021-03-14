@@ -1,21 +1,17 @@
 /**
  Represents the quantity of an ingredient.
+ 
+ Invariants:
+ - Quantities are non negative.
+ 
+ Quantities can be added and subtracted together if they are of the same type.
+ Quantities can be multiplied and divided by a factor.
+ Quantities can be compared if they are of the same type.
  */
 enum IngredientQuantity {
     case count(Double)
     case mass(Double)
     case volume(Double)
-
-    var isZero: Bool {
-        switch self {
-        case .count(let value):
-            return value == 0
-        case .mass(let value):
-            return value == 0
-        case .volume(let value):
-            return value == 0
-        }
-    }
 
     var type: IngredientQuantityType {
         switch self {
@@ -25,6 +21,29 @@ enum IngredientQuantity {
             return .mass
         case .volume:
             return .volume
+        }
+    }
+
+    var value: Double {
+        get {
+            switch self {
+            case .count(let value):
+                return value
+            case .mass(let value):
+                return value
+            case .volume(let value):
+                return value
+            }
+        }
+        set {
+            switch self {
+            case .count:
+                self = .count(newValue)
+            case .mass:
+                self = .mass(newValue)
+            case .volume:
+                self = .volume(newValue)
+            }
         }
     }
 }
@@ -80,12 +99,8 @@ extension IngredientQuantity {
             throw IngredientQuantityError.differentQuantityTypes
         }
     }
-    
-    static func * (left: IngredientQuantity, right: Double) throws -> IngredientQuantity {
-        guard right > 0 else {
-            throw IngredientQuantityError.nonPositiveFactor
-        }
 
+    static func * (left: IngredientQuantity, right: Double) throws -> IngredientQuantity {
         switch left {
         case .count(let value):
             let product = value * right
@@ -109,8 +124,8 @@ extension IngredientQuantity {
     }
 
     static func / (left: IngredientQuantity, right: Double) throws -> IngredientQuantity {
-        guard right > 0 else {
-            throw IngredientQuantityError.nonPositiveFactor
+        guard right != 0 else {
+            throw IngredientQuantityError.divisionByZero
         }
 
         switch left {
@@ -197,15 +212,11 @@ extension IngredientQuantity: Comparable {
             throw IngredientQuantityError.differentQuantityTypes
         }
     }
-
-    func isSameType(as quantity: IngredientQuantity) -> Bool {
-        self.type == quantity.type
-    }
 }
 
 enum IngredientQuantityError: Error {
     case negativeQuantity
-    case nonPositiveFactor
+    case divisionByZero
     case differentQuantityTypes
 }
 

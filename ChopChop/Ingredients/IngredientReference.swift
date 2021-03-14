@@ -10,31 +10,15 @@ class IngredientReference {
         self.quantity = quantity
     }
 
-    func add(_ quantity: IngredientQuantity) {
-        do {
-            try self.quantity += quantity
-        } catch {
-            return
-        }
+    func add(_ quantity: IngredientQuantity) throws {
+        try self.quantity += quantity
     }
 
-    func subtract(_ quantity: IngredientQuantity) {
-        do {
-            try self.quantity -= quantity
-        } catch {
-            return
-        }
+    func subtract(_ quantity: IngredientQuantity) throws {
+        try self.quantity -= quantity
     }
 
-    func subtractAll() {
-        subtract(self.quantity)
-    }
-
-    func scale(_ factor: Double) {
-        do {
-            try self.quantity *= factor
-        } catch {
-            return
-        }
+    func scale(_ factor: Double) throws {
+        try self.quantity *= factor
     }
 }

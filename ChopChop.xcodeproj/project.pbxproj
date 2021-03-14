@@ -8,14 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		3F98687425FC96DA00F2B44F /* IngredientQuantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */; };
-		3F98687C25FC991D00F2B44F /* IngredientCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98687B25FC991D00F2B44F /* IngredientCount.swift */; };
-		3F98688125FC9ADC00F2B44F /* IngredientVolume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688025FC9ADC00F2B44F /* IngredientVolume.swift */; };
-		3F98688625FC9BEC00F2B44F /* IngredientMass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688525FC9BEC00F2B44F /* IngredientMass.swift */; };
 		3F98688B25FC9E3800F2B44F /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688A25FC9E3800F2B44F /* Ingredient.swift */; };
-		3F98689025FC9E9C00F2B44F /* IngredientItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688F25FC9E9C00F2B44F /* IngredientItem.swift */; };
+		3F98689025FC9E9C00F2B44F /* IngredientBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688F25FC9E9C00F2B44F /* IngredientBatch.swift */; };
 		3F9868A125FCC3A500F2B44F /* IngredientReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9868A025FCC3A500F2B44F /* IngredientReference.swift */; };
 		3F9868A625FCCB9A00F2B44F /* IngredientGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9868A525FCCB9A00F2B44F /* IngredientGroup.swift */; };
-		3F9868AB25FCCF5000F2B44F /* IngredientEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9868AA25FCCF5000F2B44F /* IngredientEditable.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
@@ -43,14 +39,10 @@
 
 /* Begin PBXFileReference section */
 		3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientQuantity.swift; sourceTree = "<group>"; };
-		3F98687B25FC991D00F2B44F /* IngredientCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientCount.swift; sourceTree = "<group>"; };
-		3F98688025FC9ADC00F2B44F /* IngredientVolume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientVolume.swift; sourceTree = "<group>"; };
-		3F98688525FC9BEC00F2B44F /* IngredientMass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientMass.swift; sourceTree = "<group>"; };
 		3F98688A25FC9E3800F2B44F /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
-		3F98688F25FC9E9C00F2B44F /* IngredientItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientItem.swift; sourceTree = "<group>"; };
+		3F98688F25FC9E9C00F2B44F /* IngredientBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientBatch.swift; sourceTree = "<group>"; };
 		3F9868A025FCC3A500F2B44F /* IngredientReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientReference.swift; sourceTree = "<group>"; };
 		3F9868A525FCCB9A00F2B44F /* IngredientGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientGroup.swift; sourceTree = "<group>"; };
-		3F9868AA25FCCF5000F2B44F /* IngredientEditable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientEditable.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
 		72D6C94125F77E3600ED20FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -93,25 +85,13 @@
 		3F98687225FC96CB00F2B44F /* Ingredients */ = {
 			isa = PBXGroup;
 			children = (
-				3F98689425FCA15E00F2B44F /* Quantities */,
 				3F98688A25FC9E3800F2B44F /* Ingredient.swift */,
-				3F9868AA25FCCF5000F2B44F /* IngredientEditable.swift */,
-				3F98688F25FC9E9C00F2B44F /* IngredientItem.swift */,
+				3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */,
+				3F98688F25FC9E9C00F2B44F /* IngredientBatch.swift */,
 				3F9868A025FCC3A500F2B44F /* IngredientReference.swift */,
 				3F9868A525FCCB9A00F2B44F /* IngredientGroup.swift */,
 			);
 			path = Ingredients;
-			sourceTree = "<group>";
-		};
-		3F98689425FCA15E00F2B44F /* Quantities */ = {
-			isa = PBXGroup;
-			children = (
-				3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */,
-				3F98687B25FC991D00F2B44F /* IngredientCount.swift */,
-				3F98688025FC9ADC00F2B44F /* IngredientVolume.swift */,
-				3F98688525FC9BEC00F2B44F /* IngredientMass.swift */,
-			);
-			path = Quantities;
 			sourceTree = "<group>";
 		};
 		72D6C93325F77E3600ED20FB = {
@@ -307,12 +287,8 @@
 				72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */,
 				3F9868A125FCC3A500F2B44F /* IngredientReference.swift in Sources */,
 				3F98688B25FC9E3800F2B44F /* Ingredient.swift in Sources */,
-				3F98688125FC9ADC00F2B44F /* IngredientVolume.swift in Sources */,
-				3F98687C25FC991D00F2B44F /* IngredientCount.swift in Sources */,
-				3F98688625FC9BEC00F2B44F /* IngredientMass.swift in Sources */,
-				3F9868AB25FCCF5000F2B44F /* IngredientEditable.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
-				3F98689025FC9E9C00F2B44F /* IngredientItem.swift in Sources */,
+				3F98689025FC9E9C00F2B44F /* IngredientBatch.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
