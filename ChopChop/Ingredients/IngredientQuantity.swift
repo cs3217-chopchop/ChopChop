@@ -50,21 +50,27 @@ enum IngredientQuantity {
 
 // MARK: - Arithmetic operations
 extension IngredientQuantity {
+    /**
+     Returns the sum of two quantities if they are of the same type.
+     - Throws:
+        - `IngredientQuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+        - `IngredientQuantityError.negativeQuantity`: if the result is negative.
+     */
     static func + (left: IngredientQuantity, right: IngredientQuantity) throws -> IngredientQuantity {
         switch (left, right) {
-        case (.count(let leftValue), .count(let rightValue)):
+        case let (.count(leftValue), .count(rightValue)):
             let sum = leftValue + rightValue
             guard sum >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
             }
             return .count(sum)
-        case (.mass(let leftValue), .mass(let rightValue)):
+        case let (.mass(leftValue), .mass(rightValue)):
             let sum = leftValue + rightValue
             guard sum >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
             }
             return .mass(sum)
-        case (.volume(let leftValue), .volume(let rightValue)):
+        case let (.volume(leftValue), .volume(rightValue)):
             let sum = leftValue + rightValue
             guard sum >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
@@ -75,21 +81,27 @@ extension IngredientQuantity {
         }
     }
 
+    /**
+     Returns the result of the right quantity subtracted from the left if they are of the same type.
+     - Throws:
+        - `IngredientQuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+        - `IngredientQuantityError.negativeQuantity`: if the result is negative.
+     */
     static func - (left: IngredientQuantity, right: IngredientQuantity) throws -> IngredientQuantity {
         switch (left, right) {
-        case (.count(let leftValue), .count(let rightValue)):
+        case let (.count(leftValue), .count(rightValue)):
             let difference = leftValue - rightValue
             guard difference >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
             }
             return .count(difference)
-        case (.mass(let leftValue), .mass(let rightValue)):
+        case let (.mass(leftValue), .mass(rightValue)):
             let difference = leftValue - rightValue
             guard difference >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
             }
             return .mass(difference)
-        case (.volume(let leftValue), .volume(let rightValue)):
+        case let (.volume(leftValue), .volume(rightValue)):
             let difference = leftValue - rightValue
             guard difference >= 0 else {
                 throw IngredientQuantityError.negativeQuantity
@@ -100,6 +112,11 @@ extension IngredientQuantity {
         }
     }
 
+    /**
+     Returns the quantity scaled with a given factor.
+     - Throws:
+        - `IngredientQuantityError.negativeQuantity`: if the result is negative.
+     */
     static func * (left: IngredientQuantity, right: Double) throws -> IngredientQuantity {
         switch left {
         case .count(let value):
@@ -123,6 +140,12 @@ extension IngredientQuantity {
         }
     }
 
+    /**
+     Returns the quantity divided by a given factor.
+     - Throws:
+        - `IngredientQuantityError.divisionByZero`: if the given factor is 0.
+        - `IngredientQuantityError.negativeQuantity`: if the result is negative.
+     */
     static func / (left: IngredientQuantity, right: Double) throws -> IngredientQuantity {
         guard right != 0 else {
             throw IngredientQuantityError.divisionByZero
@@ -187,26 +210,36 @@ extension IngredientQuantity: CustomStringConvertible {
 
 // MARK: - Comparable
 extension IngredientQuantity: Comparable {
+    /**
+     Returns whether the left quantity is smaller than the right, if they are of the same type.
+     - Throws:
+        - `IngredientQuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+     */
     static func < (lhs: IngredientQuantity, rhs: IngredientQuantity) throws -> Bool {
         switch (lhs, rhs) {
-        case (.count(let leftValue), .count(let rightValue)):
+        case let (.count(leftValue), .count(rightValue)):
             return leftValue < rightValue
-        case (.mass(let leftValue), .mass(let rightValue)):
+        case let(.mass(leftValue), .mass(rightValue)):
             return leftValue < rightValue
-        case (.volume(let leftValue), .volume(let rightValue)):
+        case let (.volume(leftValue), .volume(rightValue)):
             return leftValue < rightValue
         default:
             throw IngredientQuantityError.differentQuantityTypes
         }
     }
 
+    /**
+     Returns whether the quantities are equal, if they are of the same type.
+     - Throws:
+        - `IngredientQuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+     */
     static func == (lhs: IngredientQuantity, rhs: IngredientQuantity) throws -> Bool {
         switch (lhs, rhs) {
-        case (.count(let leftValue), .count(let rightValue)):
+        case let (.count(leftValue), .count(rightValue)):
             return leftValue == rightValue
-        case (.mass(let leftValue), .mass(let rightValue)):
+        case let (.mass(leftValue), .mass(rightValue)):
             return leftValue == rightValue
-        case (.volume(let leftValue), .volume(let rightValue)):
+        case let (.volume(leftValue), .volume(rightValue)):
             return leftValue == rightValue
         default:
             throw IngredientQuantityError.differentQuantityTypes
