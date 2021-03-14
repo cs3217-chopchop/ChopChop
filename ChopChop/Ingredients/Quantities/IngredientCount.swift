@@ -1,7 +1,7 @@
 /**
  Represents the count of an ingredient.
  */
-struct IngredientCount {
+class IngredientCount {
     static let precision: Int = 1
 
     let count: Double
@@ -50,9 +50,5 @@ extension IngredientCount: IngredientQuantity {
 
     var isZero: Bool {
         count == 0
-    }
-
-    var type: IngredientQuantityType {
-        .count
     }
 }

@@ -1,7 +1,7 @@
 /**
  Represents the volume of an ingredient measured in milliliters.
  */
-struct IngredientVolume {
+class IngredientVolume {
     static let precision: Int = 2
 
     let volume: Double
@@ -50,9 +50,5 @@ extension IngredientVolume: IngredientQuantity {
 
     var isZero: Bool {
         volume == 0
-    }
-
-    var type: IngredientQuantityType {
-        .volume
     }
 }

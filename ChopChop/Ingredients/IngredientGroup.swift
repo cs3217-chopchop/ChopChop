@@ -10,7 +10,6 @@ class IngredientGroup {
     func add(_ addedIngredient: IngredientEditable) {
         let existingIngredient = ingredients.filter { ingredient in
             ingredient.name == addedIngredient.name
-                && ingredient.
         }
     }
 }

@@ -3,9 +3,9 @@ import Foundation
 /**
  Represents a collection of quantities of the same ingredient, grouped by expiry date.
  */
-class Ingredient<Quantity: IngredientQuantity> {
+class Ingredient {
     private(set) var name: String
-    private(set) var items: [IngredientItem<Quantity>]
+    private(set) var items: [IngredientItem]
 
     init(name: String) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -18,7 +18,7 @@ class Ingredient<Quantity: IngredientQuantity> {
         self.items = []
     }
 
-    var itemsByExpiryDate: [IngredientItem<Quantity>] {
+    var itemsByExpiryDate: [IngredientItem] {
         items.sorted()
     }
 
@@ -28,7 +28,7 @@ class Ingredient<Quantity: IngredientQuantity> {
     }
 }
 
-extension Ingredient: IngredientEditable {
+extension Ingredient {
     func rename(_ newName: String) throws {
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -39,7 +39,7 @@ extension Ingredient: IngredientEditable {
         self.name = newName
     }
 
-    func add<Q: IngredientQuantity>(quantity: Q, expiryDate: Date) {
+    func add(quantity: IngredientQuantity, expiryDate: Date) {
         guard let addedQuantity = quantity as? Quantity else {
             return
         }

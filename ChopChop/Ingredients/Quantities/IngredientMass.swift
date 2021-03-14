@@ -1,7 +1,7 @@
 /**
  Represents the mass of an ingredient measured in grams.
  */
-struct IngredientMass {
+class IngredientMass {
     static let precision: Int = 2
 
     let mass: Double
@@ -50,9 +50,5 @@ extension IngredientMass: IngredientQuantity {
 
     var isZero: Bool {
         mass == 0
-    }
-
-    var type: IngredientQuantityType {
-        .mass
     }
 }

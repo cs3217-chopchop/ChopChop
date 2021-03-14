@@ -1,16 +1,16 @@
 /**
  Represents some quantity of an ingredient.
  */
-class IngredientReference<Quantity: IngredientQuantity> {
+class IngredientReference {
     let name: String
-    private(set) var quantity: Quantity
+    private(set) var quantity: IngredientQuantity
 
-    init(name: String, quantity: Quantity) {
+    init(name: String, quantity: IngredientQuantity) {
         self.name = name
         self.quantity = quantity
     }
 
-    func add(_ quantity: Quantity) {
+    func add(_ quantity: IngredientQuantity) {
         do {
             try self.quantity += quantity
         } catch {
@@ -18,7 +18,7 @@ class IngredientReference<Quantity: IngredientQuantity> {
         }
     }
 
-    func subtract(_ quantity: Quantity) {
+    func subtract(_ quantity: IngredientQuantity) {
         do {
             try self.quantity -= quantity
         } catch {

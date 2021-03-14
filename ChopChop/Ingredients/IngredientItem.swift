@@ -3,11 +3,11 @@ import Foundation
 /**
  Represents some quantity of an ingredient with the same expiry date.
  */
-class IngredientItem<Quantity: IngredientQuantity> {
-    private(set) var quantity: Quantity
+class IngredientItem {
+    private(set) var quantity: IngredientQuantity
     private(set) var expiryDate: Date
 
-    init(quantity: Quantity, expiryDate: Date) {
+    init(quantity: IngredientQuantity, expiryDate: Date) {
         self.quantity = quantity
         self.expiryDate = expiryDate
     }
@@ -16,7 +16,7 @@ class IngredientItem<Quantity: IngredientQuantity> {
         quantity.isZero
     }
 
-    func add(_ quantity: Quantity) {
+    func add(_ quantity: IngredientQuantity) {
         do {
             try self.quantity += quantity
         } catch {
@@ -24,7 +24,7 @@ class IngredientItem<Quantity: IngredientQuantity> {
         }
     }
 
-    func subtract(_ quantity: Quantity) {
+    func subtract(_ quantity: IngredientQuantity) {
         do {
             try self.quantity -= quantity
         } catch {
@@ -38,11 +38,11 @@ class IngredientItem<Quantity: IngredientQuantity> {
 }
 
 extension IngredientItem: Comparable {
-    static func < (lhs: IngredientItem<Quantity>, rhs: IngredientItem<Quantity>) -> Bool {
+    static func < (lhs: IngredientItem, rhs: IngredientItem) -> Bool {
         lhs.expiryDate < rhs.expiryDate
     }
 
-    static func == (lhs: IngredientItem<Quantity>, rhs: IngredientItem<Quantity>) -> Bool {
+    static func == (lhs: IngredientItem, rhs: IngredientItem) -> Bool {
         lhs.expiryDate == rhs.expiryDate
     }
 }
