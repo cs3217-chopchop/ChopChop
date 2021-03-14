@@ -1,3 +1,5 @@
+import Foundation
+
 /// Note there is no relationship between steps and ingredients after parsing stage
 class Recipe {
     let id: Int64
@@ -93,4 +95,27 @@ class Recipe {
 
     // recipeManager to check recipe vs recipe problems
     // eg if there are duplicate names
+}
+
+extension Recipe: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        var newSteps: [RecipeStep] = []
+        for step in steps {
+            guard let recipeStep = step.copy() as? RecipeStep else {
+                fatalError()
+            }
+            newSteps.append(recipeStep)
+        }
+
+        var newIngredients: [RecipeIngredient] = []
+        for ingredient in ingredients {
+            guard let recipeIngredient = ingredient.copy() as? RecipeIngredient else {
+                fatalError()
+            }
+            newIngredients.append(recipeIngredient)
+        }
+
+        let copy = Recipe(id: id, name: name, servings: servings, cuisine: cuisine, difficulty: difficulty, steps: newSteps, ingredients: newIngredients)
+        return copy
+    }
 }

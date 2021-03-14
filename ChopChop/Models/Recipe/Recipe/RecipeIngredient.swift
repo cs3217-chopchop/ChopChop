@@ -1,3 +1,5 @@
+import Foundation
+
 class RecipeIngredient {
     let id: Int64
     var name: String
@@ -26,6 +28,7 @@ class RecipeIngredient {
     func scaleQuantityMagnitude(scale: Double) {
         guard scale > 0 else {
             assertionFailure("Should be positive magnitude")
+            return
         }
         quantity.magnitude *= scale
     }
@@ -42,4 +45,12 @@ class RecipeIngredient {
 struct Quantity {
     var unit: String
     var magnitude: Double
+}
+
+
+extension RecipeIngredient: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        let copy = RecipeIngredient(id: id, name: name, quantity: quantity)
+        return copy
+    }
 }
