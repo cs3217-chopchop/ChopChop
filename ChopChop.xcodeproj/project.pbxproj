@@ -23,6 +23,8 @@
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
 		72D6C94725F77E3800ED20FB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */; };
+		AEF591F525FDADCC0085C598 /* RecipeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF591F425FDADCC0085C598 /* RecipeParser.swift */; };
+		AEF591FB25FE5D960085C598 /* RecipeParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF591FA25FE5D960085C598 /* RecipeParserTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +57,8 @@
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AEF591F425FDADCC0085C598 /* RecipeParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeParser.swift; sourceTree = "<group>"; };
+		AEF591FA25FE5D960085C598 /* RecipeParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeParserTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +149,7 @@
 		72D6C93E25F77E3600ED20FB /* ChopChop */ = {
 			isa = PBXGroup;
 			children = (
+				AEF591F325FDADB20085C598 /* Parser */,
 				0E16A5B325FC6C7F000C2DCF /* Models */,
 				0E389C0225FA4906001B1088 /* Storage */,
 				72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */,
@@ -168,9 +173,18 @@
 			isa = PBXGroup;
 			children = (
 				0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */,
+				AEF591FA25FE5D960085C598 /* RecipeParserTest.swift */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
+			sourceTree = "<group>";
+		};
+		AEF591F325FDADB20085C598 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				AEF591F425FDADCC0085C598 /* RecipeParser.swift */,
+			);
+			path = Parser;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -304,6 +318,7 @@
 				72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */,
 				0E389C3025FA70D5001B1088 /* IngredientRecord.swift in Sources */,
 				0E389C5425FB50FA001B1088 /* IngredientSetRecord.swift in Sources */,
+				AEF591F525FDADCC0085C598 /* RecipeParser.swift in Sources */,
 				0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */,
 				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
@@ -319,6 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AEF591FB25FE5D960085C598 /* RecipeParserTest.swift in Sources */,
 				0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
