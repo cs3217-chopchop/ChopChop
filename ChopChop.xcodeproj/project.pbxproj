@@ -20,8 +20,6 @@
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
 		72D6C94725F77E3800ED20FB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */; };
-		72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C95125F77E3800ED20FB /* ChopChopTests.swift */; };
-		72D6C95D25F77E3800ED20FB /* ChopChopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,10 +56,8 @@
 		72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72D6C95125F77E3800ED20FB /* ChopChopTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopTests.swift; sourceTree = "<group>"; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopUITests.swift; sourceTree = "<group>"; };
 		72D6C95E25F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -158,7 +154,6 @@
 		72D6C95025F77E3800ED20FB /* ChopChopTests */ = {
 			isa = PBXGroup;
 			children = (
-				72D6C95125F77E3800ED20FB /* ChopChopTests.swift */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
@@ -167,7 +162,6 @@
 		72D6C95B25F77E3800ED20FB /* ChopChopUITests */ = {
 			isa = PBXGroup;
 			children = (
-				72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */,
 				72D6C95E25F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopUITests;
@@ -183,6 +177,7 @@
 				72D6C93825F77E3600ED20FB /* Sources */,
 				72D6C93925F77E3600ED20FB /* Frameworks */,
 				72D6C93A25F77E3600ED20FB /* Resources */,
+				3F65113725FE6685008F6015 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -297,6 +292,26 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		3F65113725FE6685008F6015 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		72D6C93825F77E3600ED20FB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -320,7 +335,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,7 +342,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				72D6C95D25F77E3800ED20FB /* ChopChopUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

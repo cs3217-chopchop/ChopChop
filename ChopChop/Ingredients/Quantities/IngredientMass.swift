@@ -7,7 +7,7 @@ struct IngredientMass {
     let mass: Double
 
     init(_ mass: Double) throws {
-        guard mass > 0 else {
+        guard !mass.isLess(than: 0) else {
             throw IngredientQuantityError.negativeQuantity
         }
 
@@ -16,12 +16,14 @@ struct IngredientMass {
 }
 
 extension IngredientMass: IngredientQuantity {
+    // swiftlint:disable force_try
     static let zero: IngredientMass = try! IngredientMass(0)
+    // swiftlint:enable force_try
 
     static func + (left: IngredientMass, right: IngredientMass) throws -> IngredientMass {
         try IngredientMass(left.mass + right.mass)
     }
-    
+
     static func - (left: IngredientMass, right: IngredientMass) throws -> IngredientMass {
         try IngredientMass(left.mass - right.mass)
     }

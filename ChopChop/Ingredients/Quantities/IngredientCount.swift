@@ -7,7 +7,7 @@ struct IngredientCount {
     let count: Double
 
     init(_ count: Double) throws {
-        guard count >= 0 else {
+        guard !count.isLess(than: 0) else {
             throw IngredientQuantityError.negativeQuantity
         }
 
@@ -16,7 +16,9 @@ struct IngredientCount {
 }
 
 extension IngredientCount: IngredientQuantity {
+    // swiftlint:disable force_try
     static let zero: IngredientCount = try! IngredientCount(0)
+    // swiftlint:enable force_try
 
     static func + (left: IngredientCount, right: IngredientCount) throws -> IngredientCount {
         try IngredientCount(left.count + right.count)

@@ -13,7 +13,8 @@ class IngredientGroup<Ingredient: IngredientEditable> {
         }
 
         for ingredient in existingIngredients {
-            
+            // not possible to have heterogeneous array of ingredients
+            // with different quantity types
         }
     }
 }

@@ -7,7 +7,7 @@ struct IngredientVolume {
     let volume: Double
 
     init(_ volume: Double) throws {
-        guard volume > 0 else {
+        guard !volume.isLess(than: 0) else {
             throw IngredientQuantityError.negativeQuantity
         }
 
@@ -16,7 +16,9 @@ struct IngredientVolume {
 }
 
 extension IngredientVolume: IngredientQuantity {
+    // swiftlint:disable force_try
     static let zero: IngredientVolume = try! IngredientVolume(0)
+    // swiftlint:enable force_try
 
     static func + (left: IngredientVolume, right: IngredientVolume) throws -> IngredientVolume {
         try IngredientVolume(left.volume + right.volume)
