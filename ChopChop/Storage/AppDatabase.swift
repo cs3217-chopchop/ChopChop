@@ -119,6 +119,8 @@ struct AppDatabase {
     }
 }
 
+// MARK: - Database Access: Create/Update
+
 extension AppDatabase {
     func saveRecipe(_ recipe: inout Recipe) throws {
         var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name)
@@ -229,7 +231,11 @@ extension AppDatabase {
             try ingredientCategory.save(db)
         }
     }
+}
 
+// MARK: - Database Access: Delete
+
+extension AppDatabase {
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try RecipeRecord.deleteAll(db, keys: ids)
@@ -279,6 +285,33 @@ extension AppDatabase {
     }
 }
 
+// MARK: - Database Access: Read
+
+extension AppDatabase {
+    func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(key: recipe.id)
+                .including(all: RecipeRecord.ingredients)
+                .including(all: RecipeRecord.steps)
+
+            return try Recipe.fetchOne(db, request)
+        }
+    }
+
+    func fetchIngredient(_ ingredient: IngredientRecord) throws -> Ingredient? {
+        try dbWriter.read { db in
+            let request = IngredientRecord
+                .filter(key: ingredient.id)
+                .including(all: IngredientRecord.sets)
+
+            return try Ingredient.fetchOne(db, request)
+        }
+    }
+}
+
+// MARK: - Database Access: Publishers
+
 extension AppDatabase {
     func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
@@ -313,26 +346,5 @@ extension AppDatabase {
             .tracking(IngredientCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
-    }
-
-    func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
-        try dbWriter.read { db in
-            let request = RecipeRecord
-                .filter(key: recipe.id)
-                .including(all: RecipeRecord.ingredients)
-                .including(all: RecipeRecord.steps)
-
-            return try Recipe.fetchOne(db, request)
-        }
-    }
-
-    func fetchIngredient(_ ingredient: IngredientRecord) throws -> Ingredient? {
-        try dbWriter.read { db in
-            let request = IngredientRecord
-                .filter(key: ingredient.id)
-                .including(all: IngredientRecord.sets)
-
-            return try Ingredient.fetchOne(db, request)
-        }
     }
 }

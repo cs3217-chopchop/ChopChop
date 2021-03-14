@@ -761,6 +761,7 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Model Fetch Tests
 
     func testFetchRecipe() throws {
+        var categoryRecord = RecipeCategoryRecord(name: "American")
         var recipeRecord = RecipeRecord(name: "Pancakes")
         var ingredientRecords = [
             RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
@@ -793,6 +794,10 @@ class AppDatabaseTests: XCTestCase {
         ]
 
         try dbWriter.write { db in
+            try categoryRecord.insert(db)
+
+            recipeRecord.recipeCategoryId = categoryRecord.id
+
             try recipeRecord.insert(db)
 
             for index in 0..<ingredientRecords.count {
@@ -807,6 +812,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let recipe = Recipe(id: recipeRecord.id,
+                            recipeCategoryId: categoryRecord.id,
                             name: recipeRecord.name,
                             ingredients: ingredientRecords.reduce(into: [:]) {
                                 $0[$1.name] = $1.quantity
@@ -817,6 +823,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testFetchIngredient() throws {
+        var categoryRecord = IngredientCategoryRecord(name: "Dairy")
         var ingredientRecord = IngredientRecord(name: "Egg")
         var setRecords = [
             IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
@@ -827,6 +834,10 @@ class AppDatabaseTests: XCTestCase {
         ]
 
         try dbWriter.write { db in
+            try categoryRecord.insert(db)
+
+            ingredientRecord.ingredientCategoryId = categoryRecord.id
+
             try ingredientRecord.insert(db)
 
             for index in 0..<setRecords.count {
@@ -836,6 +847,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let ingredient = Ingredient(id: ingredientRecord.id,
+                                    ingredientCategoryId: categoryRecord.id,
                                     name: ingredientRecord.name,
                                     sets: setRecords.reduce(into: [:]) {
                                         $0[$1.expiryDate] = $1.quantity
