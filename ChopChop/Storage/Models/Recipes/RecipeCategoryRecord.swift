@@ -13,11 +13,6 @@ extension RecipeCategoryRecord: Codable, FetchableRecord, MutablePersistableReco
 
     static let databaseTableName = "recipeCategory"
 
-    static let recipes = hasMany(RecipeRecord.self)
-    var recipes: QueryInterfaceRequest<RecipeRecord> {
-        request(for: RecipeCategoryRecord.recipes)
-    }
-
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }
