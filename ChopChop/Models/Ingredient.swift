@@ -3,6 +3,7 @@ import GRDB
 
 struct Ingredient: Equatable {
     var id: Int64?
+    var ingredientCategoryId: Int64?
     var name: String
     var sets: [Date?: Quantity]
 }
@@ -10,6 +11,7 @@ struct Ingredient: Equatable {
 extension Ingredient: FetchableRecord {
     init(row: Row) {
         id = row["id"]
+        ingredientCategoryId = row["ingredientCategoryId"]
         name = row["name"]
         sets = row.prefetchedRows["ingredientSets"]?.reduce(into: [Date?: Quantity]()) {
             let set = IngredientSetRecord(row: $1)

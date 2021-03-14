@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5A925FC67DD000C2DCF /* Recipe.swift */; };
 		0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5B625FCA236000C2DCF /* Ingredient.swift */; };
+		0E16A5C325FD08EA000C2DCF /* RecipeCategoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */; };
+		0E16A5C925FD09EB000C2DCF /* IngredientCategoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */; };
 		0E389BEC25FA4606001B1088 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 0E389BEB25FA4606001B1088 /* GRDB */; };
 		0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BF825FA480C001B1088 /* AppDatabase.swift */; };
 		0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */; };
@@ -38,6 +40,8 @@
 /* Begin PBXFileReference section */
 		0E16A5A925FC67DD000C2DCF /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		0E16A5B625FCA236000C2DCF /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
+		0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCategoryRecord.swift; sourceTree = "<group>"; };
+		0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientCategoryRecord.swift; sourceTree = "<group>"; };
 		0E389BF825FA480C001B1088 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0E389C0425FA4931001B1088 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
@@ -109,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				0E389C2F25FA70D5001B1088 /* IngredientRecord.swift */,
+				0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */,
 				0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */,
 			);
 			path = Ingredients;
@@ -118,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				0E389C4325FB3AEB001B1088 /* RecipeRecord.swift */,
+				0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */,
 				0E389C4E25FB3B18001B1088 /* RecipeIngredientRecord.swift */,
 				0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */,
 			);
@@ -308,8 +314,10 @@
 				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
 				0E389C4F25FB3B18001B1088 /* RecipeIngredientRecord.swift in Sources */,
+				0E16A5C325FD08EA000C2DCF /* RecipeCategoryRecord.swift in Sources */,
 				0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */,
 				0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */,
+				0E16A5C925FD09EB000C2DCF /* IngredientCategoryRecord.swift in Sources */,
 				0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */,
 				0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */,
 			);

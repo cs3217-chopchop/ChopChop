@@ -2,12 +2,14 @@ import GRDB
 
 struct RecipeRecord: Equatable {
     var id: Int64?
+    var recipeCategoryId: Int64?
     var name: String
 }
 
 extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
+        static let recipeCategoryId = Column(CodingKeys.recipeCategoryId)
         static let name = Column(CodingKeys.name)
     }
 
