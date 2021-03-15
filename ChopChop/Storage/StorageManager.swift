@@ -23,9 +23,13 @@ struct StorageManager {
         recipe.id = recipeRecord.id
     }
 
-//    func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {
-//
-//    }
+    func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {
+        var recipeCategoryRecord = RecipeCategoryRecord(id: recipeCategory.id, name: recipeCategory.name)
+
+        try appDatabase.saveRecipeCategory(&recipeCategoryRecord)
+
+        recipeCategory.id = recipeCategoryRecord.id
+    }
 
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
@@ -40,9 +44,14 @@ struct StorageManager {
         ingredient.id = ingredientRecord.id
     }
 
-//    func saveRecipeCategory(_ recipeCategory: inout IngredientCategory) throws {
-//
-//    }
+    func saveIngredientCategory(_ ingredientCategory: inout IngredientCategory) throws {
+        var ingredientCategoryRecord = IngredientCategoryRecord(id: ingredientCategory.id,
+                                                                name: ingredientCategory.name)
+
+        try appDatabase.saveIngredientCategory(&ingredientCategoryRecord)
+
+        ingredientCategory.id = ingredientCategoryRecord.id
+    }
 
     // MARK: - StorageManager: Delete
 
@@ -102,9 +111,11 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-//    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
-//
-//    }
+    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
+        appDatabase.recipeCategoriesOrderedByNamePublisher()
+            .map { $0.map { RecipeCategory(id: $0.id, name: $0.name ) } }
+            .eraseToAnyPublisher()
+    }
 
     func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsOrderedByNamePublisher()
@@ -124,7 +135,9 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-//    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
-//
-//    }
+    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
+        appDatabase.ingredientCategoriesOrderedByNamePublisher()
+            .map { $0.map { IngredientCategory(id: $0.id, name: $0.name ) } }
+            .eraseToAnyPublisher()
+    }
 }
