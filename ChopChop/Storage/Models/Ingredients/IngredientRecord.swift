@@ -21,7 +21,8 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
     }
 
     // Sorted by expiry date (nils last)
-    static let batches = hasMany(IngredientBatchRecord.self).order(IngredientBatchRecord.Columns.expiryDate.ascNullsLast)
+    static let batches = hasMany(IngredientBatchRecord.self)
+        .order(IngredientBatchRecord.Columns.expiryDate.ascNullsLast)
     var batches: QueryInterfaceRequest<IngredientBatchRecord> {
         request(for: IngredientRecord.batches)
     }

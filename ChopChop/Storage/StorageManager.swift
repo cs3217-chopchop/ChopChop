@@ -35,8 +35,8 @@ struct StorageManager {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.ingredientCategoryId,
                                                 name: ingredient.name)
-        var batchRecords = ingredient.batches.map { expiryDate, quantity in
-            IngredientBatchRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
+        var batchRecords = ingredient.batches.map { batch in
+            IngredientBatchRecord(ingredientId: ingredient.id, expiryDate: batch.expiryDate, quantity: batch.quantity)
         }
 
         try appDatabase.saveIngredient(&ingredientRecord, batches: &batchRecords)

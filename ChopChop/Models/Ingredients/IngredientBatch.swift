@@ -6,9 +6,9 @@ import Foundation
  */
 class IngredientBatch {
     private(set) var quantity: Quantity
-    private(set) var expiryDate: Date
+    private(set) var expiryDate: Date?
 
-    init(quantity: Quantity, expiryDate: Date) {
+    init(quantity: Quantity, expiryDate: Date?) {
         self.quantity = quantity
         self.expiryDate = expiryDate
     }
@@ -32,7 +32,15 @@ class IngredientBatch {
  */
 extension IngredientBatch: Comparable {
     static func < (lhs: IngredientBatch, rhs: IngredientBatch) -> Bool {
-        lhs.expiryDate < rhs.expiryDate
+        guard let rightDate = rhs.expiryDate else {
+            return true
+        }
+
+        guard let leftDate = lhs.expiryDate else {
+            return false
+        }
+
+        return leftDate < rightDate
     }
 
     static func == (lhs: IngredientBatch, rhs: IngredientBatch) -> Bool {
