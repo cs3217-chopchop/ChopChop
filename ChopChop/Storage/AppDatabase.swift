@@ -288,10 +288,10 @@ extension AppDatabase {
 // MARK: - Database Access: Read
 
 extension AppDatabase {
-    func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
+    func fetchRecipe(id: Int64) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
-                .filter(key: recipe.id)
+                .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
                 .including(all: RecipeRecord.steps)
 
@@ -299,10 +299,10 @@ extension AppDatabase {
         }
     }
 
-    func fetchIngredient(_ ingredient: IngredientRecord) throws -> Ingredient? {
+    func fetchIngredient(id: Int64) throws -> Ingredient? {
         try dbWriter.read { db in
             let request = IngredientRecord
-                .filter(key: ingredient.id)
+                .filter(key: id)
                 .including(all: IngredientRecord.sets)
 
             return try Ingredient.fetchOne(db, request)

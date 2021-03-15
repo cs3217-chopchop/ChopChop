@@ -940,7 +940,12 @@ class AppDatabaseTests: XCTestCase {
                             },
                             steps: stepRecords.sorted(by: { $0.index < $1.index }).map { $0.content })
 
-        try XCTAssertEqual(appDatabase.fetchRecipe(recipeRecord), recipe)
+        guard let id = recipeRecord.id else {
+            XCTFail("Recipes should have a non-nil ID after insertion into database")
+            return
+        }
+
+        try XCTAssertEqual(appDatabase.fetchRecipe(id: id), recipe)
     }
 
     func testFetchIngredient() throws {
@@ -974,6 +979,11 @@ class AppDatabaseTests: XCTestCase {
                                         $0[$1.expiryDate] = $1.quantity
                                     })
 
-        try XCTAssertEqual(appDatabase.fetchIngredient(ingredientRecord), ingredient)
+        guard let id = ingredientRecord.id else {
+            XCTFail("Ingredients should have a non-nil ID after insertion into database")
+            return
+        }
+
+        try XCTAssertEqual(appDatabase.fetchIngredient(id: id), ingredient)
     }
 }
