@@ -1,7 +1,7 @@
 struct RecipeStepParser {
 
     static let delimiters = ["-", "–", "to", "or"]
-    static let minUnits = ["minute[s]?", "min[s]?"] // put strict ones first
+    static let minUnits = ["minute[s]?", "min[s]?", "m"] // put strict ones first
     static let hourUnits = ["hour[s]?", "h"]
     static let secondUnits = ["second[s]?", "s", "sec[s]?"]
     static let digitNames = [
@@ -20,30 +20,21 @@ struct RecipeStepParser {
         "twenty": 20
     ]
 
-    static let intOrDecimal = "[1-9]\\d*(\\.\\d+)?"
-    static let randoShortString = "[a-z\\d\\-_\\s]{0,6}" // any <=10 chars
+    static let intOrDecimal = "[1-9]\\d*(\\.\\d+)?" // TODO include fraction
+    static let randoShortString = "[a-z\\d\\-_\\s]{0,6}" // any <=6 chars
     static let stricterRandoShortString = optional(str: "[a-z\\d\\-_\\s]{0,5} ")
 
     static let defaultTime = 900
 
     /// Given a step, sum up all time words
-    // convert "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" to
-    // 3.5 mins * 60 = 210 seconds
+    /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" returns 210 seconds
     static func parseTimeTaken(step: String) -> Int {
-        // 2 factors:
-        // step might not contain any time words
-        // user might not even want to use ML
-
-        // worse case use default 1.0
         return parseTimerDurations(step: step).map{parseToTime(timeString: $0)}.reduce(0, +)
     }
 
-    // convert "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" to
-    // ["2 minutes", "1-2 minutes"]
+    /// Given a step, returns an array of time duration words
+    /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" returns ["2 minutes", "1-2 minutes"]
     static func parseTimerDurations(step: String) -> [String] {
-        // 1–2 minutes
-        // 1 to 2 minutes
-
         var allDelimitersString = reducePipeSeparated(arr: delimiters)
         let allTimeUnits = minUnits + hourUnits + secondUnits
         var allTimeUnitsString = reducePipeSeparated(arr: allTimeUnits)
@@ -58,21 +49,19 @@ struct RecipeStepParser {
         let mostBasicTimeWithCompulsoryUnit = allNumbersString + stricterRandoShortString + allTimeUnitsString
         let optionalRangeString = optional(str: mostBasicTimeWithOptionalUnit + optional(str: randoShortString + mostBasicTimeWithOptionalUnit) + randoShortString + allDelimitersString + randoShortString) // 1h 30mins to
 
-        // less than 10 chars exist between the number and unit
         let regexString = optionalRangeString +
             mostBasicTimeWithCompulsoryUnit + optional(str: randoShortString + mostBasicTimeWithCompulsoryUnit) // 1h 9 mins to 1h 10 mins
         let matched = matches(for: regexString, in: step)
-        print(matched)
 
         return matched
     }
 
-    // convert to time in seconds
-    // "1 minutes" to 60, "30 sec" to 30, etc
+    /// converts time represented in String to seconds
+    /// E.g. "1 minutes" returns 60, "30 sec" returns 30
     static func parseToTime(timeString: String) -> Int {
 
         var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map{$0})
-        allNumbersString += "|" + intOrDecimal // zero|one|...|[0-9]
+        allNumbersString += "|" + intOrDecimal
         allNumbersString = "(" + allNumbersString + ")"
         let matchedNumbers = matches(for: allNumbersString, in: timeString)
 
@@ -82,11 +71,6 @@ struct RecipeStepParser {
         let matchedUnits = matches(for: allTimeUnitsString, in: timeString)
 
         if matchedNumbers.count == matchedUnits.count {
-            // 2025 minutes
-            // about 1 hour 10 minutes
-            // 1h 20 min to 1h 30 min
-
-
             // 1h 20 min to 1h 30 min to [3600, 120, 3600, 180]
             var scaledValues: [Double] = []
             for i in 0..<matchedNumbers.count {
@@ -106,17 +90,14 @@ struct RecipeStepParser {
                 let number = scaledValues[0..<(matchedNumbers.count)].reduce(0, +)
                 return Int(number)
             }
-
         } else if matchedNumbers.count == 2 && matchedUnits.count == 1 {
             guard let scale = parseTimeUnit(unit: matchedUnits[0]), let firstNumber = parseNumber(number: matchedNumbers[0]), let secondNumber = parseNumber(number: matchedNumbers[1]) else {
                 assertionFailure()
                 return defaultTime
             }
             return Int(((firstNumber + secondNumber) / 2) * scale)
-
         } else {
-            // unidentifiable
-            // eg if cant break up word but identified "minutes", just return 15 minutes
+            // unidentifiable: e.g. cant break up word but identified "minutes", just return 15 minutes
             return defaultTime
         }
 
@@ -124,7 +105,7 @@ struct RecipeStepParser {
 
     private static func parseNumber(number: String) -> Double? {
         var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map{$0})
-        allNumbersString += "|" + intOrDecimal // zero|one|...|[0-9]
+        allNumbersString += "|" + intOrDecimal
         guard number ~= allNumbersString else {
             return nil
         }
@@ -148,8 +129,9 @@ struct RecipeStepParser {
         }
     }
 
-    /// Given a step String, scales all numbers by factor (including ingredient quantity, time) and returns the scaled step String
+    /// Given a step String, scales only ingredeint quantity  by factor and returns the scaled step String
     static func scaleNumerals(step: String, scale: Double) -> String {
+        // TODO copy wj's implementation of detecting ingredients
         guard scale > 0 else {
             assertionFailure("Should be positive magnitude")
             return step
@@ -165,30 +147,3 @@ struct RecipeStepParser {
         "(" + str + ")?"
     }
 }
-
-
-// 20 - 25 mins
-// 2025 minutes
-// "50 minutes per pound"
-// "15 more minutes"
-// "15 minutes"
-// 2 to 3 hours
-// 10 to 15 minutes
-// 2 or 3 more minutes
-// 20 seconds
-// about 1 hour 10 minutes
-// 1 1/2 hours
-// -
-// 2 or 3 minutes
-// 45 seconds
-// 45 second
-// 1h 20 min to 1h 30 min
-// 45-50 minutes
-// 10 min
-// five to 10 minutes
-// no spaces
-// 10mins
-// 1 hour
-// 20 sec
-// 10-15 min
-// (abt 20 mins)

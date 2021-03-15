@@ -2,8 +2,11 @@ import Foundation
 
 class RecipeIngredient {
     let id: Int64
-    var name: String
-    var quantity: Quantity?
+    private(set) var name: String
+
+    // Quantity is optional because some ingredients don't have an associated quantity
+    // e.g. "add salt to meat" does not specify quantity of salt
+    private(set) var quantity: Quantity?
 
     init(id: Int64, name: String, quantity: Quantity?) {
         self.id = id
@@ -12,36 +15,38 @@ class RecipeIngredient {
         assert(checkRepresentation())
     }
 
-    // Use case: substitutes
-    func updateName(name: String) {
+    func updateName(name: String) throws {
+        assert(checkRepresentation())
+        guard name != "" else {
+            throw RecipeIngredientError.invalidName
+        }
         self.name = name
+        assert(checkRepresentation())
     }
 
     func updateQuantity(quantity: Quantity) {
-        // since we are only deducting ingredients at the end, the units only need to be same as those in inventory at the end
-        // user can change units of ingredients too
-
+        assert(checkRepresentation())
         self.quantity = quantity
-
+        assert(checkRepresentation())
     }
 
     func scaleQuantityMagnitude(scale: Double) {
+        assert(checkRepresentation())
         guard scale > 0 else {
             assertionFailure("Should be positive magnitude")
             return
         }
         quantity?.magnitude *= scale
+        assert(checkRepresentation())
     }
 
     private func checkRepresentation() -> Bool {
         name != ""
     }
 
-
-
 }
 
-// remove
+// TODO remove
 struct Quantity {
     var unit: String
     var magnitude: Double

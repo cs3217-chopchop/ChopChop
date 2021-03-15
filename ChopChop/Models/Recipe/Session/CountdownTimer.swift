@@ -1,9 +1,10 @@
 import Foundation
 
+// All timings are in seconds
 class CountdownTimer {
-    var defaultTime: Int
-    var remainingTime: Int // in seconds -> display this
-    var timer: Timer? // https://developer.apple.com/documentation/foundation/timer/2091888-init
+    private(set) var defaultTime: Int
+    private(set) var remainingTime: Int
+    private(set) var timer: Timer?
 
     init(time: Int) {
         remainingTime = time
@@ -12,21 +13,18 @@ class CountdownTimer {
 
     @objc private func countdown() {
         remainingTime -= 1;
-        guard remainingTime <= 0 else {
+        guard remainingTime > 0 else {
             timer?.invalidate()
-            // ring sound?
             return
         }
     }
 
     func start() {
         Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
-//        RunLoop.current.add(timer, forMode: .common)
-//        Timer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
     }
 
     func pause() {
-        timer?.invalidate()
+        timer?.invalidate() // removes timer from RunLoop
     }
 
     func resume() {
@@ -41,10 +39,9 @@ class CountdownTimer {
         remainingTime = defaultTime
     }
 
-    // use case: user inc or dec default time, prob thru up and down arrow buttons
+    // use case: user inc or dec default time
     func updateDefaultTime(defaultTime: Int) {
         self.defaultTime = defaultTime
     }
-
     
 }

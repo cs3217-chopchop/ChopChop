@@ -1,17 +1,18 @@
 import Foundation
 
+/// Conforms to ActionTimeTracker so that SessionRecipeStep can modify only 1 attribute through the delegate
 class SessionRecipe: ActionTimeTracker {
-    var timeOfLastAction = Date() // https://developer.apple.com/documentation/foundation/date
-
-    var recipe: Recipe
-    var sessionSteps: [SessionRecipeStep]! // implicitly unwrapped optional due to need to bind to self
+    private(set) var timeOfLastAction = Date()
+    private(set) var recipe: Recipe
+    private(set) var sessionSteps: [SessionRecipeStep]! // implicitly unwrapped optional due to need to bind to self
 
     init(recipe: Recipe) {
-        guard let recipe = recipe.copy() as? Recipe else {
+        // A copy of the recipe object is made so that recipe on recipe tab dosen't actually get modified
+        guard let recipeCopy = recipe.copy() as? Recipe else {
             fatalError()
-        } // so that recipe on recipe tab dosent actually get modified
-        self.recipe = recipe
-        sessionSteps = recipe.steps.map{SessionRecipeStep(step: $0, actionTimeTracker: self)}
+        }
+        self.recipe = recipeCopy
+        sessionSteps = recipeCopy.steps.map{SessionRecipeStep(step: $0, actionTimeTracker: self)}
     }
 
     // future use case: on complete, send session steps to user log
@@ -27,14 +28,17 @@ class SessionRecipe: ActionTimeTracker {
         recipe.updateDifficulty(difficulty: difficulty)
     }
 
-    // add/delete/reorder ingredients
+    /// Add/delete/reorder ingredients
     func updateIngredients(ingredients: [RecipeIngredient]) throws {
         try recipe.updateIngredients(ingredients: ingredients)
     }
 
-    // dont allow updates to servings
-    // updates to steps done through SessionRecipeStep
+    func updateServings(servings: Double) throws {
+        try recipe.updateServings(servings: servings)
+    }
 
-
+    func updateTimeOfLastAction(date: Date) {
+        timeOfLastAction = date
+    }
 
 }

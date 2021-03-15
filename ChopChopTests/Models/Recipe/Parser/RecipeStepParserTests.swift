@@ -5,8 +5,8 @@ class RecipeStepParserTests: XCTestCase {
 
     // https://www.allrecipes.com/
     func testParseTimeTaken() {
-        let timeTaken = RecipeStepParser.parseTimeTaken(step: "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes")
-        XCTAssertEqual(timeTaken, 210)
+        let timeTaken = RecipeStepParser.parseTimeTaken(step: "cook for about 5 min 40 seconds. Turn ribs and cook until second side is golden brown, 1–2 minutes")
+        XCTAssertEqual(timeTaken, 430)
     }
 
     func testParseTimeTaken_closeTogether() {
@@ -15,8 +15,8 @@ class RecipeStepParserTests: XCTestCase {
     }
 
     func testParseTimeTaken_manyTimers() {
-        let timeTaken = RecipeStepParser.parseTimeTaken(step: "Add flour, milk, eggs, and melted butter to a blender and process until smooth, 1 to 2 minutes. Set batter aside for at least 20 minutes. Loosen crepe carefully from the pan using a spatula and gently flip to brown the other side, 1 to 2 minutes more. ")
-        XCTAssertEqual(timeTaken, 1380)
+        let timeTaken = RecipeStepParser.parseTimeTaken(step: "Add flour, milk, eggs, and melted butter to a blender and process until smooth, 5m 40s. Set batter aside for at least 20 minutes. Loosen crepe carefully from the pan using a spatula and gently flip to brown the other side, 1 to 2 minutes more. ")
+        XCTAssertEqual(timeTaken, 1630)
     }
 
     func testParseTimeDurations() {
@@ -34,9 +34,14 @@ class RecipeStepParserTests: XCTestCase {
         XCTAssertEqual(durations, [])
     }
 
-    func testParseToTime() {
-        let timeTaken = RecipeStepParser.parseToTime(timeString: "1–2 minutes")
-        XCTAssertEqual(timeTaken, 90)
+    func testParseToTime_decimal() {
+        let timeTaken = RecipeStepParser.parseToTime(timeString: "2.5 minutes")
+        XCTAssertEqual(timeTaken, 150)
+    }
+
+    func testParseToTime_fraction() {
+        let timeTaken = RecipeStepParser.parseToTime(timeString: "1 1/2 hours")
+        XCTAssertEqual(timeTaken, 5400)
     }
 
     func testParseToTime_withRangeNoSpace() {
@@ -64,9 +69,31 @@ class RecipeStepParserTests: XCTestCase {
         XCTAssertEqual(timeTaken, 450)
     }
 
-    func testParseToTime_failure() {
-        let timeTaken = RecipeStepParser.parseToTime(timeString: "1 1/2 hours")
-        XCTAssertEqual(timeTaken, 900)
-    }
-
 }
+
+
+// 20 - 25 mins
+// 2025 minutes
+// "50 minutes per pound"
+// "15 more minutes"
+// "15 minutes"
+// 2 to 3 hours
+// 10 to 15 minutes
+// 2 or 3 more minutes
+// 20 seconds
+// about 1 hour 10 minutes
+// 1 1/2 hours
+// -
+// 2 or 3 minutes
+// 45 seconds
+// 45 second
+// 1h 20 min to 1h 30 min
+// 45-50 minutes
+// 10 min
+// five to 10 minutes
+// no spaces
+// 10mins
+// 1 hour
+// 20 sec
+// 10-15 min
+// (abt 20 mins)

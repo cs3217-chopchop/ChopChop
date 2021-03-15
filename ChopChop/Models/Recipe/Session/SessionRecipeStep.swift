@@ -1,12 +1,12 @@
 import Foundation
 
 class SessionRecipeStep {
-    var isCompleted = false
-    var timeTaken = 0.0 // for user log only
-    var step: RecipeStep
+    private(set) var isCompleted = false
+    private(set) var timeTaken = 0.0 // for user log only
+    private(set) var step: RecipeStep
     private(set) var timers: [(String, CountdownTimer)]
 
-    var actionTimeTracker: ActionTimeTracker
+    let actionTimeTracker: ActionTimeTracker
 
     init(step: RecipeStep, actionTimeTracker: ActionTimeTracker) {
         self.step = step
@@ -16,37 +16,36 @@ class SessionRecipeStep {
         timers = durationStrings.map{($0, CountdownTimer(time: RecipeStepParser.parseToTime(timeString: $0)))}
     }
 
+    /// If previously checked, becomes unchecked and timeTaken resets to 0.
+    /// If previously unchecked, becomes checked and timeTaken recorded based on current time and timeOfLastAction.
+    /// Also updates actionTimeTracker's timeOfLastAction.
     func toggleCompleted() {
         isCompleted = !isCompleted
         if isCompleted {
-            // https://stackoverflow.com/questions/50950092/calculating-the-difference-between-two-dates-in-swift
             timeTaken = Date().timeIntervalSinceReferenceDate - actionTimeTracker.timeOfLastAction.timeIntervalSinceReferenceDate
         } else {
-            // means step is unchecked
+            // means step is unchecked and time should be reset
             timeTaken = 0
         }
-        actionTimeTracker.timeOfLastAction = Date()
+        actionTimeTracker.updateTimeOfLastAction(date: Date())
     }
 
-    func updateStep(content: String) {
-        step.updateContent(content: content)
+    /// Updates content of a step.
+    /// Updates timers in step if needed - If timer duration words are exactly the same, do nothing. Else, delete all old timers and create new timers based on updated contents of step.
+    // Possibly should "retain" old timers through some intelligent decision making?
+    func updateStep(content: String) throws {
+        try step.updateContent(content: content)
 
-        // the next few steps are abit iffy,
-        // the easiest way would be to prevent edit to step while timer is counting down
-        // but the user would probably want to "retain" old timers through some intelligent decision making
-
-        // check if timing words are the same
         let newTimeWords = RecipeStepParser.parseTimerDurations(step: content)
         let isTimersExactlySame = newTimeWords == timers.map{$0.0}
 
         guard !isTimersExactlySame else {
-            // currently all timing words must be the same to not edit timers at all
+            // currently all timing words must be the same so don't edit timers at all
             return
         }
 
-        // otherwise, nuke all timers and replace with new timers
+        // otherwise, delete all current timers and replace with new timers
         timers = newTimeWords.map{($0, CountdownTimer(time: RecipeStepParser.parseToTime(timeString: $0)))}
-
     }
 
 

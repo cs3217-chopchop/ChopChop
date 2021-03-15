@@ -3,14 +3,14 @@ import Foundation
 /// Note there is no relationship between steps and ingredients after parsing stage
 class Recipe {
     let id: Int64
-    var name: String
-    var servings: Double
-    let cuisine: String // string or enum?
-    var difficulty: Difficulty?
-    var steps: [RecipeStep]
-    var ingredients: [RecipeIngredient]
+    private(set) var name: String
+    private(set) var servings: Double
+    let cuisine: RecipeCategory
+    private(set) var difficulty: Difficulty?
+    private(set) var steps: [RecipeStep]
+    private(set) var ingredients: [RecipeIngredient]
 
-    init(id: Int64, name: String, servings: Double, cuisine: String, difficulty: Difficulty?, steps: [RecipeStep], ingredients: [RecipeIngredient]) {
+    init(id: Int64, name: String, servings: Double, cuisine: RecipeCategory, difficulty: Difficulty?, steps: [RecipeStep], ingredients: [RecipeIngredient]) {
         self.id = id
         self.name = name
         self.servings = servings
@@ -32,6 +32,11 @@ class Recipe {
         assert(checkRepresentation())
     }
 
+    /// Update servings of recipe. Scales the ingredient quantities and updates steps with scaled quantities.
+    /// Does not scale time taken and difficulty level
+    /// - Parameter servings: <#servings description#>
+    /// - Throws:
+    ///     - `RecipeError.invalidServings`: if the given servings is less than 0.
     func updateServings(servings: Double) throws {
         assert(checkRepresentation())
         guard servings > 0 else {
@@ -40,18 +45,15 @@ class Recipe {
         let scale = servings / self.servings
         self.servings = servings
 
-        // auto scale ingredients
         for ingredient in ingredients {
             ingredient.scaleQuantityMagnitude(scale: scale)
         }
 
         for step in steps {
             let updatedStep = RecipeStepParser.scaleNumerals(step: step.content, scale: scale)
-            step.updateContent(content: updatedStep)
+            try step.updateContent(content: updatedStep)
         }
         assert(checkRepresentation())
-
-        // assume difficulty does not scale by servings size
     }
 
     func updateDifficulty(difficulty: Difficulty) {
@@ -60,14 +62,14 @@ class Recipe {
         assert(checkRepresentation())
     }
 
-    // add/delete/reorder steps
+    // use case: add/delete/reorder steps
     func updateSteps(steps: [RecipeStep]) {
         assert(checkRepresentation())
         self.steps = steps
         assert(checkRepresentation())
     }
 
-    // add/delete/reorder ingredients
+    // use case: add/delete/reorder ingredients
     func updateIngredients(ingredients: [RecipeIngredient]) throws {
         assert(checkRepresentation())
         guard checkNoDuplicateIngredients(ingredients: ingredients) else {
@@ -77,24 +79,19 @@ class Recipe {
         assert(checkRepresentation())
     }
 
-    /// in seconds
+    /// Returns total time taken to complete the recipe in seconds, computed from time taken for each step
     var totalTimeTaken: Int {
         return steps.map({$0.timeTaken}).reduce(0, +)
     }
 
     private func checkRepresentation() -> Bool {
-        name != "" && servings > 0 && cuisine != "" && !steps.isEmpty && !ingredients.isEmpty && checkNoDuplicateIngredients(ingredients: ingredients)
-        // no repeat of name ingredients (how to get rid of synonyms?)
-
+        name != "" && servings > 0 && !steps.isEmpty && !ingredients.isEmpty && checkNoDuplicateIngredients(ingredients: ingredients)
     }
 
     private func checkNoDuplicateIngredients(ingredients: [RecipeIngredient]) -> Bool {
-        // preferably have a list of synonyms ??
+        // synonyms of ingredients are allowed e.g. brinjal and eggplant
         return ingredients.allSatisfy{(ingredient) -> Bool in (ingredients.filter{$0.name == ingredient.name}.count == 1)}
     }
-
-    // recipeManager to check recipe vs recipe problems
-    // eg if there are duplicate names
 }
 
 extension Recipe: NSCopying {
