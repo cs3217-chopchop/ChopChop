@@ -4,9 +4,8 @@
  Invariants:
  - Quantities are non negative.
  
- Quantities can be added and subtracted together if they are of the same type.
- Quantities can be multiplied and divided by a factor.
- Quantities can be compared if they are of the same type.
+ Mass type quantities are meaasured in kilograms.
+ Volume type quantities are measured in litres.
  */
 enum IngredientQuantity {
     case count(Double)
@@ -230,10 +229,9 @@ extension IngredientQuantity: Comparable {
 
     /**
      Returns whether the quantities are equal, if they are of the same type.
-     - Throws:
-        - `IngredientQuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+     If they are of different types, return false.
      */
-    static func == (lhs: IngredientQuantity, rhs: IngredientQuantity) throws -> Bool {
+    static func == (lhs: IngredientQuantity, rhs: IngredientQuantity) -> Bool {
         switch (lhs, rhs) {
         case let (.count(leftValue), .count(rightValue)):
             return leftValue == rightValue
@@ -242,7 +240,7 @@ extension IngredientQuantity: Comparable {
         case let (.volume(leftValue), .volume(rightValue)):
             return leftValue == rightValue
         default:
-            throw IngredientQuantityError.differentQuantityTypes
+            return false
         }
     }
 }

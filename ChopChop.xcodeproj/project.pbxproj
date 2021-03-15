@@ -3,10 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F65114625FE6FB8008F6015 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F65114525FE6FB8008F6015 /* GRDB */; };
+		3F65114E25FE710A008F6015 /* IngredientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F65114D25FE710A008F6015 /* IngredientTests.swift */; };
+		3F65115525FF5F00008F6015 /* IngredientBatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F65115425FF5F00008F6015 /* IngredientBatchTests.swift */; };
+		3F65115925FF5F67008F6015 /* IngredientTestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F65115825FF5F67008F6015 /* IngredientTestUtils.swift */; };
+		3F65115D25FF64D2008F6015 /* IngredientReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F65115C25FF64D2008F6015 /* IngredientReferenceTests.swift */; };
 		3F98687425FC96DA00F2B44F /* IngredientQuantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */; };
 		3F98688B25FC9E3800F2B44F /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688A25FC9E3800F2B44F /* Ingredient.swift */; };
 		3F98689025FC9E9C00F2B44F /* IngredientBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F98688F25FC9E9C00F2B44F /* IngredientBatch.swift */; };
@@ -26,16 +31,13 @@
 			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
 			remoteInfo = ChopChop;
 		};
-		72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 72D6C93425F77E3600ED20FB /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
-			remoteInfo = ChopChop;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3F65114D25FE710A008F6015 /* IngredientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientTests.swift; sourceTree = "<group>"; };
+		3F65115425FF5F00008F6015 /* IngredientBatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientBatchTests.swift; sourceTree = "<group>"; };
+		3F65115825FF5F67008F6015 /* IngredientTestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientTestUtils.swift; sourceTree = "<group>"; };
+		3F65115C25FF64D2008F6015 /* IngredientReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientReferenceTests.swift; sourceTree = "<group>"; };
 		3F98687325FC96DA00F2B44F /* IngredientQuantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientQuantity.swift; sourceTree = "<group>"; };
 		3F98688A25FC9E3800F2B44F /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		3F98688F25FC9E9C00F2B44F /* IngredientBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientBatch.swift; sourceTree = "<group>"; };
@@ -49,7 +51,6 @@
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C95E25F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -58,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F65114625FE6FB8008F6015 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,16 +70,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72D6C95525F77E3800ED20FB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3F65114A25FE70D8008F6015 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3F65114C25FE70E6008F6015 /* Ingredients */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3F65114B25FE70DE008F6015 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3F98687225FC96CB00F2B44F /* Ingredients */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3F65114C25FE70E6008F6015 /* Ingredients */ = {
+			isa = PBXGroup;
+			children = (
+				3F65114D25FE710A008F6015 /* IngredientTests.swift */,
+				3F65115425FF5F00008F6015 /* IngredientBatchTests.swift */,
+				3F65115825FF5F67008F6015 /* IngredientTestUtils.swift */,
+				3F65115C25FF64D2008F6015 /* IngredientReferenceTests.swift */,
+			);
+			path = Ingredients;
+			sourceTree = "<group>";
+		};
 		3F98687225FC96CB00F2B44F /* Ingredients */ = {
 			isa = PBXGroup;
 			children = (
@@ -105,7 +127,6 @@
 			children = (
 				72D6C93C25F77E3600ED20FB /* ChopChop.app */,
 				72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */,
-				72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,7 +134,7 @@
 		72D6C93E25F77E3600ED20FB /* ChopChop */ = {
 			isa = PBXGroup;
 			children = (
-				3F98687225FC96CB00F2B44F /* Ingredients */,
+				3F65114B25FE70DE008F6015 /* Models */,
 				72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */,
 				72D6C94125F77E3600ED20FB /* ContentView.swift */,
 				72D6C94325F77E3800ED20FB /* Assets.xcassets */,
@@ -134,6 +155,7 @@
 		72D6C95025F77E3800ED20FB /* ChopChopTests */ = {
 			isa = PBXGroup;
 			children = (
+				3F65114A25FE70D8008F6015 /* Models */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
@@ -164,6 +186,9 @@
 			dependencies = (
 			);
 			name = ChopChop;
+			packageProductDependencies = (
+				3F65114525FE6FB8008F6015 /* GRDB */,
+			);
 			productName = ChopChop;
 			productReference = 72D6C93C25F77E3600ED20FB /* ChopChop.app */;
 			productType = "com.apple.product-type.application";
@@ -186,24 +211,6 @@
 			productReference = 72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		72D6C95725F77E3800ED20FB /* ChopChopUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */;
-			buildPhases = (
-				72D6C95425F77E3800ED20FB /* Sources */,
-				72D6C95525F77E3800ED20FB /* Frameworks */,
-				72D6C95625F77E3800ED20FB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				72D6C95A25F77E3800ED20FB /* PBXTargetDependency */,
-			);
-			name = ChopChopUITests;
-			productName = ChopChopUITests;
-			productReference = 72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -218,10 +225,7 @@
 					};
 					72D6C94C25F77E3800ED20FB = {
 						CreatedOnToolsVersion = 12.4;
-						TestTargetID = 72D6C93B25F77E3600ED20FB;
-					};
-					72D6C95725F77E3800ED20FB = {
-						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1230;
 						TestTargetID = 72D6C93B25F77E3600ED20FB;
 					};
 				};
@@ -235,13 +239,15 @@
 				Base,
 			);
 			mainGroup = 72D6C93325F77E3600ED20FB;
+			packageReferences = (
+				3F65114425FE6FB8008F6015 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
 			productRefGroup = 72D6C93D25F77E3600ED20FB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				72D6C93B25F77E3600ED20FB /* ChopChop */,
 				72D6C94C25F77E3800ED20FB /* ChopChopTests */,
-				72D6C95725F77E3800ED20FB /* ChopChopUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -257,13 +263,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		72D6C94B25F77E3800ED20FB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72D6C95625F77E3800ED20FB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -311,13 +310,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72D6C95425F77E3800ED20FB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				3F65115D25FF64D2008F6015 /* IngredientReferenceTests.swift in Sources */,
+				3F65115925FF5F67008F6015 /* IngredientTestUtils.swift in Sources */,
+				3F65114E25FE710A008F6015 /* IngredientTests.swift in Sources */,
+				3F65115525FF5F00008F6015 /* IngredientBatchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,11 +324,6 @@
 			isa = PBXTargetDependency;
 			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
 			targetProxy = 72D6C94E25F77E3800ED20FB /* PBXContainerItemProxy */;
-		};
-		72D6C95A25F77E3800ED20FB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
-			targetProxy = 72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -502,6 +493,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LBA89U9ZJC;
 				INFOPLIST_FILE = ChopChopTests/Info.plist;
@@ -513,6 +505,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChopChop.app/ChopChop";
@@ -524,6 +517,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LBA89U9ZJC;
 				INFOPLIST_FILE = ChopChopTests/Info.plist;
@@ -538,46 +532,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChopChop.app/ChopChop";
-			};
-			name = Release;
-		};
-		72D6C96825F77E3800ED20FB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
-			};
-			name = Debug;
-		};
-		72D6C96925F77E3800ED20FB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
 			};
 			name = Release;
 		};
@@ -611,16 +565,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				72D6C96825F77E3800ED20FB /* Debug */,
-				72D6C96925F77E3800ED20FB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3F65114425FE6FB8008F6015 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3F65114525FE6FB8008F6015 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F65114425FE6FB8008F6015 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 72D6C93425F77E3600ED20FB /* Project object */;
 }

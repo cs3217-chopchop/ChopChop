@@ -171,6 +171,15 @@ extension Ingredient {
     }
 
     /**
+     Returns the batch with the given expiry date, or `nil` if it does not exist.
+     */
+    func getBatch(expiryDate: Date) -> IngredientBatch? {
+        batches.first { batch in
+            batch.expiryDate == expiryDate
+        }
+    }
+
+    /**
      Removes the batch identified by the given expiry date.
      If such a batch does not exist, do nothing.
      */
@@ -192,12 +201,6 @@ extension Ingredient {
         }
 
         removeBatches(removedBatches)
-    }
-
-    private func getBatch(expiryDate: Date) -> IngredientBatch? {
-        batches.first { batch in
-            batch.expiryDate == expiryDate
-        }
     }
 
     private func removeBatches(_ removedBatches: [IngredientBatch]) {

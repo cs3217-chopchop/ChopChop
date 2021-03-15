@@ -26,12 +26,16 @@ class IngredientBatch {
     }
 }
 
+/**
+ Two batches are compared based on their expiry dates.
+ Two batches are equal if they have the same expiry date and quantity
+ */
 extension IngredientBatch: Comparable {
     static func < (lhs: IngredientBatch, rhs: IngredientBatch) -> Bool {
         lhs.expiryDate < rhs.expiryDate
     }
 
     static func == (lhs: IngredientBatch, rhs: IngredientBatch) -> Bool {
-        lhs.expiryDate == rhs.expiryDate
+        lhs.expiryDate == rhs.expiryDate && lhs.quantity == rhs.quantity
     }
 }
