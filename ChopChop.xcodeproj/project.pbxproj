@@ -3,16 +3,34 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5A925FC67DD000C2DCF /* Recipe.swift */; };
+		0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5B625FCA236000C2DCF /* Ingredient.swift */; };
+		0E16A5C325FD08EA000C2DCF /* RecipeCategoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */; };
+		0E16A5C925FD09EB000C2DCF /* IngredientCategoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */; };
+		0E389BEC25FA4606001B1088 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 0E389BEB25FA4606001B1088 /* GRDB */; };
+		0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BF825FA480C001B1088 /* AppDatabase.swift */; };
+		0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */; };
+		0E389C0525FA4931001B1088 /* Quantity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C0425FA4931001B1088 /* Quantity.swift */; };
+		0E389C3025FA70D5001B1088 /* IngredientRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C2F25FA70D5001B1088 /* IngredientRecord.swift */; };
+		0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C4325FB3AEB001B1088 /* RecipeRecord.swift */; };
+		0E389C4F25FB3B18001B1088 /* RecipeIngredientRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C4E25FB3B18001B1088 /* RecipeIngredientRecord.swift */; };
+		0E389C5425FB50FA001B1088 /* IngredientSetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */; };
+		0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */; };
+		0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */; };
+		0ED72F4825FF5ACB00A045D2 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */; };
+		0ED72F4C25FF5D5D00A045D2 /* RecipeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */; };
+		0ED72F5025FF5D7B00A045D2 /* IngredientInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */; };
+		0ED72F5625FF684800A045D2 /* StorageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F5525FF684800A045D2 /* StorageManagerTests.swift */; };
+		0ED72F5C25FF6D4D00A045D2 /* RecipeCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F5B25FF6D4D00A045D2 /* RecipeCategory.swift */; };
+		0ED72F6025FF6D6500A045D2 /* IngredientCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F5F25FF6D6500A045D2 /* IngredientCategory.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
 		72D6C94725F77E3800ED20FB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */; };
-		72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C95125F77E3800ED20FB /* ChopChopTests.swift */; };
-		72D6C95D25F77E3800ED20FB /* ChopChopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,16 +41,28 @@
 			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
 			remoteInfo = ChopChop;
 		};
-		72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 72D6C93425F77E3600ED20FB /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 72D6C93B25F77E3600ED20FB;
-			remoteInfo = ChopChop;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0E16A5A925FC67DD000C2DCF /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
+		0E16A5B625FCA236000C2DCF /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
+		0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCategoryRecord.swift; sourceTree = "<group>"; };
+		0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientCategoryRecord.swift; sourceTree = "<group>"; };
+		0E389BF825FA480C001B1088 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
+		0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDatabase+Persistence.swift"; sourceTree = "<group>"; };
+		0E389C0425FA4931001B1088 /* Quantity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quantity.swift; sourceTree = "<group>"; };
+		0E389C2F25FA70D5001B1088 /* IngredientRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientRecord.swift; sourceTree = "<group>"; };
+		0E389C4325FB3AEB001B1088 /* RecipeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeRecord.swift; sourceTree = "<group>"; };
+		0E389C4E25FB3B18001B1088 /* RecipeIngredientRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredientRecord.swift; sourceTree = "<group>"; };
+		0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSetRecord.swift; sourceTree = "<group>"; };
+		0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStepRecord.swift; sourceTree = "<group>"; };
+		0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabaseTests.swift; sourceTree = "<group>"; };
+		0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeInfo.swift; sourceTree = "<group>"; };
+		0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientInfo.swift; sourceTree = "<group>"; };
+		0ED72F5525FF684800A045D2 /* StorageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManagerTests.swift; sourceTree = "<group>"; };
+		0ED72F5B25FF6D4D00A045D2 /* RecipeCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCategory.swift; sourceTree = "<group>"; };
+		0ED72F5F25FF6D6500A045D2 /* IngredientCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientCategory.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
 		72D6C94125F77E3600ED20FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -40,11 +70,7 @@
 		72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72D6C95125F77E3800ED20FB /* ChopChopTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopTests.swift; sourceTree = "<group>"; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopUITests.swift; sourceTree = "<group>"; };
-		72D6C95E25F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E389BEC25FA4606001B1088 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,22 +89,69 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72D6C95525F77E3800ED20FB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E16A5B325FC6C7F000C2DCF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0E16A5A925FC67DD000C2DCF /* Recipe.swift */,
+				0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */,
+				0ED72F5B25FF6D4D00A045D2 /* RecipeCategory.swift */,
+				0E16A5B625FCA236000C2DCF /* Ingredient.swift */,
+				0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */,
+				0ED72F5F25FF6D6500A045D2 /* IngredientCategory.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0E389C0225FA4906001B1088 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C0325FA4924001B1088 /* Models */,
+				0E389BF825FA480C001B1088 /* AppDatabase.swift */,
+				0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */,
+				0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		0E389C0325FA4924001B1088 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C5C25FB5117001B1088 /* Recipes */,
+				0E389C5B25FB5110001B1088 /* Ingredients */,
+				0E389C0425FA4931001B1088 /* Quantity.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0E389C5B25FB5110001B1088 /* Ingredients */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C2F25FA70D5001B1088 /* IngredientRecord.swift */,
+				0E16A5C825FD09EB000C2DCF /* IngredientCategoryRecord.swift */,
+				0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */,
+			);
+			path = Ingredients;
+			sourceTree = "<group>";
+		};
+		0E389C5C25FB5117001B1088 /* Recipes */ = {
+			isa = PBXGroup;
+			children = (
+				0E389C4325FB3AEB001B1088 /* RecipeRecord.swift */,
+				0E16A5C225FD08EA000C2DCF /* RecipeCategoryRecord.swift */,
+				0E389C4E25FB3B18001B1088 /* RecipeIngredientRecord.swift */,
+				0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */,
+			);
+			path = Recipes;
+			sourceTree = "<group>";
+		};
 		72D6C93325F77E3600ED20FB = {
 			isa = PBXGroup;
 			children = (
 				72D6C93E25F77E3600ED20FB /* ChopChop */,
 				72D6C95025F77E3800ED20FB /* ChopChopTests */,
-				72D6C95B25F77E3800ED20FB /* ChopChopUITests */,
 				72D6C93D25F77E3600ED20FB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,7 +161,6 @@
 			children = (
 				72D6C93C25F77E3600ED20FB /* ChopChop.app */,
 				72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */,
-				72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +168,8 @@
 		72D6C93E25F77E3600ED20FB /* ChopChop */ = {
 			isa = PBXGroup;
 			children = (
+				0E16A5B325FC6C7F000C2DCF /* Models */,
+				0E389C0225FA4906001B1088 /* Storage */,
 				72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */,
 				72D6C94125F77E3600ED20FB /* ContentView.swift */,
 				72D6C94325F77E3800ED20FB /* Assets.xcassets */,
@@ -115,19 +190,11 @@
 		72D6C95025F77E3800ED20FB /* ChopChopTests */ = {
 			isa = PBXGroup;
 			children = (
-				72D6C95125F77E3800ED20FB /* ChopChopTests.swift */,
+				0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */,
+				0ED72F5525FF684800A045D2 /* StorageManagerTests.swift */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
-			sourceTree = "<group>";
-		};
-		72D6C95B25F77E3800ED20FB /* ChopChopUITests */ = {
-			isa = PBXGroup;
-			children = (
-				72D6C95C25F77E3800ED20FB /* ChopChopUITests.swift */,
-				72D6C95E25F77E3800ED20FB /* Info.plist */,
-			);
-			path = ChopChopUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -137,6 +204,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 72D6C96125F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChop" */;
 			buildPhases = (
+				0EA9B08125FB9CB300FF2E08 /* ShellScript */,
 				72D6C93825F77E3600ED20FB /* Sources */,
 				72D6C93925F77E3600ED20FB /* Frameworks */,
 				72D6C93A25F77E3600ED20FB /* Resources */,
@@ -146,6 +214,9 @@
 			dependencies = (
 			);
 			name = ChopChop;
+			packageProductDependencies = (
+				0E389BEB25FA4606001B1088 /* GRDB */,
+			);
 			productName = ChopChop;
 			productReference = 72D6C93C25F77E3600ED20FB /* ChopChop.app */;
 			productType = "com.apple.product-type.application";
@@ -168,24 +239,6 @@
 			productReference = 72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		72D6C95725F77E3800ED20FB /* ChopChopUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */;
-			buildPhases = (
-				72D6C95425F77E3800ED20FB /* Sources */,
-				72D6C95525F77E3800ED20FB /* Frameworks */,
-				72D6C95625F77E3800ED20FB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				72D6C95A25F77E3800ED20FB /* PBXTargetDependency */,
-			);
-			name = ChopChopUITests;
-			productName = ChopChopUITests;
-			productReference = 72D6C95825F77E3800ED20FB /* ChopChopUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -200,10 +253,7 @@
 					};
 					72D6C94C25F77E3800ED20FB = {
 						CreatedOnToolsVersion = 12.4;
-						TestTargetID = 72D6C93B25F77E3600ED20FB;
-					};
-					72D6C95725F77E3800ED20FB = {
-						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
 						TestTargetID = 72D6C93B25F77E3600ED20FB;
 					};
 				};
@@ -217,13 +267,15 @@
 				Base,
 			);
 			mainGroup = 72D6C93325F77E3600ED20FB;
+			packageReferences = (
+				0E389BEA25FA4606001B1088 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
 			productRefGroup = 72D6C93D25F77E3600ED20FB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				72D6C93B25F77E3600ED20FB /* ChopChop */,
 				72D6C94C25F77E3800ED20FB /* ChopChopTests */,
-				72D6C95725F77E3800ED20FB /* ChopChopUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -245,22 +297,52 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		72D6C95625F77E3800ED20FB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0EA9B08125FB9CB300FF2E08 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint autocorrect && swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
-/* End PBXResourcesBuildPhase section */
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		72D6C93825F77E3600ED20FB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */,
 				72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */,
+				0E389C3025FA70D5001B1088 /* IngredientRecord.swift in Sources */,
+				0E389C5425FB50FA001B1088 /* IngredientSetRecord.swift in Sources */,
+				0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */,
+				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
+				0E389C4F25FB3B18001B1088 /* RecipeIngredientRecord.swift in Sources */,
+				0E16A5C325FD08EA000C2DCF /* RecipeCategoryRecord.swift in Sources */,
+				0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */,
+				0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */,
+				0ED72F6025FF6D6500A045D2 /* IngredientCategory.swift in Sources */,
+				0ED72F5C25FF6D4D00A045D2 /* RecipeCategory.swift in Sources */,
+				0E16A5C925FD09EB000C2DCF /* IngredientCategoryRecord.swift in Sources */,
+				0ED72F5025FF5D7B00A045D2 /* IngredientInfo.swift in Sources */,
+				0ED72F4825FF5ACB00A045D2 /* StorageManager.swift in Sources */,
+				0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */,
+				0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */,
+				0ED72F4C25FF5D5D00A045D2 /* RecipeInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,15 +350,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		72D6C95425F77E3800ED20FB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				72D6C95D25F77E3800ED20FB /* ChopChopUITests.swift in Sources */,
+				0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */,
+				0ED72F5625FF684800A045D2 /* StorageManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,11 +362,6 @@
 			isa = PBXTargetDependency;
 			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
 			targetProxy = 72D6C94E25F77E3800ED20FB /* PBXContainerItemProxy */;
-		};
-		72D6C95A25F77E3800ED20FB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 72D6C93B25F77E3600ED20FB /* ChopChop */;
-			targetProxy = 72D6C95925F77E3800ED20FB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -419,7 +489,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"ChopChop/Preview Content\"";
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
+				DEVELOPMENT_TEAM = 9FBN4F9648;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ChopChop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -427,10 +497,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChop;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seowalex.ChopChop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -441,7 +511,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"ChopChop/Preview Content\"";
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
+				DEVELOPMENT_TEAM = 9FBN4F9648;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ChopChop/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -449,10 +519,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChop;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seowalex.ChopChop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
@@ -461,6 +531,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LBA89U9ZJC;
 				INFOPLIST_FILE = ChopChopTests/Info.plist;
@@ -472,6 +543,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChopChop.app/ChopChop";
@@ -483,6 +555,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LBA89U9ZJC;
 				INFOPLIST_FILE = ChopChopTests/Info.plist;
@@ -497,46 +570,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChopChop.app/ChopChop";
-			};
-			name = Release;
-		};
-		72D6C96825F77E3800ED20FB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
-			};
-			name = Debug;
-		};
-		72D6C96925F77E3800ED20FB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = LBA89U9ZJC;
-				INFOPLIST_FILE = ChopChopUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.chrystalquek.ChopChopUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ChopChop;
 			};
 			name = Release;
 		};
@@ -570,16 +603,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		72D6C96725F77E3800ED20FB /* Build configuration list for PBXNativeTarget "ChopChopUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				72D6C96825F77E3800ED20FB /* Debug */,
-				72D6C96925F77E3800ED20FB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0E389BEA25FA4606001B1088 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0E389BEB25FA4606001B1088 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0E389BEA25FA4606001B1088 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 72D6C93425F77E3600ED20FB /* Project object */;
 }
