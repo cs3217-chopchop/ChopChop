@@ -3,9 +3,9 @@ import Foundation
 class RecipeIngredient {
     let id: Int64
     var name: String
-    var quantity: Quantity
+    var quantity: Quantity?
 
-    init(id: Int64, name: String, quantity: Quantity) {
+    init(id: Int64, name: String, quantity: Quantity?) {
         self.id = id
         self.name = name
         self.quantity = quantity
@@ -30,7 +30,7 @@ class RecipeIngredient {
             assertionFailure("Should be positive magnitude")
             return
         }
-        quantity.magnitude *= scale
+        quantity?.magnitude *= scale
     }
 
     private func checkRepresentation() -> Bool {

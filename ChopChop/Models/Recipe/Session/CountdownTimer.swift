@@ -1,11 +1,11 @@
 import Foundation
 
 class CountdownTimer {
-    var defaultTime: Double
-    var remainingTime: Double // in seconds -> display this
+    var defaultTime: Int
+    var remainingTime: Int // in seconds -> display this
     var timer: Timer? // https://developer.apple.com/documentation/foundation/timer/2091888-init
 
-    init(time: Double) {
+    init(time: Int) {
         remainingTime = time
         defaultTime = time
     }
@@ -20,7 +20,7 @@ class CountdownTimer {
     }
 
     func start() {
-        Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
+        Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
 //        RunLoop.current.add(timer, forMode: .common)
 //        Timer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
     }
@@ -41,7 +41,8 @@ class CountdownTimer {
         remainingTime = defaultTime
     }
 
-    func updateDefaultTime(defaultTime: Double) {
+    // use case: user inc or dec default time, prob thru up and down arrow buttons
+    func updateDefaultTime(defaultTime: Int) {
         self.defaultTime = defaultTime
     }
 

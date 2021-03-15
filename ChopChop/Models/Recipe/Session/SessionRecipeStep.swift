@@ -12,9 +12,8 @@ class SessionRecipeStep {
         self.step = step
         self.actionTimeTracker = actionTimeTracker
 
-        let parser = RecipeStepParser()
-        let durationStrings = parser.parseTimerDurations(step: step.content)
-        timers = durationStrings.map{($0, CountdownTimer(time: parser.parseToTime(timeString: $0)))}
+        let durationStrings = RecipeStepParser.parseTimerDurations(step: step.content)
+        timers = durationStrings.map{($0, CountdownTimer(time: RecipeStepParser.parseToTime(timeString: $0)))}
     }
 
     func toggleCompleted() {
@@ -37,7 +36,7 @@ class SessionRecipeStep {
         // but the user would probably want to "retain" old timers through some intelligent decision making
 
         // check if timing words are the same
-        let newTimeWords = RecipeStepParser().parseTimerDurations(step: content)
+        let newTimeWords = RecipeStepParser.parseTimerDurations(step: content)
         let isTimersExactlySame = newTimeWords == timers.map{$0.0}
 
         guard !isTimersExactlySame else {
@@ -46,7 +45,7 @@ class SessionRecipeStep {
         }
 
         // otherwise, nuke all timers and replace with new timers
-        timers = newTimeWords.map{($0, CountdownTimer(time: RecipeStepParser().parseToTime(timeString: $0)))}
+        timers = newTimeWords.map{($0, CountdownTimer(time: RecipeStepParser.parseToTime(timeString: $0)))}
 
     }
 

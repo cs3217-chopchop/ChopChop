@@ -3,8 +3,8 @@ import Foundation
 class RecipeStep {
     let id: Int64
     var content: String
-    var timeTaken: Double {
-        RecipeStepParser().parseTimeTaken(step: content)
+    var timeTaken: Int {
+        RecipeStepParser.parseTimeTaken(step: content)
     } // nth to do with timer. only depedendent on whats in the content and prev user input
 
     init(id: Int64, content: String) {

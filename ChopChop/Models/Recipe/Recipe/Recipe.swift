@@ -45,9 +45,8 @@ class Recipe {
             ingredient.scaleQuantityMagnitude(scale: scale)
         }
 
-        let parser = RecipeStepParser()
         for step in steps {
-            let updatedStep = parser.scaleNumerals(step: step.content, scale: scale)
+            let updatedStep = RecipeStepParser.scaleNumerals(step: step.content, scale: scale)
             step.updateContent(content: updatedStep)
         }
         assert(checkRepresentation())
@@ -78,7 +77,8 @@ class Recipe {
         assert(checkRepresentation())
     }
 
-    var totalTimeTaken: Double {
+    /// in seconds
+    var totalTimeTaken: Int {
         return steps.map({$0.timeTaken}).reduce(0, +)
     }
 

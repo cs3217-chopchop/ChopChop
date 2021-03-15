@@ -10,6 +10,7 @@
 		72149E1C25FDD0A900EB6C74 /* CountdownTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72149E1B25FDD0A900EB6C74 /* CountdownTimer.swift */; };
 		72149E2725FDDB5F00EB6C74 /* ActionTimeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72149E2625FDDB5F00EB6C74 /* ActionTimeTracker.swift */; };
 		72149E2F25FDF36100EB6C74 /* NSRegularExpressionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72149E2E25FDF36100EB6C74 /* NSRegularExpressionExtensions.swift */; };
+		72149E4225FF491A00EB6C74 /* RecipeStepParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72149E4125FF491A00EB6C74 /* RecipeStepParserTests.swift */; };
 		7286346525FCB11300156A22 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7286346425FCB11300156A22 /* Recipe.swift */; };
 		7286346A25FCB1F100156A22 /* RecipeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7286346925FCB1F100156A22 /* RecipeStep.swift */; };
 		7286346F25FCB26800156A22 /* RecipeIngredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7286346E25FCB26800156A22 /* RecipeIngredient.swift */; };
@@ -47,6 +48,7 @@
 		72149E1B25FDD0A900EB6C74 /* CountdownTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimer.swift; sourceTree = "<group>"; };
 		72149E2625FDDB5F00EB6C74 /* ActionTimeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionTimeTracker.swift; sourceTree = "<group>"; };
 		72149E2E25FDF36100EB6C74 /* NSRegularExpressionExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRegularExpressionExtensions.swift; sourceTree = "<group>"; };
+		72149E4125FF491A00EB6C74 /* RecipeStepParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStepParserTests.swift; sourceTree = "<group>"; };
 		7286346425FCB11300156A22 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		7286346925FCB1F100156A22 /* RecipeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStep.swift; sourceTree = "<group>"; };
 		7286346E25FCB26800156A22 /* RecipeIngredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredient.swift; sourceTree = "<group>"; };
@@ -94,6 +96,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		72149E3325FF48EA00EB6C74 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				72149E3425FF48EF00EB6C74 /* Recipe */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		72149E3425FF48EF00EB6C74 /* Recipe */ = {
+			isa = PBXGroup;
+			children = (
+				72149E3525FF48F400EB6C74 /* Parser */,
+			);
+			path = Recipe;
+			sourceTree = "<group>";
+		};
+		72149E3525FF48F400EB6C74 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				72149E4125FF491A00EB6C74 /* RecipeStepParserTests.swift */,
+			);
+			path = Parser;
+			sourceTree = "<group>";
+		};
 		7286346325FCB10200156A22 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -189,6 +215,7 @@
 			isa = PBXGroup;
 			children = (
 				72D6C95125F77E3800ED20FB /* ChopChopTests.swift */,
+				72149E3325FF48EA00EB6C74 /* Models */,
 				72D6C95325F77E3800ED20FB /* Info.plist */,
 			);
 			path = ChopChopTests;
@@ -352,6 +379,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				72149E4225FF491A00EB6C74 /* RecipeStepParserTests.swift in Sources */,
 				72D6C95225F77E3800ED20FB /* ChopChopTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
