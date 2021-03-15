@@ -21,6 +21,9 @@
 		0E389C5425FB50FA001B1088 /* IngredientSetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */; };
 		0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */; };
 		0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */; };
+		0ED72F4825FF5ACB00A045D2 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */; };
+		0ED72F4C25FF5D5D00A045D2 /* RecipeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */; };
+		0ED72F5025FF5D7B00A045D2 /* IngredientInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
@@ -51,6 +54,9 @@
 		0E389C5325FB50FA001B1088 /* IngredientSetRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSetRecord.swift; sourceTree = "<group>"; };
 		0EA9B07C25FB588F00FF2E08 /* RecipeStepRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStepRecord.swift; sourceTree = "<group>"; };
 		0EA9B09125FB9E7200FF2E08 /* AppDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabaseTests.swift; sourceTree = "<group>"; };
+		0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeInfo.swift; sourceTree = "<group>"; };
+		0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientInfo.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
 		72D6C94125F77E3600ED20FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -84,7 +90,9 @@
 			isa = PBXGroup;
 			children = (
 				0E16A5A925FC67DD000C2DCF /* Recipe.swift */,
+				0ED72F4B25FF5D5D00A045D2 /* RecipeInfo.swift */,
 				0E16A5B625FCA236000C2DCF /* Ingredient.swift */,
+				0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -95,6 +103,7 @@
 				0E389C0325FA4924001B1088 /* Models */,
 				0E389BF825FA480C001B1088 /* AppDatabase.swift */,
 				0E389BFD25FA48A5001B1088 /* AppDatabase+Persistence.swift */,
+				0ED72F4725FF5ACB00A045D2 /* StorageManager.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -318,8 +327,11 @@
 				0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */,
 				0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */,
 				0E16A5C925FD09EB000C2DCF /* IngredientCategoryRecord.swift in Sources */,
+				0ED72F5025FF5D7B00A045D2 /* IngredientInfo.swift in Sources */,
+				0ED72F4825FF5ACB00A045D2 /* StorageManager.swift in Sources */,
 				0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */,
 				0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */,
+				0ED72F4C25FF5D5D00A045D2 /* RecipeInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

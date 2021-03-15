@@ -122,20 +122,6 @@ struct AppDatabase {
 // MARK: - Database Access: Create/Update
 
 extension AppDatabase {
-    func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name)
-        var ingredientRecords = recipe.ingredients.map { name, quantity in
-            RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
-        }
-        var stepRecords = recipe.steps.enumerated().map { index, content in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
-        }
-
-        try saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
-
-        recipe.id = recipeRecord.id
-    }
-
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
         var steps: [RecipeStepRecord] = []
@@ -184,19 +170,6 @@ extension AppDatabase {
         try dbWriter.write { db in
             try recipeCategory.save(db)
         }
-    }
-
-    func saveIngredient(_ ingredient: inout Ingredient) throws {
-        var ingredientRecord = IngredientRecord(id: ingredient.id,
-                                                ingredientCategoryId: ingredient.ingredientCategoryId,
-                                                name: ingredient.name)
-        var setRecords = ingredient.sets.map { expiryDate, quantity in
-            IngredientSetRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
-        }
-
-        try saveIngredient(&ingredientRecord, sets: &setRecords)
-
-        ingredient.id = ingredientRecord.id
     }
 
     func saveIngredient(_ ingredient: inout IngredientRecord) throws {
