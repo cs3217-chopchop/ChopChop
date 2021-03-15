@@ -462,35 +462,35 @@ class AppDatabaseTests: XCTestCase {
 
     func testSaveIngredient_insertsValidSets_success() throws {
         var ingredient = IngredientRecord(name: "Egg")
-        var sets = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+        var batches = [
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(12)),
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
                                 quantity: .count(13)),
-            IngredientSetRecord(quantity: .count(14))
+            IngredientBatchRecord(quantity: .count(14))
         ]
 
-        try appDatabase.saveIngredient(&ingredient, sets: &sets)
+        try appDatabase.saveIngredient(&ingredient, batches: &batches)
 
         try dbWriter.read { db in
             try XCTAssertTrue(ingredient.exists(db))
 
-            for set in sets {
-                try XCTAssertTrue(set.exists(db))
+            for batch in batches {
+                try XCTAssertTrue(batch.exists(db))
             }
         }
     }
 
     func testSaveIngredient_insertsInvalidSets_throwsError() throws {
         var ingredient = IngredientRecord(name: "Egg")
-        var sets = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+        var batches = [
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(12)),
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(13))
         ]
 
-        try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, sets: &sets))
+        try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, batches: &batches))
     }
 
     func testDeleteIngredients() throws {
@@ -498,11 +498,11 @@ class AppDatabaseTests: XCTestCase {
         var ingredient2 = IngredientRecord(name: "Salt")
         var ingredient3 = IngredientRecord(name: "Sugar")
         var sets = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(12)),
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
                                 quantity: .count(13)),
-            IngredientSetRecord(quantity: .count(14))
+            IngredientBatchRecord(quantity: .count(14))
         ]
 
         try dbWriter.write { db in
@@ -763,11 +763,11 @@ class AppDatabaseTests: XCTestCase {
         var ingredient3 = IngredientRecord(name: "Pepper")
 
         var sets2 = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
                                 quantity: .count(1))
         ]
         var sets3 = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(1))
         ]
 
@@ -951,12 +951,12 @@ class AppDatabaseTests: XCTestCase {
     func testFetchIngredient() throws {
         var categoryRecord = IngredientCategoryRecord(name: "Dairy")
         var ingredientRecord = IngredientRecord(name: "Egg")
-        var setRecords = [
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+        var batchRecords = [
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
                                 quantity: .count(12)),
-            IngredientSetRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
                                 quantity: .count(13)),
-            IngredientSetRecord(quantity: .count(14))
+            IngredientBatchRecord(quantity: .count(14))
         ]
 
         try dbWriter.write { db in
@@ -966,16 +966,16 @@ class AppDatabaseTests: XCTestCase {
 
             try ingredientRecord.insert(db)
 
-            for index in 0..<setRecords.count {
-                setRecords[index].ingredientId = ingredientRecord.id
-                try setRecords[index].insert(db)
+            for index in 0..<batchRecords.count {
+                batchRecords[index].ingredientId = ingredientRecord.id
+                try batchRecords[index].insert(db)
             }
         }
 
         let ingredient = Ingredient(id: ingredientRecord.id,
                                     ingredientCategoryId: categoryRecord.id,
                                     name: ingredientRecord.name,
-                                    sets: setRecords.reduce(into: [:]) {
+                                    batches: batchRecords.reduce(into: [:]) {
                                         $0[$1.expiryDate] = $1.quantity
                                     })
 

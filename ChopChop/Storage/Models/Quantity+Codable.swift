@@ -1,9 +1,3 @@
-enum Quantity: Equatable {
-    case count(Double)
-    case mass(Double)
-    case volume(Double)
-}
-
 extension Quantity: Codable {
     enum CodingKeys: CodingKey {
         case count, mass, volume

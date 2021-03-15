@@ -52,7 +52,7 @@ class StorageManagerTests: XCTestCase {
 
     func testSaveIngredient() throws {
         var ingredient = Ingredient(name: "Egg",
-                                    sets: [
+                                    batches: [
                                         Calendar.current.startOfDay(for: Date()): .count(12),
                                         Calendar.current
                                             .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)): .count(13),
