@@ -1,7 +1,11 @@
 import Combine
 
 struct StorageManager {
-    let appDatabase = AppDatabase.shared
+    let appDatabase: AppDatabase
+
+    init(_ appDatabase: AppDatabase = .shared) {
+        self.appDatabase = appDatabase
+    }
 
     // MARK: - Storage Manager: Create/Update
 

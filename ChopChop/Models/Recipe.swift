@@ -4,8 +4,8 @@ struct Recipe: Equatable {
     var id: Int64?
     var recipeCategoryId: Int64?
     var name: String
-    var ingredients: [String: Quantity]
-    var steps: [String]
+    var ingredients: [String: Quantity] = [:]
+    var steps: [String] = []
 }
 
 extension Recipe: FetchableRecord {

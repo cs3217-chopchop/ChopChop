@@ -5,7 +5,7 @@ struct Ingredient: Equatable {
     var id: Int64?
     var ingredientCategoryId: Int64?
     var name: String
-    var sets: [Date?: Quantity]
+    var sets: [Date?: Quantity] = [:]
 }
 
 extension Ingredient: FetchableRecord {
