@@ -4,8 +4,18 @@
 //
 //  Created by Cao Wenjie on 14/3/21.
 //
+import Foundation
 
 class RecipeParser {
+    static let stepsIndexRegex = "[1-9][0-9]*\\."
+
+    static let tablespoonUnit = ["tablespoon[s]?", "tbsp"]
+    static let teaspoonUnit = ["teaspoon[s]?", "tsp"]
+    static let cupUnit = ["cup[s]"]
+    static let quartUnit = ["quart[s]", "qt"]
+    static let literUnit = ["liter[s]", "l"]
+    static let mlUnit = ["milliliter[s]", "ml"]
+
     static let volumeWordMap = [
         "tablespoon": "tablespoon",
         "tablespoons": "tablespoon",
@@ -30,14 +40,14 @@ class RecipeParser {
         "milliliter": "milliliter",
         "milliliters": "milliliter"
     ]
-    
+
     static let massWordMap = [
         "gram": "gram",
         "grams": "gram",
         "g": "gram",
         "kilogram": "kilogram",
         "kilograms": "kilogram",
-        "kg": "kg",
+        "kg": "kilogram",
         "ounce": "ounce",
         "ounces": "ounce",
         "oz": "ounce",
@@ -45,87 +55,203 @@ class RecipeParser {
         "pounds": "pound",
         "lb": "pound"
     ]
-    
-    static let volumeToMl = [
-        "milliliter": 1,
-        "tablespoon": 15,
-        "teaspoon": 5,
-        "ounce": 30,
-        "cup": 250,
-        "pint": 500,
-        "quart": 950,
-        "gallon": 3800,
-        "liter": 1000
+
+    static let volumeToL = [
+        "milliliter": 0.001,
+        "tablespoon": 0.015,
+        "teaspoon": 0.005,
+        "ounce": 0.03,
+        "cup": 0.25,
+        "pint": 0.5,
+        "quart": 0.95,
+        "gallon": 3.8,
+        "liter": 1.0
     ]
-    
-    static let massToG = [
-        "gram": 1,
-        "kilogram": 1000,
-        "ounce": 28,
-        "pound": 454
+
+    static let massToKg = [
+        "gram": 0.001,
+        "kilogram": 1.0,
+        "ounce": 0.028,
+        "pound": 0.454
     ]
-    
+
     static func fromJsonStringToSteps(jsonInstructions: String) -> [String] {
-        return jsonInstructions.components(separatedBy: "\r\n\r\n")
+        if jsonInstructions ~= stepsIndexRegex {
+            let regex = NSRegularExpression(stepsIndexRegex)
+
+            return []
+//            return jsonInstructions.ranges(of: stepsIndexRegex, options: .regularExpression)
+
+        } else {
+            return jsonInstructions.components(separatedBy: "\r\n\r\n")
+        }
     }
-    
-    static func fromJsonStringArrayToIngredientDict(jsonIngredients: [String]) -> [String: Quantity?] {
-        
+
+    static func fromJsonStringArrayToIngredientDict(jsonIngredients: [String]) -> [String: Quantity] {
+
         var ingredientDict = [String: Quantity]()
-        
+
         jsonIngredients.map({ fromStringToNameQuantity(ingredientText: $0) })
-            .forEach({ ingredientDict[$0] = $1 })
+            .forEach({ ingredient in
+                ingredientDict[ingredient.name] = ingredient.quantity
+            })
         return ingredientDict
     }
-    
-    static private func fromStringToNameQuantity(ingredientText: String) -> (name: String, quantity: Quantity?) {
-        let wordArray = ingredientText.split(separator: " ")
-        let len = wordArray.count
-        
-        var value = 0
-        var valueIndex = 0
-        var valueFound = false
-        
-        for idx in 0..<len {
-            if let number = Int(wordArray[idx]) {
-                value = number
-                valueIndex = idx
-                valueFound = true
-                break
-            }
+
+    static let intOrDecimal = "[1-9]\\d*(\\.\\d+)?"
+    static let integer = "[1-9]\\d*"
+    static let fraction = "[1-9]\\s*/\\s*[1-9]"
+    static let whitespace = "\\s+"
+    static let optionalWhiteSpace = "\\s*"
+
+    static let units: String = (Array(volumeWordMap.keys) + Array(massWordMap.keys))
+        .joined(separator: "|")
+
+    static func matchNumberFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
+        let pattern = groupWithName(pattern: integer, name: "number")
+            + whitespace + groupWithName(pattern: fraction, name: "fraction")
+            + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
+            + whitespace + groupWithName(pattern: ".*", name: "ingredient")
+        let regex = NSRegularExpression(pattern)
+        guard let result =
+            regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
+
+            return nil
         }
-        
-        if !valueFound {
-            return (ingredientText, nil)
+
+        guard let numberRange = Range(result.range(withName: "number"), in: text),
+              let number = Double(text[numberRange]),
+              let fractionRange = Range(result.range(withName: "fraction"), in: text),
+              let ingredientRange = Range(result.range(withName: "ingredient"), in: text) else {
+
+            print("Incorrect match")
+            return nil
         }
-        
-        var measurementIndex = 0
-        var measurementFound = false
+
+        var value = number + parseFraction(fraction: String(text[fractionRange]))
         var quantity: Quantity?
-        
-        for idx in (valueIndex + 1)..<len {
-            if let volume = volumeWordMap[String(wordArray[idx]).lowercased()], let factor = volumeToMl[volume] {
-                value *= factor
-                measurementIndex = idx
-                quantity = .volume(Double(value))
-                measurementFound = true
-                break
-            } else if let mass = massWordMap[String(wordArray[idx]).lowercased()], let factor = massToG[mass] {
-                value *= factor
-                measurementIndex = idx
-                quantity = .mass(Double(value))
-                measurementFound = true
-                break
-            }
-        }
-        
-        if measurementFound {
-            let name = wordArray.dropFirst(measurementIndex + 1).joined(separator: " ")
-            return (name, quantity)
+        if let unitRange = Range(result.range(withName: "unit"), in: text) {
+            let unit = text[unitRange]
+            quantity = convertToQuantity(value: &value, unit: String(unit))
         } else {
-            quantity = .count(Double(value))
-            let name = wordArray.dropFirst(valueIndex + 1).joined(separator: " ")
-            return (name, quantity)
+            quantity = .count(value)
+        }
+
+        let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
+
+        guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
+            print("Invalid quantity or ingredient")
+            return nil
+        }
+
+        return (ingredient, ingredientQuantity)
+
+    }
+
+    static func matchNumberOrFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
+        let pattern = groupWithName(pattern: "\(intOrDecimal)|\(fraction)", name: "numeral")
+            + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
+            + whitespace + groupWithName(pattern: ".*", name: "ingredient")
+
+        let regex = NSRegularExpression(pattern)
+        guard let result =
+            regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
+
+            return nil
+        }
+
+        guard let numeralRange = Range(result.range(withName: "numeral"), in: text),
+              let ingredientRange = Range(result.range(withName: "ingredient"), in: text) else {
+
+            print("Incorrect match")
+            return nil
+        }
+
+        var value: Double = 0
+        let numberText = text[numeralRange]
+        if isFraction(text: String(numberText)) {
+            value = parseFraction(fraction: String(numberText))
+        } else if let number = Double(numberText) {
+            value = number
+        } else {
+            print("Incorrect match")
+            return nil
+        }
+
+        var quantity: Quantity?
+        if let unitRange = Range(result.range(withName: "unit"), in: text) {
+            let unit = text[unitRange]
+            quantity = convertToQuantity(value: &value, unit: String(unit))
+        } else {
+            quantity = .count(value)
+        }
+
+        let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
+
+        guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
+            print("Invalid quantity or ingredient")
+            return nil
+        }
+
+        return (ingredient, ingredientQuantity)
+    }
+
+    static func fromStringToNameQuantity(ingredientText: String) -> (name: String, quantity: Quantity) {
+
+        var parseResult = matchNumberFractionOptionalUnitFormat(text: ingredientText)
+        if let ingredients = parseResult {
+            return ingredients
+        }
+
+        parseResult = matchNumberOrFractionOptionalUnitFormat(text: ingredientText)
+        if let ingredients = parseResult {
+            return ingredients
+        }
+
+        // temporary
+        return (ingredientText, .count(1))
+
+    }
+
+    private static func parseFraction(fraction: String) -> Double {
+        let fractionArray = fraction.split(separator: "/")
+        if fractionArray.count != 2 {
+            print("Incorrect fraction format")
+            return 0
+        }
+        let numeratorStr = fractionArray[0].trimmingCharacters(in: .whitespaces)
+        let denominatorStr = fractionArray[1].trimmingCharacters(in: .whitespaces)
+
+        guard let numerator = Double(numeratorStr), let denominator = Double(denominatorStr) else {
+            print("Incorrect fraction format")
+            return 0
+        }
+
+        return numerator / denominator
+    }
+
+    private static func isFraction(text: String) -> Bool {
+        NSRegularExpression(fraction).matches(text)
+    }
+
+    private static func convertToQuantity( value: inout Double, unit: String) -> Quantity {
+        if let volume = volumeWordMap[unit.lowercased()], let factor = volumeToL[volume] {
+            value *= factor
+            return .volume(value)
+        } else if let mass = massWordMap[unit.lowercased()], let factor = massToKg[mass] {
+            value *= factor
+            return .mass(value)
+        } else {
+            // temp
+            return .count(1)
+        }
+    }
+
+    private static func groupWithName(pattern: String, name: String?, isOptional: Bool = false) -> String {
+        if let groupName = name {
+            return isOptional ? "(?<\(groupName)>\(pattern))?" : "(?<\(groupName)>\(pattern))"
+        } else {
+            return isOptional ? "(\(pattern))?" : "(\(pattern))"
         }
     }
 }

@@ -23,6 +23,9 @@
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
 		72D6C94725F77E3800ED20FB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94625F77E3800ED20FB /* Preview Assets.xcassets */; };
+		AE902F0E25FFD0EA00C86EAD /* NSRegularExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE902F0D25FFD0EA00C86EAD /* NSRegularExpression.swift */; };
+		AE902F1225FFD19500C86EAD /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE902F1125FFD19500C86EAD /* String.swift */; };
+		AE902F162600438900C86EAD /* StringProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE902F152600438900C86EAD /* StringProtocol.swift */; };
 		AEF591F525FDADCC0085C598 /* RecipeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF591F425FDADCC0085C598 /* RecipeParser.swift */; };
 		AEF591FB25FE5D960085C598 /* RecipeParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF591FA25FE5D960085C598 /* RecipeParserTest.swift */; };
 /* End PBXBuildFile section */
@@ -57,6 +60,9 @@
 		72D6C94825F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72D6C94D25F77E3800ED20FB /* ChopChopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChopChopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C95325F77E3800ED20FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AE902F0D25FFD0EA00C86EAD /* NSRegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRegularExpression.swift; sourceTree = "<group>"; };
+		AE902F1125FFD19500C86EAD /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		AE902F152600438900C86EAD /* StringProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProtocol.swift; sourceTree = "<group>"; };
 		AEF591F425FDADCC0085C598 /* RecipeParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeParser.swift; sourceTree = "<group>"; };
 		AEF591FA25FE5D960085C598 /* RecipeParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeParserTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -183,6 +189,9 @@
 			isa = PBXGroup;
 			children = (
 				AEF591F425FDADCC0085C598 /* RecipeParser.swift */,
+				AE902F0D25FFD0EA00C86EAD /* NSRegularExpression.swift */,
+				AE902F1125FFD19500C86EAD /* String.swift */,
+				AE902F152600438900C86EAD /* StringProtocol.swift */,
 			);
 			path = Parser;
 			sourceTree = "<group>";
@@ -317,14 +326,17 @@
 				0E389BF925FA480C001B1088 /* AppDatabase.swift in Sources */,
 				72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */,
 				0E389C3025FA70D5001B1088 /* IngredientRecord.swift in Sources */,
+				AE902F0E25FFD0EA00C86EAD /* NSRegularExpression.swift in Sources */,
 				0E389C5425FB50FA001B1088 /* IngredientSetRecord.swift in Sources */,
 				AEF591F525FDADCC0085C598 /* RecipeParser.swift in Sources */,
 				0E389BFE25FA48A5001B1088 /* AppDatabase+Persistence.swift in Sources */,
 				0E389C0525FA4931001B1088 /* Quantity.swift in Sources */,
+				AE902F162600438900C86EAD /* StringProtocol.swift in Sources */,
 				72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */,
 				0E389C4F25FB3B18001B1088 /* RecipeIngredientRecord.swift in Sources */,
 				0E16A5B725FCA236000C2DCF /* Ingredient.swift in Sources */,
 				0EA9B07D25FB588F00FF2E08 /* RecipeStepRecord.swift in Sources */,
+				AE902F1225FFD19500C86EAD /* String.swift in Sources */,
 				0E389C4425FB3AEB001B1088 /* RecipeRecord.swift in Sources */,
 				0E16A5AA25FC67DD000C2DCF /* Recipe.swift in Sources */,
 			);

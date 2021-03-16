@@ -3,7 +3,7 @@ import GRDB
 struct Recipe: Equatable {
     var id: Int64?
     var name: String
-    var ingredients: [String: Quantity?]
+    var ingredients: [String: Quantity]
     var steps: [String]
 }
 
@@ -24,7 +24,7 @@ extension Recipe: Decodable {
     private enum CodingKeys: CodingKey {
         case name, ingredients, instructions
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.name = try container.decode(String.self, forKey: .name)
@@ -38,5 +38,5 @@ extension Recipe: Decodable {
 //        self.border = try container.decode(Rectangular.self, forKey: .border)
 //        self.isPreLoaded = try container.decode(Bool.self, forKey: .isPreLoaded)
     }
-    
+
 }
