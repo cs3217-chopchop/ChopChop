@@ -984,7 +984,9 @@ class AppDatabaseTests: XCTestCase {
 
         let ingredient = try Ingredient(name: ingredientRecord.name,
                                         batches: batchRecords.map {
-                                            IngredientBatch(quantity: $0.quantity, expiryDate: $0.expiryDate)
+                                            IngredientBatch(
+                                                quantity: try Quantity(from: $0.quantity),
+                                                expiryDate: $0.expiryDate)
                                         })
         ingredient.id = ingredientRecord.id
         ingredient.ingredientCategoryId = categoryRecord.id

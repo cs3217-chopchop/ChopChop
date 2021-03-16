@@ -3,7 +3,6 @@ import XCTest
 @testable import ChopChop
 
 class QuantityTests: XCTestCase {
-
     override func setUpWithError() throws {
         try super.setUpWithError()
     }
@@ -13,271 +12,244 @@ class QuantityTests: XCTestCase {
     }
 }
 
+// MARK: - Construct
+extension QuantityType {
+    func testConstruct_nonNegativeQuantity_success() {
+        XCTAssertNoThrow(try Quantity(.count, value: 3))
+        XCTAssertNoThrow(try Quantity(.mass, value: 0))
+    }
+
+    func testConstruct_negativeQuantity_throwsError() {
+        XCTAssertThrowsError(try Quantity(.volume, value: -0.2))
+    }
+}
+
 // MARK: - Arithmetic operations
 extension QuantityTests {
     func testPlus_sameQuantityType_success() {
-        let leftCount: Quantity = .count(1)
-        let rightCount: Quantity = .count(2)
-        XCTAssertEqual(try? leftCount + rightCount, .count(1 + 2))
+        XCTAssertEqual(
+            try? Quantity(.count, value: 1) + Quantity(.count, value: 2),
+            try? Quantity(.count, value: 1 + 2))
 
-        let leftMass: Quantity = .mass(0.3)
-        let rightMass: Quantity = .mass(0.4)
-        XCTAssertEqual(try? leftMass + rightMass, .mass(0.3 + 0.4))
+        XCTAssertEqual(
+            try? Quantity(.mass, value: 0.3) + Quantity(.mass, value: 0.4),
+            try? Quantity(.mass, value: 0.3 + 0.4))
 
-        let leftVolume: Quantity = .volume(0.5)
-        let rightVolume: Quantity = .volume(0.6)
-        XCTAssertEqual(try? leftVolume + rightVolume, .volume(0.5 + 0.6))
+        XCTAssertEqual(
+            try? Quantity(.volume, value: 0.5) + Quantity(.volume, value: 0.6),
+            try? Quantity(.volume, value: 0.5 + 0.6))
     }
 
     func testPlus_differentQuantityType_throwsError() {
-        let left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left + right)
+        XCTAssertThrowsError(try Quantity(.count, value: 1) + Quantity(.volume, value: 0.5))
     }
 
     func testPlus_negativeResult_throwsError() {
-        let left: Quantity = .volume(-1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left + right)
+        XCTAssertThrowsError(try Quantity(.volume, value: -1) + Quantity(.volume, value: 0.5))
     }
 
     func testMinus_sameQuantityType_success() {
-        let leftCount: Quantity = .count(6)
-        let rightCount: Quantity = .count(5)
-        XCTAssertEqual(try? leftCount - rightCount, .count(6 - 5))
+        XCTAssertEqual(
+            try? Quantity(.count, value: 6) - Quantity(.count, value: 5),
+            try? Quantity(.count, value: 6 - 5))
 
-        let leftMass: Quantity = .mass(0.4)
-        let rightMass: Quantity = .mass(0.3)
-        XCTAssertEqual(try? leftMass - rightMass, .mass(0.4 - 0.3))
+        XCTAssertEqual(
+            try? Quantity(.mass, value: 0.4) - Quantity(.mass, value: 0.3),
+            try? Quantity(.mass, value: 0.4 - 0.3))
 
-        let leftVolume: Quantity = .volume(0.2)
-        let rightVolume: Quantity = .volume(0.1)
-        XCTAssertEqual(try? leftVolume - rightVolume, .volume(0.2 - 0.1))
+        XCTAssertEqual(
+            try? Quantity(.volume, value: 0.2) - Quantity(.volume, value: 0.1),
+            try? Quantity(.volume, value: 0.2 - 0.1))
     }
 
     func testMinus_differentQuantityType_throwsError() {
-        let left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left - right)
+        XCTAssertThrowsError(try Quantity(.count, value: 1) - Quantity(.volume, value: 0.5))
     }
 
     func testMinus_negativeResult_throwsError() {
-        let left: Quantity = .volume(0.5)
-        let right: Quantity = .volume(1)
-
-        XCTAssertThrowsError(try left - right)
+        XCTAssertThrowsError(try Quantity(.volume, value: 0.5) - Quantity(.volume, value: 1))
     }
 
     func testTimes_validResult_success() {
-        let testCount: Quantity = .count(7)
-        let testMass: Quantity = .mass(0.8)
-        let testVolume: Quantity = .volume(0.9)
         let factor: Double = 1.5
 
-        XCTAssertEqual(try? testCount * factor, .count(7 * factor))
-        XCTAssertEqual(try? testMass * factor, .mass(0.8 * factor))
-        XCTAssertEqual(try? testVolume * factor, .volume(0.9 * factor))
+        XCTAssertEqual(
+            try? Quantity(.count, value: 7) * factor,
+            try? Quantity(.count, value: 7 * factor))
+        XCTAssertEqual(
+            try? Quantity(.mass, value: 0.8) * factor,
+            try? Quantity(.mass, value: 0.8 * factor))
+        XCTAssertEqual(
+            try? Quantity(.volume, value: 0.9) * factor,
+            try? Quantity(.volume, value: 0.9 * factor))
     }
 
     func testTimes_negativeResult_throwsError() {
-        let quantity: Quantity = .mass(1)
-        let factor: Double = -0.3
-
-        XCTAssertThrowsError(try quantity * factor)
+        XCTAssertThrowsError(try Quantity(.mass, value: 1) * -0.3)
     }
 
     func testDivides_validResult_success() {
-        let testCount: Quantity = .count(1.1)
-        let testMass: Quantity = .mass(1.2)
-        let testVolume: Quantity = .volume(1.3)
         let factor: Double = 4
 
-        XCTAssertEqual(try? testCount / factor, .count(1.1 / factor))
-        XCTAssertEqual(try? testMass / factor, .mass(1.2 / factor))
-        XCTAssertEqual(try? testVolume / factor, .volume(1.3 / factor))
+        XCTAssertEqual(
+            try? Quantity(.count, value: 1.1) / factor,
+            try? Quantity(.count, value: 1.1 / factor))
+        XCTAssertEqual(
+            try? Quantity(.mass, value: 1.2) / factor,
+            try? Quantity(.mass, value: 1.2 / factor))
+        XCTAssertEqual(
+            try? Quantity(.volume, value: 1.3) / factor,
+            try? Quantity(.volume, value: 1.3 / factor))
     }
 
     func testDivides_negativeResult_throwsError() {
-        let quantity: Quantity = .volume(1.4)
-        let factor: Double = -2
-
-        XCTAssertThrowsError(try quantity / factor)
+        XCTAssertThrowsError(try Quantity(.volume, value: 1.4) / -2)
     }
 
     func testDivides_zeroDivisor_throwsError() {
-        let quantity: Quantity = .count(1.5)
-        let factor: Double = 0
-
-        XCTAssertThrowsError(try quantity / factor)
+        XCTAssertThrowsError(try Quantity(.count, value: 1.5) / 0)
     }
 
     func testPlusEquals_sameQuantityType_success() {
-        var leftCount: Quantity = .count(1)
-        let rightCount: Quantity = .count(2)
-        XCTAssertNoThrow(try leftCount += rightCount)
-        XCTAssertEqual(leftCount, .count(1 + 2))
+        var leftCount = try? Quantity(.count, value: 1)
+        XCTAssertNoThrow(try leftCount? += Quantity(.count, value: 2))
+        XCTAssertEqual(leftCount, try? Quantity(.count, value: 1 + 2))
 
-        var leftMass: Quantity = .mass(0.3)
-        let rightMass: Quantity = .mass(0.4)
-        XCTAssertNoThrow(try leftMass += rightMass)
-        XCTAssertEqual(leftMass, .mass(0.3 + 0.4))
+        var leftMass = try? Quantity(.mass, value: 0.3)
+        XCTAssertNoThrow(try leftMass? += Quantity(.mass, value: 0.4))
+        XCTAssertEqual(leftMass, try? Quantity(.mass, value: 0.3 + 0.4))
 
-        var leftVolume: Quantity = .volume(0.5)
-        let rightVolume: Quantity = .volume(0.6)
-        XCTAssertNoThrow(try leftVolume += rightVolume)
-        XCTAssertEqual(leftVolume, .volume(0.5 + 0.6))
+        var leftVolume = try? Quantity(.volume, value: 0.5)
+        XCTAssertNoThrow(try leftVolume? += Quantity(.volume, value: 0.6))
+        XCTAssertEqual(leftVolume, try? Quantity(.volume, value: 0.5 + 0.6))
     }
 
     func testPlusEquals_differentQuantityType_throwsError() {
-        var left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left += right)
-    }
-
-    func testPlusEquals_negativeResult_throwsError() {
-        var left: Quantity = .volume(-1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left += right)
+        var left = try? Quantity(.count, value: 1)
+        XCTAssertThrowsError(try left? += Quantity(.volume, value: 0.5))
     }
 
     func testMinusEquals_sameQuantityType_success() {
-        var leftCount: Quantity = .count(6)
-        let rightCount: Quantity = .count(5)
-        XCTAssertNoThrow(try leftCount -= rightCount)
-        XCTAssertEqual(leftCount, .count(6 - 5))
+        var leftCount = try? Quantity(.count, value: 6)
+        XCTAssertNoThrow(try leftCount? -= Quantity(.count, value: 5))
+        XCTAssertEqual(leftCount, try? Quantity(.count, value: 6 - 5))
 
-        var leftMass: Quantity = .mass(0.4)
-        let rightMass: Quantity = .mass(0.3)
-        XCTAssertNoThrow(try leftMass -= rightMass)
-        XCTAssertEqual(leftMass, .mass(0.4 - 0.3))
+        var leftMass = try? Quantity(.mass, value: 0.4)
+        XCTAssertNoThrow(try leftMass? -= Quantity(.mass, value: 0.3))
+        XCTAssertEqual(leftMass, try? Quantity(.mass, value: 0.4 - 0.3))
 
-        var leftVolume: Quantity = .volume(0.2)
-        let rightVolume: Quantity = .volume(0.1)
-        XCTAssertNoThrow(try leftVolume -= rightVolume)
-        XCTAssertEqual(leftVolume, .volume(0.2 - 0.1))
+        var leftVolume = try? Quantity(.volume, value: 0.2)
+        XCTAssertNoThrow(try leftVolume? -= Quantity(.volume, value: 0.1))
+        XCTAssertEqual(leftVolume, try? Quantity(.volume, value: 0.2 - 0.1))
     }
 
     func testMinusEquals_differentQuantityType_throwsError() {
-        var left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left -= right)
+        var left = try? Quantity(.count, value: 1)
+        XCTAssertThrowsError(try left? -= Quantity(.volume, value: 0.5))
     }
 
     func testMinusEquals_negativeResult_throwsError() {
-        var left: Quantity = .volume(0.5)
-        let right: Quantity = .volume(1)
-
-        XCTAssertThrowsError(try left -= right)
+        var left = try? Quantity(.volume, value: 0.5)
+        XCTAssertThrowsError(try left? -= Quantity(.volume, value: 1))
     }
 
     func testTimesEquals_validResult_success() {
-        var testCount: Quantity = .count(7)
-        var testMass: Quantity = .mass(0.8)
-        var testVolume: Quantity = .volume(0.9)
+        var testCount = try? Quantity(.count, value: 7)
+        var testMass = try? Quantity(.mass, value: 0.8)
+        var testVolume = try? Quantity(.volume, value: 0.9)
         let factor: Double = 1.5
 
-        XCTAssertNoThrow(try testCount *= factor)
-        XCTAssertNoThrow(try testMass *= factor)
-        XCTAssertNoThrow(try testVolume *= factor)
-        XCTAssertEqual(testCount, .count(7 * factor))
-        XCTAssertEqual(testMass, .mass(0.8 * factor))
-        XCTAssertEqual(testVolume, .volume(0.9 * factor))
+        XCTAssertNoThrow(try testCount? *= factor)
+        XCTAssertNoThrow(try testMass? *= factor)
+        XCTAssertNoThrow(try testVolume? *= factor)
+
+        XCTAssertEqual(testCount, try? Quantity(.count, value: 7 * factor))
+        XCTAssertEqual(testMass, try? Quantity(.mass, value: 0.8 * factor))
+        XCTAssertEqual(testVolume, try? Quantity(.volume, value: 0.9 * factor))
     }
 
     func testTimesEquals_negativeResult_throwsError() {
-        var quantity: Quantity = .mass(1)
+        var quantity = try? Quantity(.mass, value: 1)
         let factor: Double = -0.3
 
-        XCTAssertThrowsError(try quantity *= factor)
+        XCTAssertThrowsError(try quantity? *= factor)
     }
 
     func testDividesEquals_validResult_success() {
-        var testCount: Quantity = .count(1.1)
-        var testMass: Quantity = .mass(1.2)
-        var testVolume: Quantity = .volume(1.3)
+        var testCount = try? Quantity(.count, value: 1.1)
+        var testMass = try? Quantity(.mass, value: 1.2)
+        var testVolume = try? Quantity(.volume, value: 1.3)
         let factor: Double = 4
 
-        XCTAssertNoThrow(try testCount /= factor)
-        XCTAssertNoThrow(try testMass /= factor)
-        XCTAssertNoThrow(try testVolume /= factor)
-        XCTAssertEqual(testCount, .count(1.1 / factor))
-        XCTAssertEqual(testMass, .mass(1.2 / factor))
-        XCTAssertEqual(testVolume, .volume(1.3 / factor))
+        XCTAssertNoThrow(try testCount? /= factor)
+        XCTAssertNoThrow(try testMass? /= factor)
+        XCTAssertNoThrow(try testVolume? /= factor)
+
+        XCTAssertEqual(testCount, try? Quantity(.count, value: 1.1 / factor))
+        XCTAssertEqual(testMass, try? Quantity(.mass, value: 1.2 / factor))
+        XCTAssertEqual(testVolume, try? Quantity(.volume, value: 1.3 / factor))
     }
 
     func testDividesEquals_negativeResult_throwsError() {
-        var quantity: Quantity = .volume(1.4)
+        var quantity = try? Quantity(.volume, value: 1.4)
         let factor: Double = -2
 
-        XCTAssertThrowsError(try quantity /= factor)
+        XCTAssertThrowsError(try quantity? /= factor)
     }
 
     func testDividesEquals_zeroDivisor_throwsError() {
-        var quantity: Quantity = .count(1.5)
+        var quantity = try? Quantity(.count, value: 1.4)
         let factor: Double = 0
 
-        XCTAssertThrowsError(try quantity /= factor)
+        XCTAssertThrowsError(try quantity? /= factor)
     }
 }
 
 // MARK: - Comparable
 extension QuantityTests {
-    func testLessThan_sameQuantityType_success() {
-        let leftCount: Quantity = .count(1)
-        let rightCount: Quantity = .count(2)
+    func testLessThan_sameQuantityType_success() throws {
+        let leftCount = try Quantity(.count, value: 1)
+        let rightCount = try Quantity(.count, value: 2)
         XCTAssertLessThan(leftCount, rightCount)
 
-        let leftMass: Quantity = .mass(0.3)
-        let rightMass: Quantity = .mass(0.4)
+        let leftMass = try Quantity(.mass, value: 0.3)
+        let rightMass = try Quantity(.mass, value: 0.4)
         XCTAssertLessThan(leftMass, rightMass)
 
-        let leftVolume: Quantity = .volume(0.5)
-        let rightVolume: Quantity = .volume(0.6)
+        let leftVolume = try Quantity(.volume, value: 0.5)
+        let rightVolume = try Quantity(.volume, value: 0.6)
         XCTAssertLessThan(leftVolume, rightVolume)
     }
 
-    func testLessThan_equalQuantities_returnsFalse() {
-        let left: Quantity = .count(3)
-        let right: Quantity = .count(3)
+    func testLessThan_equalQuantities_returnsFalse() throws {
+        let left = try Quantity(.count, value: 3)
+        let right = try Quantity(.count, value: 3)
         XCTAssertLessThanOrEqual(left, right)
     }
 
-    func testLessThan_differentQuantityTypes_throwsError() {
-        let left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
-
-        XCTAssertThrowsError(try left < right)
-    }
-
-    func testEqualTo_sameQuantityType_success() {
-        let leftCount: Quantity = .count(1)
-        let rightCount: Quantity = .count(1)
-        let differentCount: Quantity = .count(2)
+    func testEqualTo_sameQuantityType_success() throws {
+        let leftCount = try Quantity(.count, value: 1)
+        let rightCount = try Quantity(.count, value: 1)
+        let differentCount = try Quantity(.count, value: 2)
         XCTAssertEqual(leftCount, rightCount)
         XCTAssertNotEqual(leftCount, differentCount)
 
-        let leftMass: Quantity = .mass(0.3)
-        let rightMass: Quantity = .mass(0.3)
-        let differentMass: Quantity = .mass(0.4)
+        let leftMass = try Quantity(.mass, value: 0.3)
+        let rightMass = try Quantity(.mass, value: 0.3)
+        let differentMass = try Quantity(.mass, value: 0.4)
         XCTAssertEqual(leftMass, rightMass)
         XCTAssertNotEqual(leftMass, differentMass)
 
-        let leftVolume: Quantity = .volume(0.5)
-        let rightVolume: Quantity = .volume(0.5)
-        let differentVolume: Quantity = .volume(0.6)
+        let leftVolume = try Quantity(.volume, value: 0.5)
+        let rightVolume = try Quantity(.volume, value: 0.5)
+        let differentVolume = try Quantity(.volume, value: 0.6)
         XCTAssertEqual(leftVolume, rightVolume)
         XCTAssertNotEqual(leftVolume, differentVolume)
     }
 
-    func testEqualTo_differentQuantityTypes_returnsFalse() {
-        let left: Quantity = .count(1)
-        let right: Quantity = .volume(0.5)
+    func testEqualTo_differentQuantityTypes_returnsFalse() throws {
+        let left = try Quantity(.count, value: 1)
+        let right = try Quantity(.volume, value: 0.5)
 
         XCTAssertNotEqual(left, right)
     }

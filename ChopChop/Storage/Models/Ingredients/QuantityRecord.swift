@@ -1,4 +1,10 @@
-extension Quantity: Codable {
+enum QuantityRecord: Equatable {
+    case count(Double)
+    case mass(Double)
+    case volume(Double)
+}
+
+extension QuantityRecord: Codable {
     enum CodingKeys: CodingKey {
         case count, mass, volume
     }

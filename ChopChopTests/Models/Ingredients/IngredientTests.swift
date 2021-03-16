@@ -17,9 +17,9 @@ class IngredientTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    private func addTestQuantity(_ quantity: Double, expiryDate: Date? = .testDate) {
-        let ingredientQuantity: Quantity = .count(quantity)
-        XCTAssertNoThrow(try ingredient.add(quantity: ingredientQuantity, expiryDate: expiryDate))
+    private func addTestQuantity(_ value: Double, expiryDate: Date? = .testDate) throws {
+        let quantity = try Quantity(.count, value: value)
+        XCTAssertNoThrow(try ingredient.add(quantity: quantity, expiryDate: expiryDate))
     }
 }
 
@@ -60,8 +60,8 @@ extension IngredientTests {
 
 // MARK: - Add
 extension IngredientTests {
-    func testAdd_sameQuantityTypeNewExpiryDate_newBatchAdded() {
-        let addedQuantity: Quantity = .count(2)
+    func testAdd_sameQuantityTypeNewExpiryDate_newBatchAdded() throws {
+        let addedQuantity = try Quantity(.count, value: 2)
         XCTAssertNoThrow(try ingredient.add(quantity: addedQuantity, expiryDate: nil))
 
         let nonExpiringBatch = try? XCTUnwrap(
@@ -82,52 +82,53 @@ extension IngredientTests {
         XCTAssertEqual(expiringBatch?.expiryDate, .testDate, "Expiry date of batch should be set correctly")
     }
 
-    func testAdd_sameQuantityTypeExistingBatchWithDate_quantityAddedToBatch() {
-        let existingQuantity: Quantity = .count(2)
+    func testAdd_sameQuantityTypeExistingBatchWithDate_quantityAddedToBatch() throws {
+        let existingQuantity = try Quantity(.count, value: 2)
         XCTAssertNoThrow(try ingredient.add(quantity: existingQuantity, expiryDate: .testDate))
 
-        let addedQuantity: Quantity = .count(3)
+        let addedQuantity = try Quantity(.count, value: 3)
         XCTAssertNoThrow(try ingredient.add(quantity: addedQuantity, expiryDate: .testDate))
 
         let batch = try? XCTUnwrap(
             ingredient.getBatch(expiryDate: .testDate),
             "Batch should exist in ingredient")
 
-        XCTAssertEqual(batch?.quantity, .count(5), "Quantity should be added correctly")
+        XCTAssertEqual(batch?.quantity, try? Quantity(.count, value: 5), "Quantity should be added correctly")
         XCTAssertEqual(batch?.expiryDate, .testDate, "Expiry date of batch should be set correctly")
         XCTAssertEqual(ingredient.batches.count, 1,
                        "There should be no new batch appended")
     }
 
-    func testAdd_sameQuantityTypeExistingNonExpiringBatch_quantityAddedToBatch() {
-        let existingQuantity: Quantity = .count(2)
+    func testAdd_sameQuantityTypeExistingNonExpiringBatch_quantityAddedToBatch() throws {
+        let existingQuantity = try Quantity(.count, value: 2)
         XCTAssertNoThrow(try ingredient.add(quantity: existingQuantity, expiryDate: nil))
 
-        let addedQuantity: Quantity = .count(3)
+        let addedQuantity = try Quantity(.count, value: 3)
         XCTAssertNoThrow(try ingredient.add(quantity: addedQuantity, expiryDate: nil))
 
         let batch = try? XCTUnwrap(
             ingredient.getBatch(expiryDate: nil),
             "Batch should exist in ingredient")
 
-        XCTAssertEqual(batch?.quantity, .count(5), "Quantity should be added correctly")
+        XCTAssertEqual(batch?.quantity, try? Quantity(.count, value: 5),
+                       "Quantity should be added correctly")
         XCTAssertNil(batch?.expiryDate, "Batch should not have expiry date")
         XCTAssertEqual(ingredient.batches.count, 1,
                        "There should be no new batch appended")
     }
 
-    func testAdd_differentQuantityTypeNewExpiryDate_throwsError() {
-        let addedQuantity: Quantity = .volume(1)
+    func testAdd_differentQuantityTypeNewExpiryDate_throwsError() throws {
+        let addedQuantity = try Quantity(.volume, value: 1)
         XCTAssertThrowsError(try ingredient.add(quantity: addedQuantity, expiryDate: .testDate))
 
         XCTAssertNil(ingredient.getBatch(expiryDate: .testDate), "Batch should not be added")
     }
 
-    func testAdd_differentQuantityTypeExistingBatchWithDate_throwsError() {
-        let existingQuantity: Quantity = .count(2)
+    func testAdd_differentQuantityTypeExistingBatchWithDate_throwsError() throws {
+        let existingQuantity = try Quantity(.count, value: 2)
         XCTAssertNoThrow(try ingredient.add(quantity: existingQuantity, expiryDate: .testDate))
 
-        let addedQuantity: Quantity = .mass(1)
+        let addedQuantity = try Quantity(.mass, value: 1)
         XCTAssertThrowsError(try ingredient.add(quantity: addedQuantity, expiryDate: .testDate))
 
         let batch = try? XCTUnwrap(
@@ -140,50 +141,51 @@ extension IngredientTests {
 
 // MARK: - Subtract
 extension IngredientTests {
-    func testSubtract_sufficientQuantity_success() {
+    func testSubtract_sufficientQuantity_success() throws {
         let existingQuantity: Double = 5
-        addTestQuantity(existingQuantity)
+        try addTestQuantity(existingQuantity)
 
-        let subtractedQuantity: Quantity = .count(3)
+        let subtractedQuantity: Quantity = try Quantity(.count, value: 3)
         XCTAssertNoThrow(try ingredient.subtract(quantity: subtractedQuantity, expiryDate: .testDate))
 
         let batch = try? XCTUnwrap(
             ingredient.getBatch(expiryDate: .testDate),
             "Batch should exist in ingredient")
 
-        XCTAssertEqual(batch?.quantity, .count(2), "Quantity should be subtracted correctly")
+        XCTAssertEqual(batch?.quantity, try? Quantity(.count, value: 2),
+                       "Quantity should be subtracted correctly")
     }
 
-    func testSubtract_subtractAllQuantity_batchRemoved() {
-        let existingQuantity: Double = 5
-        addTestQuantity(existingQuantity)
+    func testSubtract_subtractAllQuantity_batchRemoved() throws {
+        let existingQuantity = try Quantity(.count, value: 5)
+        try addTestQuantity(5)
 
-        XCTAssertNoThrow(try ingredient.subtract(quantity: .count(existingQuantity), expiryDate: .testDate))
+        XCTAssertNoThrow(try ingredient.subtract(quantity: existingQuantity, expiryDate: .testDate))
 
         XCTAssertNil(ingredient.getBatch(expiryDate: .testDate), "Empty batch should be removed")
     }
 
-    func testSubtract_insufficientQuantity_throwsError() {
-        let existingQuantity: Double = 5
-        addTestQuantity(existingQuantity)
+    func testSubtract_insufficientQuantity_throwsError() throws {
+        let existingQuantity = try Quantity(.count, value: 5)
+        try addTestQuantity(5)
 
-        let subtractedQuantity: Quantity = .count(10)
+        let subtractedQuantity = try Quantity(.count, value: 10)
         XCTAssertThrowsError(try ingredient.subtract(quantity: subtractedQuantity, expiryDate: .testDate))
 
         let batch = try? XCTUnwrap(
             ingredient.getBatch(expiryDate: .testDate),
             "Batch should exist in ingredient")
 
-        XCTAssertEqual(batch?.quantity, .count(existingQuantity),
+        XCTAssertEqual(batch?.quantity, existingQuantity,
                        "Quantity should not be subtracted")
     }
 
-    func testSubtract_nonExistentBatch_throwsError() {
-        let subtractedQuantity: Quantity = .count(5)
+    func testSubtract_nonExistentBatch_throwsError() throws {
+        let subtractedQuantity = try Quantity(.count, value: 5)
         XCTAssertThrowsError(try ingredient.subtract(quantity: subtractedQuantity, expiryDate: .testDate))
 
-        let existingQuantity: Double = 10
-        addTestQuantity(existingQuantity)
+        let existingQuantity = try Quantity(.count, value: 10)
+        try addTestQuantity(10)
 
         let nonExistentBatchDate = Date(timeInterval: 100, since: .testDate)
         XCTAssertThrowsError(try ingredient.subtract(quantity: subtractedQuantity, expiryDate: nonExistentBatchDate))
@@ -192,27 +194,27 @@ extension IngredientTests {
             ingredient.getBatch(expiryDate: .testDate),
             "Batch should exist in ingredient")
 
-        XCTAssertEqual(batch?.quantity, .count(existingQuantity), "Existing batch should not be subtracted")
+        XCTAssertEqual(batch?.quantity, existingQuantity, "Existing batch should not be subtracted")
     }
 
-    func testSubtract_differentQuantityType_throwsError() {
-        addTestQuantity(10)
+    func testSubtract_differentQuantityType_throwsError() throws {
+        try addTestQuantity(10)
 
-        let subtractedQuantity: Quantity = .volume(5)
+        let subtractedQuantity = try Quantity(.volume, value: 5)
         XCTAssertThrowsError(try ingredient.subtract(quantity: subtractedQuantity, expiryDate: .testDate))
     }
 }
 
 // MARK: - Use
 extension IngredientTests {
-    func testUse_sufficientQuantityInMultipleBatches_subtractsFromNearstExpiryDate() {
+    func testUse_sufficientQuantityInMultipleBatches_subtractsFromNearstExpiryDate() throws {
         let testDate1 = Date(timeInterval: 1_000, since: .now)
         let testDate2 = Date(timeInterval: 2_000, since: .now)
-        addTestQuantity(5, expiryDate: testDate1)
-        addTestQuantity(5, expiryDate: testDate2)
-        addTestQuantity(5, expiryDate: nil)
+        try addTestQuantity(5, expiryDate: testDate1)
+        try addTestQuantity(5, expiryDate: testDate2)
+        try addTestQuantity(5, expiryDate: nil)
 
-        let subtractedQuantity: Quantity = .count(12)
+        let subtractedQuantity = try Quantity(.count, value: 12)
         XCTAssertNoThrow(try ingredient.use(quantity: subtractedQuantity))
 
         XCTAssertNil(ingredient.getBatch(expiryDate: testDate1),
@@ -223,62 +225,62 @@ extension IngredientTests {
         let nonExpiringBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: nil),
                                               "Non expiring batch should be in the ingredient")
 
-        XCTAssertEqual(nonExpiringBatch?.quantity, .count(3), "Quantity should be subtracted correctly")
+        XCTAssertEqual(nonExpiringBatch?.quantity, try? Quantity(.count, value: 3), "Quantity should be subtracted correctly")
     }
 
-    func testUse_existingExpiredBatch_ignoresExpiredBatch() {
-        let existingQuantity: Double = 5
+    func testUse_existingExpiredBatch_ignoresExpiredBatch() throws {
+        let existingQuantity = try Quantity(.count, value: 5)
         let expiredDate = Date(timeInterval: -1_000, since: .now)
 
         let testDate = Date(timeInterval: 1_000, since: .now)
-        addTestQuantity(existingQuantity, expiryDate: expiredDate)
-        addTestQuantity(existingQuantity, expiryDate: testDate)
+        try addTestQuantity(5, expiryDate: expiredDate)
+        try addTestQuantity(5, expiryDate: testDate)
 
-        let subtractedQuantity: Quantity = .count(5)
+        let subtractedQuantity = try Quantity(.count, value: 5)
         XCTAssertNoThrow(try ingredient.use(quantity: subtractedQuantity))
 
         let expiredBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: expiredDate),
                                           "Expired batch should be in the ingredient")
 
-        XCTAssertEqual(expiredBatch?.quantity, .count(existingQuantity),
+        XCTAssertEqual(expiredBatch?.quantity, existingQuantity,
                        "Expired ingredients should not be used")
 
         XCTAssertNil(ingredient.getBatch(expiryDate: testDate),
                      "Quantity should be used up and batch should be removed")
     }
 
-    func testUse_differentQuantityType_throwsError() {
-        addTestQuantity(5, expiryDate: .testDate)
+    func testUse_differentQuantityType_throwsError() throws {
+        try addTestQuantity(5, expiryDate: .testDate)
 
-        let usedQuantity: Quantity = .volume(5)
+        let usedQuantity = try Quantity(.volume, value: 5)
         XCTAssertThrowsError(try ingredient.use(quantity: usedQuantity))
     }
 
-    func testUse_insufficientQuantity_throwsError() {
-        let existingQuantity: Double = 5
+    func testUse_insufficientQuantity_throwsError() throws {
+        let existingQuantity = try Quantity(.count, value: 5)
         let expiredDate = Date(timeInterval: -1_000, since: .now)
         let testDate = Date(timeInterval: 1_000, since: .now)
-        addTestQuantity(existingQuantity, expiryDate: expiredDate)
-        addTestQuantity(existingQuantity, expiryDate: testDate)
+        try addTestQuantity(5, expiryDate: expiredDate)
+        try addTestQuantity(5, expiryDate: testDate)
 
-        let subtractedQuantity: Quantity = .count(10)
+        let subtractedQuantity = try Quantity(.count, value: 10)
         XCTAssertThrowsError(try ingredient.use(quantity: subtractedQuantity))
 
         let expiredBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: expiredDate),
                                           "Expired batch should be in the ingredient")
-        XCTAssertEqual(expiredBatch?.quantity, .count(existingQuantity),
+        XCTAssertEqual(expiredBatch?.quantity, existingQuantity,
                        "Expired ingredients should not be used")
 
         let existingBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: testDate),
                                            "Other batch should be in the ingredient")
-        XCTAssertEqual(existingBatch?.quantity, .count(existingQuantity),
+        XCTAssertEqual(existingBatch?.quantity, existingQuantity,
                        "Ingredients should not be used if there is insufficient quantity")
     }
 }
 
 // MARK: - Combine
 extension IngredientTests {
-    func testCombine_sameIngredientAndQuantityType_success() {
+    func testCombine_sameIngredientAndQuantityType_success() throws {
         guard let combinedIngredient = try? Ingredient(name: ingredient.name, type: ingredient.quantityType) else {
             XCTFail("Ingredient should be successfully constructed")
             return
@@ -288,34 +290,38 @@ extension IngredientTests {
         let combinedDate = Date(timeInterval: 1_000, since: .now)
         let existingDate = Date(timeInterval: 2_000, since: .now)
         let newDate = Date(timeInterval: 3_000, since: .now)
-        addTestQuantity(1, expiryDate: expiredDate)
-        addTestQuantity(2, expiryDate: combinedDate)
-        addTestQuantity(3, expiryDate: existingDate)
+        try addTestQuantity(1, expiryDate: expiredDate)
+        try addTestQuantity(2, expiryDate: combinedDate)
+        try addTestQuantity(3, expiryDate: existingDate)
 
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: .count(4), expiryDate: expiredDate))
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: .count(5), expiryDate: combinedDate))
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: .count(6), expiryDate: newDate))
+        let addedQuantity1 = try Quantity(.count, value: 4)
+        let addedQuantity2 = try Quantity(.count, value: 5)
+        let addedQuantity3 = try Quantity(.count, value: 6)
+
+        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity1, expiryDate: expiredDate))
+        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity2, expiryDate: combinedDate))
+        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity3, expiryDate: newDate))
 
         XCTAssertNoThrow(try ingredient.combine(with: combinedIngredient))
 
         let expiredBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: expiredDate),
                                           "Expired batch should be in the ingredient")
-        XCTAssertEqual(expiredBatch?.quantity, .count(5),
+        XCTAssertEqual(expiredBatch?.quantity, try? Quantity(.count, value: 5),
                        "Expired batch quantities should be combined")
 
         let combinedBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: combinedDate),
                                            "Combined batch should be in the ingredient")
-        XCTAssertEqual(combinedBatch?.quantity, .count(7),
+        XCTAssertEqual(combinedBatch?.quantity, try? Quantity(.count, value: 7),
                        "Combined batch quantities should be combined")
 
         let existingBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: existingDate),
                                            "Existing batch should be in the ingredient")
-        XCTAssertEqual(existingBatch?.quantity, .count(3),
+        XCTAssertEqual(existingBatch?.quantity, try? Quantity(.count, value: 3),
                        "Existing batch quantities should not be changed")
 
         let newBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: newDate),
                                       "New batch should be appended to the ingredient")
-        XCTAssertEqual(newBatch?.quantity, .count(6),
+        XCTAssertEqual(newBatch?.quantity, try? Quantity(.count, value: 6),
                        "New batch quantities should be added correctly")
     }
 
@@ -340,8 +346,8 @@ extension IngredientTests {
 
 // MARK: - Get and remove batches
 extension IngredientTests {
-    func testGetBatch_existingBatch_success() {
-        addTestQuantity(5)
+    func testGetBatch_existingBatch_success() throws {
+        try addTestQuantity(5)
         let batch = try? XCTUnwrap(ingredient.getBatch(expiryDate: .testDate),
                                    "Batch should be added")
 
@@ -349,40 +355,40 @@ extension IngredientTests {
                        "Correct batch should be retrieved")
     }
 
-    func testGetBatch_notExpiringBatch_success() {
-        addTestQuantity(5, expiryDate: nil)
+    func testGetBatch_notExpiringBatch_success() throws {
+        try addTestQuantity(5, expiryDate: nil)
         let batch = try? XCTUnwrap(ingredient.getBatch(expiryDate: nil),
                                    "Batch should be added")
 
         XCTAssertNil(batch?.expiryDate, "Correct batch should be retrieved")
     }
 
-    func testGetBatch_notExistingBatch_returnsNil() {
-        addTestQuantity(5)
+    func testGetBatch_notExistingBatch_returnsNil() throws {
+        try addTestQuantity(5)
         let notExistingDate = Date(timeInterval: 1_000, since: .testDate)
 
         XCTAssertNil(ingredient.getBatch(expiryDate: notExistingDate),
                      "Non existent batch should not be retrieved")
     }
 
-    func testRemoveBatch_existingBatch_success() {
-        addTestQuantity(5)
+    func testRemoveBatch_existingBatch_success() throws {
+        try addTestQuantity(5)
         ingredient.removeBatch(expiryDate: .testDate)
 
         XCTAssertNil(ingredient.getBatch(expiryDate: .testDate),
                      "Batch should be removed")
     }
 
-    func testRemoveBatch_notExpiringBatch_success() {
-        addTestQuantity(5, expiryDate: nil)
+    func testRemoveBatch_notExpiringBatch_success() throws {
+        try addTestQuantity(5, expiryDate: nil)
         ingredient.removeBatch(expiryDate: nil)
 
         XCTAssertNil(ingredient.getBatch(expiryDate: nil),
                      "Batch should be removed")
     }
 
-    func testRemoveBatch_nonExistingBatch_doNothing() {
-        addTestQuantity(5)
+    func testRemoveBatch_nonExistingBatch_doNothing() throws {
+        try addTestQuantity(5)
         let nonExistingDate = Date(timeInterval: 1_000, since: .testDate)
         ingredient.removeBatch(expiryDate: nonExistingDate)
 
@@ -390,11 +396,11 @@ extension IngredientTests {
                         "Batch should not be removed")
     }
 
-    func testRemoveExpiredBatches_existingExpiredBatches_success() {
+    func testRemoveExpiredBatches_existingExpiredBatches_success() throws {
         let expiredDate2 = Date(timeInterval: -2_000, since: .now)
         let expiredDate1 = Date(timeInterval: -1_000, since: .now)
-        addTestQuantity(5, expiryDate: expiredDate1)
-        addTestQuantity(5, expiryDate: expiredDate2)
+        try addTestQuantity(5, expiryDate: expiredDate1)
+        try addTestQuantity(5, expiryDate: expiredDate2)
 
         ingredient.removeExpiredBatches()
 
@@ -404,12 +410,12 @@ extension IngredientTests {
                      "Expired batch should be removed")
     }
 
-    func testRemoveExpiredBatches_existingNonExpiredBatches_ignoresNonExpiredBatches() {
+    func testRemoveExpiredBatches_existingNonExpiredBatches_ignoresNonExpiredBatches() throws {
         let expiredDate = Date(timeInterval: -1_000, since: .now)
         let notExpiredDate = Date(timeInterval: 1_000, since: .now)
-        addTestQuantity(5, expiryDate: expiredDate)
-        addTestQuantity(5, expiryDate: notExpiredDate)
-        addTestQuantity(5, expiryDate: nil)
+        try addTestQuantity(5, expiryDate: expiredDate)
+        try addTestQuantity(5, expiryDate: notExpiredDate)
+        try addTestQuantity(5, expiryDate: nil)
 
         ingredient.removeExpiredBatches()
 

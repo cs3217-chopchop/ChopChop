@@ -5,7 +5,7 @@ struct IngredientBatchRecord {
     var id: Int64?
     var ingredientId: Int64?
     var expiryDate: Date?
-    var quantity: Quantity
+    var quantity: QuantityRecord
 }
 
 extension IngredientBatchRecord: Codable, FetchableRecord, MutablePersistableRecord {

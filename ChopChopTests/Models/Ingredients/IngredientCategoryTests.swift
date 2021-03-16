@@ -35,7 +35,7 @@ extension IngredientCategoryTests {
             ingredients: [ingredient])
 
         XCTAssertNotEqual(ingredient.ingredientCategoryId, 3_216,
-                       "Category ID of contained ingredient should be updated")
+                          "Category ID of contained ingredient should be updated")
         XCTAssertEqual(ingredient.ingredientCategoryId, IngredientCategoryTests.categoryId,
                        "Category ID of contained ingredient should be updated correctly")
     }
@@ -63,25 +63,31 @@ extension IngredientCategoryTests {
         let quantityType: QuantityType = .mass
         let existingDate = Date(timeInterval: -1_000, since: .testDate)
         let commonDate: Date = .testDate
+
+        let quantity1 = try Quantity(.mass, value: 1)
+        let quantity2 = try Quantity(.mass, value: 0.3)
+        let quantity3 = try Quantity(.mass, value: 0.5)
         let existingIngredient = try Ingredient(
             name: name,
             type: quantityType,
             batches: [
-                IngredientBatch(quantity: .mass(1)),
-                IngredientBatch(quantity: .mass(0.3), expiryDate: commonDate),
-                IngredientBatch(quantity: .mass(0.5), expiryDate: existingDate)
+                IngredientBatch(quantity: quantity1),
+                IngredientBatch(quantity: quantity2, expiryDate: commonDate),
+                IngredientBatch(quantity: quantity3, expiryDate: existingDate)
             ])
 
         category.add(existingIngredient)
 
+        let quantity4 = try Quantity(.mass, value: 2)
+        let quantity5 = try Quantity(.mass, value: 0.4)
         let newDate = Date(timeInterval: 1_000, since: .testDate)
         let addedIngredient = try Ingredient(
             name: name,
             type: quantityType,
             batches: [
-                IngredientBatch(quantity: .mass(2)),
-                IngredientBatch(quantity: .mass(0.4), expiryDate: commonDate),
-                IngredientBatch(quantity: .mass(0.5), expiryDate: newDate)
+                IngredientBatch(quantity: quantity4),
+                IngredientBatch(quantity: quantity5, expiryDate: commonDate),
+                IngredientBatch(quantity: quantity3, expiryDate: newDate)
             ])
 
         category.add(addedIngredient)
@@ -90,11 +96,11 @@ extension IngredientCategoryTests {
                                                "Ingredient should be in category")
 
         let notExpiringBatch = combinedIngredient.getBatch(expiryDate: nil)
-        XCTAssertEqual(notExpiringBatch?.quantity, .mass(1 + 2),
+        XCTAssertEqual(notExpiringBatch?.quantity, try? Quantity(.mass, value: 1 + 2),
                        "Quantity should be combined correctly")
 
         let commonBatch = combinedIngredient.getBatch(expiryDate: commonDate)
-        XCTAssertEqual(commonBatch?.quantity, .mass(0.3 + 0.4),
+        XCTAssertEqual(commonBatch?.quantity, try? Quantity(.mass, value: 0.3 + 0.4),
                        "Quantity should be combined correctly")
 
         XCTAssertNotNil(combinedIngredient.getBatch(expiryDate: existingDate),
@@ -108,11 +114,13 @@ extension IngredientCategoryTests {
 
     func testAdd_existingIngredientDifferentQuantityType_ingredientAppended() throws {
         let name = "Cheese"
+        let massQuantity = try Quantity(.mass, value: 1)
+        let countQuantity = try Quantity(.count, value: 1)
         let ingredient = try Ingredient(
             name: name,
             type: .mass,
             batches: [
-                IngredientBatch(quantity: .mass(1))
+                IngredientBatch(quantity: massQuantity)
             ])
 
         category.add(ingredient)
@@ -121,7 +129,7 @@ extension IngredientCategoryTests {
             name: name,
             type: .count,
             batches: [
-                IngredientBatch(quantity: .count(1))
+                IngredientBatch(quantity: countQuantity)
             ])
 
         category.add(addedIngredient)
@@ -131,9 +139,9 @@ extension IngredientCategoryTests {
         let appendedIngredient = try XCTUnwrap(category.getIngredient(name: name, type: .count),
                                                "Ingredient should not be combined")
 
-        XCTAssertEqual(existingIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: .mass(1)),
+        XCTAssertEqual(existingIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: massQuantity),
                        "Ingredient should not be combined")
-        XCTAssertEqual(appendedIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: .count(1)),
+        XCTAssertEqual(appendedIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: countQuantity),
                        "Ingredient should not be combined")
 
         XCTAssertEqual(appendedIngredient.ingredientCategoryId, IngredientCategoryTests.categoryId,
@@ -207,10 +215,11 @@ extension IngredientCategoryTests {
     func testGetIngredient_existingIngredient_success() throws {
         let ingredientName = "Cheese"
         let quantityType: QuantityType = .mass
+        let quantity = try Quantity(.mass, value: 0.5)
         let ingredient = try Ingredient(
             name: ingredientName,
             type: quantityType,
-            batches: [IngredientBatch(quantity: .mass(0.5))])
+            batches: [IngredientBatch(quantity: quantity)])
 
         category = IngredientCategory(
             name: IngredientCategoryTests.categoryName,
@@ -220,16 +229,17 @@ extension IngredientCategoryTests {
         let retrievedIngredient = try XCTUnwrap(category.getIngredient(name: ingredientName, type: quantityType))
 
         XCTAssertEqual(retrievedIngredient, ingredient)
-        XCTAssertEqual(retrievedIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: .mass(0.5)))
+        XCTAssertEqual(retrievedIngredient.getBatch(expiryDate: nil), IngredientBatch(quantity: quantity))
     }
 
     func testGetIngredient_nonExistingIngredient_returnsNil() throws {
         let ingredientName = "Cheese"
         let quantityType: QuantityType = .mass
+        let quantity = try Quantity(.mass, value: 0.5)
         let ingredient = try Ingredient(
             name: ingredientName,
             type: quantityType,
-            batches: [IngredientBatch(quantity: .mass(0.5))])
+            batches: [IngredientBatch(quantity: quantity)])
 
         category = IngredientCategory(
             name: IngredientCategoryTests.categoryName,
@@ -242,10 +252,11 @@ extension IngredientCategoryTests {
     func testGetIngredient_existingIngredientDifferentType_returnsNil() throws {
         let ingredientName = "Cheese"
         let quantityType: QuantityType = .mass
+        let quantity = try Quantity(.mass, value: 0.5)
         let ingredient = try Ingredient(
             name: ingredientName,
             type: quantityType,
-            batches: [IngredientBatch(quantity: .mass(0.5))])
+            batches: [IngredientBatch(quantity: quantity)])
 
         category = IngredientCategory(
             name: IngredientCategoryTests.categoryName,

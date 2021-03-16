@@ -1,10 +1,13 @@
+import GRDB
+import Combine
+
 /**
  Represents a collection of ingredients grouped under a category.
  
  Invariants:
  - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
-class IngredientCategory {
+class IngredientCategory: FetchableRecord {
     var id: Int64?
     private(set) var name: String
     private(set) var ingredients: [Ingredient]
@@ -15,6 +18,22 @@ class IngredientCategory {
 
         ingredients.forEach { $0.ingredientCategoryId = id }
         self.ingredients = ingredients
+    }
+
+    required init(row: Row) {
+        id = row["id"]
+        name = row["name"]
+        ingredients = []
+
+        if let categoryId = id {
+            let storageManager = StorageManager()
+            storageManager.ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [categoryId])
+                .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] infos in
+                    let ingredientIds = infos.compactMap { $0.id }
+                    let ingredients = ingredientIds.compactMap { try? storageManager.fetchIngredient(id: $0) }
+                    self?.ingredients = ingredients
+                })
+        }
     }
 
     /**
