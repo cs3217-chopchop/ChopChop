@@ -1,0 +1,31 @@
+name: ChopChop
+options:
+  # bundleIdPrefix: com.seowalex
+  xcodeVersion: "12.4"
+  deploymentTarget:
+    iOS: 14.4
+  groupSortPosition: top
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 5.6.0
+targets:
+  ChopChop:
+    type: application
+    platform: iOS
+    sources: ChopChop
+    dependencies:
+      - package: GRDB
+    preBuildScripts:
+      - script: |
+          if which swiftlint >/dev/null; then
+            swiftlint autocorrect && swiftlint
+          else
+            echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+          fi
+  ChopChopTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: ChopChopTests
+    dependencies:
+      - target: ChopChop
