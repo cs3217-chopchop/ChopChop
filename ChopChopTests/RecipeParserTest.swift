@@ -10,43 +10,77 @@ import XCTest
 
 class RecipeParserTest: XCTestCase {
 
-    let ingredients = [
-        "2 1/2 tablespoon olive oil\r",
-        "1  1 / 3 cup onion, chopped\r"
-    ]
-
-    func testFromJsonStringArrayToIngredientDict() throws {
-        let result = RecipeParser.fromJsonStringArrayToIngredientDict(jsonIngredients: ingredients)
-        print(result)
-        XCTAssertTrue(true)
+    func testParseIngredientList() throws {
+        let ingredients = [
+            "2 tablespoon olive oil",
+            "1 lemon, juiced"
+        ]
+        let result = RecipeParser.parseIngredientList(ingredientList: ingredients)
+        let right: [String: Quantity] = [
+            "olive oil": .volume(0.015 * 2),
+            "lemon, juiced": .count(1)
+        ]
+        XCTAssertEqual(result, right)
     }
 
-    func testRegex() {
-        let intOrDecimal = "(?<number>[1-9]\\d*)\\s+(?<frac>[1-9]\\s*/\\s*[1-9])\\s+"
-        let full = intOrDecimal + "(<?unit>liters|milliliters|tablespoons|qt|teaspoon|cup|cups|tsp|"
-            + "teaspoons|pint|pints|pt|tbsp|quart|gallon|gallons|liter|l|quarts|ml|tablespoon|milliliter"
-            + "|lb|oz|grams|gram|ounce|kilogram|pound|g|kilograms|kg|ounces|pounds)"
-        let regex = NSRegularExpression(full)
-        let text = "2 1/2 tablespoon of olive oil"
-        XCTAssertNotNil(regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)))
+    func testParseIngredient_fractionWithVolume() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "1/4 tsp ground cloves")
+        XCTAssertEqual(result.name, "ground cloves")
+        XCTAssertEqual(result.quantity, .volume(0.005 * 0.25))
     }
 
-    func testFromStringToNameQuantity() throws {
-        let result = RecipeParser.fromStringToNameQuantity(ingredientText: "6.6 lettuce")
-        XCTAssertEqual(result.name, "lettuce")
-        XCTAssertEqual(result.quantity, .count(6.6))
+    func testParseIngredient_fractionWithCount() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "1/4 nutmeg, grated")
+        XCTAssertEqual(result.name, "nutmeg, grated")
+        XCTAssertEqual(result.quantity, .count(0.25))
     }
 
-    func testMatchNumberFractionOptionalUnitFormat() {
-        let result = RecipeParser.matchNumberFractionOptionalUnitFormat(text: "2 1/2 olive oil")
-        XCTAssertEqual(result?.name, "olive oil")
-        XCTAssertEqual(result?.quantity, .count(2.5))
+    func testParseIngredient_fractionWithMass() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "1/4 tsp ground cloves")
+        XCTAssertEqual(result.name, "ground cloves")
+        XCTAssertEqual(result.quantity, .volume(0.005 * 0.25))
     }
 
-    func testMatchNumberOrFractionOptionalUnitFormat() {
-        let result = RecipeParser.matchNumberOrFractionOptionalUnitFormat(text: "2L olive oil")
-        XCTAssertEqual(result?.name, "olive oil")
-        XCTAssertEqual(result?.quantity, .volume(2))
+    func testParseIngredient_integerFractionWithCount() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "2 1/2 4.0kg pork escalopes")
+        XCTAssertEqual(result.name, "4.0kg pork escalopes")
+            XCTAssertEqual(result.quantity, .count(2.5))
+    }
+
+    func testParseIngredient_integerSpaceWithVolume() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "2 teaspoon sesame oil")
+        XCTAssertEqual(result.name, "sesame oil")
+        XCTAssertEqual(result.quantity, .volume(0.005 * 2))
+    }
+
+    func testParseIngredient_integerNoSpaceWithVolume() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "2tsp sesame oil")
+        XCTAssertEqual(result.name, "sesame oil")
+        XCTAssertEqual(result.quantity, .volume(0.005 * 2))
+    }
+
+    func testParseIngredient_decimalSpaceWithMass() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "2.5 g butter")
+        XCTAssertEqual(result.name, "butter")
+        XCTAssertEqual(result.quantity, .mass(0.001 * 2.5))
+    }
+
+    func testParseIngredient_decimalNoSpaceWithMass() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "19.0kg ground beef")
+        XCTAssertEqual(result.name, "ground beef")
+        XCTAssertEqual(result.quantity, .mass(19.0))
+    }
+
+    func testParseIngredient_noQuantity() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "Salt and pepper")
+        XCTAssertEqual(result.name, "Salt and pepper")
+        XCTAssertEqual(result.quantity, .count(1))
+    }
+
+    func testParseIngredient_invalidFraction() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "0/0 tsp ground cloves")
+        XCTAssertEqual(result.name, "0/0 tsp ground cloves")
+        XCTAssertEqual(result.quantity, .count(1))
     }
 
     func testfromJsonStringToSteps() throws {

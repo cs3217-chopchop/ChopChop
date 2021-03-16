@@ -87,11 +87,11 @@ class RecipeParser {
         }
     }
 
-    static func fromJsonStringArrayToIngredientDict(jsonIngredients: [String]) -> [String: Quantity] {
+    static func parseIngredientList(ingredientList: [String]) -> [String: Quantity] {
 
         var ingredientDict = [String: Quantity]()
 
-        jsonIngredients.map({ fromStringToNameQuantity(ingredientText: $0) })
+        ingredientList.map({ parseIngredient(ingredientText: $0) })
             .forEach({ ingredient in
                 ingredientDict[ingredient.name] = ingredient.quantity
             })
@@ -196,7 +196,7 @@ class RecipeParser {
         return (ingredient, ingredientQuantity)
     }
 
-    static func fromStringToNameQuantity(ingredientText: String) -> (name: String, quantity: Quantity) {
+    static func parseIngredient(ingredientText: String) -> (name: String, quantity: Quantity) {
 
         var parseResult = matchNumberFractionOptionalUnitFormat(text: ingredientText)
         if let ingredients = parseResult {
