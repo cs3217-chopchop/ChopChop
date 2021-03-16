@@ -76,7 +76,7 @@ extension Quantity {
             }
             return .volume(sum)
         default:
-            throw QuantityError.differentQuantityTypes
+            throw QuantityError.differentTypes
         }
     }
 
@@ -107,7 +107,7 @@ extension Quantity {
             }
             return .volume(difference)
         default:
-            throw QuantityError.differentQuantityTypes
+            throw QuantityError.differentTypes
         }
     }
 
@@ -223,7 +223,7 @@ extension Quantity: Comparable {
         case let (.volume(leftValue), .volume(rightValue)):
             return leftValue < rightValue
         default:
-            throw QuantityError.differentQuantityTypes
+            throw QuantityError.differentTypes
         }
     }
 
@@ -248,7 +248,7 @@ extension Quantity: Comparable {
 enum QuantityError: Error {
     case negativeQuantity
     case divisionByZero
-    case differentQuantityTypes
+    case differentTypes
 }
 
 enum QuantityType {

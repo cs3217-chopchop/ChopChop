@@ -94,7 +94,7 @@ extension IngredientBatchTests {
 
 // MARK: - Comparable
 extension IngredientBatchTests {
-    func testCompare() {
+    func testCompare_expiringBatches_success() {
         let laterDate = Date(timeInterval: 1_000, since: .testDate)
 
         let laterBatch = IngredientBatch(
@@ -102,6 +102,13 @@ extension IngredientBatchTests {
             expiryDate: laterDate)
 
         XCTAssertTrue(batch < laterBatch)
+    }
+
+    func testCompare_nonExpiringBatch_success() {
+        let nonExpiringBatch = IngredientBatch(
+            quantity: IngredientBatchTests.existingQuantity)
+
+        XCTAssertTrue(batch < nonExpiringBatch)
     }
 
     func testEqual() {

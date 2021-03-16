@@ -8,7 +8,7 @@ class IngredientBatch {
     private(set) var quantity: Quantity
     private(set) var expiryDate: Date?
 
-    init(quantity: Quantity, expiryDate: Date?) {
+    init(quantity: Quantity, expiryDate: Date? = nil) {
         self.quantity = quantity
         self.expiryDate = expiryDate
     }

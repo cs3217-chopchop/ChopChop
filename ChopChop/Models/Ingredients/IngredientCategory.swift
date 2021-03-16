@@ -6,10 +6,12 @@ class IngredientCategory {
     private(set) var name: String
     private(set) var ingredients: [Ingredient]
 
-    init(id: Int64?, name: String) {
+    init(name: String, id: Int64? = nil, ingredients: [Ingredient] = []) {
         self.id = id
         self.name = name
-        self.ingredients = []
+
+        ingredients.forEach { $0.ingredientCategoryId = id }
+        self.ingredients = ingredients
     }
 
     /**
@@ -24,6 +26,7 @@ class IngredientCategory {
 
         guard let existingIngredient = sameIngredient else {
             ingredients.append(addedIngredient)
+            addedIngredient.ingredientCategoryId = id
             return
         }
 
@@ -41,6 +44,16 @@ class IngredientCategory {
     func remove(_ removedIngredient: Ingredient) {
         ingredients.removeAll { ingredient in
             ingredient == removedIngredient
+        }
+    }
+
+    /**
+     Returns the ingredient with the given name and quantity type,
+     or `nil` if it does not exist in the category.
+     */
+    func getIngredient(name: String, type: QuantityType) -> Ingredient? {
+        ingredients.first { ingredient in
+            ingredient.name == name && ingredient.quantityType == type
         }
     }
 }

@@ -33,6 +33,8 @@
 		3FB92A6225FFCB480017F9F3 /* IngredientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB92A6125FFCB480017F9F3 /* IngredientTests.swift */; };
 		3FB92A6825FFCB600017F9F3 /* IngredientBatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB92A6725FFCB600017F9F3 /* IngredientBatchTests.swift */; };
 		3FB92A6C25FFCB790017F9F3 /* IngredientReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB92A6B25FFCB790017F9F3 /* IngredientReferenceTests.swift */; };
+		3FB92A7026005B0F0017F9F3 /* QuantityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB92A6F26005B0F0017F9F3 /* QuantityTests.swift */; };
+		3FB92A76260074220017F9F3 /* IngredientCategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB92A75260074220017F9F3 /* IngredientCategoryTests.swift */; };
 		72D6C94025F77E3600ED20FB /* ChopChopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */; };
 		72D6C94225F77E3600ED20FB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D6C94125F77E3600ED20FB /* ContentView.swift */; };
 		72D6C94425F77E3800ED20FB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 72D6C94325F77E3800ED20FB /* Assets.xcassets */; };
@@ -75,6 +77,8 @@
 		3FB92A6125FFCB480017F9F3 /* IngredientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientTests.swift; sourceTree = "<group>"; };
 		3FB92A6725FFCB600017F9F3 /* IngredientBatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientBatchTests.swift; sourceTree = "<group>"; };
 		3FB92A6B25FFCB790017F9F3 /* IngredientReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientReferenceTests.swift; sourceTree = "<group>"; };
+		3FB92A6F26005B0F0017F9F3 /* QuantityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuantityTests.swift; sourceTree = "<group>"; };
+		3FB92A75260074220017F9F3 /* IngredientCategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientCategoryTests.swift; sourceTree = "<group>"; };
 		72D6C93C25F77E3600ED20FB /* ChopChop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChopChop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		72D6C93F25F77E3600ED20FB /* ChopChopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChopChopApp.swift; sourceTree = "<group>"; };
 		72D6C94125F77E3600ED20FB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -163,9 +167,9 @@
 				0E16A5B625FCA236000C2DCF /* Ingredient.swift */,
 				0ED72F4F25FF5D7B00A045D2 /* IngredientInfo.swift */,
 				0ED72F5F25FF6D6500A045D2 /* IngredientCategory.swift */,
-				3F743B2325FFB4BF00E8EB71 /* Quantity.swift */,
 				3F743B2725FFB58F00E8EB71 /* IngredientBatch.swift */,
 				3F743B2F25FFBA0800E8EB71 /* IngredientReference.swift */,
+				3F743B2325FFB4BF00E8EB71 /* Quantity.swift */,
 			);
 			path = Ingredients;
 			sourceTree = "<group>";
@@ -193,6 +197,8 @@
 				3FB92A6125FFCB480017F9F3 /* IngredientTests.swift */,
 				3FB92A6725FFCB600017F9F3 /* IngredientBatchTests.swift */,
 				3FB92A6B25FFCB790017F9F3 /* IngredientReferenceTests.swift */,
+				3FB92A6F26005B0F0017F9F3 /* QuantityTests.swift */,
+				3FB92A75260074220017F9F3 /* IngredientCategoryTests.swift */,
 			);
 			path = Ingredients;
 			sourceTree = "<group>";
@@ -407,6 +413,8 @@
 				3FB92A6C25FFCB790017F9F3 /* IngredientReferenceTests.swift in Sources */,
 				0EA9B09225FB9E7200FF2E08 /* AppDatabaseTests.swift in Sources */,
 				0ED72F5625FF684800A045D2 /* StorageManagerTests.swift in Sources */,
+				3FB92A7026005B0F0017F9F3 /* QuantityTests.swift in Sources */,
+				3FB92A76260074220017F9F3 /* IngredientCategoryTests.swift in Sources */,
 				3FB92A6825FFCB600017F9F3 /* IngredientBatchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

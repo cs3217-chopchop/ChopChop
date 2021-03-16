@@ -137,7 +137,7 @@ struct StorageManager {
 
     func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
         appDatabase.ingredientCategoriesOrderedByNamePublisher()
-            .map { $0.map { IngredientCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.map { IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }
 }
