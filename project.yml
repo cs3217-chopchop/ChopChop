@@ -1,6 +1,6 @@
 name: ChopChop
 options:
-  # bundleIdPrefix: com.seowalex
+  bundleIdPrefix: com.seowalex
   xcodeVersion: "12.4"
   deploymentTarget:
     iOS: 14.4
