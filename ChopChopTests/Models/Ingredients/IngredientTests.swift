@@ -23,19 +23,22 @@ class IngredientTests: XCTestCase {
     }
 }
 
-// MARK: - Init
+// MARK: - Construct
 extension IngredientTests {
-    func testInit_validName_success() {
-        let validName = "Sugar"
-        XCTAssertNoThrow(try Ingredient(name: validName, type: .volume))
+    func testInit_validName_nameTrimmed() {
+        let validName = "  Sugar\n"
+        XCTAssertNoThrow(ingredient = try Ingredient(name: validName, type: .volume))
+
+        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
+        XCTAssertEqual(ingredient.name, trimmedName)
     }
 
-    func testInit_emptyName_throwsError() {
+    func testInit_invalidName_throwsError() {
         let emptyName = ""
         XCTAssertThrowsError(try Ingredient(name: emptyName, type: .count))
 
-        let nameWithOnlyWhitespace = " "
-        XCTAssertThrowsError(try Ingredient(name: nameWithOnlyWhitespace, type: .count))
+        let invalidName = " \n"
+        XCTAssertThrowsError(try Ingredient(name: invalidName, type: .count))
     }
 }
 

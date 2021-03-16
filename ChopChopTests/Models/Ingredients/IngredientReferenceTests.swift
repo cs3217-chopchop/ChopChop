@@ -9,7 +9,7 @@ class IngredientReferenceTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        reference = IngredientReference(
+        reference = try IngredientReference(
             name: "Sugar",
             quantity: IngredientReferenceTests.existingQuantity)
     }
@@ -18,6 +18,25 @@ class IngredientReferenceTests: XCTestCase {
         reference = nil
 
         try super.tearDownWithError()
+    }
+}
+
+// MARK: - Construct
+extension IngredientReferenceTests {
+    func testConstruct_validName_nameTrimmed() {
+        let validName = "  Cheese\n"
+        XCTAssertNoThrow(reference = try IngredientReference(name: validName, quantity: .count(3)))
+
+        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
+        XCTAssertEqual(reference.name, trimmedName)
+    }
+
+    func testConstruct_invalidName_throwsError() {
+        let emptyName = ""
+        XCTAssertThrowsError(try IngredientReference(name: emptyName, quantity: .count(3)))
+
+        let invalidName = " \n"
+        XCTAssertThrowsError(try IngredientReference(name: invalidName, quantity: .count(3)))
     }
 }
 

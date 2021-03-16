@@ -1,5 +1,8 @@
 /**
- Represents a collection of ingredients grouped under a category..
+ Represents a collection of ingredients grouped under a category.
+ 
+ Invariants:
+ - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
 class IngredientCategory {
     var id: Int64?
@@ -42,9 +45,15 @@ class IngredientCategory {
      If such an ingredient does not exist, do nothing.
      */
     func remove(_ removedIngredient: Ingredient) {
+        guard ingredients.contains(removedIngredient) else {
+            return
+        }
+
         ingredients.removeAll { ingredient in
             ingredient == removedIngredient
         }
+
+        removedIngredient.ingredientCategoryId = nil
     }
 
     /**

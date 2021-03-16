@@ -231,24 +231,21 @@ extension QuantityTests {
     func testLessThan_sameQuantityType_success() {
         let leftCount: Quantity = .count(1)
         let rightCount: Quantity = .count(2)
-        XCTAssertTrue(try leftCount < rightCount)
-        XCTAssertFalse(try rightCount < leftCount)
+        XCTAssertLessThan(leftCount, rightCount)
 
         let leftMass: Quantity = .mass(0.3)
         let rightMass: Quantity = .mass(0.4)
-        XCTAssertTrue(try leftMass < rightMass)
-        XCTAssertFalse(try rightMass < leftMass)
+        XCTAssertLessThan(leftMass, rightMass)
 
         let leftVolume: Quantity = .volume(0.5)
         let rightVolume: Quantity = .volume(0.6)
-        XCTAssertTrue(try leftVolume < rightVolume)
-        XCTAssertFalse(try rightVolume < leftVolume)
+        XCTAssertLessThan(leftVolume, rightVolume)
     }
 
     func testLessThan_equalQuantities_returnsFalse() {
         let left: Quantity = .count(3)
         let right: Quantity = .count(3)
-        XCTAssertFalse(try left < right)
+        XCTAssertLessThanOrEqual(left, right)
     }
 
     func testLessThan_differentQuantityTypes_throwsError() {
@@ -262,26 +259,26 @@ extension QuantityTests {
         let leftCount: Quantity = .count(1)
         let rightCount: Quantity = .count(1)
         let differentCount: Quantity = .count(2)
-        XCTAssertTrue(leftCount == rightCount)
-        XCTAssertFalse(leftCount == differentCount)
+        XCTAssertEqual(leftCount, rightCount)
+        XCTAssertNotEqual(leftCount, differentCount)
 
         let leftMass: Quantity = .mass(0.3)
         let rightMass: Quantity = .mass(0.3)
         let differentMass: Quantity = .mass(0.4)
-        XCTAssertTrue(leftMass == rightMass)
-        XCTAssertFalse(leftMass == differentMass)
+        XCTAssertEqual(leftMass, rightMass)
+        XCTAssertNotEqual(leftMass, differentMass)
 
         let leftVolume: Quantity = .volume(0.5)
         let rightVolume: Quantity = .volume(0.5)
         let differentVolume: Quantity = .volume(0.6)
-        XCTAssertTrue(leftVolume == rightVolume)
-        XCTAssertFalse(leftVolume == differentVolume)
+        XCTAssertEqual(leftVolume, rightVolume)
+        XCTAssertNotEqual(leftVolume, differentVolume)
     }
 
     func testEqualTo_differentQuantityTypes_returnsFalse() {
         let left: Quantity = .count(1)
         let right: Quantity = .volume(0.5)
 
-        XCTAssertFalse(left == right)
+        XCTAssertNotEqual(left, right)
     }
 }

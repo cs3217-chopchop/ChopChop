@@ -27,14 +27,17 @@ extension IngredientCategoryTests {
         let ingredientName = "Cheese"
         let quantityType: QuantityType = .mass
         let ingredient = try Ingredient(name: ingredientName, type: quantityType)
+        ingredient.ingredientCategoryId = 3_216
 
         category = IngredientCategory(
             name: IngredientCategoryTests.categoryName,
             id: IngredientCategoryTests.categoryId,
             ingredients: [ingredient])
 
+        XCTAssertNotEqual(ingredient.ingredientCategoryId, 3_216,
+                       "Category ID of contained ingredient should be updated")
         XCTAssertEqual(ingredient.ingredientCategoryId, IngredientCategoryTests.categoryId,
-                       "Category ID of contained ingredient should be set correctly")
+                       "Category ID of contained ingredient should be updated correctly")
     }
 }
 
@@ -154,6 +157,8 @@ extension IngredientCategoryTests {
 
         XCTAssertNil(category.getIngredient(name: ingredientName, type: quantityType),
                      "Ingredient should be removed")
+        XCTAssertNil(ingredient.ingredientCategoryId,
+                     "Category ID should be set to nil")
     }
 
     func testRemove_nonExistingIngredient_doNothing() throws {
@@ -167,10 +172,13 @@ extension IngredientCategoryTests {
             ingredients: [ingredient])
 
         let removedIngredient = try Ingredient(name: "Milk", type: .volume)
+        removedIngredient.ingredientCategoryId = 3_216
         category.remove(removedIngredient)
 
         XCTAssertNotNil(category.getIngredient(name: ingredientName, type: quantityType),
                         "Existing ingredient should not be removed")
+        XCTAssertEqual(removedIngredient.ingredientCategoryId, 3_216,
+                       "Ingredient not in category should have unchanged category ID")
     }
 
     func testRemove_existingIngredientDifferentQuantityType_doNothing() throws {
@@ -184,11 +192,13 @@ extension IngredientCategoryTests {
             ingredients: [ingredient])
 
         let removedIngredient = try Ingredient(name: ingredientName, type: .count)
+        removedIngredient.ingredientCategoryId = 3_216
         category.remove(removedIngredient)
 
         XCTAssertNotNil(category.getIngredient(name: ingredientName, type: quantityType),
                         "Existing ingredient with different type should not be removed")
-
+        XCTAssertEqual(removedIngredient.ingredientCategoryId, 3_216,
+                       "Ingredient not in category should have unchanged category ID")
     }
 }
 

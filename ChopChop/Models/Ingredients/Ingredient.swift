@@ -12,6 +12,7 @@ class Ingredient: FetchableRecord {
     var id: Int64?
     var ingredientCategoryId: Int64?
     let quantityType: QuantityType
+
     private(set) var name: String
     private(set) var batches: [IngredientBatch]
 
@@ -23,7 +24,7 @@ class Ingredient: FetchableRecord {
         }
 
         self.quantityType = type
-        self.name = name
+        self.name = trimmedName
 
         for batch in batches where batch.quantity.type != type {
             throw QuantityError.differentTypes
@@ -83,11 +84,7 @@ extension Ingredient {
             throw QuantityError.differentTypes
         }
 
-        let existingBatches = batches.filter { batch in
-            batch.expiryDate == expiryDate
-        }
-
-        if let existingBatch = existingBatches.first {
+        if let existingBatch = batches.first(where: { $0.expiryDate == expiryDate }) {
             try existingBatch.add(quantity)
         } else {
             let addedBatch = IngredientBatch(quantity: quantity, expiryDate: expiryDate)
@@ -148,19 +145,7 @@ extension Ingredient {
         var usedBatches: [IngredientBatch] = []
 
         for batch in batchesByExpiryDate {
-            guard let expiryDate = batch.expiryDate else {
-                do {
-                    try subtractedQuantity -= batch.quantity
-                    usedBatches.append(batch)
-                    continue
-                } catch QuantityError.negativeQuantity {
-                    try batch.subtract(subtractedQuantity)
-                    subtractedQuantity.value = 0
-                    break
-                }
-            }
-
-            guard expiryDate > currentDate else {
+            if let expiryDate = batch.expiryDate, expiryDate < currentDate {
                 continue
             }
 

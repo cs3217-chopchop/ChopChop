@@ -198,11 +198,21 @@ extension Quantity: CustomStringConvertible {
     var description: String {
         switch self {
         case .count(let value):
-            let precision = 1
-            return String(format: "%.\(precision)f", value)
-        case .mass(let value), .volume(let value):
-            let precision = 2
-            return String(format: "%.\(precision)f", value)
+            return String(format: "%.1f", value)
+        case .mass(let valueInKilograms):
+            if valueInKilograms < 1 {
+                let valueInGrams = valueInKilograms * 1_000
+                return String(format: "%.2f grams", valueInGrams)
+            }
+
+            return String(format: "%.2f kilograms", valueInKilograms)
+        case .volume(let valueInLitres):
+            if valueInLitres < 1 {
+                let valueInMillilitres = valueInLitres * 1_000
+                return String(format: "%.2f millilitres", valueInMillilitres)
+            }
+
+            return String(format: "%.2f litres", valueInLitres)
         }
     }
 }
