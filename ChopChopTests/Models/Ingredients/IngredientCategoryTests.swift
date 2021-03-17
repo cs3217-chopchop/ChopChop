@@ -10,7 +10,7 @@ class IngredientCategoryTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        category = IngredientCategory(
+        category = try IngredientCategory(
             name: IngredientCategoryTests.categoryName,
             id: IngredientCategoryTests.categoryId)
     }
@@ -19,5 +19,43 @@ class IngredientCategoryTests: XCTestCase {
         category = nil
 
         try super.tearDownWithError()
+    }
+}
+
+// MARK: - Construct
+extension IngredientCategoryTests {
+    func testConstruct_validName_nameTrimmed() throws {
+        let validName = "  Dairy\n"
+        XCTAssertNoThrow(category = try IngredientCategory(name: validName))
+
+        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
+        XCTAssertEqual(category.name, trimmedName)
+    }
+
+    func testConstruct_invalidName_throwsError() {
+        let emptyName = ""
+        XCTAssertThrowsError(try IngredientCategory(name: emptyName))
+
+        let invalidName = " \n"
+        XCTAssertThrowsError(try IngredientCategory(name: invalidName))
+    }
+}
+
+// MARK: - Rename
+extension IngredientCategoryTests {
+    func testRename_validName_nameTrimmed() {
+        let validName = "  Spices\n"
+        XCTAssertNoThrow(try category.rename(validName))
+
+        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
+        XCTAssertEqual(category.name, trimmedName)
+    }
+
+    func testRename_emptyName_throwsError() {
+        let emptyName = ""
+        XCTAssertThrowsError(try category.rename(emptyName))
+
+        let nameWithOnlyWhitespace = " "
+        XCTAssertThrowsError(try category.rename(nameWithOnlyWhitespace))
     }
 }

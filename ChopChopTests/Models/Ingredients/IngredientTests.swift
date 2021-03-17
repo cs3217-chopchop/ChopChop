@@ -25,7 +25,7 @@ class IngredientTests: XCTestCase {
 
 // MARK: - Construct
 extension IngredientTests {
-    func testInit_validName_nameTrimmed() {
+    func testConstruct_validName_nameTrimmed() {
         let validName = "  Sugar\n"
         XCTAssertNoThrow(ingredient = try Ingredient(name: validName, type: .volume))
 
@@ -33,7 +33,7 @@ extension IngredientTests {
         XCTAssertEqual(ingredient.name, trimmedName)
     }
 
-    func testInit_invalidName_throwsError() {
+    func testConstruct_invalidName_throwsError() {
         let emptyName = ""
         XCTAssertThrowsError(try Ingredient(name: emptyName, type: .count))
 
@@ -44,9 +44,12 @@ extension IngredientTests {
 
 // MARK: - Rename
 extension IngredientTests {
-    func testRename_validName_success() {
-        let validName = "Sugar"
+    func testRename_validName_nameTrimmed() {
+        let validName = "  Sugar\n"
         XCTAssertNoThrow(try ingredient.rename(validName))
+
+        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
+        XCTAssertEqual(ingredient.name, trimmedName)
     }
 
     func testRename_emptyName_throwsError() {
@@ -225,7 +228,8 @@ extension IngredientTests {
         let nonExpiringBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: nil),
                                               "Non expiring batch should be in the ingredient")
 
-        XCTAssertEqual(nonExpiringBatch?.quantity, try? Quantity(.count, value: 3), "Quantity should be subtracted correctly")
+        XCTAssertEqual(nonExpiringBatch?.quantity, try? Quantity(.count, value: 3),
+                       "Quantity should be subtracted correctly")
     }
 
     func testUse_existingExpiredBatch_ignoresExpiredBatch() throws {

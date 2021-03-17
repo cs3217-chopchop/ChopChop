@@ -72,7 +72,7 @@ extension Ingredient {
             throw IngredientError.emptyName
         }
 
-        self.name = newName
+        self.name = trimmedName
     }
 
     /**

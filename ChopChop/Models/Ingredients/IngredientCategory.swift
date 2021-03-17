@@ -11,9 +11,30 @@ struct IngredientCategory {
     var id: Int64?
     private(set) var name: String
 
-    init(name: String, id: Int64? = nil) {
+    init(name: String, id: Int64? = nil) throws {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else {
+            throw IngredientError.emptyName
+        }
+
         self.id = id
-        self.name = name
+        self.name = trimmedName
+    }
+
+    /**
+     Renames the ingredient category with a given name.
+     - Throws:
+        - `IngredientError.emptyName`: if the given name is empty.
+     */
+    mutating func rename(_ newName: String) throws {
+        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else {
+            throw IngredientError.emptyName
+        }
+
+        name = trimmedName
     }
 
     /**
