@@ -617,7 +617,7 @@ class AppDatabaseTests: XCTestCase {
 
     // MARK: - Recipes Publisher Tests
 
-    func testRecipesOrderedByNamePublisher_publishesWellOrderedRecipes() throws {
+    func testRecipesOrderedByNamePublisher_publishesOrderedRecipes() throws {
         var recipe1 = RecipeRecord(name: "Scrambled Eggs")
         var recipe2 = RecipeRecord(name: "Pancakes")
 
@@ -657,7 +657,7 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertNotNil(recipes)
     }
 
-    func testRecipesFilteredByCategoryOrderedByNamePublisher_publishesFilteredWellOrderedRecipes() throws {
+    func testRecipesFilteredByCategoryOrderedByNamePublisher_publishesFilteredOrderedRecipes() throws {
         var category1 = RecipeCategoryRecord(name: "American")
         var category2 = RecipeCategoryRecord(name: "Japanese")
 
@@ -717,9 +717,51 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertNotNil(recipes)
     }
 
+    func testRecipesFilteredByNamePublisher_publishesFilteredRecipes() throws {
+        var recipe1 = RecipeRecord(name: "Scrambled Eggs")
+        var recipe2 = RecipeRecord(name: "Pancakes")
+        var recipe3 = RecipeRecord(name: "Eggs Benedict")
+
+        try dbWriter.write { db in
+            try recipe1.insert(db)
+            try recipe2.insert(db)
+            try recipe3.insert(db)
+        }
+
+        let exp = expectation(description: "Recipes")
+        var recipes: [RecipeRecord]?
+        let cancellable = appDatabase.recipesFilteredByNamePublisher("egg").sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            recipes = $0
+            exp.fulfill()
+        }
+
+        withExtendedLifetime(cancellable) {
+            waitForExpectations(timeout: 1, handler: nil)
+        }
+
+        XCTAssertEqual(recipes, [recipe1, recipe3])
+    }
+
+    func testRecipesFilteredByNamePublisher_publishesRightOnSubscription() throws {
+        var recipes: [RecipeRecord]?
+        _ = appDatabase.recipesFilteredByNamePublisher("").sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            recipes = $0
+        }
+
+        XCTAssertNotNil(recipes)
+    }
+
     // MARK: - Ingredients Publisher Tests
 
-    func testIngredientsOrderedByNamePublisher_publishesWellOrderedIngredients() throws {
+    func testIngredientsOrderedByNamePublisher_publishesOrderedIngredients() throws {
         var ingredient1 = IngredientRecord(name: "Sugar")
         var ingredient2 = IngredientRecord(name: "Salt")
 
@@ -759,7 +801,7 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertNotNil(ingredients)
     }
 
-    func testIngredientsOrderedByExpiryDatePublisher_publishesWellOrderedIngredients() throws {
+    func testIngredientsOrderedByExpiryDatePublisher_publishesOrderedIngredients() throws {
         var ingredient1 = IngredientRecord(name: "Sugar")
         var ingredient2 = IngredientRecord(name: "Salt")
         var ingredient3 = IngredientRecord(name: "Pepper")
@@ -821,7 +863,7 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertNotNil(ingredients)
     }
 
-    func testIngredientsFilteredByCategoryOrderedByNamePublisher_publishesFilteredWellOrderedIngredients() throws {
+    func testIngredientsFilteredByCategoryOrderedByNamePublisher_publishesFilteredOrderedIngredients() throws {
         var category1 = IngredientCategoryRecord(name: "Spices")
         var category2 = IngredientCategoryRecord(name: "Dairy")
 
