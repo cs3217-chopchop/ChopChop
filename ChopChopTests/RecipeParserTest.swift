@@ -83,11 +83,48 @@ class RecipeParserTest: XCTestCase {
         XCTAssertEqual(result.quantity, .count(1))
     }
 
-    func testfromJsonStringToSteps() throws {
-        let instructions = "1. Do this. 2. Do that."
-        let steps = RecipeParser.fromJsonStringToSteps(jsonInstructions: instructions)
+    func testParseInstructions_withIndexDot() throws {
+        let instructions = "1. First Step. 2. Second Step. 3. Last Step."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
         print(steps)
-        let correctSteps = ["Do this.", "Do that."]
+        let correctSteps = ["First Step.", "Second Step.", "Last Step."]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
+    func testParseInstructions_withIndexBracket() throws {
+        let instructions = "1) First Step. 2) Second Step. 3) Last Step."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        print(steps)
+        let correctSteps = ["First Step.", "Second Step.", "Last Step."]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
+    func testParseInstructions_oneStep() throws {
+        let instructions = "1. First Step."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        let correctSteps = ["First Step."]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
+    func testParseInstructions_withoutIndex() throws {
+        let instructions = "In a non-reactive dish, combine the lemon juice, olive oil and mix together."
+            + "To cook the chicken: Heat a nonstick skillet or grill pan over high heat."
+            + "Add the chicken breasts and cook on each side or until cooked through."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        let correctSteps = [
+            "In a non-reactive dish, combine the lemon juice, olive oil and mix together.",
+            "To cook the chicken: Heat a nonstick skillet or grill pan over high heat.",
+            "Add the chicken breasts and cook on each side or until cooked through."
+        ]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
+    func testParseInstructions_oneSentence() throws {
+        let instructions = "In a non-reactive dish, combine the lemon juice, olive oil and mix together."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        let correctSteps = [
+            "In a non-reactive dish, combine the lemon juice, olive oil and mix together."
+        ]
         XCTAssertEqual(steps, correctSteps)
     }
 

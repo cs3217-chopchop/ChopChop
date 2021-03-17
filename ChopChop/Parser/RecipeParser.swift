@@ -7,7 +7,7 @@
 import Foundation
 
 class RecipeParser {
-    static let stepsIndexRegex = "[1-9][0-9]*\\."
+    static let stepsIndexRegex = "[1-9][0-9]*(\\.|\\))\\s"
 
     static let tablespoonUnit = ["tablespoon[s]?", "tbsp"]
     static let teaspoonUnit = ["teaspoon[s]?", "tsp"]
@@ -75,15 +75,30 @@ class RecipeParser {
         "pound": 0.454
     ]
 
-    static func fromJsonStringToSteps(jsonInstructions: String) -> [String] {
-        if jsonInstructions ~= stepsIndexRegex {
-            let regex = NSRegularExpression(stepsIndexRegex)
+    static func parseInstructions(instructions: String) -> [String] {
+        let regex = NSRegularExpression(stepsIndexRegex)
 
-            return []
-//            return jsonInstructions.ranges(of: stepsIndexRegex, options: .regularExpression)
-
+        let indexes = regex.matches(in: instructions, options: [],
+                                    range: NSRange(location: 0, length: instructions.utf16.count))
+        if !indexes.isEmpty {
+            var steps = [String]()
+            for idx in 1..<indexes.count {
+                let startIndex = instructions.index(instructions.startIndex,
+                                                    offsetBy: indexes[idx - 1].range.upperBound)
+                let endIndex = instructions.index(instructions.startIndex,
+                                                  offsetBy: indexes[idx].range.lowerBound - 1)
+                steps.append(String(instructions[startIndex...endIndex])
+                                .trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+            let lastStart = instructions.index(instructions.startIndex,
+                                               offsetBy: indexes[indexes.count - 1].range.upperBound)
+            steps.append(String(instructions[lastStart..<instructions.endIndex])
+                            .trimmingCharacters(in: .whitespacesAndNewlines))
+            return steps
         } else {
-            return jsonInstructions.components(separatedBy: "\r\n\r\n")
+            return instructions.components(separatedBy: ".")
+                .dropLast()
+                .map({ $0 + "." })
         }
     }
 
