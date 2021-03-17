@@ -1,7 +1,7 @@
 /**
  Represents some quantity of an ingredient.
  */
-struct IngredientReference {
+struct RecipeIngredient {
     let name: String
     private(set) var quantity: Quantity
 

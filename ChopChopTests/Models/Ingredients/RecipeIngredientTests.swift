@@ -2,75 +2,75 @@ import XCTest
 
 @testable import ChopChop
 
-class IngredientReferenceTests: XCTestCase {
-    var reference: IngredientReference!
+class RecipeIngredientTests: XCTestCase {
+    var recipeIngredient: RecipeIngredient!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
-        reference = try IngredientReference(
+        recipeIngredient = try RecipeIngredient(
             name: "Sugar",
             quantity: existingQuantity)
     }
 
     override func tearDownWithError() throws {
-        reference = nil
+        recipeIngredient = nil
 
         try super.tearDownWithError()
     }
 }
 
 // MARK: - Construct
-extension IngredientReferenceTests {
+extension RecipeIngredientTests {
     func testConstruct_validName_nameTrimmed() throws {
         let validName = "  Cheese\n"
         let quantity = try Quantity(.count, value: 3)
-        XCTAssertNoThrow(reference = try IngredientReference(name: validName, quantity: quantity))
+        XCTAssertNoThrow(recipeIngredient = try RecipeIngredient(name: validName, quantity: quantity))
 
         let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
-        XCTAssertEqual(reference.name, trimmedName)
+        XCTAssertEqual(recipeIngredient.name, trimmedName)
     }
 
     func testConstruct_invalidName_throwsError() throws {
         let emptyName = ""
         let quantity = try Quantity(.count, value: 3)
-        XCTAssertThrowsError(try IngredientReference(name: emptyName, quantity: quantity))
+        XCTAssertThrowsError(try RecipeIngredient(name: emptyName, quantity: quantity))
 
         let invalidName = " \n"
-        XCTAssertThrowsError(try IngredientReference(name: invalidName, quantity: quantity))
+        XCTAssertThrowsError(try RecipeIngredient(name: invalidName, quantity: quantity))
     }
 }
 
 // MARK: - Add
-extension IngredientReferenceTests {
+extension RecipeIngredientTests {
     func testAdd_sameQuantityType_success() throws {
         let addedQuantity = try Quantity(.volume, value: 0.2)
 
-        XCTAssertNoThrow(try reference.add(addedQuantity))
+        XCTAssertNoThrow(try recipeIngredient.add(addedQuantity))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
         let sum = try? existingQuantity + addedQuantity
-        XCTAssertEqual(reference.quantity, sum, "Quantities should be added correctly")
+        XCTAssertEqual(recipeIngredient.quantity, sum, "Quantities should be added correctly")
     }
 
     func testAdd_differentQuantityType_throwsError() throws {
         let addedQuantity = try Quantity(.mass, value: 3)
 
-        XCTAssertThrowsError(try reference.add(addedQuantity))
+        XCTAssertThrowsError(try recipeIngredient.add(addedQuantity))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
-        XCTAssertEqual(reference.quantity, existingQuantity,
+        XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Current quantity should not be changed")
     }
 }
 
 // MARK: - Subtract
-extension IngredientReferenceTests {
+extension RecipeIngredientTests {
     func testSubtract_sameQuantityTypeSufficientQuantity_success() throws {
         let subtractedQuantity = try Quantity(.volume, value: 0.05)
 
-        XCTAssertNoThrow(try reference.subtract(subtractedQuantity))
+        XCTAssertNoThrow(try recipeIngredient.subtract(subtractedQuantity))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
         guard let difference = try? existingQuantity - subtractedQuantity else {
@@ -78,36 +78,36 @@ extension IngredientReferenceTests {
             return
         }
 
-        XCTAssertEqual(reference.quantity, difference, "Quantities should be subtracted correctly")
+        XCTAssertEqual(recipeIngredient.quantity, difference, "Quantities should be subtracted correctly")
     }
 
     func testSubtract_insufficientQuantity_throwsError() throws {
         let subtractedQuantity = try Quantity(.volume, value: 1)
 
-        XCTAssertThrowsError(try reference.subtract(subtractedQuantity))
+        XCTAssertThrowsError(try recipeIngredient.subtract(subtractedQuantity))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
-        XCTAssertEqual(reference.quantity, existingQuantity,
+        XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be subtracted")
     }
 
     func testSubtract_differentQuantityType_throwsError() throws {
         let subtractedQuantity = try Quantity(.mass, value: 3)
 
-        XCTAssertThrowsError(try reference.subtract(subtractedQuantity))
+        XCTAssertThrowsError(try recipeIngredient.subtract(subtractedQuantity))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
-        XCTAssertEqual(reference.quantity, existingQuantity,
+        XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be subtracted")
     }
 }
 
 // MARK: - Scale
-extension IngredientReferenceTests {
+extension RecipeIngredientTests {
     func testScale_nonNegativeFactor_success() throws {
         let factor: Double = 1.5
 
-        XCTAssertNoThrow(try reference.scale(factor))
+        XCTAssertNoThrow(try recipeIngredient.scale(factor))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
         guard let product = try? existingQuantity * factor else {
@@ -115,16 +115,16 @@ extension IngredientReferenceTests {
             return
         }
 
-        XCTAssertEqual(reference.quantity, product, "Quantity should be scaled correctly")
+        XCTAssertEqual(recipeIngredient.quantity, product, "Quantity should be scaled correctly")
     }
 
     func testScale_negativeResult_throwsError() throws {
         let factor: Double = -0.5
 
-        XCTAssertThrowsError(try reference.scale(factor))
+        XCTAssertThrowsError(try recipeIngredient.scale(factor))
 
         let existingQuantity = try Quantity(.volume, value: 0.1)
-        XCTAssertEqual(reference.quantity, existingQuantity,
+        XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be scaled")
     }
 }
