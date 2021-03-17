@@ -310,6 +310,13 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func recipesFilteredByContentsPublisher(_ query: String) -> AnyPublisher<[RecipeRecord], Error> {
+        ValueObservation
+            .tracking(RecipeRecord.all().filteredByContents(query).fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
