@@ -46,4 +46,8 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
     func filteredByCategory(ids: [Int64]) -> Self {
         joining(required: IngredientRecord.category.filter(keys: ids))
     }
+
+    func filteredByName(_ query: String) -> Self {
+        filter(IngredientRecord.Columns.name.like("%\(query)%"))
+    }
 }

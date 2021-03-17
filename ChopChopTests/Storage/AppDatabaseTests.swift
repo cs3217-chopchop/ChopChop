@@ -1012,6 +1012,48 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertNotNil(ingredients)
     }
 
+    func testIngredientsFilteredByNamePublisher_publishesFilteredIngredients() throws {
+        var ingredient1 = IngredientRecord(name: "Baking Powder")
+        var ingredient2 = IngredientRecord(name: "Baking Soda")
+        var ingredient3 = IngredientRecord(name: "Salt")
+
+        try dbWriter.write { db in
+            try ingredient1.insert(db)
+            try ingredient2.insert(db)
+            try ingredient3.insert(db)
+        }
+
+        let exp = expectation(description: "Ingredients")
+        var ingredients: [IngredientRecord]?
+        let cancellable = appDatabase.ingredientsFilteredByNamePublisher("baking").sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+            exp.fulfill()
+        }
+
+        withExtendedLifetime(cancellable) {
+            waitForExpectations(timeout: 1, handler: nil)
+        }
+
+        XCTAssertEqual(ingredients, [ingredient1, ingredient2])
+    }
+
+    func testIngredientsFilteredByNamePublisher_publishesRightOnSubscription() throws {
+        var ingredients: [IngredientRecord]?
+        _ = appDatabase.ingredientsFilteredByNamePublisher("").sink { completion in
+            if case let .failure(error) = completion {
+                XCTFail("Unexpected error \(error)")
+            }
+        } receiveValue: {
+            ingredients = $0
+        }
+
+        XCTAssertNotNil(ingredients)
+    }
+
     // MARK: - Model Fetch Tests
 
     func testFetchRecipe() throws {
