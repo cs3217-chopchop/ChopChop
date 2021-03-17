@@ -335,6 +335,13 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func ingredientsFilteredByNamePublisher(_ query: String) -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.all().filteredByName(query).fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all().orderedByExpiryDate().fetchAll)
