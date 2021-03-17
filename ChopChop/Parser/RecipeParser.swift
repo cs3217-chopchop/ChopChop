@@ -7,20 +7,31 @@
 import Foundation
 
 class RecipeParser {
+    
+    // matches 1. or 1)
     static let stepsIndexRegex = "[1-9][0-9]*(\\.|\\))\\s"
+    // matches 2 or 2.5
     static let intOrDecimal = "[1-9]\\d*(\\.\\d+)?"
+    // matches 2
     static let integer = "[1-9]\\d*"
+    // matches 1/2 or 1 / 2
     static let fraction = "[1-9]\\s*/\\s*[1-9]"
     static let whitespace = "\\s+"
     static let optionalWhiteSpace = "\\s*"
+    // places all units into a group like (kg|g|cup)
     static let units: String = (Array(UnitsMapping.volumeWordMap.keys) + Array(UnitsMapping.massWordMap.keys))
         .joined(separator: "|")
-
+    
+    /**
+     Parses a chunk of instructions into an array of steps. Parsing is done differently depending on
+     whether the instructions are already numbered.
+     */
     static func parseInstructions(instructions: String) -> [String] {
         let regex = NSRegularExpression(stepsIndexRegex)
 
         let indexes = regex.matches(in: instructions, options: [],
                                     range: NSRange(location: 0, length: instructions.utf16.count))
+        // when instructions are numbered, just parse base on the numbering
         if !indexes.isEmpty {
             var steps = [String]()
             for idx in 1..<indexes.count {
@@ -36,13 +47,17 @@ class RecipeParser {
             steps.append(String(instructions[lastStart..<instructions.endIndex])
                             .trimmingCharacters(in: .whitespacesAndNewlines))
             return steps
+        // when instructions are not numbered, each sentence is taken as a step
         } else {
             return instructions.components(separatedBy: ".")
                 .dropLast()
                 .map({ $0 + "." })
         }
     }
-
+    
+    /**
+     Parse a list of ingredient description into a dictionary of ingredient name and its corresponding quantity.
+     */
     static func parseIngredientList(ingredientList: [String]) -> [String: Quantity] {
 
         var ingredientDict = [String: Quantity]()
@@ -54,20 +69,25 @@ class RecipeParser {
         return ingredientDict
     }
     
+    /**
+     Parse a ingredient description into a pair of ingredient name and its corresponding quantity
+     */
     static func parseIngredient(ingredientText: String) -> (name: String, quantity: Quantity) {
-
+        
+        // checks if the text has both a number and a fraction, e.g. 1 1/2 gram of potato
         var parseResult = matchNumberFractionOptionalUnitFormat(text: ingredientText)
         if let ingredients = parseResult {
             return ingredients
         }
-
+        
+        // checks if the text has either a number or a fraction, e.g. 1 egg, 1/2 lemon
         parseResult = matchNumberOrFractionOptionalUnitFormat(text: ingredientText)
         if let ingredients = parseResult {
             return ingredients
         }
 
-        // temporary
-        return (ingredientText, .count(1))
+        // case where there is no numerical information about the ingredient, e.g. salt
+        return (ingredientText, .count(0))
 
     }
 
