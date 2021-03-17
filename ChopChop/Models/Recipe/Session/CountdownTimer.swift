@@ -6,17 +6,20 @@ class CountdownTimer {
     private(set) var remainingTime: Int
     private(set) var timer: Timer?
 
-    init(time: Int) {
+    init(time: Int) throws {
+        guard time > 0 else {
+            throw CountdownTimerError.invalidDuration
+        }
         remainingTime = time
         defaultTime = time
     }
 
     @objc private func countdown() {
-        remainingTime -= 1;
-        guard remainingTime > 0 else {
+        guard remainingTime == 0 else {
             timer?.invalidate()
             return
         }
+        remainingTime -= 1
     }
 
     func start() {
@@ -40,8 +43,19 @@ class CountdownTimer {
     }
 
     // use case: user inc or dec default time
-    func updateDefaultTime(defaultTime: Int) {
+    func updateDefaultTime(defaultTime: Int) throws {
+        guard defaultTime > 0 else {
+            throw CountdownTimerError.invalidDuration
+        }
         self.defaultTime = defaultTime
     }
+
+    var hoursMinutesSeconds: (Int, Int, Int) {
+      return (remainingTime / 3600, (remainingTime % 3600) / 60, (remainingTime % 3600) % 60)
+    }
     
+}
+
+enum CountdownTimerError: Error {
+    case invalidDuration
 }

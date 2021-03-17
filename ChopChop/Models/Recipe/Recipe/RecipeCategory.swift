@@ -1,24 +1,25 @@
 class RecipeCategory {
-    let id: Int64
+    var id: Int64?
     private(set) var name: String
 
-    init(id: Int64, name: String) {
-        self.id = id
-        self.name = name
-        assert(checkRepresentation())
-    }
-
-    func updateName(name: String) throws {
-        assert(checkRepresentation())
-        guard name != "" else {
+    init(name: String) throws {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
             throw RecipeCategoryError.invalidName
         }
-        self.name = name
-        assert(checkRepresentation())
+        self.name = trimmedName
     }
 
-    private func checkRepresentation() -> Bool {
-        name != ""
+    func updateName(_ name: String) throws {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw RecipeCategoryError.invalidName
+        }
+        self.name = trimmedName
     }
     
+}
+
+enum RecipeCategoryError: Error {
+    case invalidName
 }

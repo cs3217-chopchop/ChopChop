@@ -6,7 +6,7 @@ class SessionRecipeStep {
     private(set) var step: RecipeStep
     private(set) var timers: [(String, CountdownTimer)]
 
-    let actionTimeTracker: ActionTimeTracker
+    private let actionTimeTracker: ActionTimeTracker
 
     init(step: RecipeStep, actionTimeTracker: ActionTimeTracker) {
         self.step = step
@@ -32,9 +32,8 @@ class SessionRecipeStep {
 
     /// Updates content of a step.
     /// Updates timers in step if needed - If timer duration words are exactly the same, do nothing. Else, delete all old timers and create new timers based on updated contents of step.
-    // Possibly should "retain" old timers through some intelligent decision making?
     func updateStep(content: String) throws {
-        try step.updateContent(content: content)
+        try step.updateContent(content)
 
         let newTimeWords = RecipeStepParser.parseTimerDurations(step: content)
         let isTimersExactlySame = newTimeWords == timers.map{$0.0}

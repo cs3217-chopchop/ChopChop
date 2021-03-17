@@ -15,6 +15,20 @@ func matches(for regex: String, in text: String) -> [String] {
     }
 }
 
+func matchesWithIndex(for regex: String, in text: String) -> [(String, Int)] {
+    do {
+        let regex = try NSRegularExpression(pattern: regex, options: .caseInsensitive)
+        let results = regex.matches(in: text,
+                                    range: NSRange(text.startIndex..., in: text))
+        return results.map {
+            (String(text[Range($0.range, in: text)!]), $0.range.lowerBound)
+        }
+    } catch let error {
+        print("invalid regex: \(error.localizedDescription)")
+        return []
+    }
+}
+
 // https://www.hackingwithswift.com/articles/108/how-to-use-regular-expressions-in-swift
 extension NSRegularExpression {
     convenience init(_ pattern: String) {

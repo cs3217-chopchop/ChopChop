@@ -1,15 +1,14 @@
 import Foundation
 
 class RecipeIngredient {
-    let id: Int64
+    var id: Int64?
     private(set) var name: String
 
     // Quantity is optional because some ingredients don't have an associated quantity
     // e.g. "add salt to meat" does not specify quantity of salt
     private(set) var quantity: Quantity?
 
-    init(id: Int64, name: String, quantity: Quantity?) {
-        self.id = id
+    init(name: String, quantity: Quantity?) {
         self.name = name
         self.quantity = quantity
         assert(checkRepresentation())
@@ -58,4 +57,8 @@ extension RecipeIngredient: NSCopying {
         let copy = RecipeIngredient(id: id, name: name, quantity: quantity)
         return copy
     }
+}
+
+enum RecipeIngredientError: Error {
+    case invalidName
 }

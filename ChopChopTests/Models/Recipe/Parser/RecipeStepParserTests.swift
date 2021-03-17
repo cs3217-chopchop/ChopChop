@@ -44,6 +44,12 @@ class RecipeStepParserTests: XCTestCase {
         XCTAssertEqual(timeTaken, 5400)
     }
 
+    func testParseToTime_complexfraction() {
+        let timeTaken = RecipeStepParser.parseToTime(timeString: "2 and a half minute")
+        XCTAssertEqual(timeTaken, 150)
+    }
+
+
     func testParseToTime_withRangeNoSpace() {
         let timeTaken = RecipeStepParser.parseToTime(timeString: "20-25mins")
         XCTAssertEqual(timeTaken, 1350)
@@ -97,3 +103,4 @@ class RecipeStepParserTests: XCTestCase {
 // 20 sec
 // 10-15 min
 // (abt 20 mins)
+// 1 and a half minute
