@@ -10,12 +10,13 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name)
+        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
+                                        servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { name, quantity in
             RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
         }
-        var stepRecords = recipe.steps.enumerated().map { index, content in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
+        var stepRecords = recipe.steps.enumerated().map { index, step in
+            RecipeStepRecord(recipeId: recipe.id, index: index, content: step.content)
         }
 
         try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)

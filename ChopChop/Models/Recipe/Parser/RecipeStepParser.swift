@@ -31,7 +31,7 @@ struct RecipeStepParser {
     /// Given a step, sum up all time words
     /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" returns 210 seconds
     static func parseTimeTaken(step: String) -> Int {
-        return parseTimerDurations(step: step).map{parseToTime(timeString: $0)}.reduce(0, +)
+        parseTimerDurations(step: step).map { parseToTime(timeString: $0) }.reduce(0, +)
     }
 
     /// Given a step, returns an array of time duration words
@@ -40,7 +40,7 @@ struct RecipeStepParser {
         var allDelimitersString = reducePipeSeparated(arr: delimiters)
         let allTimeUnits = minUnits + hourUnits + secondUnits
         var allTimeUnitsString = reducePipeSeparated(arr: allTimeUnits)
-        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map{$0})
+        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map { $0 })
         allNumbersString += "|" + intOrDecimal // zero|one|...|[0-9]
         allNumbersString += optional(str: specialAndDelimiter + allNumbersString) // 1 and a half min
 
@@ -50,12 +50,14 @@ struct RecipeStepParser {
 
         let mostBasicTimeWithOptionalUnit = allNumbersString + optional(str: stricterRandoShortString + allTimeUnitsString) // 30 mins or 30
         let mostBasicTimeWithCompulsoryUnit = allNumbersString + stricterRandoShortString + allTimeUnitsString
-        let optionalRangeString = optional(str: mostBasicTimeWithOptionalUnit + optional(str: randoShortString + mostBasicTimeWithOptionalUnit) + randoShortString + allDelimitersString + randoShortString) // 1h 30mins to
+        let optionalRangeString = optional(str: mostBasicTimeWithOptionalUnit +
+                                            optional(str: randoShortString + mostBasicTimeWithOptionalUnit)
+                                            + randoShortString + allDelimitersString + randoShortString) // 1h 30mins to
 
         let regexString = optionalRangeString +
             mostBasicTimeWithCompulsoryUnit + optional(str: randoShortString + mostBasicTimeWithCompulsoryUnit) // 1h 9 mins to 1h 10 mins
         let matched = matches(for: regexString, in: step)
-        let trimmed = matched.map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}
+        let trimmed = matched.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
 
         return trimmed
     }
@@ -63,7 +65,7 @@ struct RecipeStepParser {
     /// converts time represented in String to seconds
     /// E.g. "1 minutes" returns 60, "30 sec" returns 30
     static func parseToTime(timeString: String) -> Int {
-        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map{$0})
+        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map { $0 })
         allNumbersString += "|" + intOrDecimal
         allNumbersString = "(" + allNumbersString + ")" // (1|2|3...one|two|...)
         let matchedNumbers = matchesWithIndex(for: allNumbersString, in: timeString)
@@ -74,18 +76,19 @@ struct RecipeStepParser {
         var matchedUnits = matchesWithIndex(for: allTimeUnitsString, in: timeString) // (minutes|seconds|..)
 
         // there should be no overlap between matchedNumbers and matchedUnits
-        let matchedNumberIndexRanges = matchedNumbers.map{($0.1, $0.1 + $0.0.count)}
-        matchedUnits = matchedUnits.filter{ (unit) -> Bool in
+        let matchedNumberIndexRanges = matchedNumbers.map { ($0.1, $0.1 + $0.0.count) }
+        matchedUnits = matchedUnits.filter { unit -> Bool in
             // the unit's start must be greater than each number's end
             // OR
             // the unit's end much be lesser than each number's start
-            matchedNumberIndexRanges.allSatisfy{unit.1 >= $0.1 || unit.1 + unit.0.count < $0.0}}
+            matchedNumberIndexRanges.allSatisfy { unit.1 >= $0.1 || unit.1 + unit.0.count < $0.0 }
+        }
 
         // 1h 20 min to 1h 30 min to [3600, 120, 3600, 180]
         var scaledValues: [Double] = []
         for i in 0..<matchedNumbers.count {
             // index of matched unit just exceeds that of number e.g. 1 1/2 hour
-            guard let nearestTimeUnitForNumber = (matchedUnits.first{$0.1 > matchedNumbers[i].1}) else {
+            guard let nearestTimeUnitForNumber = (matchedUnits.first { $0.1 > matchedNumbers[i].1 }) else {
                 assertionFailure()
                 return defaultTime
             }
@@ -98,8 +101,8 @@ struct RecipeStepParser {
 
         let isRanged = timeString ~= ".*" + "(" + reducePipeSeparated(arr: delimiters) + ")" + ".*" && matchedNumbers.count > 1
         if isRanged {
-            let firstNumber = scaledValues[0..<(matchedNumbers.count/2)].reduce(0, +)
-            let secondNumber = scaledValues[(matchedNumbers.count/2)...].reduce(0, +)
+            let firstNumber = scaledValues[0..<(matchedNumbers.count / 2)].reduce(0, +)
+            let secondNumber = scaledValues[(matchedNumbers.count / 2)...].reduce(0, +)
             return Int((firstNumber + secondNumber) / 2)
         } else {
             let number = scaledValues[0..<(matchedNumbers.count)].reduce(0, +)
@@ -109,7 +112,7 @@ struct RecipeStepParser {
     }
 
     private static func parseNumber(number: String) -> Double? {
-        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map{$0})
+        var allNumbersString = reducePipeSeparated(arr: digitNames.keys.map { $0 })
         allNumbersString += "|" + intOrDecimal
         guard number ~= allNumbersString else {
             return nil
@@ -138,7 +141,7 @@ struct RecipeStepParser {
         if unit ~= reducePipeSeparated(arr: minUnits) { // must start with minutes first cos *.s will conflict
             return 60
         } else if unit ~= reducePipeSeparated(arr: hourUnits) {
-            return 3600
+            return 3_600
         } else if unit ~= reducePipeSeparated(arr: secondUnits) {
             return 1
         } else {

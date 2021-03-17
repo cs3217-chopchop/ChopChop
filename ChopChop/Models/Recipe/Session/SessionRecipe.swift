@@ -12,12 +12,12 @@ class SessionRecipe: ActionTimeTracker {
             fatalError()
         }
         self.recipe = recipeCopy
-        sessionSteps = recipeCopy.steps.map{SessionRecipeStep(step: $0, actionTimeTracker: self)}
+        sessionSteps = recipeCopy.steps.map { SessionRecipeStep(step: $0, actionTimeTracker: self) }
     }
 
     // future use case: on complete, send session steps to user log
     var isCompleted: Bool {
-        sessionSteps.allSatisfy{$0.isCompleted}
+        sessionSteps.allSatisfy { $0.isCompleted }
     }
 
     func updateTimeOfLastAction(date: Date) {
@@ -38,12 +38,12 @@ class SessionRecipe: ActionTimeTracker {
     func removeStep(_ removedStep: SessionRecipeStep) throws {
         assert(checkRepresentation())
         try recipe.removeStep(removedStep.step)
-        guard (sessionSteps.contains{$0 === removedStep}) else {
+        guard (sessionSteps.contains { $0 === removedStep }) else {
             assertionFailure()
             return
         }
 
-        sessionSteps.removeAll{$0 === removedStep}
+        sessionSteps.removeAll { $0 === removedStep }
         assert(checkRepresentation())
     }
 
@@ -51,7 +51,7 @@ class SessionRecipe: ActionTimeTracker {
     func moveStepUp(_ movedStep: SessionRecipeStep) throws {
         assert(checkRepresentation())
         try recipe.moveStepUp(movedStep.step)
-        guard let idx = (sessionSteps.firstIndex{$0 === movedStep}) else {
+        guard let idx = (sessionSteps.firstIndex { $0 === movedStep }) else {
             assertionFailure()
             return
         }
@@ -70,7 +70,7 @@ class SessionRecipe: ActionTimeTracker {
     func moveStepDown(_ movedStep: SessionRecipeStep) throws {
         assert(checkRepresentation())
         try recipe.moveStepDown(movedStep.step)
-        guard let idx = (sessionSteps.firstIndex{$0 === movedStep}) else {
+        guard let idx = (sessionSteps.firstIndex { $0 === movedStep }) else {
             assertionFailure()
             return
         }

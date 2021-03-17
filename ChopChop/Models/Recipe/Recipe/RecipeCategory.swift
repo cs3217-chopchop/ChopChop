@@ -2,7 +2,8 @@ class RecipeCategory {
     var id: Int64?
     private(set) var name: String
 
-    init(name: String) throws {
+    init(id: Int64?, name: String) throws {
+        self.id = id
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeCategoryError.invalidName
@@ -17,7 +18,7 @@ class RecipeCategory {
         }
         self.name = trimmedName
     }
-    
+
 }
 
 enum RecipeCategoryError: Error {

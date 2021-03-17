@@ -9,7 +9,7 @@ func matches(for regex: String, in text: String) -> [String] {
         return results.map {
             String(text[Range($0.range, in: text)!])
         }
-    } catch let error {
+    } catch {
         print("invalid regex: \(error.localizedDescription)")
         return []
     }
@@ -23,7 +23,7 @@ func matchesWithIndex(for regex: String, in text: String) -> [(String, Int)] {
         return results.map {
             (String(text[Range($0.range, in: text)!]), $0.range.lowerBound)
         }
-    } catch let error {
+    } catch {
         print("invalid regex: \(error.localizedDescription)")
         return []
     }

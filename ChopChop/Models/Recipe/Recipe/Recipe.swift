@@ -1,7 +1,8 @@
 import Foundation
+import GRDB
 
 /// Note there is no relationship between steps and ingredients after parsing stage
-class Recipe {
+class Recipe: FetchableRecord {
     var id: Int64?
     private(set) var name: String
     private(set) var servings: Double
@@ -61,18 +62,18 @@ class Recipe {
 
     func removeStep(_ removedStep: RecipeStep) throws {
         assert(checkRepresentation())
-        guard (steps.contains{$0 === removedStep}) else {
+        guard (steps.contains { $0 === removedStep }) else {
             throw RecipeError.nonExistentStep
         }
 
-        steps.removeAll{$0 === removedStep}
+        steps.removeAll { $0 === removedStep }
         assert(checkRepresentation())
     }
 
     // reorder step from larger to smaller index
     func moveStepUp(_ movedStep: RecipeStep) throws {
         assert(checkRepresentation())
-        guard let idx = (steps.firstIndex{$0 === movedStep}) else {
+        guard let idx = (steps.firstIndex { $0 === movedStep }) else {
             throw RecipeError.nonExistentStep
         }
 
@@ -88,7 +89,7 @@ class Recipe {
     // reorder step from smaller to larger index
     func moveStepDown(_ movedStep: RecipeStep) throws {
         assert(checkRepresentation())
-        guard let idx = (steps.firstIndex{$0 === movedStep}) else {
+        guard let idx = (steps.firstIndex { $0 === movedStep }) else {
             throw RecipeError.nonExistentStep
         }
 
@@ -112,11 +113,11 @@ class Recipe {
 
     func removeIngredient(_ removedIngredient: RecipeIngredient) throws {
         assert(checkRepresentation())
-        guard (ingredients.contains{$0 === removedIngredient}) else {
+        guard (ingredients.contains { $0 === removedIngredient }) else {
             throw RecipeError.nonExistentIngredient
         }
 
-        ingredients.removeAll{$0 === removedIngredient}
+        ingredients.removeAll { $0 === removedIngredient }
         assert(checkRepresentation())
     }
 
@@ -130,7 +131,7 @@ class Recipe {
 
     /// Returns total time taken to complete the recipe in seconds, computed from time taken for each step
     var totalTimeTaken: Int {
-        return steps.map({$0.timeTaken}).reduce(0, +)
+        steps.map({ $0.timeTaken }).reduce(0, +)
     }
 
     private func checkRepresentation() -> Bool {
@@ -139,14 +140,33 @@ class Recipe {
 
     private func checkNoDuplicateIngredients(ingredients: [RecipeIngredient]) -> Bool {
         // synonyms of ingredients are allowed e.g. brinjal and eggplant
-        return ingredients.allSatisfy{(ingredient) -> Bool in (ingredient.name.isEmpty || ingredients.filter{$0.name == ingredient.name}.count == 1)}
+        return ingredients.allSatisfy { ingredient -> Bool in
+            (ingredient.name.isEmpty || ingredients.filter { $0.name == ingredient.name }.count == 1)
+        }
     }
 
     func canSave() -> Bool {
         checkRepresentation() && recipeCategoryId != nil && !steps.isEmpty && !ingredients.isEmpty
-            && steps.allSatisfy{!$0.content.isEmpty} // steps can be duplicate contents but cannot be empty
-            && ingredients.allSatisfy{(ingredient) -> Bool in (!ingredient.name.isEmpty && ingredients.filter{$0.name == ingredient.name}.count == 1)} // ingredients cannot be duplicates and cannot be empty
+            && steps.allSatisfy { !$0.content.isEmpty } // steps can be duplicate contents but cannot be empty
+            && ingredients.allSatisfy { ingredient -> Bool in
+                (!ingredient.name.isEmpty && ingredients.filter { $0.name == ingredient.name }.count == 1)
+            } // ingredients cannot be duplicates and cannot be empty
     }
+
+    required init(row: Row) {
+        id = row["id"]
+        servings = row["servings"]
+        recipeCategoryId = row["recipeCategoryId"]
+        name = row["name"]
+        difficulty = row["difficulty"]
+//        ingredients = row.prefetchedRows["recipeIngredients"]?.reduce(into: [String: Quantity]()) {
+//            let ingredient = RecipeIngredientRecord(row: $1)
+//
+//            $0[ingredient.name] = ingredient.quantity
+//        } ?? [:]
+        steps = row.prefetchedRows["recipeSteps"]?.map { RecipeStep(content: RecipeStepRecord(row: $0).content) } ?? []
+    }
+
 }
 
 extension Recipe: Equatable {

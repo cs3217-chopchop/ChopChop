@@ -4,7 +4,7 @@ class RecipeStep {
     var id: Int64?
     private(set) var content: String // can be empty
 
-    /// Estimation of time taken based only on content of recipe step. Future releases may take into account previous user input
+    /// Estimation of time taken in seconds based only on content of recipe step. Future releases may take into account previous user input
     var timeTaken: Int {
         RecipeStepParser.parseTimeTaken(step: content)
     }

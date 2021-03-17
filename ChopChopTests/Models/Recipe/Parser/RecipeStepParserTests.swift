@@ -1,3 +1,5 @@
+// swiftlint:disable line_length
+
 import XCTest
 @testable import ChopChop
 
@@ -16,7 +18,7 @@ class RecipeStepParserTests: XCTestCase {
 
     func testParseTimeTaken_manyTimers() {
         let timeTaken = RecipeStepParser.parseTimeTaken(step: "Add flour, milk, eggs, and melted butter to a blender and process until smooth, 5m 40s. Set batter aside for at least 20 minutes. Loosen crepe carefully from the pan using a spatula and gently flip to brown the other side, 1 to 2 minutes more. ")
-        XCTAssertEqual(timeTaken, 1630)
+        XCTAssertEqual(timeTaken, 1_630)
     }
 
     func testParseTimeDurations() {
@@ -41,7 +43,7 @@ class RecipeStepParserTests: XCTestCase {
 
     func testParseToTime_fraction() {
         let timeTaken = RecipeStepParser.parseToTime(timeString: "1 1/2 hours")
-        XCTAssertEqual(timeTaken, 5400)
+        XCTAssertEqual(timeTaken, 5_400)
     }
 
     func testParseToTime_complexfraction() {
@@ -49,10 +51,9 @@ class RecipeStepParserTests: XCTestCase {
         XCTAssertEqual(timeTaken, 150)
     }
 
-
     func testParseToTime_withRangeNoSpace() {
         let timeTaken = RecipeStepParser.parseToTime(timeString: "20-25mins")
-        XCTAssertEqual(timeTaken, 1350)
+        XCTAssertEqual(timeTaken, 1_350)
     }
 
     func testParseToTime_wordBetween() {
@@ -62,12 +63,12 @@ class RecipeStepParserTests: XCTestCase {
 
     func testParseToTime_twoUnits() {
         let timeTaken = RecipeStepParser.parseToTime(timeString: "1 hour 10 minutes")
-        XCTAssertEqual(timeTaken, 4200)
+        XCTAssertEqual(timeTaken, 4_200)
     }
 
     func testParseToTime_twoUnitsWithRange() {
         let timeTaken = RecipeStepParser.parseToTime(timeString: "1h 20 min to 1h 30 min")
-        XCTAssertEqual(timeTaken, 5100)
+        XCTAssertEqual(timeTaken, 5_100)
     }
 
     func testParseToTime_numberWord() {
@@ -76,7 +77,6 @@ class RecipeStepParserTests: XCTestCase {
     }
 
 }
-
 
 // 20 - 25 mins
 // 2025 minutes

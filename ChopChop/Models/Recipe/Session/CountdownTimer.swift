@@ -8,7 +8,8 @@ class CountdownTimer {
 
     init(time: Int) throws {
         guard time > 0 else {
-            throw CountdownTimerError.invalidDuration
+            throw CountdownTimerError.invalidTiming
+            return
         }
         remainingTime = time
         defaultTime = time
@@ -23,7 +24,7 @@ class CountdownTimer {
     }
 
     func start() {
-        Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdown), userInfo: nil, repeats: false)
     }
 
     func pause() {
@@ -32,30 +33,34 @@ class CountdownTimer {
 
     func resume() {
         guard let existingTimer = timer else {
-            assertionFailure()
+            assertionFailure("No timer to resume")
             return
         }
+
         RunLoop.current.add(existingTimer, forMode: .common)
     }
 
     func restart() {
         remainingTime = defaultTime
+        timer?.invalidate()
     }
 
     // use case: user inc or dec default time
     func updateDefaultTime(defaultTime: Int) throws {
         guard defaultTime > 0 else {
-            throw CountdownTimerError.invalidDuration
+            throw CountdownTimerError.invalidTiming
+            return
         }
         self.defaultTime = defaultTime
     }
 
     var hoursMinutesSeconds: (Int, Int, Int) {
-      return (remainingTime / 3600, (remainingTime % 3600) / 60, (remainingTime % 3600) % 60)
+      (remainingTime / 3600, (remainingTime % 3600) / 60, (remainingTime % 3600) % 60)
     }
-    
+
 }
 
+
 enum CountdownTimerError: Error {
-    case invalidDuration
+    case invalidTiming
 }

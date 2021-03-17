@@ -51,7 +51,6 @@ struct Quantity {
     var magnitude: Double
 }
 
-
 extension RecipeIngredient: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         let copy = RecipeIngredient(id: id, name: name, quantity: quantity)
