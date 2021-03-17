@@ -35,11 +35,14 @@ struct StorageManager {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.ingredientCategoryId,
                                                 name: ingredient.name)
-        var setRecords = ingredient.sets.map { expiryDate, quantity in
-            IngredientSetRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
+        var batchRecords = ingredient.batches.map { batch in
+            IngredientBatchRecord(
+                ingredientId: ingredient.id,
+                expiryDate: batch.expiryDate,
+                quantity: batch.quantity.record)
         }
 
-        try appDatabase.saveIngredient(&ingredientRecord, sets: &setRecords)
+        try appDatabase.saveIngredient(&ingredientRecord, batches: &batchRecords)
 
         ingredient.id = ingredientRecord.id
     }
@@ -137,7 +140,7 @@ struct StorageManager {
 
     func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
         appDatabase.ingredientCategoriesOrderedByNamePublisher()
-            .map { $0.map { IngredientCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }
 }
