@@ -132,7 +132,4 @@ class CountdownTimerTests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(TimeInterval(seconds)))
     }
 
-
-
-
 }

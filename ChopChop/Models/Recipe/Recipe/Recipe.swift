@@ -51,12 +51,9 @@ class Recipe: FetchableRecord {
     }
 
     // step related functions
-    func addStep() -> RecipeStep {
+    func addStep(_ addedStep: RecipeStep) {
         assert(checkRepresentation())
-        // like adding a new empty line with checkbox
-        let newStep = RecipeStep(content: "")
-        steps.append(newStep)
-        return newStep
+        steps.append(addedStep)
         assert(checkRepresentation())
     }
 
@@ -103,29 +100,30 @@ class Recipe: FetchableRecord {
     }
 
     // ingredient related functions
-    func addIngredient() -> RecipeIngredient {
+    func addIngredient(_ addedIngredient: RecipeIngredient) throws {
         assert(checkRepresentation())
-        let newIngredient = RecipeIngredient(name: "", quantity: nil)
-        ingredients.append(newIngredient)
-        return newIngredient
+        guard checkNoDuplicateIngredients(ingredients: ingredients + [addedIngredient]) else {
+            throw RecipeError.invalidIngredients
+        }
+        ingredients.append(addedIngredient)
         assert(checkRepresentation())
     }
 
     func removeIngredient(_ removedIngredient: RecipeIngredient) throws {
         assert(checkRepresentation())
-        guard (ingredients.contains { $0 === removedIngredient }) else {
+        guard (ingredients.contains { $0 == removedIngredient }) else {
             throw RecipeError.nonExistentIngredient
         }
 
-        ingredients.removeAll { $0 === removedIngredient }
+        ingredients.removeAll { $0 == removedIngredient }
         assert(checkRepresentation())
     }
 
-    func updateIngredient(_ updatedIngredient: RecipeIngredient) throws {
+    func updateIngredient(oldIngredient: RecipeIngredient, updatedIngredient: RecipeIngredient) throws {
         // note there is no effect on steps on updating ingredients
-        guard checkNoDuplicateIngredients(ingredients: ingredients) else {
-            throw RecipeError.invalidIngredients
-        }
+        assert(checkRepresentation())
+        try removeIngredient(oldIngredient)
+        try addIngredient(updatedIngredient)
         assert(checkRepresentation())
     }
 
@@ -141,16 +139,12 @@ class Recipe: FetchableRecord {
     private func checkNoDuplicateIngredients(ingredients: [RecipeIngredient]) -> Bool {
         // synonyms of ingredients are allowed e.g. brinjal and eggplant
         return ingredients.allSatisfy { ingredient -> Bool in
-            (ingredient.name.isEmpty || ingredients.filter { $0.name == ingredient.name }.count == 1)
+            ingredients.filter { $0.name == ingredient.name }.count == 1
         }
     }
 
     func canSave() -> Bool {
         checkRepresentation() && recipeCategoryId != nil && !steps.isEmpty && !ingredients.isEmpty
-            && steps.allSatisfy { !$0.content.isEmpty } // steps can be duplicate contents but cannot be empty
-            && ingredients.allSatisfy { ingredient -> Bool in
-                (!ingredient.name.isEmpty && ingredients.filter { $0.name == ingredient.name }.count == 1)
-            } // ingredients cannot be duplicates and cannot be empty
     }
 
     required init(row: Row) {
@@ -159,12 +153,15 @@ class Recipe: FetchableRecord {
         recipeCategoryId = row["recipeCategoryId"]
         name = row["name"]
         difficulty = row["difficulty"]
-//        ingredients = row.prefetchedRows["recipeIngredients"]?.reduce(into: [String: Quantity]()) {
-//            let ingredient = RecipeIngredientRecord(row: $1)
-//
-//            $0[ingredient.name] = ingredient.quantity
-//        } ?? [:]
         steps = row.prefetchedRows["recipeSteps"]?.map { RecipeStep(content: RecipeStepRecord(row: $0).content) } ?? []
+        ingredients = row.prefetchedRows["recipeIngredients"]?.compactMap {
+            let record = RecipeIngredientRecord(row: $0)
+            guard let quantity = try? Quantity(from: record.quantity) else {
+                return nil
+            }
+
+            return try? RecipeIngredient(name: record.name, quantity: quantity)
+        } ?? []
     }
 
 }
@@ -185,16 +182,8 @@ extension Recipe: NSCopying {
             newSteps.append(recipeStep)
         }
 
-        var newIngredients: [RecipeIngredient] = []
-        for ingredient in ingredients {
-            guard let recipeIngredient = ingredient.copy() as? RecipeIngredient else {
-                fatalError()
-            }
-            newIngredients.append(recipeIngredient)
-        }
-
         do {
-            let copy = try Recipe(name: name, servings: servings, difficulty: difficulty, steps: newSteps, ingredients: newIngredients)
+            let copy = try Recipe(name: name, servings: servings, difficulty: difficulty, steps: newSteps, ingredients: ingredients)
             copy.id = id
             copy.recipeCategoryId = recipeCategoryId
             return copy

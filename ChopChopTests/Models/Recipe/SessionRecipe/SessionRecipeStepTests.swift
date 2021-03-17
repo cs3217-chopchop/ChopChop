@@ -4,7 +4,7 @@ import XCTest
 class SessionRecipeStepTests: XCTestCase {
 
     func testConstruct() {
-        
+
     }
 
 }

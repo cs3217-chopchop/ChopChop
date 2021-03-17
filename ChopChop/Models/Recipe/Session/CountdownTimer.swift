@@ -55,11 +55,10 @@ class CountdownTimer {
     }
 
     var hoursMinutesSeconds: (Int, Int, Int) {
-      (remainingTime / 3600, (remainingTime % 3600) / 60, (remainingTime % 3600) % 60)
+      (remainingTime / 3_600, (remainingTime % 3_600) / 60, (remainingTime % 3_600) % 60)
     }
 
 }
-
 
 enum CountdownTimerError: Error {
     case invalidTiming

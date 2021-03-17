@@ -1,9 +1,9 @@
 name: ChopChop
 options:
   bundleIdPrefix: com.seowalex
-  xcodeVersion: "12.4"
+  xcodeVersion: "12.3"
   deploymentTarget:
-    iOS: 14.4
+    iOS: 14.3
   groupSortPosition: top
 packages:
   GRDB:

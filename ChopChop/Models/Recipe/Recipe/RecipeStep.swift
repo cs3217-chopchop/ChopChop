@@ -10,6 +10,7 @@ class RecipeStep {
     }
 
     init(content: String) {
+        // TODO put non empty throw error
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
         self.content = trimmedContent
     }

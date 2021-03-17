@@ -1,3 +1,5 @@
+// swiftlint:disable line_length
+
 import XCTest
 @testable import ChopChop
 
@@ -15,14 +17,14 @@ class RecipeStepTests: XCTestCase {
         XCTAssertEqual(recipeStepWithWhiteSpaces.content, content)
     }
 
-    func testUpdateContent() {
+    func testUpdateContent() throws {
         let recipeStep = RecipeStep(content: content)
 
-        recipeStep.updateContent(contentWithTimeTaken)
+        try recipeStep.updateContent(contentWithTimeTaken)
         XCTAssertEqual(recipeStep.content, contentWithTimeTaken)
         XCTAssertEqual(recipeStep.timeTaken, 600)
 
-        recipeStep.updateContent(contentWithWhiteSpace)
+        try recipeStep.updateContent(contentWithWhiteSpace)
         XCTAssertEqual(recipeStep.content, contentWithWhiteSpace, "Should not be trimmed")
         XCTAssertEqual(recipeStep.timeTaken, RecipeStepParser.defaultTime)
     }
