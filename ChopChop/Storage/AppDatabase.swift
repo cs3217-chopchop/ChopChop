@@ -13,9 +13,23 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
+        migrator.registerMigration("CreateRecipeCategory") { db in
+            try db.create(table: "recipeCategory") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text)
+                    .notNull()
+                    .unique()
+                    .check { $0 != "" }
+                    .collate(.localizedStandardCompare)
+            }
+        }
+
         migrator.registerMigration("CreateRecipe") { db in
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
+                t.column("recipeCategoryId", .integer)
+                    .indexed()
+                    .references("recipeCategory", onDelete: .restrict)
                 t.column("name", .text)
                     .notNull()
                     .unique()
@@ -56,9 +70,23 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("CreateIngredientCategory") { db in
+            try db.create(table: "ingredientCategory") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text)
+                    .notNull()
+                    .unique()
+                    .check { $0 != "" }
+                    .collate(.localizedStandardCompare)
+            }
+        }
+
         migrator.registerMigration("CreateIngredient") { db in
             try db.create(table: "ingredient") { t in
                 t.autoIncrementedPrimaryKey("id")
+                t.column("ingredientCategoryId", .integer)
+                    .indexed()
+                    .references("ingredientCategory", onDelete: .restrict)
                 t.column("name", .text)
                     .notNull()
                     .unique()
@@ -74,7 +102,6 @@ struct AppDatabase {
                     .notNull()
                     .indexed()
                     .references("ingredient", onDelete: .cascade)
-                // TODO: Check time is 0000
                 t.column("expiryDate", .date)
                 t.column("quantity", .text)
                     .notNull()
@@ -92,17 +119,14 @@ struct AppDatabase {
     }
 }
 
-extension AppDatabase {
-    func saveRecipe(_ recipe: Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, name: recipe.name)
-        var ingredientRecords = recipe.ingredients.map { name, quantity in
-            RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
-        }
-        var stepRecords = recipe.steps.enumerated().map { index, content in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
-        }
+// MARK: - Database Access: Create/Update
 
-        try saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
+extension AppDatabase {
+    func saveRecipe(_ recipe: inout RecipeRecord) throws {
+        var ingredients: [RecipeIngredientRecord] = []
+        var steps: [RecipeStepRecord] = []
+
+        try saveRecipe(&recipe, ingredients: &ingredients, steps: &steps)
     }
 
     func saveRecipe(_ recipe: inout RecipeRecord,
@@ -142,13 +166,16 @@ extension AppDatabase {
         }
     }
 
-    func saveIngredient(_ ingredient: Ingredient) throws {
-        var ingredientRecord = IngredientRecord(id: ingredient.id, name: ingredient.name)
-        var setRecords = ingredient.sets.map { expiryDate, quantity in
-            IngredientSetRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
+    func saveRecipeCategory(_ recipeCategory: inout RecipeCategoryRecord) throws {
+        try dbWriter.write { db in
+            try recipeCategory.save(db)
         }
+    }
 
-        try saveIngredient(&ingredientRecord, sets: &setRecords)
+    func saveIngredient(_ ingredient: inout IngredientRecord) throws {
+        var sets: [IngredientSetRecord] = []
+
+        try saveIngredient(&ingredient, sets: &sets)
     }
 
     func saveIngredient(_ ingredient: inout IngredientRecord, sets: inout [IngredientSetRecord]) throws {
@@ -172,6 +199,16 @@ extension AppDatabase {
         }
     }
 
+    func saveIngredientCategory(_ ingredientCategory: inout IngredientCategoryRecord) throws {
+        try dbWriter.write { db in
+            try ingredientCategory.save(db)
+        }
+    }
+}
+
+// MARK: - Database Access: Delete
+
+extension AppDatabase {
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try RecipeRecord.deleteAll(db, keys: ids)
@@ -181,6 +218,18 @@ extension AppDatabase {
     func deleteAllRecipes() throws {
         try dbWriter.write { db in
             _ = try RecipeRecord.deleteAll(db)
+        }
+    }
+
+    func deleteRecipeCategories(ids: [Int64]) throws {
+        try dbWriter.write { db in
+            _ = try RecipeCategoryRecord.deleteAll(db, keys: ids)
+        }
+    }
+
+    func deleteAllRecipeCategories() throws {
+        try dbWriter.write { db in
+            _ = try RecipeCategoryRecord.deleteAll(db)
         }
     }
 
@@ -195,12 +244,65 @@ extension AppDatabase {
             _ = try IngredientRecord.deleteAll(db)
         }
     }
+
+    func deleteIngredientCategories(ids: [Int64]) throws {
+        try dbWriter.write { db in
+            _ = try IngredientCategoryRecord.deleteAll(db, keys: ids)
+        }
+    }
+
+    func deleteAllIngredientCategories() throws {
+        try dbWriter.write { db in
+            _ = try IngredientCategoryRecord.deleteAll(db)
+        }
+    }
 }
+
+// MARK: - Database Access: Read
+
+extension AppDatabase {
+    func fetchRecipe(id: Int64) throws -> Recipe? {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(key: id)
+                .including(all: RecipeRecord.ingredients)
+                .including(all: RecipeRecord.steps)
+
+            return try Recipe.fetchOne(db, request)
+        }
+    }
+
+    func fetchIngredient(id: Int64) throws -> Ingredient? {
+        try dbWriter.read { db in
+            let request = IngredientRecord
+                .filter(key: id)
+                .including(all: IngredientRecord.sets)
+
+            return try Ingredient.fetchOne(db, request)
+        }
+    }
+}
+
+// MARK: - Database Access: Publishers
 
 extension AppDatabase {
     func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
             .tracking(RecipeRecord.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
+        ValueObservation
+            .tracking(RecipeRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
+        ValueObservation
+            .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
@@ -212,6 +314,13 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all().orderedByExpiryDate().fetchAll)
@@ -219,24 +328,10 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func fetchRecipe(_ recipe: RecipeRecord) throws -> Recipe? {
-        try dbWriter.read { db in
-            let request = RecipeRecord
-                .filter(key: recipe.id)
-                .including(all: RecipeRecord.ingredients)
-                .including(all: RecipeRecord.steps)
-
-            return try Recipe.fetchOne(db, request)
-        }
-    }
-
-    func fetchIngredient(_ ingredient: IngredientRecord) throws -> Ingredient? {
-        try dbWriter.read { db in
-            let request = IngredientRecord
-                .filter(key: ingredient.id)
-                .including(all: IngredientRecord.sets)
-
-            return try Ingredient.fetchOne(db, request)
-        }
+    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
+        ValueObservation
+            .tracking(IngredientCategoryRecord.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
     }
 }
