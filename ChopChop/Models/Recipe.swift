@@ -21,19 +21,3 @@ extension Recipe: FetchableRecord {
         steps = row.prefetchedRows["recipeSteps"]?.map { RecipeStepRecord(row: $0).content } ?? []
     }
 }
-
-//extension Recipe: Decodable {
-//    private enum CodingKeys: CodingKey {
-//        case name, ingredients, instructions
-//    }
-//
-//    init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        self.name = try container.decode(String.self, forKey: .name)
-//        let instructions = try container.decode(String.self, forKey: .instructions)
-//        self.steps = RecipeParser.fromJsonStringToSteps(jsonInstructions: instructions)
-//        let ingredients = try container.decode([String].self, forKey: .ingredients)
-//        self.ingredients = RecipeParser.fromJsonStringArrayToIngredientDict(jsonIngredients: ingredients)
-//    }
-//
-//}
