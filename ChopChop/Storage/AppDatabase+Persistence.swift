@@ -12,6 +12,8 @@ extension AppDatabase {
             let dbPool = try DatabasePool(path: url.path)
             let appDatabase = try AppDatabase(dbPool)
 
+            try appDatabase.createPreloadedRecipesIfEmpty()
+
             return appDatabase
         } catch {
             fatalError("Unresolved error \(error)")

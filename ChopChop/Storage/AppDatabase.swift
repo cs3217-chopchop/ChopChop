@@ -13,7 +13,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategory") { db in
+        migrator.registerMigration("CreateRecipeCategoryk") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)
@@ -119,6 +119,54 @@ struct AppDatabase {
     init(_ dbWriter: DatabaseWriter) throws {
         self.dbWriter = dbWriter
         try migrator.migrate(dbWriter)
+    }
+}
+
+// MARK: - Database: Preloaded Recipes
+extension AppDatabase {
+    func createPreloadedRecipesIfEmpty() throws {
+        try dbWriter.write { db in
+            if try RecipeRecord.fetchCount(db) == 0 {
+                try createPreloadedRecipes(db)
+            }
+        }
+    }
+
+    private func createPreloadedRecipes(_ db: Database) throws {
+        var categories = [
+            RecipeCategoryRecord(name: "Japanese"),
+            RecipeCategoryRecord(name: "Italian"),
+            RecipeCategoryRecord(name: "American")
+        ]
+
+        for index in categories.indices {
+            try categories[index].save(db)
+        }
+
+        var recipes = [
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes"),
+            RecipeRecord(recipeCategoryId: categories[1].id, name: "Carbonara"),
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Scrambled Eggs"),
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza"),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen"),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon"),
+            RecipeRecord(name: "Uncategorised Recipe")
+        ]
+
+        for index in recipes.indices {
+            try recipes[index].save(db)
+        }
+
+        var ingredients = [
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(0.5)),
+            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(0.6)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2))
+        ]
+
+        for index in ingredients.indices {
+            try ingredients[index].save(db)
+        }
     }
 }
 
@@ -305,7 +353,14 @@ extension AppDatabase {
 
     func recipesFilteredByNamePublisher(_ query: String) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
-            .tracking(RecipeRecord.all().filteredByName(query).fetchAll)
+            .tracking(RecipeRecord.all().filteredByName(query).orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
+        ValueObservation
+            .tracking(RecipeRecord.all().filteredByCategory(ids: categoryIds).filteredByName(query).orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
@@ -320,6 +375,13 @@ extension AppDatabase {
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func recipeIngredientsPublisher() -> AnyPublisher<[RecipeIngredientRecord], Error> {
+        ValueObservation
+            .tracking(RecipeIngredientRecord.all().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

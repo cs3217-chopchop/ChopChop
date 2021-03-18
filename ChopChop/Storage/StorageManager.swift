@@ -121,6 +121,12 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[RecipeInfo], Error> {
+        appDatabase.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: categoryIds)
+            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
+            .eraseToAnyPublisher()
+    }
+
     func recipesFilteredByContentsPublisher(_ query: String) -> AnyPublisher<[RecipeInfo], Error> {
         appDatabase.recipesFilteredByContentsPublisher(query)
             .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
@@ -130,6 +136,19 @@ struct StorageManager {
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesOrderedByNamePublisher()
             .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
+            .eraseToAnyPublisher()
+    }
+
+    func recipeIngredientsPublisher() -> AnyPublisher<[String: [Int64]], Error> {
+        appDatabase.recipeIngredientsPublisher()
+            .map { $0.reduce(into: [:]) { ingredients, ingredient in
+                guard let id = ingredient.recipeId else {
+                    return
+                }
+
+                ingredients[ingredient.name, default: []].append(id)
+            }
+            }
             .eraseToAnyPublisher()
     }
 
