@@ -150,17 +150,30 @@ struct StorageManager {
 
 // MARK: - Images on Disk
 extension StorageManager {
-    static let ingredientFolderName = "Ingredients"
-    static let recipeFolderName = "Ingredients"
-    func deleteImage(name: String) {
-        ImageStore.delete(imageNamed: name)
+    static let ingredientFolderName = "Ingredient"
+    static let recipeFolderName = "Recipe"
+
+    func deleteRecipeImage(name: String) {
+        ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
-    func fetchImage(name: String) -> UIImage? {
-        ImageStore.fetch(imageNamed: name)
+    func fetchRecipeImage(name: String) -> UIImage? {
+        ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
-    func saveImage(_ image: UIImage, name: String) throws {
-        try ImageStore.save(image: image, name: name)
+    func saveRecipeImage(_ image: UIImage, name: String) throws {
+        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
+    }
+
+    func deleteIngredientImage(name: String) {
+        ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
+    }
+
+    func fetchIngredientImage(name: String) -> UIImage? {
+        ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
+    }
+
+    func saveIngredientImage(_ image: UIImage, name: String) throws {
+        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
     }
 }
