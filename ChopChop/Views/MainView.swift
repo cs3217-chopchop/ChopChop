@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var selectedCategory: RecipeCategory? = RecipeCategory(name: "All Recipes")
+    @State private var selectedCategory: RecipeCategory?
     @State private var selectedRecipe: RecipeInfo?
 
     var body: some View {
@@ -9,7 +9,8 @@ struct MainView: View {
                 selectedCategory: $selectedCategory,
                 selectedRecipe: $selectedRecipe)
 
-        Text("Select category...")
+        RecipeCollectionView(viewModel: RecipeCollectionViewModel(selectedCategory: RecipeCategory(name: "All Recipes")),
+                             selectedRecipe: $selectedRecipe)
     }
 }
 
