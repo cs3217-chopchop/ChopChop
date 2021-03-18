@@ -155,6 +155,15 @@ extension StorageManager {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
+    func renameRecipeImage(from oldName: String, to newName: String) throws {
+        guard let image = fetchRecipeImage(name: oldName) else {
+            return
+        }
+
+        deleteRecipeImage(name: oldName)
+        try saveRecipeImage(image, name: newName)
+    }
+
     func fetchRecipeImage(name: String) -> UIImage? {
         ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
@@ -165,6 +174,15 @@ extension StorageManager {
 
     func deleteIngredientImage(name: String) {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
+    }
+
+    func renameIngredientImage(from oldName: String, to newName: String) throws {
+        guard let image = fetchIngredientImage(name: oldName) else {
+            return
+        }
+
+        deleteIngredientImage(name: oldName)
+        try saveIngredientImage(image, name: newName)
     }
 
     func fetchIngredientImage(name: String) -> UIImage? {
