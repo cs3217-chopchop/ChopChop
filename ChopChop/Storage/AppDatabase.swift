@@ -98,8 +98,8 @@ struct AppDatabase {
             }
         }
 
-        migrator.registerMigration("CreateIngredientSet") { db in
-            try db.create(table: "ingredientSet") { t in
+        migrator.registerMigration("CreateIngredientBatch") { db in
+            try db.create(table: "ingredientBatch") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("ingredientId", .integer)
                     .notNull()
@@ -186,15 +186,15 @@ extension AppDatabase {
             try ingredient.save(db)
 
             guard batches.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {
-                throw DatabaseError(message: "Ingredient sets belong to the wrong ingredient.")
+                throw DatabaseError(message: "Ingredient batches belong to the wrong ingredient.")
             }
 
-            // Delete all sets that are not in the array
+            // Delete all batches that are not in the array
             try ingredient.batches
                 .filter(!batches.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
                 .deleteAll(db)
 
-            // Save ingredient sets
+            // Save ingredient batches
             for index in batches.indices {
                 batches[index].ingredientId = ingredient.id
                 try batches[index].save(db)

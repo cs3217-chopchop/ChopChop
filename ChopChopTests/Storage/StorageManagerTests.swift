@@ -59,14 +59,13 @@ class StorageManagerTests: XCTestCase {
     func testSaveIngredient() throws {
         var ingredient = try Ingredient(name: "Egg",
                                         batches: [
-                                            IngredientBatch(
-                                                quantity: try Quantity(from: .count(12)),
-                                                expiryDate: Calendar.current.startOfDay(for: Date())),
-                                            IngredientBatch(
-                                                quantity: try Quantity(from: .count(13)),
-                                                expiryDate: Calendar.current
-                                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24))),
-                                            IngredientBatch(quantity: try Quantity(from: .count(14)), expiryDate: nil)
+                                            IngredientBatch(quantity: try Quantity(from: .count(12)),
+                                                            expiryDate: Calendar.current.startOfDay(for: Date())),
+                                            IngredientBatch(quantity: try Quantity(from: .count(13)),
+                                                            expiryDate: Calendar.current
+                                                                .startOfDay(for: Date(timeIntervalSinceNow:
+                                                                                        60 * 60 * 24))),
+                                            IngredientBatch(quantity: try Quantity(from: .count(14)))
                                         ])
 
         try storageManager.saveIngredient(&ingredient)

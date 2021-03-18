@@ -39,7 +39,7 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
 
     func orderedByExpiryDate() -> Self {
         annotated(with: IngredientRecord.batches.min(IngredientBatchRecord.Columns.expiryDate))
-            .order(SQLLiteral("minIngredientSetExpiryDate").sqlExpression.ascNullsLast)
+            .order(SQLLiteral("minIngredientBatchExpiryDate").sqlExpression.ascNullsLast)
     }
 
     func filteredByCategory(ids: [Int64]) -> Self {

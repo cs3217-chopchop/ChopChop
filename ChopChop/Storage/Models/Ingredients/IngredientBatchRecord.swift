@@ -16,7 +16,7 @@ extension IngredientBatchRecord: Codable, FetchableRecord, MutablePersistableRec
         static let quantity = Column(CodingKeys.quantity)
     }
 
-    static let databaseTableName = "ingredientSet"
+    static let databaseTableName = "ingredientBatch"
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
