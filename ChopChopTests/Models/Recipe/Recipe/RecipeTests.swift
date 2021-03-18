@@ -53,8 +53,8 @@ class RecipeTests: XCTestCase {
 
     func testConstruct() throws {
         let recipe = try Recipe(name: "Pancakes",
-                            steps: RecipeTests.generateSteps(),
-                            ingredients: RecipeTests.generateIngredients()
+                                steps: RecipeTests.generateSteps(),
+                                ingredients: RecipeTests.generateIngredients()
                             )
 
         XCTAssertEqual(recipe.name, "Pancakes")
@@ -119,27 +119,17 @@ class RecipeTests: XCTestCase {
 
     func testReorderStep() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        guard let lastStep = recipe.steps.last else {
-            XCTFail("There are no steps")
-            return
-        }
-
-        let secondLastIdx = recipe.steps.count - 2
-        try recipe.reorderStep(movedStep: lastStep, isSwapUp: true)
-        XCTAssertEqual(recipe.steps[secondLastIdx], lastStep)
-        XCTAssertEqual(recipe.steps.last, RecipeTests.generateSteps()[secondLastIdx])
+        let firstStep = recipe.steps[0]
+        let secondStep = recipe.steps[1]
+        try recipe.reorderStep(idx1: 0, idx2: 1)
+        XCTAssertEqual(firstStep, recipe.steps[1])
+        XCTAssertEqual(secondStep, recipe.steps[0])
     }
 
     func testReorderStep_fail() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.reorderStep(movedStep: RecipeStep(content: "Wait some more"), isSwapUp: false))
-
-        guard let firstStep = recipe.steps.first, let lastStep = recipe.steps.last else {
-            XCTFail("There are no steps")
-            return
-        }
-        XCTAssertThrowsError(try recipe.reorderStep(movedStep: lastStep, isSwapUp: false))
-        XCTAssertThrowsError(try recipe.reorderStep(movedStep: firstStep, isSwapUp: true))
+        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: -1))
+        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: 10))
     }
 
     func testAddIngredient_existingIngredient() throws {
@@ -167,7 +157,11 @@ class RecipeTests: XCTestCase {
         XCTAssertFalse(recipe.ingredients.contains(firstIngredient))
     }
 
-    // TODO non existent ingredient
+    func testRemoveIngredient_nonExistentIngredient() throws {
+        let recipe = RecipeTests.generateSampleRecipe()
+        let nonExistentIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(0.120)))
+        XCTAssertThrowsError(try recipe.removeIngredient(nonExistentIngredient))
+    }
 
     func testUpdateIngredient_changeName() throws {
         let recipe = RecipeTests.generateSampleRecipe()
@@ -175,11 +169,13 @@ class RecipeTests: XCTestCase {
             XCTFail("There are no ingredients")
             return
         }
-        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour", quantity: try Quantity(from: .mass(0.120)))
+        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour",
+                                    quantity: try Quantity(from: .mass(0.120)))
 
-        let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour", quantity: try Quantity(from: .mass(0.120)))
+        let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour",
+                                                     quantity: try Quantity(from: .mass(0.120)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
-        XCTAssertTrue(recipe.ingredients.filter { $0.name == "Flour" }.isEmpty)
+        XCTAssertFalse(recipe.ingredients.contains { $0.name == "Flour" })
     }
 
     func testUpdateIngredient_changeNameToAnotherIngredient() throws {
@@ -200,11 +196,13 @@ class RecipeTests: XCTestCase {
             XCTFail("There are no ingredients")
             return
         }
-        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour", quantity: try Quantity(from: .mass(0.120)))
+        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour",
+                                    quantity: try Quantity(from: .mass(0.120)))
 
-        let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour", quantity: try Quantity(from: .mass(0.120)))
+        let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour",
+                                                     quantity: try Quantity(from: .mass(0.120)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
-        XCTAssertTrue(recipe.ingredients.filter { $0.name == "Flour" }.isEmpty)
+        XCTAssertFalse(recipe.ingredients.contains { $0.name == "Flour" })
     }
 
     func testUpdateIngredient_nonExistent() throws {

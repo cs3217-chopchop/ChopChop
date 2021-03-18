@@ -944,8 +944,8 @@ class AppDatabaseTests: XCTestCase {
 
         let recipe = try Recipe(
                             name: recipeRecord.name,
-            steps: stepRecords.sorted(by: { $0.index < $1.index }).compactMap { try? RecipeStep(content: $0.content) },
-            ingredients: ingredientRecords.compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) })
+                            steps: stepRecords.sorted(by: { $0.index < $1.index }).compactMap { try? RecipeStep(content: $0.content) },
+                            ingredients: ingredientRecords.compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) })
 
         recipe.id = recipeRecord.id
         recipe.recipeCategoryId = categoryRecord.id

@@ -1,7 +1,7 @@
 import Foundation
 
 //https://www.hackingwithswift.com/articles/108/how-to-use-regular-expressions-in-swift
-
+//https://stackoverflow.com/questions/27880650/swift-extract-regex-matches
 func matchesWithIndex(for regex: String, in text: String) -> [(String, Int)] {
     do {
         let regex = try NSRegularExpression(pattern: regex, options: .caseInsensitive)
@@ -31,16 +31,11 @@ extension NSRegularExpression {
     }
 }
 
-extension NSRegularExpression {
-    func matches(_ string: String) -> Bool {
-        let range = NSRange(location: 0, length: string.utf16.count)
-        return firstMatch(in: string, options: [], range: range) != nil
-    }
-}
-
 extension String {
     static func ~= (lhs: String, rhs: String) -> Bool {
-        guard let regex = try? NSRegularExpression(pattern: rhs, options: .caseInsensitive) else { return false }
+        guard let regex = try? NSRegularExpression(pattern: rhs, options: .caseInsensitive) else {
+            return false
+        }
         let range = NSRange(location: 0, length: lhs.utf16.count)
         return regex.firstMatch(in: lhs, options: [], range: range) != nil
     }

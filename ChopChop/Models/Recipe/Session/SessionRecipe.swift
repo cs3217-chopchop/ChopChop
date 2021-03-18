@@ -1,10 +1,9 @@
 import Foundation
 
-/// Conforms to ActionTimeTracker so that SessionRecipeStep can modify only 1 attribute through the delegate
-class SessionRecipe: ActionTimeTracker {
+class SessionRecipe {
     private(set) var timeOfLastAction = Date()
     private(set) var recipe: Recipe
-    private(set) var sessionSteps: [SessionRecipeStep]! // implicitly unwrapped optional due to need to bind to self
+    private(set) var sessionSteps: [SessionRecipeStep]
 
     init(recipe: Recipe) {
         // A copy of the recipe object is made so that recipe on recipe tab dosen't actually get modified
@@ -12,21 +11,12 @@ class SessionRecipe: ActionTimeTracker {
             fatalError("Could not copy recipe for edit")
         }
         self.recipe = recipeCopy
-        sessionSteps = recipeCopy.steps.map { SessionRecipeStep(step: $0, actionTimeTracker: self) }
+        let actionTimeTracker = ActionTimeTracker()
+        sessionSteps = recipeCopy.steps.map { SessionRecipeStep(step: $0, actionTimeTracker: actionTimeTracker) }
     }
 
     var isCompleted: Bool {
         sessionSteps.allSatisfy { $0.isCompleted }
-    }
-
-    func updateTimeOfLastAction(date: Date) {
-        assert(checkRepresentation())
-        guard date <= Date() else {
-            assertionFailure("Date must be in past or current")
-            return
-        }
-        timeOfLastAction = date
-        assert(checkRepresentation())
     }
 
     private func checkRepresentation() -> Bool {
@@ -39,10 +29,6 @@ class SessionRecipe: ActionTimeTracker {
             guard recipe.steps[i] === sessionSteps[i].step else {
                 return false
             }
-        }
-
-        guard timeOfLastAction <= Date() else {
-            return false
         }
 
         return true

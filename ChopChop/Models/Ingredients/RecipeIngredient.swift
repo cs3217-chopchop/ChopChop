@@ -16,6 +16,11 @@ class RecipeIngredient {
             throw IngredientError.emptyName
         }
 
+        // additional check that RecipeIngredient Quantity cannot be 0
+        guard quantity.value > 0 else {
+            throw RecipeIngredientError.invalidQuantity
+        }
+
         self.name = trimmedName
         self.quantity = quantity
     }
@@ -25,10 +30,17 @@ class RecipeIngredient {
     }
 
     func subtract(_ quantity: Quantity) throws {
+        guard try (self.quantity - quantity).value > 0 else {
+            // will become zero
+            throw RecipeIngredientError.invalidQuantity
+        }
         try self.quantity -= quantity
     }
 
     func scale(_ factor: Double) throws {
+        guard factor > 0 else {
+            throw RecipeIngredientError.invalidQuantity
+        }
         try self.quantity *= factor
     }
 
@@ -42,7 +54,10 @@ class RecipeIngredient {
         self.name = trimmedName
     }
 
-    func updateQuantity(_ quantity: Quantity) {
+    func updateQuantity(_ quantity: Quantity) throws {
+        guard quantity.value > 0 else {
+            throw RecipeIngredientError.invalidQuantity
+        }
         self.quantity = quantity
     }
 
@@ -57,8 +72,12 @@ extension RecipeIngredient: Equatable {
 extension RecipeIngredient: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         guard let copy = try? RecipeIngredient(name: name, quantity: quantity) else {
-            fatalError()
+            fatalError("Cannot copy RecipeIngredient")
         }
         return copy
     }
+}
+
+enum RecipeIngredientError: Error {
+    case invalidQuantity
 }
