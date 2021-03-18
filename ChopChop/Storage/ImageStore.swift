@@ -1,5 +1,6 @@
 import UIKit
 
+// https://gist.github.com/TheCodedSelf/7ff3a4fb64f8f6131925fa3e6e21efbe
 struct ImageStore {
     static func delete(imageNamed name: String) {
         guard let imagePath = ImageStore.getFilePath(for: name) else {
