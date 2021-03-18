@@ -5,11 +5,11 @@
 //  Created by Cao Wenjie on 14/3/21.
 //
 import Foundation
+import NaturalLanguage
 
 class RecipeParser {
-    
-    // matches 1. or 1)
-    static let stepsIndexRegex = "[1-9][0-9]*(\\.|\\))\\s"
+    // matches 1., 1), Step 1., Step 1)
+    static let stepsIndexRegex = "(Step\\s)?[1-9][0-9]*(\\.|\\))\\s"
     // matches 2 or 2.5
     static let intOrDecimal = "[1-9]\\d*(\\.\\d+)?"
     // matches 2
@@ -21,14 +21,12 @@ class RecipeParser {
     // places all units into a group like (kg|g|cup)
     static let units: String = (Array(UnitsMapping.volumeWordMap.keys) + Array(UnitsMapping.massWordMap.keys))
         .joined(separator: "|")
-    
     /**
      Parses a chunk of instructions into an array of steps. Parsing is done differently depending on
      whether the instructions are already numbered.
      */
     static func parseInstructions(instructions: String) -> [String] {
         let regex = NSRegularExpression(stepsIndexRegex)
-
         let indexes = regex.matches(in: instructions, options: [],
                                     range: NSRange(location: 0, length: instructions.utf16.count))
         // when instructions are numbered, just parse base on the numbering
@@ -49,12 +47,12 @@ class RecipeParser {
             return steps
         // when instructions are not numbered, each sentence is taken as a step
         } else {
-            return instructions.components(separatedBy: ".")
-                .dropLast()
-                .map({ $0 + "." })
+            let tokenizer = NLTokenizer(unit: .sentence)
+            tokenizer.string = instructions
+            return tokenizer.tokens(for: instructions.startIndex..<instructions.endIndex)
+                .map({ String(instructions[$0]).trimmingCharacters(in: .whitespaces) })
         }
     }
-    
     /**
      Parse a list of ingredient description into a dictionary of ingredient name and its corresponding quantity.
      */
@@ -68,18 +66,15 @@ class RecipeParser {
             })
         return ingredientDict
     }
-    
     /**
      Parse a ingredient description into a pair of ingredient name and its corresponding quantity
      */
     static func parseIngredient(ingredientText: String) -> (name: String, quantity: Quantity) {
-        
         // checks if the text has both a number and a fraction, e.g. 1 1/2 gram of potato
         var parseResult = matchNumberFractionOptionalUnitFormat(text: ingredientText)
         if let ingredients = parseResult {
             return ingredients
         }
-        
         // checks if the text has either a number or a fraction, e.g. 1 egg, 1/2 lemon
         parseResult = matchNumberOrFractionOptionalUnitFormat(text: ingredientText)
         if let ingredients = parseResult {
@@ -108,7 +103,6 @@ class RecipeParser {
               let fractionRange = Range(result.range(withName: "fraction"), in: text),
               let ingredientRange = Range(result.range(withName: "ingredient"), in: text) else {
 
-            print("Incorrect match")
             return nil
         }
 
@@ -124,7 +118,6 @@ class RecipeParser {
         let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
 
         guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
-            print("Invalid quantity or ingredient")
             return nil
         }
 
@@ -146,8 +139,6 @@ class RecipeParser {
 
         guard let numeralRange = Range(result.range(withName: "numeral"), in: text),
               let ingredientRange = Range(result.range(withName: "ingredient"), in: text) else {
-
-            print("Incorrect match")
             return nil
         }
 
@@ -158,7 +149,6 @@ class RecipeParser {
         } else if let number = Double(numberText) {
             value = number
         } else {
-            print("Incorrect match")
             return nil
         }
 
@@ -173,7 +163,6 @@ class RecipeParser {
         let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
 
         guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
-            print("Invalid quantity or ingredient")
             return nil
         }
 
@@ -183,14 +172,12 @@ class RecipeParser {
     private static func parseFraction(fraction: String) -> Double {
         let fractionArray = fraction.split(separator: "/")
         if fractionArray.count != 2 {
-            print("Incorrect fraction format")
             return 0
         }
         let numeratorStr = fractionArray[0].trimmingCharacters(in: .whitespaces)
         let denominatorStr = fractionArray[1].trimmingCharacters(in: .whitespaces)
 
         guard let numerator = Double(numeratorStr), let denominator = Double(denominatorStr) else {
-            print("Incorrect fraction format")
             return 0
         }
 
@@ -209,8 +196,7 @@ class RecipeParser {
             value *= factor
             return .mass(value)
         } else {
-            // temp
-            return .count(1)
+            return .count(value)
         }
     }
 

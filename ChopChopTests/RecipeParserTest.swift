@@ -74,13 +74,13 @@ class RecipeParserTest: XCTestCase {
     func testParseIngredient_noQuantity() throws {
         let result = RecipeParser.parseIngredient(ingredientText: "Salt and pepper")
         XCTAssertEqual(result.name, "Salt and pepper")
-        XCTAssertEqual(result.quantity, .count(1))
+        XCTAssertEqual(result.quantity, .count(0))
     }
 
     func testParseIngredient_invalidFraction() throws {
         let result = RecipeParser.parseIngredient(ingredientText: "0/0 tsp ground cloves")
         XCTAssertEqual(result.name, "0/0 tsp ground cloves")
-        XCTAssertEqual(result.quantity, .count(1))
+        XCTAssertEqual(result.quantity, .count(0))
     }
 
     func testParseInstructions_withIndexDot() throws {
@@ -98,6 +98,14 @@ class RecipeParserTest: XCTestCase {
         let correctSteps = ["First Step.", "Second Step.", "Last Step."]
         XCTAssertEqual(steps, correctSteps)
     }
+    
+    func testParseInstructions_withStep() throws {
+        let instructions = "Step 1) Wash apple. Step 2. Cut them. Step 3. Eat."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        print(steps)
+        let correctSteps = ["Wash apple.", "Cut them.", "Eat."]
+        XCTAssertEqual(steps, correctSteps)
+    }
 
     func testParseInstructions_oneStep() throws {
         let instructions = "1. First Step."
@@ -107,8 +115,8 @@ class RecipeParserTest: XCTestCase {
     }
 
     func testParseInstructions_withoutIndex() throws {
-        let instructions = "In a non-reactive dish, combine the lemon juice, olive oil and mix together."
-            + "To cook the chicken: Heat a nonstick skillet or grill pan over high heat."
+        let instructions = "In a non-reactive dish, combine the lemon juice, olive oil and mix together. "
+            + "To cook the chicken: Heat a nonstick skillet or grill pan over high heat. "
             + "Add the chicken breasts and cook on each side or until cooked through."
         let steps = RecipeParser.parseInstructions(instructions: instructions)
         let correctSteps = [
