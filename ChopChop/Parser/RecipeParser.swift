@@ -7,7 +7,7 @@
 import Foundation
 import NaturalLanguage
 
-class RecipeParser {
+struct RecipeParser {
     // matches 1., 1), Step 1., Step 1)
     static let stepsIndexRegex = "(Step\\s)?[1-9][0-9]*(\\.|\\))\\s"
     // matches 2 or 2.5
@@ -16,42 +16,75 @@ class RecipeParser {
     static let integer = "[1-9]\\d*"
     // matches 1/2 or 1 / 2
     static let fraction = "[1-9]\\s*/\\s*[1-9]"
+    // matches 2 or 2.5 or 1/2
+    static let decimalOrFraction = "\(intOrDecimal)|\(fraction)"
     static let whitespace = "\\s+"
     static let optionalWhiteSpace = "\\s*"
     // places all units into a group like (kg|g|cup)
-    static let units: String = (Array(UnitsMapping.volumeWordMap.keys) + Array(UnitsMapping.massWordMap.keys))
+    static let units: String = (Array(QuantityParser.volumeWordMap.keys) + Array(QuantityParser.massWordMap.keys))
         .joined(separator: "|")
+
     /**
      Parses a chunk of instructions into an array of steps. Parsing is done differently depending on
      whether the instructions are already numbered.
      */
     static func parseInstructions(instructions: String) -> [String] {
+        let trimmedInstructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedInstructions.contains(where: \.isNewline) {
+            return splitByNewLine(text: trimmedInstructions)
+        }
         let regex = NSRegularExpression(stepsIndexRegex)
         let indexes = regex.matches(in: instructions, options: [],
                                     range: NSRange(location: 0, length: instructions.utf16.count))
         // when instructions are numbered, just parse base on the numbering
         if !indexes.isEmpty {
-            var steps = [String]()
-            for idx in 1..<indexes.count {
-                let startIndex = instructions.index(instructions.startIndex,
-                                                    offsetBy: indexes[idx - 1].range.upperBound)
-                let endIndex = instructions.index(instructions.startIndex,
-                                                  offsetBy: indexes[idx].range.lowerBound - 1)
-                steps.append(String(instructions[startIndex...endIndex])
-                                .trimmingCharacters(in: .whitespacesAndNewlines))
-            }
-            let lastStart = instructions.index(instructions.startIndex,
-                                               offsetBy: indexes[indexes.count - 1].range.upperBound)
-            steps.append(String(instructions[lastStart..<instructions.endIndex])
-                            .trimmingCharacters(in: .whitespacesAndNewlines))
-            return steps
+            let ranges = indexes.map({ $0.range })
+            return splitByStepIndex(ranges: ranges, instructions: instructions)
         // when instructions are not numbered, each sentence is taken as a step
         } else {
-            let tokenizer = NLTokenizer(unit: .sentence)
-            tokenizer.string = instructions
-            return tokenizer.tokens(for: instructions.startIndex..<instructions.endIndex)
-                .map({ String(instructions[$0]).trimmingCharacters(in: .whitespaces) })
+            return splitBySentence(paragraph: instructions)
         }
+    }
+
+    private static func splitByNewLine(text: String) -> [String] {
+        text.split(whereSeparator: \.isNewline)
+            .map({ String($0) })
+    }
+
+    private static func splitByStepIndex(ranges: [NSRange], instructions: String) -> [String] {
+        var steps = [String]()
+        for idx in 1..<ranges.count {
+            let startIndex = instructions.index(instructions.startIndex,
+                                                offsetBy: ranges[idx - 1].upperBound)
+            let endIndex = instructions.index(instructions.startIndex,
+                                              offsetBy: ranges[idx].lowerBound - 1)
+            steps.append(String(instructions[startIndex...endIndex])
+                            .trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        let lastStart = instructions.index(instructions.startIndex,
+                                           offsetBy: ranges[ranges.count - 1].upperBound)
+        steps.append(String(instructions[lastStart..<instructions.endIndex])
+                        .trimmingCharacters(in: .whitespacesAndNewlines))
+        return steps
+    }
+
+    private static func splitBySentence(paragraph: String) -> [String] {
+        let tokenizer = NLTokenizer(unit: .sentence)
+        tokenizer.string = paragraph
+        return tokenizer.tokens(for: paragraph.startIndex..<paragraph.endIndex)
+            .map({ String(paragraph[$0]).trimmingCharacters(in: .whitespaces) })
+    }
+
+    static func parseIngredientString(ingredientString: String) -> [String: Quantity] {
+        let trimmedIngredient = ingredientString.trimmingCharacters(in: .whitespacesAndNewlines)
+        var ingredientList = [String]()
+        if trimmedIngredient.contains(where: \.isNewline) {
+            ingredientList = splitByNewLine(text: ingredientString)
+        } else {
+            ingredientList = splitBySentence(paragraph: ingredientString)
+        }
+
+        return parseIngredientList(ingredientList: ingredientList)
     }
     /**
      Parse a list of ingredient description into a dictionary of ingredient name and its corresponding quantity.
@@ -86,12 +119,17 @@ class RecipeParser {
 
     }
 
-    private static func matchNumberFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
+    private static func generateNumberFractionOptionalUnitRegex() -> NSRegularExpression {
         let pattern = groupWithName(pattern: integer, name: "number")
             + whitespace + groupWithName(pattern: fraction, name: "fraction")
             + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
             + whitespace + groupWithName(pattern: ".*", name: "ingredient")
-        let regex = NSRegularExpression(pattern)
+        return NSRegularExpression(pattern)
+    }
+
+    private static func matchNumberFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
+
+        let regex = generateNumberFractionOptionalUnitRegex()
         guard let result =
             regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
 
@@ -110,7 +148,7 @@ class RecipeParser {
         var quantity: Quantity?
         if let unitRange = Range(result.range(withName: "unit"), in: text) {
             let unit = text[unitRange]
-            quantity = convertToQuantity(value: &value, unit: String(unit))
+            quantity = QuantityParser.parseQuantity(value: &value, unit: String(unit))
         } else {
             quantity = .count(value)
         }
@@ -125,12 +163,17 @@ class RecipeParser {
 
     }
 
-    private static func matchNumberOrFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
-        let pattern = groupWithName(pattern: "\(intOrDecimal)|\(fraction)", name: "numeral")
+    private static func generateNumberOrFractionOptionalUnitRegex() -> NSRegularExpression {
+        let pattern = groupWithName(pattern: decimalOrFraction, name: "numeral")
             + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
             + whitespace + groupWithName(pattern: ".*", name: "ingredient")
 
-        let regex = NSRegularExpression(pattern)
+        return NSRegularExpression(pattern)
+    }
+
+    private static func matchNumberOrFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
+
+        let regex = generateNumberOrFractionOptionalUnitRegex()
         guard let result =
             regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
 
@@ -155,7 +198,7 @@ class RecipeParser {
         var quantity: Quantity?
         if let unitRange = Range(result.range(withName: "unit"), in: text) {
             let unit = text[unitRange]
-            quantity = convertToQuantity(value: &value, unit: String(unit))
+            quantity = QuantityParser.parseQuantity(value: &value, unit: String(unit))
         } else {
             quantity = .count(value)
         }
@@ -186,18 +229,6 @@ class RecipeParser {
 
     private static func isFraction(text: String) -> Bool {
         NSRegularExpression(fraction).matches(text)
-    }
-
-    private static func convertToQuantity( value: inout Double, unit: String) -> Quantity {
-        if let volume = UnitsMapping.volumeWordMap[unit.lowercased()], let factor = UnitsMapping.volumeToL[volume] {
-            value *= factor
-            return .volume(value)
-        } else if let mass = UnitsMapping.massWordMap[unit.lowercased()], let factor = UnitsMapping.massToKg[mass] {
-            value *= factor
-            return .mass(value)
-        } else {
-            return .count(value)
-        }
     }
 
     private static func groupWithName(pattern: String, name: String?, isOptional: Bool = false) -> String {

@@ -5,7 +5,7 @@
 //  Created by Cao Wenjie on 17/3/21.
 //
 
-struct UnitsMapping {
+struct QuantityParser {
     static let volumeWordMap = [
         "tablespoon": "tablespoon",
         "tablespoons": "tablespoon",
@@ -64,4 +64,16 @@ struct UnitsMapping {
         "ounce": 0.028,
         "pound": 0.454
     ]
+
+    static func parseQuantity( value: inout Double, unit: String) -> Quantity {
+        if let volume = volumeWordMap[unit.lowercased()], let factor = volumeToL[volume] {
+            value *= factor
+            return .volume(value)
+        } else if let mass = massWordMap[unit.lowercased()], let factor = massToKg[mass] {
+            value *= factor
+            return .mass(value)
+        } else {
+            return .count(value)
+        }
+    }
 }

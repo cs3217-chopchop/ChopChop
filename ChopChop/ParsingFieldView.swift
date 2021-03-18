@@ -36,11 +36,11 @@ struct ParsingFieldView: View {
     }
 
     private func parseData(instruction: String, ingredient: String) {
-        let ingredientList = ingredientString.split(whereSeparator: \.isNewline)
-            .map({ String($0) })
-        let ingredients = RecipeParser.parseIngredientList(ingredientList: ingredientList)
-        let steps = instructionString.split(whereSeparator: \.isNewline)
-            .map({ String($0) })
+
+        let ingredients = RecipeParser.parseIngredientString(ingredientString: ingredient)
+//        let steps = split(whereSeparator: \.isNewline)
+//            .map({ String($0) })
+        let steps = RecipeParser.parseInstructions(instructions: instruction)
         print(ingredients)
         print(steps)
     }
