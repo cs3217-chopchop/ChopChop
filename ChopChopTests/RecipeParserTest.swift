@@ -98,7 +98,7 @@ class RecipeParserTest: XCTestCase {
         let correctSteps = ["First Step.", "Second Step.", "Last Step."]
         XCTAssertEqual(steps, correctSteps)
     }
-    
+
     func testParseInstructions_withStep() throws {
         let instructions = "Step 1) Wash apple. Step 2. Cut them. Step 3. Eat."
         let steps = RecipeParser.parseInstructions(instructions: instructions)
