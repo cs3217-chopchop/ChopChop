@@ -21,6 +21,17 @@ struct Quantity {
         self.type = type
         self.value = value
     }
+
+    var unit: String {
+        switch type {
+        case .count:
+            return ""
+        case .mass:
+            return "kilograms"
+        case .volume:
+            return "liters"
+        }
+    }
 }
 
 // MARK: - Arithmetic operations
@@ -112,19 +123,19 @@ extension Quantity: CustomStringConvertible {
 
             if valueInKilograms < 1 {
                 let valueInGrams = valueInKilograms * 1_000
-                return String(format: "%.2f grams", valueInGrams)
+                return String(format: "%.2f g", valueInGrams)
             }
 
-            return String(format: "%.2f kilograms", valueInKilograms)
+            return String(format: "%.2f kg", valueInKilograms)
         case .volume:
             let valueInLitres = value
 
             if valueInLitres < 1 {
                 let valueInMillilitres = valueInLitres * 1_000
-                return String(format: "%.2f millilitres", valueInMillilitres)
+                return String(format: "%.2f mL", valueInMillilitres)
             }
 
-            return String(format: "%.2f litres", valueInLitres)
+            return String(format: "%.2f L", valueInLitres)
         }
     }
 }
@@ -179,8 +190,19 @@ enum QuantityError: Error {
     case differentTypes
 }
 
-enum QuantityType {
+enum QuantityType: CustomStringConvertible, CaseIterable {
     case count
     case mass
     case volume
+
+    var description: String {
+        switch self {
+        case .count:
+            return "Count"
+        case .mass:
+            return "Mass"
+        case .volume:
+            return "Volume"
+        }
+    }
 }

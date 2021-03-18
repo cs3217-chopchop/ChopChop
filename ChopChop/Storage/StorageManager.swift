@@ -1,3 +1,5 @@
+import Foundation
+import UIKit
 import Combine
 
 struct StorageManager {
@@ -142,5 +144,23 @@ struct StorageManager {
         appDatabase.ingredientCategoriesOrderedByNamePublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
+    }
+
+}
+
+// MARK: - Images on Disk
+extension StorageManager {
+    static let ingredientFolderName = "Ingredients"
+    static let recipeFolderName = "Ingredients"
+    func deleteImage(name: String) {
+        ImageStore.delete(imageNamed: name)
+    }
+
+    func fetchImage(name: String) -> UIImage? {
+        ImageStore.fetch(imageNamed: name)
+    }
+
+    func saveImage(_ image: UIImage, name: String) throws {
+        try ImageStore.save(image: image, name: name)
     }
 }

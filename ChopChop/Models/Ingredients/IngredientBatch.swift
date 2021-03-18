@@ -24,6 +24,14 @@ class IngredientBatch {
     func subtract(_ quantity: Quantity) throws {
         try self.quantity -= quantity
     }
+
+    func updateQuantity(_ quantity: Quantity) {
+        self.quantity = quantity
+    }
+
+    func updateExpiryDate(_ expiryDate: Date?) {
+        self.expiryDate = expiryDate
+    }
 }
 
 /**
