@@ -34,17 +34,22 @@ class IngredientFormViewModel: ObservableObject {
     }
 
     func save() throws {
+        let storageManager = StorageManager()
+
         guard areFieldsValid else {
             return
         }
 
         if isEdit {
             try ingredient.rename(inputName)
-            // TODO: update image
+
+            if image != UIImage() {
+                try storageManager.saveIngredientImage(image, name: inputName)
+            }
         } else {
             ingredient = try Ingredient(name: inputName, type: selectedType)
         }
 
-        try StorageManager().saveIngredient(&ingredient)
+        try storageManager.saveIngredient(&ingredient)
     }
 }
