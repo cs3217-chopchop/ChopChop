@@ -4,7 +4,7 @@ struct RecipeIngredientRecord {
     var id: Int64?
     var recipeId: Int64?
     var name: String
-    var quantity: Quantity
+    var quantity: QuantityRecord
 }
 
 extension RecipeIngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {

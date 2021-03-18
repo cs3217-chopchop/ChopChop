@@ -21,9 +21,10 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
     }
 
     // Sorted by expiry date (nils last)
-    static let sets = hasMany(IngredientSetRecord.self).order(IngredientSetRecord.Columns.expiryDate.ascNullsLast)
-    var sets: QueryInterfaceRequest<IngredientSetRecord> {
-        request(for: IngredientRecord.sets)
+    static let batches = hasMany(IngredientBatchRecord.self)
+        .order(IngredientBatchRecord.Columns.expiryDate.ascNullsLast)
+    var batches: QueryInterfaceRequest<IngredientBatchRecord> {
+        request(for: IngredientRecord.batches)
     }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
@@ -37,7 +38,7 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
     }
 
     func orderedByExpiryDate() -> Self {
-        annotated(with: IngredientRecord.sets.min(IngredientSetRecord.Columns.expiryDate))
+        annotated(with: IngredientRecord.batches.min(IngredientBatchRecord.Columns.expiryDate))
             .order(SQLLiteral("minIngredientSetExpiryDate").sqlExpression.ascNullsLast)
     }
 
