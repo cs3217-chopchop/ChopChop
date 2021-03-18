@@ -16,7 +16,7 @@ struct StorageManager {
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
         var stepRecords = recipe.steps.enumerated().map { index, step in
-            RecipeStepRecord(recipeId: recipe.id, index: index, content: step.content)
+            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: step.content)
         }
 
         try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)

@@ -9,22 +9,40 @@ class RecipeStep {
         RecipeStepParser.parseTimeTaken(step: content)
     }
 
-    init(content: String) {
-        // TODO put non empty throw error
+    init(content: String) throws {
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedContent.isEmpty else {
+            throw RecipeStepError.invalidContent
+        }
         self.content = trimmedContent
     }
 
     func updateContent(_ content: String) throws {
-        self.content = content
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedContent.isEmpty else {
+            throw RecipeStepError.invalidContent
+        }
+        self.content = trimmedContent
     }
 
 }
 
+extension RecipeStep: Equatable {
+    static func == (lhs: RecipeStep, rhs: RecipeStep) -> Bool {
+        lhs.content == rhs.content
+    }
+}
+
 extension RecipeStep: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
-        let copy = RecipeStep(content: content)
+        guard let copy = try? RecipeStep(content: content) else {
+            fatalError()
+        }
         copy.id = id
         return copy
     }
+}
+
+enum RecipeStepError: Error {
+    case invalidContent
 }

@@ -1,7 +1,11 @@
+import GRDB
+import Foundation
+
 /**
  Represents some quantity of an ingredient.
  */
-struct RecipeIngredient {
+class RecipeIngredient {
+    var id: Int64?
     private(set) var name: String
     private(set) var quantity: Quantity
 
@@ -16,19 +20,19 @@ struct RecipeIngredient {
         self.quantity = quantity
     }
 
-    mutating func add(_ quantity: Quantity) throws {
+    func add(_ quantity: Quantity) throws {
         try self.quantity += quantity
     }
 
-    mutating func subtract(_ quantity: Quantity) throws {
+    func subtract(_ quantity: Quantity) throws {
         try self.quantity -= quantity
     }
 
-    mutating func scale(_ factor: Double) throws {
+    func scale(_ factor: Double) throws {
         try self.quantity *= factor
     }
 
-    mutating func updateName(_ name: String) throws {
+    func rename(_ name: String) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
@@ -38,10 +42,23 @@ struct RecipeIngredient {
         self.name = trimmedName
     }
 
+    func updateQuantity(_ quantity: Quantity) {
+        self.quantity = quantity
+    }
+
 }
 
 extension RecipeIngredient: Equatable {
     static func == (lhs: RecipeIngredient, rhs: RecipeIngredient) -> Bool {
         lhs.quantity == rhs.quantity && lhs.name == rhs.name
+    }
+}
+
+extension RecipeIngredient: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        guard let copy = try? RecipeIngredient(name: name, quantity: quantity) else {
+            fatalError()
+        }
+        return copy
     }
 }

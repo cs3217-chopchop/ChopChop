@@ -9,24 +9,25 @@ class SessionRecipe: ActionTimeTracker {
     init(recipe: Recipe) {
         // A copy of the recipe object is made so that recipe on recipe tab dosen't actually get modified
         guard let recipeCopy = recipe.copy() as? Recipe else {
-            fatalError()
+            fatalError("Could not copy recipe for edit")
         }
         self.recipe = recipeCopy
         sessionSteps = recipeCopy.steps.map { SessionRecipeStep(step: $0, actionTimeTracker: self) }
     }
 
-    // future use case: on complete, send session steps to user log
     var isCompleted: Bool {
         sessionSteps.allSatisfy { $0.isCompleted }
     }
 
     func updateTimeOfLastAction(date: Date) {
         assert(checkRepresentation())
+        guard date <= Date() else {
+            assertionFailure("Date must be in past or current")
+            return
+        }
         timeOfLastAction = date
         assert(checkRepresentation())
     }
-
-    // all other attributes of recipe can be modified from recipe itself
 
     private func checkRepresentation() -> Bool {
         guard recipe.steps.count == sessionSteps.count else {
@@ -40,10 +41,11 @@ class SessionRecipe: ActionTimeTracker {
             }
         }
 
-        guard timeOfLastAction >= Date() else {
+        guard timeOfLastAction <= Date() else {
             return false
         }
 
         return true
     }
+
 }

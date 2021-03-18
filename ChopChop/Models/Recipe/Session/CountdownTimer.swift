@@ -7,9 +7,8 @@ class CountdownTimer {
     private(set) var timer: Timer?
 
     init(time: Int) throws {
-        guard time > 0 else {
+        guard time >= 0 else {
             throw CountdownTimerError.invalidTiming
-            return
         }
         remainingTime = time
         defaultTime = time
@@ -47,9 +46,8 @@ class CountdownTimer {
 
     // use case: user inc or dec default time
     func updateDefaultTime(defaultTime: Int) throws {
-        guard defaultTime > 0 else {
+        guard defaultTime >= 0 else {
             throw CountdownTimerError.invalidTiming
-            return
         }
         self.defaultTime = defaultTime
     }

@@ -26,7 +26,7 @@ struct RecipeStepParser {
     static let randomShortStringBetweenMagnitudeAndUnit = optional(str: "[a-z\\d\\-_\\s]{0,5} ")
     static let specialAndDelimiter = " (and|&) "
 
-    static let defaultTime = 900
+    static let defaultTime = 0
 
     static let timeUnitsJoined = "(" + joinWithPipeSymbol(arr: minUnits + hourUnits + secondUnits) + ")"
 
@@ -40,7 +40,7 @@ struct RecipeStepParser {
     /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes" returns ["2 minutes", "1-2 minutes"]
     static func parseTimerDurations(step: String) -> [String] {
         var delimitersJoined = joinWithPipeSymbol(arr: delimiters)
-        var numbersJoined = joinWithPipeSymbol(arr: digitNames.keys.map { $0 })
+        var numbersJoined = joinWithPipeSymbol(arr: Array(digitNames.keys))
         numbersJoined += "|" + intOrDecimal // zero|one|...|[0-9]
         numbersJoined += optional(str: specialAndDelimiter + numbersJoined) // 1 and a half min
 
@@ -55,7 +55,7 @@ struct RecipeStepParser {
 
         let regexString = optionalRangeString +
             mostBasicTimeWithCompulsoryUnit + optional(str: randomShortString + mostBasicTimeWithCompulsoryUnit) // 1h 9 mins to 1h 10 mins
-        let matched = matches(for: regexString, in: step)
+        let matched = matchesWithIndex(for: regexString, in: step).map { $0.0 }
         let trimmed = matched.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
 
         return trimmed
@@ -107,7 +107,7 @@ struct RecipeStepParser {
     }
 
     private static func parseNumber(number: String) -> Double? {
-        var numbersJoined = joinWithPipeSymbol(arr: digitNames.keys.map { $0 })
+        var numbersJoined = joinWithPipeSymbol(arr: Array(digitNames.keys))
         numbersJoined += "|" + intOrDecimal
         guard number ~= numbersJoined else {
             return nil

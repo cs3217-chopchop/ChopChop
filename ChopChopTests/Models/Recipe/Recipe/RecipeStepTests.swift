@@ -9,23 +9,23 @@ class RecipeStepTests: XCTestCase {
     let contentWithWhiteSpace = "     Meanwhile, whisk cornstarch and cold water together until smooth.     "
     let contentWithTimeTaken = "Select high pressure according to manufacturer's instructions; set timer for 0 minutes. Allow 10 minutes for pressure to build."
 
-    func testConstruct() {
-        let recipeStep = RecipeStep(content: content)
+    func testConstruct() throws {
+        let recipeStep = try RecipeStep(content: content)
         XCTAssertEqual(recipeStep.content, content)
 
-        let recipeStepWithWhiteSpaces = RecipeStep(content: contentWithWhiteSpace)
+        let recipeStepWithWhiteSpaces = try RecipeStep(content: contentWithWhiteSpace)
         XCTAssertEqual(recipeStepWithWhiteSpaces.content, content)
+        XCTAssertEqual(recipeStep.timeTaken, RecipeStepParser.defaultTime)
     }
 
     func testUpdateContent() throws {
-        let recipeStep = RecipeStep(content: content)
+        let recipeStep = try RecipeStep(content: content)
 
         try recipeStep.updateContent(contentWithTimeTaken)
         XCTAssertEqual(recipeStep.content, contentWithTimeTaken)
-        XCTAssertEqual(recipeStep.timeTaken, 600)
 
         try recipeStep.updateContent(contentWithWhiteSpace)
-        XCTAssertEqual(recipeStep.content, contentWithWhiteSpace, "Should not be trimmed")
+        XCTAssertEqual(recipeStep.content, content)
         XCTAssertEqual(recipeStep.timeTaken, RecipeStepParser.defaultTime)
     }
 

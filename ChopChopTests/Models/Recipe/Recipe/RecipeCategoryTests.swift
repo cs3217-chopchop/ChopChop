@@ -3,37 +3,37 @@ import XCTest
 
 class RecipeCategoryTests: XCTestCase {
 
-    let name = "Chinese"
+    let name1 = "Chinese"
     let name2 = "Indian"
     let name2WithWhiteSpace = "   Indian  "
     let whiteSpace = "      "
 
-    func testConstruct() {
-        let recipeCategory = RecipeCategory(id: 1, name: name)
-        XCTAssertEqual(recipeCategory.name, name)
+    func testConstruct() throws {
+        let recipeCategory = try RecipeCategory(id: 1, name: name1)
+        XCTAssertEqual(recipeCategory.name, name1)
 
-        let recipeCategory2 = RecipeCategory(id: 2, name: name2WithWhiteSpace)
-        XCTAssertEqual(recipeCategory.name, name2)
+        let recipeCategory2 = try RecipeCategory(id: 2, name: name2WithWhiteSpace)
+        XCTAssertEqual(recipeCategory2.name, name2)
     }
 
     func testConstruct_whiteSpace_fail() {
-        XCTAssertThrowsError(RecipeCategory(id: 3, name: whiteSpace))
+        XCTAssertThrowsError(try RecipeCategory(id: 3, name: whiteSpace))
     }
 
-    func testUpdateName() {
-        let recipeCategory = RecipeCategory(id: 1, name: name)
-        recipeCategory.updateName(name2)
+    func testRename() throws {
+        let recipeCategory = try RecipeCategory(id: 1, name: name1)
+        try recipeCategory.rename(name2)
         XCTAssertEqual(recipeCategory.name, name2)
     }
 
-    func testUpdateName_noChange() {
-        let recipeCategory = RecipeCategory(id: 1, name: name2)
-        recipeCategory.updateName(name2WithWhiteSpace)
+    func testRename_noChange() throws {
+        let recipeCategory = try RecipeCategory(id: 1, name: name2)
+        try recipeCategory.rename(name2WithWhiteSpace)
         XCTAssertEqual(recipeCategory.name, name2)
     }
 
-    func testUpdateName_whiteSpace_fail() {
-        let recipeCategory = RecipeCategory(id: 1, name: name)
-        XCTAssertThrowsError(recipeCategory.updateName(whiteSpace))
+    func testRename_whiteSpace_fail() throws {
+        let recipeCategory = try RecipeCategory(id: 1, name: name1)
+        XCTAssertThrowsError(try recipeCategory.rename(whiteSpace))
     }
 }

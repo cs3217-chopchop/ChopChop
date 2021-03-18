@@ -22,30 +22,13 @@ class SessionRecipeStep {
     func toggleCompleted() {
         isCompleted.toggle()
         if isCompleted {
-            timeTaken = Date().timeIntervalSinceReferenceDate - actionTimeTracker.timeOfLastAction.timeIntervalSinceReferenceDate
+            timeTaken = Date().timeIntervalSinceReferenceDate -
+                actionTimeTracker.timeOfLastAction.timeIntervalSinceReferenceDate
         } else {
             // means step is unchecked and time should be reset
             timeTaken = 0
         }
         actionTimeTracker.updateTimeOfLastAction(date: Date())
-    }
-
-    /// Updates content of a step.
-    /// Updates timers in step if needed - If timer duration words are exactly the same, do nothing.
-    /// Else, delete all old timers and create new timers based on updated contents of step.
-    func updateStep(content: String) throws {
-        try step.updateContent(content)
-
-        let newDurationPhrases = RecipeStepParser.parseTimerDurations(step: content)
-        let isTimersExactlySame = newDurationPhrases == timers.map { $0.0 }
-
-        guard !isTimersExactlySame else {
-            // currently all timing words must be the same so don't edit timers at all
-            return
-        }
-
-        // otherwise, delete all current timers and replace with new timers
-        timers = SessionRecipeStep.convertToTimers(durationPhrases: newDurationPhrases)
     }
 
     private static func convertToTimers(durationPhrases: [String]) -> [(String, CountdownTimer)] {
@@ -54,7 +37,7 @@ class SessionRecipeStep {
                 let timer = try CountdownTimer(time: RecipeStepParser.parseToTime(timeString: duration))
                 return (duration, timer)
             } catch {
-                fatalError()
+                fatalError("Time was not valid")
             }
         }
     }
