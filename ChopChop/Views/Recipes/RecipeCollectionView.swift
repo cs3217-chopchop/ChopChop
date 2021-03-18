@@ -6,9 +6,7 @@ struct RecipeCollectionView: View {
 
     var body: some View {
         VStack {
-            TextField("Search", text: $viewModel.query)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             List(viewModel.recipes) { recipe in
                 NavigationLink(
                     destination: RecipeDetailView(name: recipe.name),
