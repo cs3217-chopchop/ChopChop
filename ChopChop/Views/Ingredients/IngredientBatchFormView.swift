@@ -74,6 +74,22 @@ struct IngredientBatchEditView_Previews: PreviewProvider {
             viewModel: IngredientBatchFormViewModel(
                 edit: IngredientBatch(
                     quantity: try! Quantity(.count, value: 3),
-                    expiryDate: Date().addingTimeInterval(100_000))))
+                    expiryDate: Date().addingTimeInterval(100_000)),
+                in: try! Ingredient(
+                    name: "Apple",
+                    type: .count,
+                    batches: [
+                        IngredientBatch(
+                            quantity: try! Quantity(.count, value: 3),
+                            expiryDate: Date()),
+                        IngredientBatch(
+                            quantity: try! Quantity(.count, value: 3)),
+                        IngredientBatch(
+                            quantity: try! Quantity(.count, value: 3),
+                            expiryDate: Date().addingTimeInterval(100_000)),
+                        IngredientBatch(
+                            quantity: try! Quantity(.count, value: 3),
+                            expiryDate: Date().addingTimeInterval(200_000))
+                    ])))
     }
 }

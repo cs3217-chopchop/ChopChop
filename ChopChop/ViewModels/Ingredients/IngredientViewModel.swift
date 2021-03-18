@@ -1,3 +1,5 @@
+import UIKit
+
 class IngredientViewModel {
     let ingredient: Ingredient
 
@@ -5,11 +7,15 @@ class IngredientViewModel {
         self.ingredient = ingredient
     }
 
-    var ingredientName: String {
+    var name: String {
         ingredient.name
     }
 
-    var ingredientBatches: [IngredientBatch] {
+    var batches: [IngredientBatch] {
         ingredient.batches
+    }
+
+    var image: UIImage {
+        ingredient.image ?? UIImage()
     }
 }

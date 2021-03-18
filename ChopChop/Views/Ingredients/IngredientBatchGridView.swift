@@ -1,10 +1,3 @@
-//
-//  IngredientBatchGridView.swift
-//  ChopChop
-//
-//  Created by Siau Chiak on 18/3/21.
-//
-
 import SwiftUI
 
 struct IngredientBatchGridView: View {
@@ -15,9 +8,9 @@ struct IngredientBatchGridView: View {
 
         return ScrollView {
              LazyVGrid(columns: columns) {
-                ForEach(viewModel.ingredientBatches, id: \.expiryDate) { batch in
+                ForEach(viewModel.batches, id: \.expiryDate) { batch in
                     let batchViewModel = IngredientBatchViewModel(batch: batch)
-                    let batchFormViewModel = IngredientBatchFormViewModel(edit: batch)
+                    let batchFormViewModel = IngredientBatchFormViewModel(edit: batch, in: viewModel.ingredient)
                     NavigationLink(destination: IngredientBatchFormView(viewModel: batchFormViewModel)) {
                         IngredientBatchCardView(viewModel: batchViewModel)
                     }

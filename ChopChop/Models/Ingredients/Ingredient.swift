@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import GRDB
 
 /**
@@ -54,6 +55,10 @@ class Ingredient: FetchableRecord {
         self.batches = batches
     }
 
+    var image: UIImage? {
+        StorageManager().fetchIngredientImage(name: name)
+    }
+
     var batchesByExpiryDate: [IngredientBatch] {
         batches.sorted()
     }
@@ -72,6 +77,7 @@ extension Ingredient {
             throw IngredientError.emptyName
         }
 
+        try StorageManager().renameIngredientImage(from: self.name, to: trimmedName)
         self.name = trimmedName
     }
 

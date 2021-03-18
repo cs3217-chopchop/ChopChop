@@ -9,11 +9,19 @@ struct IngredientDetailView: View {
 
             VStack {
                 ZStack(alignment: .bottomLeading) {
-                    Rectangle()
+                    Image(uiImage: viewModel.image)
+                        .resizable()
+                        .scaledToFill()
                         .frame(height: 300)
-                        .opacity(0.3)
-                    Text(viewModel.ingredientName)
+                        .clipped()
+                        .overlay(
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
+                        )
+                    Text(viewModel.name)
                         .font(.largeTitle)
+                        .foregroundColor(.white)
                         .padding()
                 }
 
@@ -39,7 +47,7 @@ struct IngredientDetailView: View {
     @ViewBuilder
     var addBatchView: some View {
         if let batchFormViewModel = try? IngredientBatchFormViewModel(
-                addBatchOfType: viewModel.ingredient.quantityType) {
+            addBatchTo: viewModel.ingredient) {
             IngredientBatchFormView(viewModel: batchFormViewModel)
         }
     }

@@ -6,7 +6,7 @@ class IngredientFormViewModel: ObservableObject {
 
     @Published var selectedType: QuantityType
     @Published var inputName: String
-    @Published var image = UIImage()
+    @Published var image: UIImage
 
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
@@ -17,6 +17,7 @@ class IngredientFormViewModel: ObservableObject {
 
         self.selectedType = ingredient.quantityType
         self.inputName = ingredient.name
+        self.image = ingredient.image ?? UIImage()
     }
 
     init() throws {
@@ -25,6 +26,7 @@ class IngredientFormViewModel: ObservableObject {
 
         self.selectedType = .count
         self.inputName = ""
+        self.image = UIImage()
     }
 
     var areFieldsValid: Bool {
@@ -43,6 +45,6 @@ class IngredientFormViewModel: ObservableObject {
             ingredient = try Ingredient(name: inputName, type: selectedType)
         }
 
-        StorageManager().saveIngredient(&ingredient)
+        try StorageManager().saveIngredient(&ingredient)
     }
 }
