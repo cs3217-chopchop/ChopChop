@@ -31,7 +31,7 @@ struct RecipeCollectionView: View {
                 }
             }
         }
-        .navigationTitle(Text(viewModel.category.name))
+        .navigationTitle(Text(viewModel.title))
         .onDisappear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
@@ -51,7 +51,7 @@ struct RecipeCollectionView: View {
                 }
             }
             .popover(isPresented: $showingPopover) {
-                List(Array(viewModel.ingredients.keys).sorted(), id: \.self) { ingredient in
+                List(Array(viewModel.recipeIngredients.keys).sorted(), id: \.self) { ingredient in
                     Button(action: {
                         if viewModel.selectedIngredients.contains(ingredient) {
                             viewModel.selectedIngredients.remove(ingredient)
@@ -77,6 +77,6 @@ struct RecipeCollectionView: View {
 
 struct RecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeCollectionView(viewModel: RecipeCollectionViewModel(category: RecipeCategory(name: "")))
+        RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: ""))
     }
 }

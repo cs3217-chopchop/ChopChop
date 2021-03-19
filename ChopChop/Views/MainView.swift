@@ -4,7 +4,7 @@ struct MainView: View {
     @ObservedObject var viewModel: MainViewModel
 
     var body: some View {
-        Sidebar(recipeCategories: $viewModel.recipeCategories, ingredientCategories: $viewModel.ingredientCategories)
+        Sidebar(recipeCategories: viewModel.recipeCategories, ingredientCategories: viewModel.ingredientCategories)
 
         // TODO: Show latest recipes cooked, ingredients expiry date overview etc
         Text("Welcome to ChopChop!")

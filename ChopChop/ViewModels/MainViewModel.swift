@@ -1,8 +1,8 @@
 import Combine
 
 final class MainViewModel: ObservableObject {
-    @Published var recipeCategories: [RecipeCategory] = []
-    @Published var ingredientCategories: [IngredientCategory] = []
+    @Published private(set) var recipeCategories: [RecipeCategory] = []
+    @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
     private let storageManager = StorageManager()
     private var recipeCategoriesCancellable: AnyCancellable?
