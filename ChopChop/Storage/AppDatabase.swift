@@ -35,6 +35,9 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                     .collate(.localizedStandardCompare)
+                t.column("servings", .double)
+                    .notNull()
+                t.column("difficulty", .integer)
             }
         }
 
