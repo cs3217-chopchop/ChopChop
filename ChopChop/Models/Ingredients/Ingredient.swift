@@ -38,7 +38,7 @@ class Ingredient: FetchableRecord {
         ingredientCategoryId = row["ingredientCategoryId"]
         quantityType = .count
         name = row["name"]
-        batches = row.prefetchedRows["ingredientSet"]?.compactMap {
+        batches = row.prefetchedRows["ingredientSets"]?.compactMap {
             let record = IngredientBatchRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
                 return nil

@@ -160,8 +160,7 @@ class Recipe: FetchableRecord {
 
 extension Recipe: Equatable {
     static func == (lhs: Recipe, rhs: Recipe) -> Bool {
-        lhs.name == rhs.name && lhs.servings == rhs.servings &&
-            lhs.recipeCategoryId == rhs.recipeCategoryId && lhs.difficulty == rhs.difficulty
+        lhs.name == rhs.name
     }
 }
 
