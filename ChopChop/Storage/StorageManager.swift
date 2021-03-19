@@ -146,7 +146,7 @@ struct StorageManager {
     }
 }
 
-// MARK: - Images on Disk
+// MARK: - Images Persistence
 extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
@@ -160,8 +160,8 @@ extension StorageManager {
             return
         }
 
-        deleteRecipeImage(name: oldName)
         try saveRecipeImage(image, name: newName)
+        deleteRecipeImage(name: oldName)
     }
 
     func fetchRecipeImage(name: String) -> UIImage? {
@@ -181,8 +181,8 @@ extension StorageManager {
             return
         }
 
-        deleteIngredientImage(name: oldName)
         try saveIngredientImage(image, name: newName)
+        deleteIngredientImage(name: oldName)
     }
 
     func fetchIngredientImage(name: String) -> UIImage? {
