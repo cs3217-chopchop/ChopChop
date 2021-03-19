@@ -115,14 +115,14 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByNamePublisher(_ query: String) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByNamePublisher(query)
+    func recipesFilteredByNamePublisher(_ query: String, ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
+        appDatabase.recipesFilteredByNamePublisher(query, ingredients: ingredients)
             .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: categoryIds)
+    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64], ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
+        appDatabase.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
             .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }

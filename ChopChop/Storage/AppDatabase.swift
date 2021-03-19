@@ -351,16 +351,22 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByNamePublisher(_ query: String) -> AnyPublisher<[RecipeRecord], Error> {
+    func recipesFilteredByNamePublisher(_ query: String, ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
-            .tracking(RecipeRecord.all().filteredByName(query).orderedByName().fetchAll)
+            .tracking(RecipeRecord.all().filteredByName(query).filteredByIngredients(ingredients).orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
+    func recipesFilteredByNameAndCategoryPublisher(query: String,
+                                                   categoryIds: [Int64],
+                                                   ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
-            .tracking(RecipeRecord.all().filteredByCategory(ids: categoryIds).filteredByName(query).orderedByName().fetchAll)
+            .tracking(RecipeRecord.all().filteredByCategory(ids: categoryIds)
+                        .filteredByName(query)
+                        .filteredByIngredients(ingredients)
+                        .orderedByName()
+                        .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

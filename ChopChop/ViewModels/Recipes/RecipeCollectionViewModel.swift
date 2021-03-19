@@ -4,6 +4,7 @@ final class RecipeCollectionViewModel: ObservableObject {
     @Published var query: String = ""
     @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var ingredients: [String: [Int64]] = [:]
+    @Published var selectedIngredients: Set<String> = []
     @Published var category: RecipeCategory
 
     private let storageManager = StorageManager()
@@ -24,13 +25,15 @@ final class RecipeCollectionViewModel: ObservableObject {
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
-        $query.map { [self] query -> AnyPublisher<[RecipeInfo], Error> in
+        $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients -> AnyPublisher<[RecipeInfo], Error> in
             if let id = category.id {
                 let ids = id == 0 ? [] : [id]
 
-                return storageManager.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: ids)
+                return storageManager.recipesFilteredByNameAndCategoryPublisher(query: query,
+                                                                                categoryIds: ids,
+                                                                                ingredients: Array(selectedIngredients))
             } else {
-                return storageManager.recipesFilteredByNamePublisher(query)
+                return storageManager.recipesFilteredByNamePublisher(query, ingredients: Array(selectedIngredients))
             }
         }
         .map { recipesPublisher in
