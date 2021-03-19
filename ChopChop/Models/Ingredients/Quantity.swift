@@ -5,11 +5,8 @@ import GRDB
  
  Invariants:
  - Quantities are non negative.
- 
- Mass type quantities are meaasured in kilograms.
- Volume type quantities are measured in litres.
  */
-struct Quantity {
+struct Quantity: Equatable {
     let type: QuantityType
     var value: Double
 
@@ -32,12 +29,51 @@ extension Quantity {
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     static func + (left: Quantity, right: Quantity) throws -> Quantity {
-        guard left.type == right.type else {
-            throw QuantityError.differentTypes
-        }
+        switch (left.type, right.type) {
+        case (.count, .count):
+            let sum = left.value + right.value
+            return try Quantity(.count, value: sum)
+        case (.mass(let leftUnit), .mass(let rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
+            let unit = max(leftUnit, rightUnit)
 
-        let sum = left.value + right.value
-        return try Quantity(left.type, value: sum)
+            let leftValue = MassUnit.convert(left.value, from: leftUnit, to: unit)
+            let rightValue = MassUnit.convert(right.value, from: rightUnit, to: unit)
+
+            let sum = leftValue + rightValue
+            return try Quantity(.mass(unit), value: sum)
+        case (.mass(let leftUnit), .mass(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
+            let leftValue = MassUnit.convert(left.value, from: leftUnit, to: .kilogram)
+            let rightValue = MassUnit.convert(right.value, from: rightUnit, to: .kilogram)
+
+            let sum = leftValue + rightValue
+            return try Quantity(.mass(.kilogram), value: sum)
+        case (.volume(let leftUnit), .volume(let rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
+            let unit = max(leftUnit, rightUnit)
+
+            let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: unit)
+            let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: unit)
+
+            let sum = leftValue + rightValue
+            return try Quantity(.volume(unit), value: sum)
+        case (.volume(let leftUnit), .volume(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
+            let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: .liter)
+            let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: .liter)
+
+            let sum = leftValue + rightValue
+            return try Quantity(.volume(.liter), value: sum)
+        case (.mass(let massUnit), .volume(let volumeUnit)):
+            let rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
+
+            let sum = left.value + rightValue
+            return try Quantity(.mass(massUnit), value: sum)
+        case (.volume(let volumeUnit), .mass(let massUnit)):
+            let rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
+
+            let sum = left.value + rightValue
+            return try Quantity(.volume(volumeUnit), value: sum)
+        default:
+            throw QuantityError.incompatibleTypes
+        }
     }
 
     /**
@@ -47,12 +83,33 @@ extension Quantity {
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     static func - (left: Quantity, right: Quantity) throws -> Quantity {
-        guard left.type == right.type else {
-            throw QuantityError.differentTypes
-        }
+        switch (left.type, right.type) {
+        case (.count, .count):
+            let difference = left.value - right.value
+            return try Quantity(.count, value: difference)
+        case (.mass(let leftUnit), .mass(let rightUnit)):
+            let rightValue = MassUnit.convert(right.value, from: rightUnit, to: leftUnit)
 
-        let difference = left.value - right.value
-        return try Quantity(left.type, value: difference)
+            let difference = left.value - rightValue
+            return try Quantity(.mass(leftUnit), value: difference)
+        case (.volume(let leftUnit), .volume(let rightUnit)):
+            let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: leftUnit)
+
+            let difference = left.value - rightValue
+            return try Quantity(.volume(leftUnit), value: difference)
+        case (.mass(let massUnit), .volume(let volumeUnit)):
+            let rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
+
+            let difference = left.value - rightValue
+            return try Quantity(.mass(massUnit), value: difference)
+        case (.volume(let volumeUnit), .mass(let massUnit)):
+            let rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
+
+            let difference = left.value - rightValue
+            return try Quantity(.volume(volumeUnit), value: difference)
+        default:
+            throw QuantityError.incompatibleTypes
+        }
     }
 
     /**
@@ -99,6 +156,37 @@ extension Quantity {
         let quotient = try left / right
         left = quotient
     }
+
+    /**
+     Returns whether the left quantity is smaller than the right, if they are of the same type.
+     - Throws:
+        - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+     */
+    static func < (left: Quantity, right: Quantity) throws -> Bool {
+        var rightValue: Double
+
+        switch (left.type, right.type) {
+        case (.count, .count):
+            rightValue = right.value
+
+        case (.mass(let leftUnit), .mass(let rightUnit)):
+            rightValue = MassUnit.convert(right.value, from: rightUnit, to: leftUnit)
+
+        case (.volume(let leftUnit), .volume(let rightUnit)):
+            rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: leftUnit)
+
+        case (.mass(let massUnit), .volume(let volumeUnit)):
+            rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
+
+        case (.volume(let volumeUnit), .mass(let massUnit)):
+            rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
+
+        default:
+            throw QuantityError.incompatibleTypes
+        }
+
+        return left.value < rightValue
+    }
 }
 
 // MARK: - CustomStringConvertible
@@ -107,80 +195,40 @@ extension Quantity: CustomStringConvertible {
         switch type {
         case .count:
             return String(format: "%.1f", value)
-        case .mass:
-            let valueInKilograms = value
-
-            if valueInKilograms < 1 {
-                let valueInGrams = valueInKilograms * 1_000
-                return String(format: "%.2f grams", valueInGrams)
-            }
-
-            return String(format: "%.2f kilograms", valueInKilograms)
-        case .volume:
-            let valueInLitres = value
-
-            if valueInLitres < 1 {
-                let valueInMillilitres = valueInLitres * 1_000
-                return String(format: "%.2f millilitres", valueInMillilitres)
-            }
-
-            return String(format: "%.2f litres", valueInLitres)
+        case .mass(let unit):
+            return String(format: "%.2f \(unit.description)", value)
+        case .volume(let unit):
+            return String(format: "%.2f \(unit.description)", value)
         }
     }
 }
 
-// MARK: - Comparable
-extension Quantity: Comparable {
-    /**
-     Returns whether the left quantity is smaller than the right, if they are of the same type.
-     - Throws:
-        - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
-     */
-    static func < (lhs: Quantity, rhs: Quantity) -> Bool {
-        lhs.value < rhs.value
-    }
-
-    /**
-     Returns whether the quantities are equal, if they are of the same type.
-     If they are of different types, return false.
-     */
-    static func == (lhs: Quantity, rhs: Quantity) -> Bool {
-        lhs.type == rhs.type && lhs.value == rhs.value
-    }
-}
-
-extension Quantity {
-    init(from record: QuantityRecord) throws {
-        switch record {
-        case .count(let value):
-            try self.init(.count, value: value)
-        case .mass(let value):
-            try self.init(.mass, value: value)
-        case .volume(let value):
-            try self.init(.volume, value: value)
-        }
-    }
-
-    var record: QuantityRecord {
-        switch type {
-        case .count:
-            return .count(value)
-        case .mass:
-            return .mass(value)
-        case .volume:
-            return .volume(value)
-        }
-    }
-}
+//extension Quantity {
+//    init(from record: QuantityRecord) throws {
+//        switch record {
+//        case .count(let value):
+//            try self.init(.count, value: value)
+//        case .mass(let value):
+//            try self.init(.mass, value: value)
+//        case .volume(let value):
+//            try self.init(.volume, value: value)
+//        }
+//    }
+//
+//    var record: QuantityRecord {
+//        switch type {
+//        case .count:
+//            return .count(value)
+//        case .mass:
+//            return .mass(value)
+//        case .volume:
+//            return .volume(value)
+//        }
+//    }
+//}
 
 enum QuantityError: Error {
     case negativeQuantity
     case divisionByZero
-    case differentTypes
-}
-
-enum QuantityType {
-    case count
-    case mass
-    case volume
+    case incompatibleTypes
 }

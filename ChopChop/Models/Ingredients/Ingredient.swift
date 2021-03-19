@@ -27,7 +27,7 @@ class Ingredient: FetchableRecord {
         self.name = trimmedName
 
         for batch in batches where batch.quantity.type != type {
-            throw QuantityError.differentTypes
+            throw QuantityError.incompatibleTypes
         }
 
         self.batches = batches
@@ -84,7 +84,7 @@ extension Ingredient {
      */
     func add(quantity: Quantity, expiryDate: Date?) throws {
         guard self.quantityType == quantity.type else {
-            throw QuantityError.differentTypes
+            throw QuantityError.incompatibleTypes
         }
 
         if let existingBatch = batches.first(where: { $0.expiryDate == expiryDate }) {
@@ -111,7 +111,7 @@ extension Ingredient {
      */
     func subtract(quantity: Quantity, expiryDate: Date?) throws {
         guard self.quantityType == quantity.type else {
-            throw QuantityError.differentTypes
+            throw QuantityError.incompatibleTypes
         }
 
         guard let batch = getBatch(expiryDate: expiryDate) else {
@@ -140,7 +140,7 @@ extension Ingredient {
      */
     func use(quantity: Quantity) throws {
         guard self.quantityType == quantity.type else {
-            throw QuantityError.differentTypes
+            throw QuantityError.incompatibleTypes
         }
 
         let currentDate = Date()
@@ -186,7 +186,7 @@ extension Ingredient {
         }
 
         guard self.quantityType == ingredient.quantityType else {
-            throw QuantityError.differentTypes
+            throw QuantityError.incompatibleTypes
         }
 
         for batch in ingredient.batches {
