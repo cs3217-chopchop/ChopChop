@@ -1,4 +1,6 @@
 enum VolumeUnit: Int, CaseIterable {
+    static let baseUnit: VolumeUnit = .liter
+
     case pint
     case quart
     case gallon

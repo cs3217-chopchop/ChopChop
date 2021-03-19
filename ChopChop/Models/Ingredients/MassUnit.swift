@@ -1,4 +1,6 @@
 enum MassUnit: Int, CaseIterable {
+    static let baseUnit: MassUnit = .kilogram
+
     case ounce
     case pound
 

@@ -18,6 +18,21 @@ struct Quantity: Equatable {
         self.type = type
         self.value = value
     }
+
+    var baseType: BaseQuantityType {
+        type.baseType
+    }
+
+    var baseValue: Double {
+        switch type {
+        case .count:
+            return value
+        case .mass(let unit):
+            return MassUnit.convert(value, from: unit, to: .baseUnit)
+        case .volume(let unit):
+            return VolumeUnit.convert(value, from: unit, to: .baseUnit)
+        }
+    }
 }
 
 // MARK: - Arithmetic operations
@@ -42,8 +57,8 @@ extension Quantity {
             let sum = leftValue + rightValue
             return try Quantity(.mass(unit), value: sum)
         case (.mass(let leftUnit), .mass(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
-            let leftValue = MassUnit.convert(left.value, from: leftUnit, to: .kilogram)
-            let rightValue = MassUnit.convert(right.value, from: rightUnit, to: .kilogram)
+            let leftValue = MassUnit.convert(left.value, from: leftUnit, to: .baseUnit)
+            let rightValue = MassUnit.convert(right.value, from: rightUnit, to: .baseUnit)
 
             let sum = leftValue + rightValue
             return try Quantity(.mass(.kilogram), value: sum)
@@ -56,8 +71,8 @@ extension Quantity {
             let sum = leftValue + rightValue
             return try Quantity(.volume(unit), value: sum)
         case (.volume(let leftUnit), .volume(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
-            let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: .liter)
-            let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: .liter)
+            let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: .baseUnit)
+            let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: .baseUnit)
 
             let sum = leftValue + rightValue
             return try Quantity(.volume(.liter), value: sum)
