@@ -117,6 +117,30 @@ extension StorageManagerTests {
         XCTAssertNil(storageManager.fetchIngredientImage(name: newName))
     }
 
+    func testOverwriteExistingIngredientImage() {
+        guard let existingImage = UIImage(named: "apples") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        guard let newImage = UIImage(named: "oranges") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Fruit"
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(existingImage, name: imageName))
+
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(newImage, name: imageName))
+        let persistedImage = storageManager.fetchIngredientImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
+        XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
+
+        storageManager.deleteIngredientImage(name: imageName)
+        XCTAssertNil(storageManager.fetchIngredientImage(name: imageName))
+    }
+
     func testRecipeImagePersistence() {
         guard let image = UIImage(named: "apple-pie") else {
             XCTFail("Image asset not found")
@@ -152,5 +176,29 @@ extension StorageManagerTests {
 
         storageManager.deleteRecipeImage(name: newName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: newName))
+    }
+
+    func testOverwriteExistingRecipeImage() {
+        guard let existingImage = UIImage(named: "apple-pie") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        guard let newImage = UIImage(named: "apple-pie-slice") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Apple Pie"
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))
+
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, name: imageName))
+        let persistedImage = storageManager.fetchRecipeImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
+        XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
+
+        storageManager.deleteRecipeImage(name: imageName)
+        XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 }
