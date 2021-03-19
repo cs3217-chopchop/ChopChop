@@ -8,7 +8,7 @@ struct RecipeCollectionView: View {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             List(viewModel.recipes) { recipe in
                 NavigationLink(
-                    destination: RecipeDetailView(name: recipe.name)
+                    destination: Text(recipe.name)
                 ) {
                     HStack(alignment: .top) {
                         Image("recipe")

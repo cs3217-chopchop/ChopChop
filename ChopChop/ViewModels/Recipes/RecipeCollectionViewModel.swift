@@ -25,7 +25,6 @@ final class RecipeCollectionViewModel: ObservableObject {
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
         $query.map { [self] query -> AnyPublisher<[RecipeInfo], Error> in
-            print(query)
             if let id = category.id {
                 let ids = id == 0 ? [] : [id]
 
