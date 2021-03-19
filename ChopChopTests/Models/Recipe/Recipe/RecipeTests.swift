@@ -30,13 +30,13 @@ class RecipeTests: XCTestCase {
     static func generateIngredients() -> [RecipeIngredient] {
         do {
             return [
-        try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(0.120))),
-        try RecipeIngredient(name: "Baking Powder",
-                             quantity: try Quantity(from: .volume(0.007_5))),
-        try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.000_312_5))),
-        try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(0.250))),
-        try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
-        try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(0.015)))
+                try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
+                try RecipeIngredient(name: "Baking Powder",
+                                     quantity: try Quantity(from: .volume(7.5, unit: .milliliter))),
+                try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.312_5, unit: .milliliter))),
+                try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(250, unit: .milliliter))),
+                try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
+                try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
             ]
         } catch {
             XCTFail("Could not generate sample ingredients")
@@ -136,16 +136,16 @@ class RecipeTests: XCTestCase {
 
     func testAddIngredient_existingIngredient() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        try recipe.addIngredient(name: "Flour", quantity: try Quantity(from: .mass(0.120)))
-        let updatedIngredient = try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(0.240)))
+        try recipe.addIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram)))
+        let updatedIngredient = try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(240, unit: .gram)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
-        XCTAssertTrue(recipe.ingredients.filter { $0.name == "Flour" }.count == 1)
+        XCTAssertEqual(recipe.ingredients.filter { $0.name == "Flour" }.count, 1)
     }
 
     func testAddIngredient_new() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        try recipe.addIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(0.120)))
-        let newIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(0.120)))
+        try recipe.addIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(120, unit: .gram)))
+        let newIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(120, unit: .gram)))
         XCTAssertTrue(recipe.ingredients.contains(newIngredient))
     }
 
@@ -161,7 +161,7 @@ class RecipeTests: XCTestCase {
 
     func testRemoveIngredient_nonExistentIngredient() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        let nonExistentIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(0.120)))
+        let nonExistentIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(120, unit: .gram)))
         XCTAssertThrowsError(try recipe.removeIngredient(nonExistentIngredient))
     }
 
@@ -172,13 +172,23 @@ class RecipeTests: XCTestCase {
             return
         }
         try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour",
-                                    quantity: try Quantity(from: .mass(0.120)))
+                                    quantity: try Quantity(from: .mass(120, unit: .gram)))
 
         let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour",
-                                                     quantity: try Quantity(from: .mass(0.120)))
+                                                     quantity: try Quantity(from: .mass(120, unit: .gram)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
         XCTAssertFalse(recipe.ingredients.contains { $0.name == "Flour" })
     }
+
+    //    [
+    //        try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
+    //        try RecipeIngredient(name: "Baking Powder",
+    //                             quantity: try Quantity(from: .volume(7.5, unit: .milliliter))),
+    //        try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.312_5, unit: .milliliter))),
+    //        try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(250, unit: .milliliter))),
+    //        try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
+    //        try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
+    //    ]
 
     func testUpdateIngredient_changeNameToAnotherIngredient() throws {
         let recipe = RecipeTests.generateSampleRecipe()
@@ -186,9 +196,9 @@ class RecipeTests: XCTestCase {
             XCTFail("There are no ingredients")
             return
         }
-        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "Baking Powder", quantity: try Quantity(from: .volume(0.007_5)))
+        try recipe.updateIngredient(oldIngredient: firstIngredient, name: "Baking Powder", quantity: try Quantity(from: .volume(7.5, unit: .milliliter)))
 
-        let updatedIngredient = try RecipeIngredient(name: "Baking Powder", quantity: try Quantity(from: .volume(0.015)))
+        let updatedIngredient = try RecipeIngredient(name: "Baking Powder", quantity: try Quantity(from: .volume(15, unit: .milliliter)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
     }
 
@@ -199,19 +209,19 @@ class RecipeTests: XCTestCase {
             return
         }
         try recipe.updateIngredient(oldIngredient: firstIngredient, name: "All-Purpose Flour",
-                                    quantity: try Quantity(from: .mass(0.120)))
+                                    quantity: try Quantity(from: .mass(120, unit: .gram)))
 
         let updatedIngredient = try RecipeIngredient(name: "All-Purpose Flour",
-                                                     quantity: try Quantity(from: .mass(0.120)))
+                                                     quantity: try Quantity(from: .mass(120, unit: .gram)))
         XCTAssertTrue(recipe.ingredients.contains(updatedIngredient))
         XCTAssertFalse(recipe.ingredients.contains { $0.name == "Flour" })
     }
 
     func testUpdateIngredient_nonExistent() throws {
         let recipe = RecipeTests.generateSampleRecipe()
-        let newIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(0.120)))
+        let newIngredient = try RecipeIngredient(name: "CauliFlour", quantity: try Quantity(from: .mass(120, unit: .gram)))
         XCTAssertThrowsError(try recipe.updateIngredient(oldIngredient: newIngredient,
-                                                         name: "CauliFlour", quantity: try Quantity(from: .mass(0.240))))
+                                                         name: "CauliFlour", quantity: try Quantity(from: .mass(240, unit: .gram))))
 
     }
 

@@ -34,13 +34,13 @@ class StorageManagerTests: XCTestCase {
                                     """)
                                 ],
                                 ingredients: [
-                                    try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(0.120))),
+                                    try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
                                     try RecipeIngredient(name: "Baking Powder",
-                                                         quantity: try Quantity(from: .volume(0.007_5))),
-                                    try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.000_312_5))),
-                                    try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(0.250))),
+                                                         quantity: try Quantity(from: .volume(7.5, unit: .milliliter))),
+                                    try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.312_5, unit: .milliliter))),
+                                    try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(250, unit: .milliliter))),
                                     try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
-                                    try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(0.015)))
+                                    try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
                                 ]
                             )
 

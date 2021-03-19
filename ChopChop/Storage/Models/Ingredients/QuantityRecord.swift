@@ -1,7 +1,7 @@
 enum QuantityRecord: Equatable {
     case count(Double)
-    case mass(Double, MassUnit)
-    case volume(Double, VolumeUnit)
+    case mass(Double, unit: MassUnit)
+    case volume(Double, unit: VolumeUnit)
 }
 
 extension QuantityRecord: Codable {
@@ -16,10 +16,10 @@ extension QuantityRecord: Codable {
             self = .count(value)
         } else if let value = try container.decodeIfPresent(Double.self, forKey: .mass),
                   let unit = try container.decodeIfPresent(MassUnit.self, forKey: .unit) {
-            self = .mass(value, unit)
+            self = .mass(value, unit: unit)
         } else if let value = try container.decodeIfPresent(Double.self, forKey: .volume),
                   let unit = try container.decodeIfPresent(VolumeUnit.self, forKey: .unit) {
-            self = .volume(value, unit)
+            self = .volume(value, unit: unit)
         } else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath,
                                                                     debugDescription: "Unable to decode enum."))

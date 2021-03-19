@@ -234,9 +234,9 @@ extension Quantity: CustomStringConvertible {
         case .count:
             return .count(value)
         case .mass(let unit):
-            return .mass(value, unit)
+            return .mass(value, unit: unit)
         case .volume(let unit):
-            return .volume(value, unit)
+            return .volume(value, unit: unit)
         }
     }
  }
