@@ -6,7 +6,8 @@ struct MainView: View {
     var body: some View {
         Sidebar(recipeCategories: $viewModel.recipeCategories, ingredientCategories: $viewModel.ingredientCategories)
 
-        RecipeCollectionView(viewModel: RecipeCollectionViewModel(category: RecipeCategory(name: "All Recipes")))
+        // TODO: Show latest recipes cooked, ingredients expiry date overview etc
+        Text("Welcome to ChopChop!")
     }
 }
 

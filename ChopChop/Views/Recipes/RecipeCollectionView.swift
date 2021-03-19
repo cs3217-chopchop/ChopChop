@@ -29,6 +29,9 @@ struct RecipeCollectionView: View {
             }
         }
         .navigationTitle(Text(viewModel.category.name))
+        .onDisappear {
+            viewModel.query = ""
+        }
     }
 }
 

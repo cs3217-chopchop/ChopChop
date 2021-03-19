@@ -1,14 +1,7 @@
 import Combine
 
 final class RecipeCollectionViewModel: ObservableObject {
-    @Published var query: String = "" {
-        didSet {
-            recipesCancellable = recipesPublisher()
-                .sink { [weak self] recipes in
-                    self?.recipes = recipes
-                }
-        }
-    }
+    @Published var query: String = ""
     @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var ingredients: [String: [Int64]] = [:]
     @Published var category: RecipeCategory
@@ -31,21 +24,23 @@ final class RecipeCollectionViewModel: ObservableObject {
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
-        if let id = category.id {
-            let ids = id == 0 ? [] : [id]
+        $query.map { [self] query -> AnyPublisher<[RecipeInfo], Error> in
+            print(query)
+            if let id = category.id {
+                let ids = id == 0 ? [] : [id]
 
-            return storageManager.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: ids)
-                .catch { _ in
-                    Just<[RecipeInfo]>([])
-                }
-                .eraseToAnyPublisher()
-        } else {
-            return storageManager.recipesFilteredByNamePublisher(query)
-                .catch { _ in
-                    Just<[RecipeInfo]>([])
-                }
-                .eraseToAnyPublisher()
+                return storageManager.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: ids)
+            } else {
+                return storageManager.recipesFilteredByNamePublisher(query)
+            }
         }
+        .map { recipesPublisher in
+            recipesPublisher.catch { _ in
+                Just<[RecipeInfo]>([])
+            }
+        }
+        .switchToLatest()
+        .eraseToAnyPublisher()
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[String: [Int64]], Never> {
