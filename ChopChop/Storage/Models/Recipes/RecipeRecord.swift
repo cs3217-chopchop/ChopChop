@@ -61,12 +61,4 @@ extension DerivableRequest where RowDecoder == RecipeRecord {
         having(RecipeRecord.ingredients
                 .filter(ingredients.contains(RecipeIngredientRecord.Columns.name)).count == ingredients.count)
     }
-
-    func filteredByContents(_ query: String) -> Self {
-        let ingredientsAlias = TableAlias()
-
-        return joining(optional: RecipeRecord.ingredients.aliased(ingredientsAlias))
-            .filter(RecipeRecord.Columns.name.like("%\(query)%")
-                        || ingredientsAlias[RecipeIngredientRecord.Columns.name.like("%\(query)%")])
-    }
 }

@@ -103,52 +103,23 @@ struct StorageManager {
 
     // MARK: - Database Access: Publishers
 
-    func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesOrderedByNamePublisher()
+    func recipesPublisher(query: String,
+                          categoryIds: [Int64],
+                          ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
+        appDatabase.recipesPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
             .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByCategoryOrderedByNamePublisher(ids: ids)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
+    func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
+        appDatabase.recipeCategoriesPublisher()
+            .map { $0.map { RecipeCategory(id: $0.id, name: $0.name ) } }
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByNamePublisher(_ query: String, ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByNamePublisher(query, ingredients: ingredients)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func recipesFilteredByNameAndCategoryPublisher(query: String, categoryIds: [Int64], ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func recipesFilteredByContentsPublisher(_ query: String) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByContentsPublisher(query)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
-        appDatabase.recipeCategoriesOrderedByNamePublisher()
-            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
-            .eraseToAnyPublisher()
-    }
-
-    func recipeIngredientsPublisher() -> AnyPublisher<[String: [Int64]], Error> {
-        appDatabase.recipeIngredientsPublisher()
-            .map { $0.reduce(into: [:]) { ingredients, ingredient in
-                guard let id = ingredient.recipeId else {
-                    return
-                }
-
-                ingredients[ingredient.name, default: []].append(id)
-            }
-            }
+    func recipeIngredientsPublisher(categoryIds: [Int64]) -> AnyPublisher<[String], Error> {
+        appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
+            .map { Array(Set($0.map { $0.name })).sorted() }
             .eraseToAnyPublisher()
     }
 

@@ -3,7 +3,7 @@ import Combine
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query: String = ""
     @Published private(set) var recipes: [RecipeInfo] = []
-    @Published private(set) var recipeIngredients: [String: [Int64]] = [:]
+    @Published private(set) var recipeIngredients: [String] = []
     @Published var selectedIngredients: Set<String> = []
 
     let title: String
@@ -30,9 +30,9 @@ final class RecipeCollectionViewModel: ObservableObject {
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
         $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients
             -> AnyPublisher<[RecipeInfo], Error> in
-            storageManager.recipesFilteredByNameAndCategoryPublisher(query: query,
-                                                                     categoryIds: categoryIds,
-                                                                     ingredients: Array(selectedIngredients))
+            storageManager.recipesPublisher(query: query,
+                                            categoryIds: categoryIds,
+                                            ingredients: Array(selectedIngredients))
         }
         .map { recipesPublisher in
             recipesPublisher.catch { _ in
@@ -43,10 +43,10 @@ final class RecipeCollectionViewModel: ObservableObject {
         .eraseToAnyPublisher()
     }
 
-    private func recipeIngredientsPublisher() -> AnyPublisher<[String: [Int64]], Never> {
-        storageManager.recipeIngredientsPublisher()
+    private func recipeIngredientsPublisher() -> AnyPublisher<[String], Never> {
+        storageManager.recipeIngredientsPublisher(categoryIds: categoryIds)
             .catch { _ in
-                Just<[String: [Int64]]>([:])
+                Just<[String]>([])
             }
             .eraseToAnyPublisher()
     }

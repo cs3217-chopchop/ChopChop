@@ -51,7 +51,7 @@ struct RecipeCollectionView: View {
                 }
             }
             .popover(isPresented: $showingPopover) {
-                List(Array(viewModel.recipeIngredients.keys).sorted(), id: \.self) { ingredient in
+                List(Array(viewModel.recipeIngredients).sorted(), id: \.self) { ingredient in
                     Button(action: {
                         if viewModel.selectedIngredients.contains(ingredient) {
                             viewModel.selectedIngredients.remove(ingredient)

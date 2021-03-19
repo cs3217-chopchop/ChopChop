@@ -21,7 +21,7 @@ final class MainViewModel: ObservableObject {
     }
 
     private func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
-        storageManager.recipeCategoriesOrderedByNamePublisher()
+        storageManager.recipeCategoriesPublisher()
             .catch { _ in
                 Just<[RecipeCategory]>([])
             }

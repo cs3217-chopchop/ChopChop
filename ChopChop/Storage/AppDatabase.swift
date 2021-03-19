@@ -337,57 +337,29 @@ extension AppDatabase {
 // MARK: - Database Access: Publishers
 
 extension AppDatabase {
-    func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().orderedByName().fetchAll)
+    func recipesPublisher(query: String,
+                          categoryIds: [Int64],
+                          ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
+        ValueObservation.tracking(RecipeRecord.all()
+                                    .filteredByCategory(ids: categoryIds)
+                                    .filteredByName(query)
+                                    .filteredByIngredients(ingredients)
+                                    .orderedByName()
+                                    .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func recipesFilteredByNamePublisher(_ query: String, ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().filteredByName(query).filteredByIngredients(ingredients).orderedByName().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func recipesFilteredByNameAndCategoryPublisher(query: String,
-                                                   categoryIds: [Int64],
-                                                   ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().filteredByCategory(ids: categoryIds)
-                        .filteredByName(query)
-                        .filteredByIngredients(ingredients)
-                        .orderedByName()
-                        .fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func recipesFilteredByContentsPublisher(_ query: String) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().filteredByContents(query).fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
+    func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func recipeIngredientsPublisher() -> AnyPublisher<[RecipeIngredientRecord], Error> {
+    func recipeIngredientsPublisher(categoryIds: [Int64]) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
-            .tracking(RecipeIngredientRecord.all().fetchAll)
+            .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
