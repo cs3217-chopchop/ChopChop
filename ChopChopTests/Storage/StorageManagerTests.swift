@@ -1,5 +1,7 @@
 import XCTest
 import GRDB
+import UIKit
+
 @testable import ChopChop
 
 class StorageManagerTests: XCTestCase {
@@ -75,5 +77,130 @@ class StorageManagerTests: XCTestCase {
         let fetchedIngredient = try storageManager.fetchIngredient(id: id)
 
         XCTAssertEqual(ingredient, fetchedIngredient)
+    }
+}
+
+// MARK: - Image Persistence
+extension StorageManagerTests {
+    func testIngredientImagePersistence() {
+        guard let image = UIImage(named: "apples") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Apple"
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: imageName))
+        let persistedImage = storageManager.fetchIngredientImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertEqual(persistedImage?.pngData(), image.pngData())
+
+        storageManager.deleteIngredientImage(name: imageName)
+        XCTAssertNil(storageManager.fetchIngredientImage(name: imageName))
+    }
+
+    func testRenameIngredientImage() {
+        guard let image = UIImage(named: "apples") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let oldName = "Apple"
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: oldName))
+
+        let newName = "Apples"
+        XCTAssertNoThrow(try storageManager.renameIngredientImage(from: oldName, to: newName))
+        XCTAssertNil(storageManager.fetchIngredientImage(name: oldName))
+
+        let renamedImage = storageManager.fetchIngredientImage(name: newName)
+        XCTAssertNotNil(renamedImage)
+        XCTAssertEqual(renamedImage?.pngData(), image.pngData())
+
+        storageManager.deleteIngredientImage(name: newName)
+        XCTAssertNil(storageManager.fetchIngredientImage(name: newName))
+    }
+
+    func testOverwriteExistingIngredientImage() {
+        guard let existingImage = UIImage(named: "apples") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        guard let newImage = UIImage(named: "oranges") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Fruit"
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(existingImage, name: imageName))
+
+        XCTAssertNoThrow(try storageManager.saveIngredientImage(newImage, name: imageName))
+        let persistedImage = storageManager.fetchIngredientImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
+        XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
+
+        storageManager.deleteIngredientImage(name: imageName)
+        XCTAssertNil(storageManager.fetchIngredientImage(name: imageName))
+    }
+
+    func testRecipeImagePersistence() {
+        guard let image = UIImage(named: "apple-pie") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Apple Pie"
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
+        let persistedImage = storageManager.fetchRecipeImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertEqual(persistedImage?.pngData(), image.pngData())
+
+        storageManager.deleteRecipeImage(name: imageName)
+        XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
+    }
+
+    func testRenameRecipeImage() {
+        guard let image = UIImage(named: "apple-pie") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let oldName = "Apple Pie"
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: oldName))
+
+        let newName = "Delicious Apple Pie"
+        XCTAssertNoThrow(try storageManager.renameRecipeImage(from: oldName, to: newName))
+        XCTAssertNil(storageManager.fetchRecipeImage(name: oldName))
+
+        let renamedImage = storageManager.fetchRecipeImage(name: newName)
+        XCTAssertNotNil(renamedImage)
+        XCTAssertEqual(renamedImage?.pngData(), image.pngData())
+
+        storageManager.deleteRecipeImage(name: newName)
+        XCTAssertNil(storageManager.fetchRecipeImage(name: newName))
+    }
+
+    func testOverwriteExistingRecipeImage() {
+        guard let existingImage = UIImage(named: "apple-pie") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        guard let newImage = UIImage(named: "apple-pie-slice") else {
+            XCTFail("Image asset not found")
+            return
+        }
+
+        let imageName = "Apple Pie"
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))
+
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, name: imageName))
+        let persistedImage = storageManager.fetchRecipeImage(name: imageName)
+        XCTAssertNotNil(persistedImage)
+        XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
+        XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
+
+        storageManager.deleteRecipeImage(name: imageName)
+        XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 }

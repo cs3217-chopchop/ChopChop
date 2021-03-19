@@ -1,4 +1,5 @@
 import Combine
+import UIKit
 
 struct StorageManager {
     let appDatabase: AppDatabase
@@ -143,5 +144,53 @@ struct StorageManager {
         appDatabase.ingredientCategoriesOrderedByNamePublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
+    }
+}
+
+// MARK: - Images Persistence
+extension StorageManager {
+    static let ingredientFolderName = "Ingredient"
+    static let recipeFolderName = "Recipe"
+
+    func deleteRecipeImage(name: String) {
+        ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
+    }
+
+    func renameRecipeImage(from oldName: String, to newName: String) throws {
+        guard let image = fetchRecipeImage(name: oldName) else {
+            return
+        }
+
+        try saveRecipeImage(image, name: newName)
+        deleteRecipeImage(name: oldName)
+    }
+
+    func fetchRecipeImage(name: String) -> UIImage? {
+        ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
+    }
+
+    func saveRecipeImage(_ image: UIImage, name: String) throws {
+        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
+    }
+
+    func deleteIngredientImage(name: String) {
+        ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
+    }
+
+    func renameIngredientImage(from oldName: String, to newName: String) throws {
+        guard let image = fetchIngredientImage(name: oldName) else {
+            return
+        }
+
+        try saveIngredientImage(image, name: newName)
+        deleteIngredientImage(name: oldName)
+    }
+
+    func fetchIngredientImage(name: String) -> UIImage? {
+        ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
+    }
+
+    func saveIngredientImage(_ image: UIImage, name: String) throws {
+        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
     }
 }
