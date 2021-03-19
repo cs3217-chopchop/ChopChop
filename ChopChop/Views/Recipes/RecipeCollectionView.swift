@@ -7,36 +7,8 @@ struct RecipeCollectionView: View {
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
-            Button(action: {
-                showingPopover = true
-            }) {
-                if viewModel.selectedIngredients.isEmpty {
-                    Text("Filter by ingredients...")
-                } else {
-                    Text(viewModel.selectedIngredients.joined(separator: ", "))
-                }
-            }
-            .popover(isPresented: $showingPopover) {
-                List(Array(viewModel.ingredients.keys), id: \.self) { ingredient in
-                    Button(action: {
-                        if viewModel.selectedIngredients.contains(ingredient) {
-                            viewModel.selectedIngredients.remove(ingredient)
-                        } else {
-                            viewModel.selectedIngredients.insert(ingredient)
-                        }
-                    }) {
-                        HStack {
-                            Text(ingredient)
-                            Spacer()
-
-                            if viewModel.selectedIngredients.contains(ingredient) {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-                .frame(width: 200, height: 200)
-            }
+            IngredientFilter()
+                .padding([.trailing, .leading])
             List(viewModel.recipes) { recipe in
                 NavigationLink(
                     destination: Text(recipe.name)
@@ -62,6 +34,43 @@ struct RecipeCollectionView: View {
         .navigationTitle(Text(viewModel.category.name))
         .onDisappear {
             viewModel.query = ""
+            viewModel.selectedIngredients.removeAll()
+        }
+    }
+
+    func IngredientFilter() -> some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                showingPopover = true
+            }) {
+                if viewModel.selectedIngredients.isEmpty {
+                    Text("Filter by ingredients...")
+                } else {
+                    Text(viewModel.selectedIngredients.joined(separator: ", "))
+                }
+            }
+            .popover(isPresented: $showingPopover) {
+                List(Array(viewModel.ingredients.keys).sorted(), id: \.self) { ingredient in
+                    Button(action: {
+                        if viewModel.selectedIngredients.contains(ingredient) {
+                            viewModel.selectedIngredients.remove(ingredient)
+                        } else {
+                            viewModel.selectedIngredients.insert(ingredient)
+                        }
+                    }) {
+                        HStack {
+                            Text(ingredient)
+                            Spacer()
+
+                            if viewModel.selectedIngredients.contains(ingredient) {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+                .frame(width: 200, height: 200)
+            }
         }
     }
 }
