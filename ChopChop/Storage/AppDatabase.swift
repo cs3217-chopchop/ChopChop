@@ -35,6 +35,9 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                     .collate(.localizedStandardCompare)
+                t.column("servings", .double)
+                    .notNull()
+                t.column("difficulty", .integer)
             }
         }
 
@@ -173,28 +176,28 @@ extension AppDatabase {
     }
 
     func saveIngredient(_ ingredient: inout IngredientRecord) throws {
-        var sets: [IngredientSetRecord] = []
+        var batches: [IngredientBatchRecord] = []
 
-        try saveIngredient(&ingredient, sets: &sets)
+        try saveIngredient(&ingredient, batches: &batches)
     }
 
-    func saveIngredient(_ ingredient: inout IngredientRecord, sets: inout [IngredientSetRecord]) throws {
+    func saveIngredient(_ ingredient: inout IngredientRecord, batches: inout [IngredientBatchRecord]) throws {
         try dbWriter.write { db in
             try ingredient.save(db)
 
-            guard sets.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {
+            guard batches.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {
                 throw DatabaseError(message: "Ingredient sets belong to the wrong ingredient.")
             }
 
             // Delete all sets that are not in the array
-            try ingredient.sets
-                .filter(!sets.compactMap { $0.id }.contains(IngredientSetRecord.Columns.id))
+            try ingredient.batches
+                .filter(!batches.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
                 .deleteAll(db)
 
             // Save ingredient sets
-            for index in sets.indices {
-                sets[index].ingredientId = ingredient.id
-                try sets[index].save(db)
+            for index in batches.indices {
+                batches[index].ingredientId = ingredient.id
+                try batches[index].save(db)
             }
         }
     }
@@ -276,7 +279,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = IngredientRecord
                 .filter(key: id)
-                .including(all: IngredientRecord.sets)
+                .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
         }

@@ -10,12 +10,13 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name)
-        var ingredientRecords = recipe.ingredients.map { name, quantity in
-            RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
+        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
+                                        servings: recipe.servings, difficulty: recipe.difficulty)
+        var ingredientRecords = recipe.ingredients.map { ingredient in
+            RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var stepRecords = recipe.steps.enumerated().map { index, content in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
+        var stepRecords = recipe.steps.enumerated().map { index, step in
+            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: step.content)
         }
 
         try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
@@ -35,11 +36,14 @@ struct StorageManager {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.ingredientCategoryId,
                                                 name: ingredient.name)
-        var setRecords = ingredient.sets.map { expiryDate, quantity in
-            IngredientSetRecord(ingredientId: ingredient.id, expiryDate: expiryDate, quantity: quantity)
+        var batchRecords = ingredient.batches.map { batch in
+            IngredientBatchRecord(
+                ingredientId: ingredient.id,
+                expiryDate: batch.expiryDate,
+                quantity: batch.quantity.record)
         }
 
-        try appDatabase.saveIngredient(&ingredientRecord, sets: &setRecords)
+        try appDatabase.saveIngredient(&ingredientRecord, batches: &batchRecords)
 
         ingredient.id = ingredientRecord.id
     }
@@ -113,7 +117,7 @@ struct StorageManager {
 
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesOrderedByNamePublisher()
-            .map { $0.map { RecipeCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
             .eraseToAnyPublisher()
     }
 
@@ -137,7 +141,7 @@ struct StorageManager {
 
     func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
         appDatabase.ingredientCategoriesOrderedByNamePublisher()
-            .map { $0.map { IngredientCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }
 }

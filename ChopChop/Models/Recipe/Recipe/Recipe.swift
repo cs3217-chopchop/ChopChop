@@ -1,0 +1,192 @@
+import Foundation
+import GRDB
+
+/// Note there is no relationship between steps and ingredients after parsing stage
+class Recipe: FetchableRecord {
+    var id: Int64?
+    private(set) var name: String
+    private(set) var servings: Double
+    var recipeCategoryId: Int64?
+    private(set) var difficulty: Difficulty?
+    private(set) var steps: [RecipeStep]
+    private(set) var ingredients: [RecipeIngredient]
+
+    init(name: String, servings: Double = 1, difficulty: Difficulty? = nil,
+         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = []) throws {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw RecipeError.invalidName
+        }
+        self.name = trimmedName
+
+        guard servings > 0 else {
+            throw RecipeError.invalidServings
+        }
+        self.servings = servings
+        self.difficulty = difficulty
+        self.steps = steps
+        self.ingredients = ingredients
+        assert(checkRepresentation())
+    }
+
+    func updateName(_ name: String) throws {
+        assert(checkRepresentation())
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw RecipeError.invalidName
+        }
+        self.name = trimmedName
+        assert(checkRepresentation())
+    }
+
+    func updateDifficulty(_ difficulty: Difficulty) {
+        assert(checkRepresentation())
+        self.difficulty = difficulty
+        assert(checkRepresentation())
+    }
+
+    // step related functions
+    func addStep(content: String) throws {
+        assert(checkRepresentation())
+        steps.append(try RecipeStep(content: content))
+        assert(checkRepresentation())
+    }
+
+    func removeStep(_ removedStep: RecipeStep) {
+        assert(checkRepresentation())
+        guard (steps.contains { $0 == removedStep }) else {
+            return
+        }
+
+        steps.removeAll { $0 == removedStep }
+        assert(checkRepresentation())
+    }
+
+    func reorderStep(idx1: Int, idx2: Int) throws {
+        assert(checkRepresentation())
+        guard idx1 >= 0 && idx1 < steps.count && idx2 >= 0 && idx2 < steps.count else {
+            throw RecipeError.invalidReorderSteps
+        }
+
+        guard idx1 != idx2 else {
+            return
+        }
+
+        let temp = steps[idx1]
+        steps[idx1] = steps[idx2]
+        steps[idx2] = temp
+        assert(checkRepresentation())
+    }
+
+    // ingredient related functions
+    func addIngredient(name: String, quantity: Quantity) throws {
+        assert(checkRepresentation())
+        if let existingIngredient = ingredients.first(where: { $0.name == name }) {
+            try existingIngredient.add(quantity)
+        } else {
+            let addedIngredient = try RecipeIngredient(name: name, quantity: quantity)
+            ingredients.append(addedIngredient)
+        }
+        assert(checkRepresentation())
+    }
+
+    func removeIngredient(_ removedIngredient: RecipeIngredient) throws {
+        assert(checkRepresentation())
+        guard (ingredients.contains { $0 == removedIngredient }) else {
+            throw RecipeError.nonExistentIngredient
+        }
+
+        ingredients.removeAll { $0 == removedIngredient }
+        assert(checkRepresentation())
+    }
+
+    func updateIngredient(oldIngredient: RecipeIngredient, name: String, quantity: Quantity) throws {
+        // note there is no effect on steps on updating ingredients
+        assert(checkRepresentation())
+        guard ingredients.contains(where: { $0.name == oldIngredient.name }) else {
+            throw RecipeError.nonExistentIngredient
+        }
+        if oldIngredient.name == name {
+            try oldIngredient.updateQuantity(quantity)
+        } else {
+            guard let existingIngredient = ingredients.first(where: { $0.name == name }) else {
+                try oldIngredient.rename(name)
+                try oldIngredient.updateQuantity(quantity)
+                return
+            }
+            try removeIngredient(oldIngredient)
+            try existingIngredient.add(quantity)
+
+        }
+        assert(checkRepresentation())
+    }
+
+    /// Returns total time taken to complete the recipe in seconds, computed from time taken for each step
+    var totalTimeTaken: Int {
+        steps.map({ $0.timeTaken }).reduce(0, +)
+    }
+
+    private func checkRepresentation() -> Bool {
+        !name.isEmpty && servings > 0 && checkNoDuplicateIngredients(ingredients: ingredients)
+    }
+
+    private func checkNoDuplicateIngredients(ingredients: [RecipeIngredient]) -> Bool {
+        // synonyms of ingredients are allowed e.g. brinjal and eggplant
+        return ingredients.allSatisfy { ingredient -> Bool in
+            ingredients.filter { $0.name == ingredient.name }.count == 1
+        }
+    }
+
+    required init(row: Row) {
+        id = row["id"]
+        servings = row["servings"]
+        recipeCategoryId = row["recipeCategoryId"]
+        name = row["name"]
+        difficulty = row["difficulty"]
+        steps = row.prefetchedRows["recipeStep"]?.compactMap {
+            try? RecipeStep(content: RecipeStepRecord(row: $0).content)
+        } ?? []
+        ingredients = row.prefetchedRows["recipeIngredient"]?.compactMap {
+            let record = RecipeIngredientRecord(row: $0)
+            guard let quantity = try? Quantity(from: record.quantity) else {
+                return nil
+            }
+
+            return try? RecipeIngredient(name: record.name, quantity: quantity)
+        } ?? []
+    }
+
+}
+
+extension Recipe: Equatable {
+    static func == (lhs: Recipe, rhs: Recipe) -> Bool {
+        lhs.name == rhs.name
+    }
+}
+
+extension Recipe: NSCopying {
+    func copy(with zone: NSZone? = nil) -> Any {
+        let newSteps = steps.compactMap { $0.copy() as? RecipeStep }
+        let newIngredients = ingredients.compactMap { $0.copy() as? RecipeIngredient }
+
+        do {
+            let copy = try Recipe(name: name, servings: servings, difficulty: difficulty, steps: newSteps, ingredients: newIngredients)
+            copy.id = id
+            copy.recipeCategoryId = recipeCategoryId
+            return copy
+        } catch {
+            fatalError("Cannot copy Recipe")
+        }
+
+    }
+}
+
+enum RecipeError: Error {
+    case invalidName
+    case invalidServings
+    case invalidCuisine
+    case invalidIngredients
+    case nonExistentStep
+    case nonExistentIngredient
+    case invalidReorderSteps
+}
