@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ParsingFieldView(viewModel: ParsingRecipeViewModel())
+        Text("Hello world!")
     }
 }
 

@@ -65,15 +65,28 @@ struct QuantityParser {
         "pound": 0.454
     ]
 
-    static func parseQuantity( value: inout Double, unit: String) -> Quantity {
+    static func parseQuantity( value: Double, unit: String) -> Quantity {
         if let volume = volumeWordMap[unit.lowercased()], let factor = volumeToL[volume] {
-            value *= factor
-            return .volume(value)
+            let scaledValue = value * factor
+            do {
+                return try Quantity(.volume, value: scaledValue)
+            } catch {
+                fatalError("Invalid quantity")
+            }
+
         } else if let mass = massWordMap[unit.lowercased()], let factor = massToKg[mass] {
-            value *= factor
-            return .mass(value)
+            let scaledValue = value * factor
+            do {
+                return try Quantity(.mass, value: scaledValue)
+            } catch {
+                fatalError("Invalid quantity")
+            }
         } else {
-            return .count(value)
+            do {
+                return try Quantity(.count, value: value)
+            } catch {
+                fatalError("Invalid quantity")
+            }
         }
     }
 }

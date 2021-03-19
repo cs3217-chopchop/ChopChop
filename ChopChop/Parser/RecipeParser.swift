@@ -117,8 +117,12 @@ struct RecipeParser {
         }
 
         // case where there is no numerical information about the ingredient, e.g. salt
-        return (ingredientText, .count(0))
-
+        do {
+            let count = try Quantity(.count, value: 0)
+            return (ingredientText, count)
+        } catch {
+            fatalError("Invalid count")
+        }
     }
 
     private static func generateNumberFractionOptionalUnitRegex() -> NSRegularExpression {
@@ -146,13 +150,17 @@ struct RecipeParser {
             return nil
         }
 
-        var value = number + parseFraction(fraction: String(text[fractionRange]))
+        let value = number + parseFraction(fraction: String(text[fractionRange]))
         var quantity: Quantity?
         if let unitRange = Range(result.range(withName: "unit"), in: text) {
             let unit = text[unitRange]
-            quantity = QuantityParser.parseQuantity(value: &value, unit: String(unit))
+            quantity = QuantityParser.parseQuantity(value: value, unit: String(unit))
         } else {
-            quantity = .count(value)
+            do {
+                quantity = try Quantity(.count, value: value)
+            } catch {
+                fatalError("Invalid quantity.")
+            }
         }
 
         let ingredient = extractIngredient(text: text, range: ingredientRange)
@@ -209,9 +217,13 @@ struct RecipeParser {
         var quantity: Quantity?
         if let unitRange = Range(result.range(withName: "unit"), in: text) {
             let unit = text[unitRange]
-            quantity = QuantityParser.parseQuantity(value: &value, unit: String(unit))
+            quantity = QuantityParser.parseQuantity(value: value, unit: String(unit))
         } else {
-            quantity = .count(value)
+            do {
+                quantity = try Quantity(.count, value: value)
+            } catch {
+                fatalError("Invalid quantity")
+            }
         }
 
         let ingredient = extractIngredient(text: text, range: ingredientRange)
