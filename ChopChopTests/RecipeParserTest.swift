@@ -83,10 +83,29 @@ class RecipeParserTest: XCTestCase {
         XCTAssertEqual(result.quantity, .count(0))
     }
 
+    func testParseIngredient_removeConnector() throws {
+        let result = RecipeParser.parseIngredient(ingredientText: "1 kg of ground cloves")
+        XCTAssertEqual(result.name, "ground cloves")
+        XCTAssertEqual(result.quantity, .mass(1))
+    }
+
+    func testParseInstructions_withNewLine() throws {
+        let instructions = "First Step.\nSecond Step.\nLast Step."
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        let correctSteps = ["First Step.", "Second Step.", "Last Step."]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
+    func testParseInstructions_trimNewLine() throws {
+        let instructions = "\n\n1. First Step. 2. Second Step. 3. Last Step.\n\n"
+        let steps = RecipeParser.parseInstructions(instructions: instructions)
+        let correctSteps = ["First Step.", "Second Step.", "Last Step."]
+        XCTAssertEqual(steps, correctSteps)
+    }
+
     func testParseInstructions_withIndexDot() throws {
         let instructions = "1. First Step. 2. Second Step. 3. Last Step."
         let steps = RecipeParser.parseInstructions(instructions: instructions)
-        print(steps)
         let correctSteps = ["First Step.", "Second Step.", "Last Step."]
         XCTAssertEqual(steps, correctSteps)
     }

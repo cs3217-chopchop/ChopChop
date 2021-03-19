@@ -24,6 +24,8 @@ struct RecipeParser {
     static let units: String = (Array(QuantityParser.volumeWordMap.keys) + Array(QuantityParser.massWordMap.keys))
         .joined(separator: "|")
 
+    static let ingredientConnector = "of"
+
     /**
      Parses a chunk of instructions into an array of steps. Parsing is done differently depending on
      whether the instructions are already numbered.
@@ -153,7 +155,7 @@ struct RecipeParser {
             quantity = .count(value)
         }
 
-        let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
+        let ingredient = extractIngredient(text: text, range: ingredientRange)
 
         guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
             return nil
@@ -161,6 +163,15 @@ struct RecipeParser {
 
         return (ingredient, ingredientQuantity)
 
+    }
+
+    private static func extractIngredient(text: String, range: Range<String.Index>) -> String {
+        var ingredient = text[range].trimmingCharacters(in: .whitespaces)
+        if ingredient.hasPrefix(ingredientConnector) {
+            ingredient = ingredient.dropFirst(ingredientConnector.count)
+                .trimmingCharacters(in: .whitespaces)
+        }
+        return ingredient
     }
 
     private static func generateNumberOrFractionOptionalUnitRegex() -> NSRegularExpression {
@@ -203,7 +214,7 @@ struct RecipeParser {
             quantity = .count(value)
         }
 
-        let ingredient = text[ingredientRange].trimmingCharacters(in: .whitespaces)
+        let ingredient = extractIngredient(text: text, range: ingredientRange)
 
         guard let ingredientQuantity = quantity, !ingredient.isEmpty else {
             return nil

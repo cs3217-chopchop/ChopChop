@@ -8,25 +8,22 @@
 import SwiftUI
 
 struct ParsingFieldView: View {
-    @State private var ingredientString = ""
-    @State private var instructionString = ""
 
-//    private var steps = [String]()
-//    private var ingredients = [String: Quantity]()
+    @ObservedObject var viewModel: ParsingRecipeViewModel
 
     var body: some View {
         Form {
             Section(header: Text("Instructions")) {
-                TextEditor(text: $instructionString)
+                TextEditor(text: $viewModel.instructionString)
                     .disableAutocorrection(true)
             }
             Section(header: Text("Ingredients")) {
-                TextEditor(text: $ingredientString)
+                TextEditor(text: $viewModel.ingredientString)
                     .disableAutocorrection(true)
             }
             Button(
                 action: {
-                    parseData(instruction: instructionString, ingredient: ingredientString)
+                    viewModel.parseData()
                 },
                 label: {
                     Text("Parse data")
@@ -34,20 +31,10 @@ struct ParsingFieldView: View {
             )
         }
     }
-
-    private func parseData(instruction: String, ingredient: String) {
-
-        let ingredients = RecipeParser.parseIngredientString(ingredientString: ingredient)
-//        let steps = split(whereSeparator: \.isNewline)
-//            .map({ String($0) })
-        let steps = RecipeParser.parseInstructions(instructions: instruction)
-        print(ingredients)
-        print(steps)
-    }
 }
 
 struct ParsingFieldView_Previews: PreviewProvider {
     static var previews: some View {
-        ParsingFieldView()
+        ParsingFieldView(viewModel: ParsingRecipeViewModel())
     }
 }
