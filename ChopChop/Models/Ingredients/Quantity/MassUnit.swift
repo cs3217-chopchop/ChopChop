@@ -34,7 +34,7 @@ enum MassUnit: Int, CaseIterable {
     }
 
     static func convertToVolume(_ value: Double, from massUnit: MassUnit, to volumeUnit: VolumeUnit) -> Double {
-        (value * massUnit.ratioToKilogram * QuantityType.kilogramToLiterRatio) / volumeUnit.ratioToLiter
+        (value * massUnit.ratioToKilogram * QuantityType.massToVolumeBaseRatio) / volumeUnit.ratioToLiter
     }
 }
 
@@ -57,4 +57,7 @@ extension MassUnit: CustomStringConvertible {
             return "kg"
         }
     }
+}
+
+extension MassUnit: Codable {
 }

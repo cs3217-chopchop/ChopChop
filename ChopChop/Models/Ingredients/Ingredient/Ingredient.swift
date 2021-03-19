@@ -162,7 +162,9 @@ extension Ingredient {
             } catch QuantityError.negativeQuantity {
                 try batch.subtract(subtractedQuantity)
                 subtractedQuantity.value = 0
+                // swiftlint:disable unneeded_break_in_switch
                 break
+                // swiftlint:enable unneeded_break_in_switch
             }
         }
 

@@ -1,3 +1,5 @@
+// swiftlint:disable line_length object_literal
+
 import XCTest
 import GRDB
 import UIKit

@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length function_body_length file_length
+// swiftlint:disable type_body_length function_body_length file_length line_length
 import XCTest
 import GRDB
 @testable import ChopChop

@@ -48,7 +48,7 @@ extension Quantity {
         case (.count, .count):
             let sum = left.value + right.value
             return try Quantity(.count, value: sum)
-        case (.mass(let leftUnit), .mass(let rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
+        case let (.mass(leftUnit), .mass(rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
             let unit = max(leftUnit, rightUnit)
 
             let leftValue = MassUnit.convert(left.value, from: leftUnit, to: unit)
@@ -56,13 +56,13 @@ extension Quantity {
 
             let sum = leftValue + rightValue
             return try Quantity(.mass(unit), value: sum)
-        case (.mass(let leftUnit), .mass(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
+        case let (.mass(leftUnit), .mass(rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
             let leftValue = MassUnit.convert(left.value, from: leftUnit, to: .baseUnit)
             let rightValue = MassUnit.convert(right.value, from: rightUnit, to: .baseUnit)
 
             let sum = leftValue + rightValue
             return try Quantity(.mass(.kilogram), value: sum)
-        case (.volume(let leftUnit), .volume(let rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
+        case let (.volume(leftUnit), .volume(rightUnit)) where leftUnit.isMetric == rightUnit.isMetric:
             let unit = max(leftUnit, rightUnit)
 
             let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: unit)
@@ -70,18 +70,18 @@ extension Quantity {
 
             let sum = leftValue + rightValue
             return try Quantity(.volume(unit), value: sum)
-        case (.volume(let leftUnit), .volume(let rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
+        case let (.volume(leftUnit), .volume(rightUnit)) where leftUnit.isMetric != rightUnit.isMetric:
             let leftValue = VolumeUnit.convert(left.value, from: leftUnit, to: .baseUnit)
             let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: .baseUnit)
 
             let sum = leftValue + rightValue
             return try Quantity(.volume(.liter), value: sum)
-        case (.mass(let massUnit), .volume(let volumeUnit)):
+        case let (.mass(massUnit), .volume(volumeUnit)):
             let rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
 
             let sum = left.value + rightValue
             return try Quantity(.mass(massUnit), value: sum)
-        case (.volume(let volumeUnit), .mass(let massUnit)):
+        case let (.volume(volumeUnit), .mass(massUnit)):
             let rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
 
             let sum = left.value + rightValue
@@ -102,22 +102,22 @@ extension Quantity {
         case (.count, .count):
             let difference = left.value - right.value
             return try Quantity(.count, value: difference)
-        case (.mass(let leftUnit), .mass(let rightUnit)):
+        case let (.mass(leftUnit), .mass(rightUnit)):
             let rightValue = MassUnit.convert(right.value, from: rightUnit, to: leftUnit)
 
             let difference = left.value - rightValue
             return try Quantity(.mass(leftUnit), value: difference)
-        case (.volume(let leftUnit), .volume(let rightUnit)):
+        case let (.volume(leftUnit), .volume(rightUnit)):
             let rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: leftUnit)
 
             let difference = left.value - rightValue
             return try Quantity(.volume(leftUnit), value: difference)
-        case (.mass(let massUnit), .volume(let volumeUnit)):
+        case let (.mass(massUnit), .volume(volumeUnit)):
             let rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
 
             let difference = left.value - rightValue
             return try Quantity(.mass(massUnit), value: difference)
-        case (.volume(let volumeUnit), .mass(let massUnit)):
+        case let (.volume(volumeUnit), .mass(massUnit)):
             let rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
 
             let difference = left.value - rightValue
@@ -184,18 +184,17 @@ extension Quantity {
         case (.count, .count):
             rightValue = right.value
 
-        case (.mass(let leftUnit), .mass(let rightUnit)):
+        case let (.mass(leftUnit), .mass(rightUnit)):
             rightValue = MassUnit.convert(right.value, from: rightUnit, to: leftUnit)
 
-        case (.volume(let leftUnit), .volume(let rightUnit)):
+        case let (.volume(leftUnit), .volume(rightUnit)):
             rightValue = VolumeUnit.convert(right.value, from: rightUnit, to: leftUnit)
 
-        case (.mass(let massUnit), .volume(let volumeUnit)):
+        case let (.mass(massUnit), .volume(volumeUnit)):
             rightValue = VolumeUnit.convertToMass(right.value, from: volumeUnit, to: massUnit)
 
-        case (.volume(let volumeUnit), .mass(let massUnit)):
+        case let (.volume(volumeUnit), .mass(massUnit)):
             rightValue = MassUnit.convertToVolume(right.value, from: massUnit, to: volumeUnit)
-
         default:
             throw QuantityError.incompatibleTypes
         }
@@ -218,29 +217,29 @@ extension Quantity: CustomStringConvertible {
     }
 }
 
-//extension Quantity {
-//    init(from record: QuantityRecord) throws {
-//        switch record {
-//        case .count(let value):
-//            try self.init(.count, value: value)
-//        case .mass(let value):
-//            try self.init(.mass, value: value)
-//        case .volume(let value):
-//            try self.init(.volume, value: value)
-//        }
-//    }
-//
-//    var record: QuantityRecord {
-//        switch type {
-//        case .count:
-//            return .count(value)
-//        case .mass:
-//            return .mass(value)
-//        case .volume:
-//            return .volume(value)
-//        }
-//    }
-//}
+ extension Quantity {
+    init(from record: QuantityRecord) throws {
+        switch record {
+        case let .count(value):
+            try self.init(.count, value: value)
+        case let .mass(value, unit):
+            try self.init(.mass(unit), value: value)
+        case let .volume(value, unit):
+            try self.init(.volume(unit), value: value)
+        }
+    }
+
+    var record: QuantityRecord {
+        switch type {
+        case .count:
+            return .count(value)
+        case .mass(let unit):
+            return .mass(value, unit)
+        case .volume(let unit):
+            return .volume(value, unit)
+        }
+    }
+ }
 
 enum QuantityError: Error {
     case negativeQuantity

@@ -1,5 +1,5 @@
 enum QuantityType: Equatable {
-    static let kilogramToLiterRatio = 1.0
+    static let massToVolumeBaseRatio = 1.0
 
     case count
     case mass(MassUnit)
