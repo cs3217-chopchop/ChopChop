@@ -11,14 +11,14 @@ final class RecipeCollectionViewModel: ObservableObject {
     }
     @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var ingredients: [String: [Int64]] = [:]
-    @Published var selectedCategory: RecipeCategory?
+    @Published var category: RecipeCategory
 
     private let storageManager = StorageManager()
     private var recipesCancellable: AnyCancellable?
     private var ingredientsCancellable: AnyCancellable?
 
-    init(selectedCategory: RecipeCategory?) {
-        self.selectedCategory = selectedCategory
+    init(category: RecipeCategory) {
+        self.category = category
 
         recipesCancellable = recipesPublisher()
             .sink { [weak self] recipes in
@@ -31,7 +31,7 @@ final class RecipeCollectionViewModel: ObservableObject {
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
-        if let category = selectedCategory, let id = category.id {
+        if let id = category.id {
             let ids = id == 0 ? [] : [id]
 
             return storageManager.recipesFilteredByNameAndCategoryPublisher(query: query, categoryIds: ids)

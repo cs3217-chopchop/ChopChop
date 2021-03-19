@@ -5,7 +5,7 @@ struct ChopChopApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                MainView()
+                MainView(viewModel: MainViewModel())
             }
         }
     }

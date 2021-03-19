@@ -1,21 +1,17 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var selectedCategory: RecipeCategory?
-    @State private var selectedRecipe: RecipeInfo?
+    @ObservedObject var viewModel: MainViewModel
 
     var body: some View {
-        Sidebar(viewModel: SidebarViewModel(),
-                selectedCategory: $selectedCategory,
-                selectedRecipe: $selectedRecipe)
+        Sidebar(recipeCategories: $viewModel.recipeCategories, ingredientCategories: $viewModel.ingredientCategories)
 
-        RecipeCollectionView(viewModel: RecipeCollectionViewModel(selectedCategory: RecipeCategory(name: "All Recipes")),
-                             selectedRecipe: $selectedRecipe)
+        RecipeCollectionView(viewModel: RecipeCollectionViewModel(category: RecipeCategory(name: "All Recipes")))
     }
 }
 
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView()
+        MainView(viewModel: MainViewModel())
     }
 }

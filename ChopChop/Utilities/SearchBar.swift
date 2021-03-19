@@ -4,7 +4,7 @@ struct SearchBar: UIViewRepresentable {
     @Binding var text: String
     let placeholder: String
 
-    class Coordinator: NSObject, UISearchBarDelegate {
+    final class Coordinator: NSObject, UISearchBarDelegate {
         @Binding var text: String
 
         init(text: Binding<String>) {
@@ -20,12 +20,12 @@ struct SearchBar: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> SearchBar.Coordinator {
+    func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
     }
 
-    func makeUIView(context: UIViewRepresentableContext<SearchBar>) -> UISearchBar {
-        let searchBar = UISearchBar(frame: .zero)
+    func makeUIView(context: Context) -> UISearchBar {
+        let searchBar = UISearchBar()
         searchBar.delegate = context.coordinator
         searchBar.placeholder = placeholder
         searchBar.searchBarStyle = .minimal
@@ -34,7 +34,7 @@ struct SearchBar: UIViewRepresentable {
         return searchBar
     }
 
-    func updateUIView(_ uiView: UISearchBar, context: UIViewRepresentableContext<SearchBar>) {
+    func updateUIView(_ uiView: UISearchBar, context: Context) {
         uiView.text = text
     }
 }

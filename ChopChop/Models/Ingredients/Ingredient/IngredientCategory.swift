@@ -7,7 +7,7 @@ import Combine
  Invariants:
  - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
-struct IngredientCategory {
+struct IngredientCategory: Identifiable {
     var id: Int64?
     private(set) var name: String
 

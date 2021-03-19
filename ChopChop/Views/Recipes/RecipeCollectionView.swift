@@ -2,16 +2,13 @@ import SwiftUI
 
 struct RecipeCollectionView: View {
     @ObservedObject var viewModel: RecipeCollectionViewModel
-    @Binding var selectedRecipe: RecipeInfo?
 
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             List(viewModel.recipes) { recipe in
                 NavigationLink(
-                    destination: RecipeDetailView(name: recipe.name),
-                    tag: recipe,
-                    selection: $selectedRecipe
+                    destination: RecipeDetailView(name: recipe.name)
                 ) {
                     HStack(alignment: .top) {
                         Image("recipe")
@@ -31,12 +28,12 @@ struct RecipeCollectionView: View {
                 }
             }
         }
-        .navigationTitle(Text(viewModel.selectedCategory?.name ?? ""))
+        .navigationTitle(Text(viewModel.category.name))
     }
 }
 
 struct RecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeCollectionView(viewModel: RecipeCollectionViewModel(selectedCategory: nil), selectedRecipe: .constant(nil))
+        RecipeCollectionView(viewModel: RecipeCollectionViewModel(category: RecipeCategory(name: "")))
     }
 }
