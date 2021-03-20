@@ -19,7 +19,7 @@ class SessionRecipeStep {
     /// If previously checked, becomes unchecked and timeTaken resets to 0.
     /// If previously unchecked, becomes checked and timeTaken recorded based on current time and timeOfLastAction.
     /// Also updates actionTimeTracker's timeOfLastAction.
-    func toggleCompleted() throws {
+    func toggleCompleted() {
         isCompleted.toggle()
         if isCompleted {
             timeTaken = Date().timeIntervalSinceReferenceDate -
@@ -28,7 +28,7 @@ class SessionRecipeStep {
             // means step is unchecked and time should be reset
             timeTaken = 0
         }
-        try actionTimeTracker.updateTimeOfLastAction(date: Date())
+        try? actionTimeTracker.updateTimeOfLastAction(date: Date())
     }
 
     private static func convertToTimers(durationPhrases: [String]) -> [(String, CountdownTimer)] {

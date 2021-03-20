@@ -1,7 +1,6 @@
 import Foundation
 
 class SessionRecipe {
-    private(set) var timeOfLastAction = Date()
     private(set) var recipe: Recipe
     private(set) var sessionSteps: [SessionRecipeStep]
 
