@@ -37,34 +37,38 @@ struct RecipeCollectionView: View {
                     .clipped()
                 VStack(alignment: .leading) {
                     Text(recipe.name)
-                    VStack(alignment: .leading) {
-                        Text("""
-                            Serves \(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")
-                            """)
-                        HStack(spacing: 0) {
-                            Text("Difficulty: ")
-
-                            if let difficulty = recipe.difficulty {
-                                ForEach(0..<difficulty.rawValue) { _ in
-                                    Image(systemName: "star.fill")
-                                }
-
-                                ForEach(difficulty.rawValue..<5) { _ in
-                                    Image(systemName: "star")
-                                }
-                            } else {
-                                ForEach(0..<5) { _ in
-                                    Image(systemName: "star")
-                                }
-                            }
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    RecipeCaption(recipe: recipe)
                 }
             }
             .padding([.top, .bottom], 6)
         }
+    }
+
+    func RecipeCaption(recipe: RecipeInfo) -> some View {
+        VStack(alignment: .leading) {
+            Text("""
+                Serves \(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")
+                """)
+            HStack(spacing: 0) {
+                Text("Difficulty: ")
+
+                if let difficulty = recipe.difficulty {
+                    ForEach(0..<difficulty.rawValue) { _ in
+                        Image(systemName: "star.fill")
+                    }
+
+                    ForEach(difficulty.rawValue..<5) { _ in
+                        Image(systemName: "star")
+                    }
+                } else {
+                    ForEach(0..<5) { _ in
+                        Image(systemName: "star")
+                    }
+                }
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.secondary)
     }
 }
 
