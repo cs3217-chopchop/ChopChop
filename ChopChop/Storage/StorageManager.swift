@@ -136,32 +136,8 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsOrderedByNamePublisher()
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsFilteredByCategoryOrderedByNamePublisher(ids: ids)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsFilteredByNamePublisher(_ query: String) -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsFilteredByNamePublisher(query)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsOrderedByExpiryDatePublisher()
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
-        appDatabase.ingredientCategoriesOrderedByNamePublisher()
+    func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Error> {
+        appDatabase.ingredientCategoriesPublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }

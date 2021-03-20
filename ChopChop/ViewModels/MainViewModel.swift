@@ -29,7 +29,7 @@ final class MainViewModel: ObservableObject {
     }
 
     private func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Never> {
-        storageManager.ingredientCategoriesOrderedByNamePublisher()
+        storageManager.ingredientCategoriesPublisher()
             .catch { _ in
                 Just<[IngredientCategory]>([])
             }

@@ -446,35 +446,7 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientRecord], Error> {
-        ValueObservation
-            .tracking(IngredientRecord.all().orderedByName().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
-        ValueObservation
-            .tracking(IngredientRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsFilteredByNamePublisher(_ query: String) -> AnyPublisher<[IngredientRecord], Error> {
-        ValueObservation
-            .tracking(IngredientRecord.all().filteredByName(query).fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
-        ValueObservation
-            .tracking(IngredientRecord.all().orderedByExpiryDate().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
+    func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
         ValueObservation
             .tracking(IngredientCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
