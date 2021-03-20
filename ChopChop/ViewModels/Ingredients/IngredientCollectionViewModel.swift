@@ -14,12 +14,12 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published private(set) var ingredients: [IngredientInfo] = []
 
     let title: String
-    let categoryIds: [Int64]
+    let categoryIds: [Int64?]
 
     private let storageManager = StorageManager()
     private var ingredientsCancellable: AnyCancellable?
 
-    init(title: String, categoryIds: [Int64] = []) {
+    init(title: String, categoryIds: [Int64?] = [nil]) {
         self.title = title
         self.categoryIds = categoryIds
 

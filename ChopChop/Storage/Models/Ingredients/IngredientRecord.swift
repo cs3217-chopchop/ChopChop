@@ -43,11 +43,13 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
             .order(SQLLiteral("minIngredientBatchExpiryDate").sqlExpression.ascNullsLast)
     }
 
-    func filteredByCategory(ids: [Int64]) -> Self {
-        if ids.isEmpty {
+    func filteredByCategory(ids: [Int64?]) -> Self {
+        if ids == [nil] {
             return filter(IngredientRecord.Columns.ingredientCategoryId == nil)
+        } else if ids.contains(nil) {
+            return joining(optional: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
         } else {
-            return joining(required: IngredientRecord.category.filter(keys: ids))
+            return joining(required: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
         }
     }
 

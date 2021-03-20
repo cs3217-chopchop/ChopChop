@@ -405,7 +405,7 @@ extension AppDatabase {
 
 extension AppDatabase {
     func recipesPublisher(query: String = "",
-                          categoryIds: [Int64?] = [],
+                          categoryIds: [Int64?] = [nil],
                           ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
             .tracking(RecipeRecord.all()
@@ -433,7 +433,7 @@ extension AppDatabase {
     }
 
     func ingredientsPublisher(query: String = "",
-                              categoryIds: [Int64] = []) -> AnyPublisher<[IngredientRecord], Error> {
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all()
                         .filteredByCategory(ids: categoryIds)
@@ -445,7 +445,7 @@ extension AppDatabase {
     }
 
     func ingredientsPublisher(query: String = "",
-                              categoryIds: [Int64] = [],
+                              categoryIds: [Int64?] = [nil],
                               expiresAfter: Date,
                               expiresBefore: Date) -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation

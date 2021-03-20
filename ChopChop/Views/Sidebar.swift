@@ -19,7 +19,7 @@ import SwiftUI
                 destination: RecipeCollectionView(viewModel:
                                                     RecipeCollectionViewModel(
                                                         title: "All Recipes",
-                                                        categoryIds: recipeCategories.map { $0.id } + [nil]))
+                                                        categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
             ) {
                 Image(systemName: "tray.2")
                 Text("All Recipes")
@@ -50,7 +50,7 @@ import SwiftUI
                 destination: IngredientCollectionView(viewModel:
                                                     IngredientCollectionViewModel(
                                                         title: "All Ingredients",
-                                                        categoryIds: ingredientCategories.compactMap { $0.id }))
+                                                        categoryIds: ingredientCategories.compactMap { $0.id } + [nil]))
             ) {
                 Image(systemName: "tray.2")
                 Text("All Ingredients")
