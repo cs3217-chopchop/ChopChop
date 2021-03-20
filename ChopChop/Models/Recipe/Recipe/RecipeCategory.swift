@@ -1,4 +1,4 @@
-class RecipeCategory: Identifiable, Hashable {
+class RecipeCategory: Identifiable {
     var id: Int64?
     private(set) var name: String
 

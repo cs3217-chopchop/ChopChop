@@ -144,13 +144,17 @@ extension AppDatabase {
         }
 
         var recipes = [
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes"),
-            RecipeRecord(recipeCategoryId: categories[1].id, name: "Carbonara"),
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Scrambled Eggs"),
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza"),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen"),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon"),
-            RecipeRecord(name: "Uncategorised Recipe")
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[1].id,
+                         name: "Carbonara",
+                         servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Scrambled Eggs",
+                         servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(name: "Uncategorised Recipe", servings: Double(Int.random(in: 1...5)))
         ]
 
         for index in recipes.indices {
