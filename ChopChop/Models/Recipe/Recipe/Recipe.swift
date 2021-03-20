@@ -139,9 +139,9 @@ class Recipe: FetchableRecord {
 
     required init(row: Row) {
         id = row["id"]
-        servings = row["servings"]
         recipeCategoryId = row["recipeCategoryId"]
         name = row["name"]
+        servings = row["servings"]
         difficulty = row["difficulty"]
         steps = row.prefetchedRows["recipeStep"]?.compactMap {
             try? RecipeStep(content: RecipeStepRecord(row: $0).content)

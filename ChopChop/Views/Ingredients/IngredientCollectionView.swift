@@ -9,7 +9,9 @@ struct IngredientCollectionView: View {
             HStack {
                 Spacer()
                 Button(action: {
-                    viewModel.filterByExpiryDate.toggle()
+                    withAnimation {
+                        viewModel.filterByExpiryDate.toggle()
+                    }
                 }) {
                     Text("Filter by expiry date")
                 }
@@ -23,6 +25,7 @@ struct IngredientCollectionView: View {
             List(viewModel.ingredients) { ingredient in
                 IngredientRow(ingredient: ingredient)
             }
+            .animation(.none)
         }
         .navigationTitle(Text(viewModel.title))
         .onDisappear {
@@ -35,21 +38,21 @@ struct IngredientCollectionView: View {
 
     func ExpiryDatePicker() -> some View {
         HStack {
-            DatePicker(
-                "Expires after",
-                selection: $viewModel.expiryDateStart,
-                in: Date.distantPast...viewModel.expiryDateEnd,
-                displayedComponents: [.date]
-            )
-            .frame(width: 240)
             Spacer()
             DatePicker(
-                "Expires before",
-                selection: $viewModel.expiryDateEnd,
-                in: viewModel.expiryDateStart...Date.distantFuture,
+                "Expires from:",
+                selection: $viewModel.expiryDateStart,
+                in: ...viewModel.expiryDateEnd,
                 displayedComponents: [.date]
             )
-            .frame(width: 240)
+            .fixedSize()
+            DatePicker(
+                "to",
+                selection: $viewModel.expiryDateEnd,
+                in: viewModel.expiryDateStart...,
+                displayedComponents: [.date]
+            )
+            .fixedSize()
         }
         .padding([.leading, .trailing])
     }

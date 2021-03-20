@@ -36,20 +36,26 @@ struct RecipeCollectionView: View {
                     .cornerRadius(10)
                     .clipped()
                 VStack(alignment: .leading) {
-                    let servingNumber = Int.random(in: 1...4)
-
                     Text(recipe.name)
                     VStack(alignment: .leading) {
-                        Text("Serves \(servingNumber)-\(servingNumber + Int.random(in: 1...2)) people")
+                        Text("""
+                            Serves \(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")
+                            """)
                         HStack(spacing: 0) {
-                            let rating = Int.random(in: 2...6)
+                            Text("Difficulty: ")
 
-                            ForEach(1..<rating) { _ in
-                                Image(systemName: "star.fill")
-                            }
+                            if let difficulty = recipe.difficulty {
+                                ForEach(0..<difficulty.rawValue) { _ in
+                                    Image(systemName: "star.fill")
+                                }
 
-                            ForEach(rating..<6) { _ in
-                                Image(systemName: "star")
+                                ForEach(difficulty.rawValue..<5) { _ in
+                                    Image(systemName: "star")
+                                }
+                            } else {
+                                ForEach(0..<5) { _ in
+                                    Image(systemName: "star")
+                                }
                             }
                         }
                     }

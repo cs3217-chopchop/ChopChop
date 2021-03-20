@@ -108,7 +108,7 @@ struct StorageManager {
                           categoryIds: [Int64?],
                           ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
         appDatabase.recipesPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
+            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name, servings: $0.servings, difficulty: $0.difficulty) } }
             .eraseToAnyPublisher()
     }
 
