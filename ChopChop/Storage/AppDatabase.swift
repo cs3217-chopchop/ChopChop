@@ -403,9 +403,9 @@ extension AppDatabase {
 // MARK: - Database Access: Publishers
 
 extension AppDatabase {
-    func recipesPublisher(query: String,
-                          categoryIds: [Int64],
-                          ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
+    func recipesPublisher(query: String = "",
+                          categoryIds: [Int64] = [],
+                          ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
             .tracking(RecipeRecord.all()
                         .filteredByCategory(ids: categoryIds)
@@ -424,15 +424,27 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func recipeIngredientsPublisher(categoryIds: [Int64]) -> AnyPublisher<[RecipeIngredientRecord], Error> {
+    func recipeIngredientsPublisher(categoryIds: [Int64] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientsPublisher(query: String,
-                              categoryIds: [Int64],
+    func ingredientsPublisher(query: String = "",
+                              categoryIds: [Int64] = []) -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.all()
+                        .filteredByCategory(ids: categoryIds)
+                        .filteredByName(query)
+                        .orderedByName()
+                        .fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsPublisher(query: String = "",
+                              categoryIds: [Int64] = [],
                               expiresAfter: Date,
                               expiresBefore: Date) -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation

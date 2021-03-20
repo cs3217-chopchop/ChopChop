@@ -33,10 +33,14 @@ final class IngredientCollectionViewModel: ObservableObject {
         // swiftlint:disable line_length
         $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd).map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
             -> AnyPublisher<[IngredientInfo], Error> in
-            storageManager.ingredientsPublisher(query: query,
-                                                categoryIds: categoryIds,
-                                                expiresAfter: filterByExpiryDate ? expiryDateStart : .distantPast,
-                                                expiresBefore: filterByExpiryDate ? expiryDateEnd : .distantFuture)
+            if filterByExpiryDate {
+                return storageManager.ingredientsPublisher(query: query,
+                                                           categoryIds: categoryIds,
+                                                           expiresAfter: expiryDateStart,
+                                                           expiresBefore: expiryDateEnd)
+            } else {
+                return storageManager.ingredientsPublisher(query: query, categoryIds: categoryIds)
+            }
         }
         .map { ingredientsPublisher in
             ingredientsPublisher.catch { _ in

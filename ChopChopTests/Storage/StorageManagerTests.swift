@@ -90,10 +90,7 @@ class StorageManagerTests: XCTestCase {
 // MARK: - Image Persistence
 extension StorageManagerTests {
     func testIngredientImagePersistence() {
-        guard let image = UIImage(imageLiteralResourceName: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apples")
 
         let imageName = "Apple"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: imageName))
@@ -106,10 +103,7 @@ extension StorageManagerTests {
     }
 
     func testRenameIngredientImage() {
-        guard let image = UIImage(imageLiteralResourceName: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apples")
 
         let oldName = "Apple"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: oldName))
@@ -127,15 +121,8 @@ extension StorageManagerTests {
     }
 
     func testOverwriteExistingIngredientImage() {
-        guard let existingImage = UIImage(imageLiteralResourceName: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
-
-        guard let newImage = UIImage(imageLiteralResourceName: "oranges") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let existingImage = UIImage(imageLiteralResourceName: "apples")
+        let newImage = UIImage(imageLiteralResourceName: "oranges")
 
         let imageName = "Fruit"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(existingImage, name: imageName))
@@ -151,10 +138,7 @@ extension StorageManagerTests {
     }
 
     func testRecipeImagePersistence() {
-        guard let image = UIImage(imageLiteralResourceName: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let imageName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
@@ -167,10 +151,7 @@ extension StorageManagerTests {
     }
 
     func testRenameRecipeImage() {
-        guard let image = UIImage(imageLiteralResourceName: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let oldName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: oldName))
@@ -188,15 +169,8 @@ extension StorageManagerTests {
     }
 
     func testOverwriteExistingRecipeImage() {
-        guard let existingImage = UIImage(imageLiteralResourceName: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
-
-        guard let newImage = UIImage(imageLiteralResourceName: "apple-pie-slice") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let existingImage = UIImage(imageLiteralResourceName: "apple-pie")
+        let newImage = UIImage(imageLiteralResourceName: "apple-pie-slice")
 
         let imageName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))
