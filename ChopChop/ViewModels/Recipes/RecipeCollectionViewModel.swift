@@ -7,13 +7,13 @@ final class RecipeCollectionViewModel: ObservableObject {
     @Published var selectedIngredients: Set<String> = []
 
     let title: String
-    let categoryIds: [Int64]
+    let categoryIds: [Int64?]
 
     private let storageManager = StorageManager()
     private var recipesCancellable: AnyCancellable?
     private var recipeIngredientsCancellable: AnyCancellable?
 
-    init(title: String, categoryIds: [Int64] = []) {
+    init(title: String, categoryIds: [Int64?] = [nil]) {
         self.title = title
         self.categoryIds = categoryIds
 

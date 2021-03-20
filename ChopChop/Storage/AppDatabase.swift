@@ -165,7 +165,8 @@ extension AppDatabase {
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(0.5)),
             RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(0.6)),
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2))
+            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
+            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(0.2))
         ]
 
         for index in ingredients.indices {
@@ -404,7 +405,7 @@ extension AppDatabase {
 
 extension AppDatabase {
     func recipesPublisher(query: String = "",
-                          categoryIds: [Int64] = [],
+                          categoryIds: [Int64?] = [],
                           ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
             .tracking(RecipeRecord.all()
@@ -424,7 +425,7 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func recipeIngredientsPublisher(categoryIds: [Int64] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
+    func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)

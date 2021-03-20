@@ -105,7 +105,7 @@ struct StorageManager {
     // MARK: - Database Access: Publishers
 
     func recipesPublisher(query: String,
-                          categoryIds: [Int64],
+                          categoryIds: [Int64?],
                           ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
         appDatabase.recipesPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
             .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
@@ -118,7 +118,7 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func recipeIngredientsPublisher(categoryIds: [Int64]) -> AnyPublisher<[String], Error> {
+    func recipeIngredientsPublisher(categoryIds: [Int64?]) -> AnyPublisher<[String], Error> {
         appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
             .map { Array(Set($0.map { $0.name })).sorted() }
             .eraseToAnyPublisher()

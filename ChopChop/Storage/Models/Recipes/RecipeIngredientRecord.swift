@@ -28,12 +28,15 @@ extension RecipeIngredientRecord: Codable, FetchableRecord, MutablePersistableRe
 }
 
 extension DerivableRequest where RowDecoder == RecipeIngredientRecord {
-    func filteredByCategory(ids: [Int64]) -> Self {
-        if ids.isEmpty {
+    func filteredByCategory(ids: [Int64?]) -> Self {
+        if ids == [nil] {
             return joining(required: RecipeIngredientRecord.recipe.filter(RecipeRecord.Columns.recipeCategoryId == nil))
+        } else if ids.contains(nil) {
+            return joining(optional: RecipeIngredientRecord.recipe
+                            .filter(ids.compactMap { $0 }.contains(RecipeRecord.Columns.recipeCategoryId)))
         } else {
             return joining(required: RecipeIngredientRecord.recipe
-                            .filter(ids.contains(RecipeRecord.Columns.recipeCategoryId)))
+                            .filter(ids.compactMap { $0 }.contains(RecipeRecord.Columns.recipeCategoryId)))
         }
     }
 }

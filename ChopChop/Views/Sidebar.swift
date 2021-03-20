@@ -19,7 +19,7 @@ import SwiftUI
                 destination: RecipeCollectionView(viewModel:
                                                     RecipeCollectionViewModel(
                                                         title: "All Recipes",
-                                                        categoryIds: recipeCategories.compactMap { $0.id }))
+                                                        categoryIds: recipeCategories.map { $0.id } + [nil]))
             ) {
                 Image(systemName: "tray.2")
                 Text("All Recipes")
