@@ -134,10 +134,10 @@ struct StorageManager {
                               categoryIds: [Int64?],
                               expiresAfter: Date,
                               expiresBefore: Date) -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsPublisher(query: query,
-                                         categoryIds: categoryIds,
-                                         expiresAfter: expiresAfter,
-                                         expiresBefore: expiresBefore)
+        appDatabase.ingredientsPublisher(expiresAfter: expiresAfter,
+                                         expiresBefore: expiresBefore,
+                                         query: query,
+                                         categoryIds: categoryIds)
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }

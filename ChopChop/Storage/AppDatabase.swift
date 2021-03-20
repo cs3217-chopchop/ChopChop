@@ -444,10 +444,10 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func ingredientsPublisher(query: String = "",
-                              categoryIds: [Int64?] = [nil],
-                              expiresAfter: Date,
-                              expiresBefore: Date) -> AnyPublisher<[IngredientRecord], Error> {
+    func ingredientsPublisher(expiresAfter: Date,
+                              expiresBefore: Date,
+                              query: String = "",
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all()
                         .filteredByCategory(ids: categoryIds)
