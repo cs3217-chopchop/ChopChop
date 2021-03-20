@@ -24,7 +24,7 @@ struct IngredientCollectionView: View {
                 Image("recipe")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 60, height: 60)
+                    .frame(width: 48, height: 48)
                     .cornerRadius(10)
                     .clipped()
                 VStack(alignment: .leading) {
