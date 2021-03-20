@@ -2,7 +2,6 @@ import SwiftUI
 
 struct RecipeCollectionView: View {
     @ObservedObject var viewModel: RecipeCollectionViewModel
-    @State private var showingPopover = false
 
     var body: some View {
         VStack {

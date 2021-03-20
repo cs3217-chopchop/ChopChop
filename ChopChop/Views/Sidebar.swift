@@ -47,21 +47,27 @@ import SwiftUI
     func IngredientsSection() -> some View {
         Section(header: Text("Ingredients")) {
             NavigationLink(
-                destination: Text("All Ingredients")
+                destination: IngredientCollectionView(viewModel:
+                                                    IngredientCollectionViewModel(
+                                                        title: "All Ingredients",
+                                                        categoryIds: ingredientCategories.compactMap { $0.id }))
             ) {
                 Image(systemName: "tray.2")
                 Text("All Ingredients")
             }
             ForEach(ingredientCategories) { category in
                 NavigationLink(
-                    destination: Text(category.name)
+                    destination: IngredientCollectionView(viewModel:
+                                                        IngredientCollectionViewModel(
+                                                            title: category.name,
+                                                            categoryIds: [category.id].compactMap { $0 }))
                 ) {
                     Image(systemName: "folder")
                     Text(category.name)
                 }
             }
             NavigationLink(
-                destination: Text("Uncategorised")
+                destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
             ) {
                 Image(systemName: "questionmark.folder")
                 Text("Uncategorised")

@@ -13,6 +13,7 @@ extension AppDatabase {
             let appDatabase = try AppDatabase(dbPool)
 
             try appDatabase.createPreloadedRecipesIfEmpty()
+            try appDatabase.createPreloadedIngredientsIfEmpty()
 
             return appDatabase
         } catch {

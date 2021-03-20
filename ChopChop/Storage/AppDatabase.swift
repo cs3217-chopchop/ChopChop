@@ -13,7 +13,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategoryk") { db in
+        migrator.registerMigration("CreateRecipeCategory") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)
@@ -166,6 +166,60 @@ extension AppDatabase {
 
         for index in ingredients.indices {
             try ingredients[index].save(db)
+        }
+    }
+}
+
+// MARK: - Database: Preloaded Ingredients
+extension AppDatabase {
+    func createPreloadedIngredientsIfEmpty() throws {
+        try dbWriter.write { db in
+            if try IngredientRecord.fetchCount(db) == 0 {
+                try createPreloadedIngredients(db)
+            }
+        }
+    }
+
+    private func createPreloadedIngredients(_ db: Database) throws {
+        var categories = [
+            IngredientCategoryRecord(name: "Spices"),
+            IngredientCategoryRecord(name: "Dairy"),
+            IngredientCategoryRecord(name: "Grains")
+        ]
+
+        for index in categories.indices {
+            try categories[index].save(db)
+        }
+
+        var ingredients = [
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper"),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon"),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk"),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese"),
+            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice"),
+            IngredientRecord(name: "Uncategorised Ingredient")
+        ]
+
+        for index in ingredients.indices {
+            try ingredients[index].save(db)
+        }
+
+        var batches = [
+            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(0.5)),
+            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(0.2)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id, expiryDate: Date(), quantity: .volume(2)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7),
+                                  quantity: .volume(1.5)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4),
+                                  quantity: .volume(3)),
+            IngredientBatchRecord(ingredientId: ingredients[3].id, expiryDate: Date(), quantity: .mass(1)),
+            IngredientBatchRecord(ingredientId: ingredients[4].id, expiryDate: Date(), quantity: .mass(2))
+        ]
+
+        for index in batches.indices {
+            try batches[index].save(db)
         }
     }
 }
@@ -340,12 +394,13 @@ extension AppDatabase {
     func recipesPublisher(query: String,
                           categoryIds: [Int64],
                           ingredients: [String]) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation.tracking(RecipeRecord.all()
-                                    .filteredByCategory(ids: categoryIds)
-                                    .filteredByName(query)
-                                    .filteredByIngredients(ingredients)
-                                    .orderedByName()
-                                    .fetchAll)
+        ValueObservation
+            .tracking(RecipeRecord.all()
+                        .filteredByCategory(ids: categoryIds)
+                        .filteredByName(query)
+                        .filteredByIngredients(ingredients)
+                        .orderedByName()
+                        .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
@@ -360,6 +415,17 @@ extension AppDatabase {
     func recipeIngredientsPublisher(categoryIds: [Int64]) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
+        ValueObservation
+            .tracking(IngredientRecord.all()
+                        .filteredByCategory(ids: categoryIds)
+                        .filteredByName(query)
+                        .orderedByName()
+                        .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
