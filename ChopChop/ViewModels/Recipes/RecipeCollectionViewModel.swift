@@ -3,7 +3,7 @@ import Combine
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query: String = ""
     @Published private(set) var recipes: [RecipeInfo] = []
-    @Published private(set) var recipeIngredients: [String] = []
+    @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
 
     let title: String
@@ -23,7 +23,7 @@ final class RecipeCollectionViewModel: ObservableObject {
             }
         recipeIngredientsCancellable = recipeIngredientsPublisher()
             .sink { [weak self] ingredients in
-                self?.recipeIngredients = ingredients
+                self?.recipeIngredients = Set(ingredients)
             }
     }
 

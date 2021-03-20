@@ -7,8 +7,13 @@ struct RecipeCollectionView: View {
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
-//            IngredientFilter()
-//                .padding([.trailing, .leading])
+            HStack {
+                Spacer()
+                MultiselectPicker("Filter by ingredient",
+                                  selections: $viewModel.selectedIngredients,
+                                  options: viewModel.recipeIngredients)
+            }
+            .padding([.leading, .trailing])
             List(viewModel.recipes) { recipe in
                 RecipeRow(recipe: recipe)
             }
@@ -54,42 +59,6 @@ struct RecipeCollectionView: View {
                 }
             }
             .padding([.top, .bottom], 6)
-        }
-    }
-
-    func IngredientFilter() -> some View {
-        HStack {
-            Spacer()
-            Button(action: {
-                showingPopover = true
-            }) {
-                if viewModel.selectedIngredients.isEmpty {
-                    Text("Filter by ingredients...")
-                } else {
-                    Text(Array(viewModel.selectedIngredients).sorted().joined(separator: ", "))
-                }
-            }
-            .popover(isPresented: $showingPopover) {
-                List(Array(viewModel.recipeIngredients).sorted(), id: \.self) { ingredient in
-                    Button(action: {
-                        if viewModel.selectedIngredients.contains(ingredient) {
-                            viewModel.selectedIngredients.remove(ingredient)
-                        } else {
-                            viewModel.selectedIngredients.insert(ingredient)
-                        }
-                    }) {
-                        HStack {
-                            Text(ingredient)
-                            Spacer()
-
-                            if viewModel.selectedIngredients.contains(ingredient) {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-                .frame(width: 200, height: 200)
-            }
         }
     }
 }
