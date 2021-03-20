@@ -1,7 +1,16 @@
 import Combine
+import Foundation
 
 final class IngredientCollectionViewModel: ObservableObject {
     @Published var query: String = ""
+    @Published var filterByExpiryDate = false {
+        didSet {
+            expiryDateStart = Calendar.current.startOfDay(for: Date())
+            expiryDateEnd = Calendar.current.startOfDay(for: Date())
+        }
+    }
+    @Published var expiryDateStart = Calendar.current.startOfDay(for: Date())
+    @Published var expiryDateEnd = Calendar.current.startOfDay(for: Date())
     @Published private(set) var ingredients: [IngredientInfo] = []
 
     let title: String
@@ -21,9 +30,13 @@ final class IngredientCollectionViewModel: ObservableObject {
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        $query.map { [self] query -> AnyPublisher<[IngredientInfo], Error> in
+        // swiftlint:disable line_length
+        $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd).map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
+            -> AnyPublisher<[IngredientInfo], Error> in
             storageManager.ingredientsPublisher(query: query,
-                                                categoryIds: categoryIds)
+                                                categoryIds: categoryIds,
+                                                expiresAfter: filterByExpiryDate ? expiryDateStart : .distantPast,
+                                                expiresBefore: filterByExpiryDate ? expiryDateEnd : .distantFuture)
         }
         .map { ingredientsPublisher in
             ingredientsPublisher.catch { _ in
@@ -32,5 +45,6 @@ final class IngredientCollectionViewModel: ObservableObject {
         }
         .switchToLatest()
         .eraseToAnyPublisher()
+        // swiftlint:enable line_length
     }
 }

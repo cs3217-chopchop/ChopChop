@@ -54,4 +54,12 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
     func filteredByName(_ query: String) -> Self {
         filter(IngredientRecord.Columns.name.like("%\(query)%"))
     }
+
+    func filteredByExpiryDate(after: Date, before: Date) -> Self {
+        // swiftlint:disable contains_over_filter_is_empty
+        having(IngredientRecord.batches
+                .filter(IngredientBatchRecord.Columns.expiryDate == nil
+                            || (after...before).contains(IngredientBatchRecord.Columns.expiryDate)).isEmpty == false)
+        // swiftlint:enable contains_over_filter_is_empty
+    }
 }

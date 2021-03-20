@@ -207,15 +207,23 @@ extension AppDatabase {
         var batches = [
             IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(0.5)),
             IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(0.2)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id, expiryDate: Date(), quantity: .volume(2)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7),
+                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  quantity: .volume(2)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: Calendar.current
+                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7)),
                                   quantity: .volume(1.5)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4),
+                                  expiryDate: Calendar.current
+                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4)),
                                   quantity: .volume(3)),
-            IngredientBatchRecord(ingredientId: ingredients[3].id, expiryDate: Date(), quantity: .mass(1)),
-            IngredientBatchRecord(ingredientId: ingredients[4].id, expiryDate: Date(), quantity: .mass(2))
+            IngredientBatchRecord(ingredientId: ingredients[3].id,
+                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  quantity: .mass(1)),
+            IngredientBatchRecord(ingredientId: ingredients[4].id,
+                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  quantity: .mass(2))
         ]
 
         for index in batches.indices {
@@ -419,11 +427,15 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
-    func ingredientsPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
+    func ingredientsPublisher(query: String,
+                              categoryIds: [Int64],
+                              expiresAfter: Date,
+                              expiresBefore: Date) -> AnyPublisher<[IngredientRecord], Error> {
         ValueObservation
             .tracking(IngredientRecord.all()
                         .filteredByCategory(ids: categoryIds)
                         .filteredByName(query)
+                        .filteredByExpiryDate(after: expiresAfter, before: expiresBefore)
                         .orderedByName()
                         .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)

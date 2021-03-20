@@ -1,4 +1,5 @@
 import Combine
+import Foundation
 import UIKit
 
 struct StorageManager {
@@ -123,8 +124,14 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func ingredientsPublisher(query: String, categoryIds: [Int64]) -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
+    func ingredientsPublisher(query: String,
+                              categoryIds: [Int64],
+                              expiresAfter: Date,
+                              expiresBefore: Date) -> AnyPublisher<[IngredientInfo], Error> {
+        appDatabase.ingredientsPublisher(query: query,
+                                         categoryIds: categoryIds,
+                                         expiresAfter: expiresAfter,
+                                         expiresBefore: expiresBefore)
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
