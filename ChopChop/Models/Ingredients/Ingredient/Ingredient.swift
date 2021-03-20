@@ -100,7 +100,15 @@ extension Ingredient {
             throw QuantityError.incompatibleTypes
         }
 
-        if let existingBatch = batches.first(where: { $0.expiryDate == expiryDate?.startOfDay }) {
+        var batch: IngredientBatch?
+
+        if let addedDate = expiryDate {
+            batch = batches.first(where: { $0.expiryDate == addedDate.startOfDay })
+        } else {
+            batch = batches.first(where: { $0.expiryDate == nil })
+        }
+
+        if let existingBatch = batch {
             try existingBatch.add(quantity)
         } else {
             let addedBatch = IngredientBatch(quantity: quantity, expiryDate: expiryDate?.startOfDay)
@@ -178,7 +186,7 @@ extension Ingredient {
     func contains(quantity: Quantity) throws -> Bool {
         switch (quantityType, quantity.baseType) {
         case (.count, .count), (.mass, .mass), (.mass, .volume), (.volume, .mass), (.volume, .volume):
-            return quantity.baseValue < totalUsableQuantity
+            return quantity.baseValue <= totalUsableQuantity
         default:
             throw QuantityError.incompatibleTypes
         }
