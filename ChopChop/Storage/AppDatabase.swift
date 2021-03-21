@@ -166,11 +166,11 @@ extension AppDatabase {
         }
 
         var ingredients = [
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(0.5)),
-            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(0.6)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
-            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(0.2))
+            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram))
         ]
 
         for index in ingredients.indices {
@@ -214,25 +214,25 @@ extension AppDatabase {
         }
 
         var batches = [
-            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(0.5)),
-            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(0.2)),
+            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(500, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(200, unit: .gram)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
                                   expiryDate: Calendar.current.startOfDay(for: Date()),
-                                  quantity: .volume(2)),
+                                  quantity: .volume(2, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
                                   expiryDate: Calendar.current
                                     .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7)),
-                                  quantity: .volume(1.5)),
+                                  quantity: .volume(1.5, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
                                   expiryDate: Calendar.current
                                     .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4)),
-                                  quantity: .volume(3)),
+                                  quantity: .volume(3, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[3].id,
                                   expiryDate: Calendar.current.startOfDay(for: Date()),
-                                  quantity: .mass(1)),
+                                  quantity: .mass(1, unit: .kilogram)),
             IngredientBatchRecord(ingredientId: ingredients[4].id,
                                   expiryDate: Calendar.current.startOfDay(for: Date()),
-                                  quantity: .mass(2))
+                                  quantity: .mass(2, unit: .kilogram))
         ]
 
         for index in batches.indices {

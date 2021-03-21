@@ -1,4 +1,4 @@
-// swiftlint:disable line_length object_literal
+// swiftlint:disable line_length
 
 import XCTest
 import GRDB

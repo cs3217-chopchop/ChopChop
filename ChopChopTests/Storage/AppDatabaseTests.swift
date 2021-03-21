@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length function_body_length file_length line_length
+// swiftlint:disable type_body_length function_body_length file_length
 import XCTest
 import GRDB
 @testable import ChopChop
@@ -775,55 +775,6 @@ class AppDatabaseTests: XCTestCase {
         XCTAssertEqual(ingredients, [ingredient2, ingredient1])
     }
 
-//    func testIngredientsPublisher_publishesOrderedIngredients() throws {
-//        var ingredient1 = IngredientRecord(name: "Sugar")
-//        var ingredient2 = IngredientRecord(name: "Salt")
-//        var ingredient3 = IngredientRecord(name: "Pepper")
-//
-//        var batches2 = [
-//            IngredientBatchRecord(expiryDate: Calendar.current
-//                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
-//                                  quantity: .count(1))
-//        ]
-//        var batches3 = [
-//            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
-//                                  quantity: .count(1))
-//        ]
-//
-//        try dbWriter.write { db in
-//            try ingredient1.insert(db)
-//            try ingredient2.insert(db)
-//            try ingredient3.insert(db)
-//
-//            for index in 0..<batches2.count {
-//                batches2[index].ingredientId = ingredient2.id
-//                try batches2[index].insert(db)
-//            }
-//
-//            for index in 0..<batches3.count {
-//                batches3[index].ingredientId = ingredient3.id
-//                try batches3[index].insert(db)
-//            }
-//        }
-//
-//        let exp = expectation(description: "Ingredients")
-//        var ingredients: [IngredientRecord]?
-//        let cancellable = appDatabase.ingredientsOrderedByExpiryDatePublisher().sink { completion in
-//            if case let .failure(error) = completion {
-//                XCTFail("Unexpected error \(error)")
-//            }
-//        } receiveValue: {
-//            ingredients = $0
-//            exp.fulfill()
-//        }
-//
-//        withExtendedLifetime(cancellable) {
-//            waitForExpectations(timeout: 1, handler: nil)
-//        }
-//
-//        XCTAssertEqual(ingredients, [ingredient3, ingredient2, ingredient1])
-//    }
-
     func testIngredientsPublisher_filteredByCategoryOrderedByName_publishesFilteredOrderedIngredients() throws {
         var category1 = IngredientCategoryRecord(name: "Spices")
         var category2 = IngredientCategoryRecord(name: "Dairy")
@@ -952,8 +903,6 @@ class AppDatabaseTests: XCTestCase {
                 stepRecords[index].recipeId = recipeRecord.id
                 try stepRecords[index].insert(db)
             }
-
-            print(try RecipeStepRecord.fetchAll(db))
         }
 
         let recipe = try Recipe(
@@ -973,8 +922,6 @@ class AppDatabaseTests: XCTestCase {
             return
         }
 
-        dump(try appDatabase.fetchRecipe(id: id))
-        dump(recipe)
         try XCTAssertEqual(appDatabase.fetchRecipe(id: id), recipe)
     }
 

@@ -1,5 +1,3 @@
-// swiftlint:disable line_length
-
 import XCTest
 @testable import ChopChop
 
