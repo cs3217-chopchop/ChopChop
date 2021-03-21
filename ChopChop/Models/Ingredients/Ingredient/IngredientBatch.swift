@@ -6,11 +6,11 @@ import Foundation
  */
 class IngredientBatch {
     private(set) var quantity: Quantity
-    private(set) var expiryDate: Date?
+    let expiryDate: Date?
 
     init(quantity: Quantity, expiryDate: Date? = nil) {
         self.quantity = quantity
-        self.expiryDate = expiryDate
+        self.expiryDate = expiryDate?.startOfDay
     }
 
     var isEmpty: Bool {
@@ -28,7 +28,7 @@ class IngredientBatch {
 
 /**
  Two batches are compared based on their expiry dates.
- Two batches are equal if they have the same expiry date and quantity
+ Two batches are equal if they have the same expiry date and quantity.
  */
 extension IngredientBatch: Comparable {
     static func < (lhs: IngredientBatch, rhs: IngredientBatch) -> Bool {
