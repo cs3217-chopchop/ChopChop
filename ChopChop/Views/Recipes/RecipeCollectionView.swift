@@ -42,7 +42,7 @@ struct RecipeCollectionView: View {
                 }
             }
         }
-        .onDisappear {
+        .onAppear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
         }

@@ -51,7 +51,7 @@ struct IngredientCollectionView: View {
                 }
             }
         }
-        .onDisappear {
+        .onAppear {
             viewModel.query = ""
             viewModel.filterByExpiryDate = false
             viewModel.expiryDateStart = .today

@@ -3,6 +3,7 @@ import SwiftUI
  struct Sidebar: View {
     var recipeCategories: [RecipeCategory] = []
     var ingredientCategories: [IngredientCategory] = []
+    let allRecipesViewModel: RecipeCollectionViewModel
 
     var body: some View {
         List {
@@ -80,6 +81,6 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar()
+        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""))
     }
  }
