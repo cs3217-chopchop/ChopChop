@@ -107,11 +107,11 @@ class Recipe: FetchableRecord {
             throw RecipeError.nonExistentIngredient
         }
         if oldIngredient.name == name {
-            try oldIngredient.updateQuantity(quantity)
+            oldIngredient.updateQuantity(quantity)
         } else {
             guard let existingIngredient = ingredients.first(where: { $0.name == name }) else {
                 try oldIngredient.rename(name)
-                try oldIngredient.updateQuantity(quantity)
+                oldIngredient.updateQuantity(quantity)
                 return
             }
             try removeIngredient(oldIngredient)
@@ -170,7 +170,12 @@ extension Recipe: NSCopying {
         let newIngredients = ingredients.compactMap { $0.copy() as? RecipeIngredient }
 
         do {
-            let copy = try Recipe(name: name, servings: servings, difficulty: difficulty, steps: newSteps, ingredients: newIngredients)
+            let copy = try Recipe(
+                name: name,
+                servings: servings,
+                difficulty: difficulty,
+                steps: newSteps,
+                ingredients: newIngredients)
             copy.id = id
             copy.recipeCategoryId = recipeCategoryId
             return copy

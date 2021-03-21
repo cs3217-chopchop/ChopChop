@@ -1,12 +1,12 @@
 enum QuantityRecord: Equatable {
     case count(Double)
-    case mass(Double)
-    case volume(Double)
+    case mass(Double, unit: MassUnit)
+    case volume(Double, unit: VolumeUnit)
 }
 
 extension QuantityRecord: Codable {
     enum CodingKeys: CodingKey {
-        case count, mass, volume
+        case count, mass, volume, unit
     }
 
     init(from decoder: Decoder) throws {
@@ -14,10 +14,12 @@ extension QuantityRecord: Codable {
 
         if let value = try container.decodeIfPresent(Double.self, forKey: .count) {
             self = .count(value)
-        } else if let value = try container.decodeIfPresent(Double.self, forKey: .mass) {
-            self = .mass(value)
-        } else if let value = try container.decodeIfPresent(Double.self, forKey: .volume) {
-            self = .volume(value)
+        } else if let value = try container.decodeIfPresent(Double.self, forKey: .mass),
+                  let unit = try container.decodeIfPresent(MassUnit.self, forKey: .unit) {
+            self = .mass(value, unit: unit)
+        } else if let value = try container.decodeIfPresent(Double.self, forKey: .volume),
+                  let unit = try container.decodeIfPresent(VolumeUnit.self, forKey: .unit) {
+            self = .volume(value, unit: unit)
         } else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath,
                                                                     debugDescription: "Unable to decode enum."))
@@ -28,12 +30,14 @@ extension QuantityRecord: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         switch self {
-        case .count(let value):
+        case let .count(value):
             try container.encode(value, forKey: .count)
-        case .mass(let value):
+        case let .mass(value, unit):
             try container.encode(value, forKey: .mass)
-        case .volume(let value):
+            try container.encode(unit, forKey: .unit)
+        case let .volume(value, unit):
             try container.encode(value, forKey: .volume)
+            try container.encode(unit, forKey: .unit)
         }
     }
 }

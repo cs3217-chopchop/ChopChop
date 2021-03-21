@@ -8,7 +8,7 @@ class RecipeIngredientTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         recipeIngredient = try RecipeIngredient(
             name: "Sugar",
             quantity: existingQuantity)
@@ -45,34 +45,24 @@ extension RecipeIngredientTests {
 // MARK: - Add
 extension RecipeIngredientTests {
     func testAdd_sameQuantityType_success() throws {
-        let addedQuantity = try Quantity(.volume, value: 0.2)
+        let addedQuantity = try Quantity(.volume(.baseUnit), value: 0.2)
 
         XCTAssertNoThrow(try recipeIngredient.add(addedQuantity))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         let sum = try? existingQuantity + addedQuantity
         XCTAssertEqual(recipeIngredient.quantity, sum, "Quantities should be added correctly")
-    }
-
-    func testAdd_differentQuantityType_throwsError() throws {
-        let addedQuantity = try Quantity(.mass, value: 3)
-
-        XCTAssertThrowsError(try recipeIngredient.add(addedQuantity))
-
-        let existingQuantity = try Quantity(.volume, value: 0.1)
-        XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
-                       "Current quantity should not be changed")
     }
 }
 
 // MARK: - Subtract
 extension RecipeIngredientTests {
     func testSubtract_sameQuantityTypeSufficientQuantity_success() throws {
-        let subtractedQuantity = try Quantity(.volume, value: 0.05)
+        let subtractedQuantity = try Quantity(.volume(.baseUnit), value: 0.05)
 
         XCTAssertNoThrow(try recipeIngredient.subtract(subtractedQuantity))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         guard let difference = try? existingQuantity - subtractedQuantity else {
             XCTFail("Quantity not subtracted properly")
             return
@@ -82,21 +72,21 @@ extension RecipeIngredientTests {
     }
 
     func testSubtract_insufficientQuantity_throwsError() throws {
-        let subtractedQuantity = try Quantity(.volume, value: 1)
+        let subtractedQuantity = try Quantity(.volume(.baseUnit), value: 1)
 
         XCTAssertThrowsError(try recipeIngredient.subtract(subtractedQuantity))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be subtracted")
     }
 
     func testSubtract_differentQuantityType_throwsError() throws {
-        let subtractedQuantity = try Quantity(.mass, value: 3)
+        let subtractedQuantity = try Quantity(.mass(.baseUnit), value: 3)
 
         XCTAssertThrowsError(try recipeIngredient.subtract(subtractedQuantity))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be subtracted")
     }
@@ -109,7 +99,7 @@ extension RecipeIngredientTests {
 
         XCTAssertNoThrow(try recipeIngredient.scale(factor))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         guard let product = try? existingQuantity * factor else {
             XCTFail("Quantity not multiplied properly")
             return
@@ -123,7 +113,7 @@ extension RecipeIngredientTests {
 
         XCTAssertThrowsError(try recipeIngredient.scale(factor))
 
-        let existingQuantity = try Quantity(.volume, value: 0.1)
+        let existingQuantity = try Quantity(.volume(.baseUnit), value: 0.1)
         XCTAssertEqual(recipeIngredient.quantity, existingQuantity,
                        "Quantity should not be scaled")
     }

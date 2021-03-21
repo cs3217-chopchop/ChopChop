@@ -80,10 +80,10 @@ class CountdownTimer {
         self.timer = timer
     }
 
+    // swiftlint:disable large_tuple
     var hoursMinutesSeconds: (Int, Int, Int) {
       (remainingTime / 3_600, (remainingTime % 3_600) / 60, (remainingTime % 3_600) % 60)
     }
-
 }
 
 enum CountdownTimerError: Error {
