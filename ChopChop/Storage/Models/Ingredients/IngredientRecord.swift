@@ -5,6 +5,7 @@ struct IngredientRecord: Equatable {
     var id: Int64?
     var ingredientCategoryId: Int64?
     var name: String
+    var quantityType: BaseQuantityType
 }
 
 extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
@@ -12,6 +13,7 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
         static let id = Column(CodingKeys.id)
         static let ingredientCategoryId = Column(CodingKeys.ingredientCategoryId)
         static let name = Column(CodingKeys.name)
+        static let quantityType = Column(CodingKeys.quantityType)
     }
 
     static let databaseTableName = "ingredient"

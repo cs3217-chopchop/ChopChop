@@ -95,6 +95,9 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                     .collate(.localizedStandardCompare)
+                t.column("quantityType", .text)
+                    .notNull()
+                    .check { BaseQuantityType.allCases.map { $0.rawValue }.contains($0) }
             }
         }
 
@@ -201,12 +204,12 @@ extension AppDatabase {
         }
 
         var ingredients = [
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper"),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon"),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk"),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese"),
-            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice"),
-            IngredientRecord(name: "Uncategorised Ingredient")
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
+            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count)
         ]
 
         for index in ingredients.indices {
@@ -300,6 +303,10 @@ extension AppDatabase {
 
     func saveIngredient(_ ingredient: inout IngredientRecord, batches: inout [IngredientBatchRecord]) throws {
         try dbWriter.write { db in
+            guard batches.allSatisfy({ $0.quantity.type == ingredient.quantityType }) else {
+                throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+            }
+
             try ingredient.save(db)
 
             guard batches.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {

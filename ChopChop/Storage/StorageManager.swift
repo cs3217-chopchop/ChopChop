@@ -37,7 +37,8 @@ struct StorageManager {
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.ingredientCategoryId,
-                                                name: ingredient.name)
+                                                name: ingredient.name,
+                                                quantityType: ingredient.quantityType)
         var batchRecords = ingredient.batches.map { batch in
             IngredientBatchRecord(ingredientId: ingredient.id,
                                   expiryDate: batch.expiryDate,

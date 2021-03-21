@@ -34,10 +34,10 @@ class Ingredient: FetchableRecord {
     }
 
     required init(row: Row) {
-        id = row["id"]
-        ingredientCategoryId = row["ingredientCategoryId"]
-        quantityType = .count
-        name = row["name"]
+        id = row[IngredientRecord.Columns.id]
+        ingredientCategoryId = row[IngredientRecord.Columns.ingredientCategoryId]
+        quantityType = row[IngredientRecord.Columns.quantityType]
+        name = row[IngredientRecord.Columns.name]
         batches = row.prefetchedRows["ingredientBatches"]?.compactMap {
             let record = IngredientBatchRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
@@ -46,12 +46,6 @@ class Ingredient: FetchableRecord {
 
             return IngredientBatch(quantity: quantity, expiryDate: record.expiryDate)
         } ?? []
-    }
-
-    // TODO: Remove this after quantity types are added into db
-    convenience init(name: String, batches: [IngredientBatch]) throws {
-        try self.init(name: name, type: .count)
-        self.batches = batches
     }
 
     var notExpiredBatches: [IngredientBatch] {

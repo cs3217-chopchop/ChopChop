@@ -52,7 +52,7 @@ class AppDatabaseTests: XCTestCase {
             let columns = try db.columns(in: "ingredient")
             let columnNames = Set(columns.map { $0.name })
 
-            XCTAssertEqual(columnNames, ["id", "ingredientCategoryId", "name"])
+            XCTAssertEqual(columnNames, ["id", "ingredientCategoryId", "name", "quantityType"])
         }
     }
 
@@ -447,21 +447,21 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Ingredient CRUD Tests
 
     func testSaveIngredient_insertsInvalidName_throwsError() throws {
-        var ingredient = IngredientRecord(name: "")
+        var ingredient = IngredientRecord(name: "", quantityType: .count)
 
         try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient))
     }
 
     func testSaveIngredient_insertsDuplicateName_throwsError() throws {
-        var ingredient1 = IngredientRecord(name: "Egg")
-        var ingredient2 = IngredientRecord(name: "Egg")
+        var ingredient1 = IngredientRecord(name: "Egg", quantityType: .count)
+        var ingredient2 = IngredientRecord(name: "Egg", quantityType: .count)
 
         try appDatabase.saveIngredient(&ingredient1)
         try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient2))
     }
 
     func testSaveIngredient_insertsValidBatches_success() throws {
-        var ingredient = IngredientRecord(name: "Egg")
+        var ingredient = IngredientRecord(name: "Egg", quantityType: .count)
         var batches = [
             IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
@@ -482,7 +482,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveIngredient_insertsInvalidBatches_throwsError() throws {
-        var ingredient = IngredientRecord(name: "Egg")
+        var ingredient = IngredientRecord(name: "Egg", quantityType: .count)
         var batches = [
             IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
@@ -493,10 +493,23 @@ class AppDatabaseTests: XCTestCase {
         try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, batches: &batches))
     }
 
+    func testSaveIngredient_insertsBatchesWithWrongType_throwsError() throws {
+        var ingredient = IngredientRecord(name: "Egg", quantityType: .mass)
+        var batches = [
+            IngredientBatchRecord(expiryDate: .today,
+                                  quantity: .count(12)),
+            IngredientBatchRecord(expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24).startOfDay,
+                                  quantity: .count(13)),
+            IngredientBatchRecord(quantity: .count(14))
+        ]
+
+        try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient, batches: &batches))
+    }
+
     func testDeleteIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Egg")
-        var ingredient2 = IngredientRecord(name: "Salt")
-        var ingredient3 = IngredientRecord(name: "Sugar")
+        var ingredient1 = IngredientRecord(name: "Egg", quantityType: .count)
+        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
+        var ingredient3 = IngredientRecord(name: "Sugar", quantityType: .mass)
         var batches = [
             IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
@@ -536,8 +549,8 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testDeleteAllIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Egg")
-        var ingredient2 = IngredientRecord(name: "Salt")
+        var ingredient1 = IngredientRecord(name: "Egg", quantityType: .count)
+        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
 
         try dbWriter.write { db in
             try ingredient1.insert(db)
@@ -567,7 +580,7 @@ class AppDatabaseTests: XCTestCase {
 
     func testDeleteIngredientCategory_recipesRemaining_throwsError() throws {
         var category = IngredientCategoryRecord(name: "Spices")
-        var ingredient = IngredientRecord(name: "Pepper")
+        var ingredient = IngredientRecord(name: "Pepper", quantityType: .mass)
 
         try dbWriter.write { db in
             try category.insert(db)
@@ -586,7 +599,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveIngredient_insertsDefaultCategoryNil_success() throws {
-        var ingredient = IngredientRecord(name: "Pepper")
+        var ingredient = IngredientRecord(name: "Pepper", quantityType: .mass)
 
         try appDatabase.saveIngredient(&ingredient)
 
@@ -600,7 +613,7 @@ class AppDatabaseTests: XCTestCase {
             try category.insert(db)
         }
 
-        var ingredient = IngredientRecord(ingredientCategoryId: category.id, name: "Pepper")
+        var ingredient = IngredientRecord(ingredientCategoryId: category.id, name: "Pepper", quantityType: .mass)
 
         try appDatabase.saveIngredient(&ingredient)
 
@@ -608,7 +621,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveIngredient_insertsMissingCategory_success() throws {
-        var ingredient = IngredientRecord(ingredientCategoryId: 1, name: "Pepper")
+        var ingredient = IngredientRecord(ingredientCategoryId: 1, name: "Pepper", quantityType: .mass)
 
         try XCTAssertThrowsError(appDatabase.saveIngredient(&ingredient))
     }
@@ -747,8 +760,8 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testIngredientsPublisher_orderedByName_publishesOrderedIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Sugar")
-        var ingredient2 = IngredientRecord(name: "Salt")
+        var ingredient1 = IngredientRecord(name: "Sugar", quantityType: .mass)
+        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
 
         try dbWriter.write { db in
             try ingredient1.insert(db)
@@ -777,10 +790,10 @@ class AppDatabaseTests: XCTestCase {
         var category1 = IngredientCategoryRecord(name: "Spices")
         var category2 = IngredientCategoryRecord(name: "Dairy")
 
-        var ingredient1 = IngredientRecord(name: "Sugar")
-        var ingredient2 = IngredientRecord(name: "Salt")
-        var ingredient3 = IngredientRecord(name: "Milk")
-        var ingredient4 = IngredientRecord(name: "Egg")
+        var ingredient1 = IngredientRecord(name: "Sugar", quantityType: .mass)
+        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
+        var ingredient3 = IngredientRecord(name: "Milk", quantityType: .volume)
+        var ingredient4 = IngredientRecord(name: "Egg", quantityType: .count)
 
         try dbWriter.write { db in
             try category1.insert(db)
@@ -822,9 +835,9 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testIngredientsPublisher_filteredByName_publishesFilteredIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Baking Powder")
-        var ingredient2 = IngredientRecord(name: "Baking Soda")
-        var ingredient3 = IngredientRecord(name: "Salt")
+        var ingredient1 = IngredientRecord(name: "Baking Powder", quantityType: .mass)
+        var ingredient2 = IngredientRecord(name: "Baking Soda", quantityType: .mass)
+        var ingredient3 = IngredientRecord(name: "Salt", quantityType: .mass)
 
         try dbWriter.write { db in
             try ingredient1.insert(db)
@@ -925,7 +938,7 @@ class AppDatabaseTests: XCTestCase {
 
     func testFetchIngredient() throws {
         var categoryRecord = IngredientCategoryRecord(name: "Dairy")
-        var ingredientRecord = IngredientRecord(name: "Egg")
+        var ingredientRecord = IngredientRecord(name: "Egg", quantityType: .count)
         var batchRecords = [
             IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
@@ -948,6 +961,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let ingredient = try Ingredient(name: ingredientRecord.name,
+                                        type: .count,
                                         batches: batchRecords.map {
                                             IngredientBatch(
                                                 quantity: try Quantity(from: $0.quantity),

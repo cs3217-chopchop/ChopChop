@@ -64,6 +64,7 @@ class StorageManagerTests: XCTestCase {
 
     func testSaveIngredient() throws {
         var ingredient = try Ingredient(name: "Egg",
+                                        type: .count,
                                         batches: [
                                             IngredientBatch(quantity: try Quantity(from: .count(12)),
                                                             expiryDate: .today),
