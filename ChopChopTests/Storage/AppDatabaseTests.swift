@@ -463,10 +463,9 @@ class AppDatabaseTests: XCTestCase {
     func testSaveIngredient_insertsValidBatches_success() throws {
         var ingredient = IngredientRecord(name: "Egg")
         var batches = [
-            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
-            IngredientBatchRecord(expiryDate: Calendar.current
-                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24).startOfDay,
                                   quantity: .count(13)),
             IngredientBatchRecord(quantity: .count(14))
         ]
@@ -485,9 +484,9 @@ class AppDatabaseTests: XCTestCase {
     func testSaveIngredient_insertsInvalidBatches_throwsError() throws {
         var ingredient = IngredientRecord(name: "Egg")
         var batches = [
-            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
-            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(13))
         ]
 
@@ -499,10 +498,9 @@ class AppDatabaseTests: XCTestCase {
         var ingredient2 = IngredientRecord(name: "Salt")
         var ingredient3 = IngredientRecord(name: "Sugar")
         var batches = [
-            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
-            IngredientBatchRecord(expiryDate: Calendar.current
-                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24).startOfDay,
                                   quantity: .count(13)),
             IngredientBatchRecord(quantity: .count(14))
         ]
@@ -929,10 +927,9 @@ class AppDatabaseTests: XCTestCase {
         var categoryRecord = IngredientCategoryRecord(name: "Dairy")
         var ingredientRecord = IngredientRecord(name: "Egg")
         var batchRecords = [
-            IngredientBatchRecord(expiryDate: Calendar.current.startOfDay(for: Date()),
+            IngredientBatchRecord(expiryDate: .today,
                                   quantity: .count(12)),
-            IngredientBatchRecord(expiryDate: Calendar.current
-                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24)),
+            IngredientBatchRecord(expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24).startOfDay,
                                   quantity: .count(13)),
             IngredientBatchRecord(quantity: .count(14))
         ]

@@ -217,21 +217,19 @@ extension AppDatabase {
             IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(500, unit: .gram)),
             IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(200, unit: .gram)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  expiryDate: .today,
                                   quantity: .volume(2, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Calendar.current
-                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7)),
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7).startOfDay,
                                   quantity: .volume(1.5, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Calendar.current
-                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4)),
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
                                   quantity: .volume(3, unit: .liter)),
             IngredientBatchRecord(ingredientId: ingredients[3].id,
-                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  expiryDate: .today,
                                   quantity: .mass(1, unit: .kilogram)),
             IngredientBatchRecord(ingredientId: ingredients[4].id,
-                                  expiryDate: Calendar.current.startOfDay(for: Date()),
+                                  expiryDate: .today,
                                   quantity: .mass(2, unit: .kilogram))
         ]
 

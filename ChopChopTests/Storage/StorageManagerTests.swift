@@ -66,11 +66,10 @@ class StorageManagerTests: XCTestCase {
         var ingredient = try Ingredient(name: "Egg",
                                         batches: [
                                             IngredientBatch(quantity: try Quantity(from: .count(12)),
-                                                            expiryDate: Calendar.current.startOfDay(for: Date())),
+                                                            expiryDate: .today),
                                             IngredientBatch(quantity: try Quantity(from: .count(13)),
-                                                            expiryDate: Calendar.current
-                                                                .startOfDay(for: Date(timeIntervalSinceNow:
-                                                                                        60 * 60 * 24))),
+                                                            expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24)
+                                                                .startOfDay),
                                             IngredientBatch(quantity: try Quantity(from: .count(14)))
                                         ])
 

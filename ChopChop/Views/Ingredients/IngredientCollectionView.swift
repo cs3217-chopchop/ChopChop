@@ -31,8 +31,8 @@ struct IngredientCollectionView: View {
         .onDisappear {
             viewModel.query = ""
             viewModel.filterByExpiryDate = false
-            viewModel.expiryDateStart = Calendar.current.startOfDay(for: Date())
-            viewModel.expiryDateEnd = Calendar.current.startOfDay(for: Date())
+            viewModel.expiryDateStart = .today
+            viewModel.expiryDateEnd = .today
         }
     }
 

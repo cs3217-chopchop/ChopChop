@@ -5,12 +5,12 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published var query: String = ""
     @Published var filterByExpiryDate = false {
         didSet {
-            expiryDateStart = Calendar.current.startOfDay(for: Date())
-            expiryDateEnd = Calendar.current.startOfDay(for: Date())
+            expiryDateStart = .today
+            expiryDateEnd = .today
         }
     }
-    @Published var expiryDateStart = Calendar.current.startOfDay(for: Date())
-    @Published var expiryDateEnd = Calendar.current.startOfDay(for: Date())
+    @Published var expiryDateStart = Date.today
+    @Published var expiryDateEnd = Date.today
     @Published private(set) var ingredients: [IngredientInfo] = []
 
     let title: String
