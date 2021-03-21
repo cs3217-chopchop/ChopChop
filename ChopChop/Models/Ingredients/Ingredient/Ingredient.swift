@@ -64,6 +64,12 @@ class Ingredient: FetchableRecord {
         }
     }
 
+    var totalQuantity: Double {
+        batches
+            .map { $0.quantity.baseValue }
+            .reduce(0.0, +)
+    }
+
     var totalUsableQuantity: Double {
         notExpiredBatches
             .map { $0.quantity.baseValue }
