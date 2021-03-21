@@ -1,3 +1,5 @@
+import GRDB
+
 enum QuantityType: Equatable {
     static let massToVolumeBaseRatio = 1.0
 
@@ -30,7 +32,7 @@ extension QuantityType: CustomStringConvertible {
     }
 }
 
-enum BaseQuantityType: Equatable {
+enum BaseQuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {
     case count
     case mass
     case volume

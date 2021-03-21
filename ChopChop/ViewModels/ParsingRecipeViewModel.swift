@@ -15,5 +15,4 @@ class ParsingRecipeViewModel: ObservableObject {
         let ingredients = RecipeParser.parseIngredientString(ingredientString: ingredientString)
         let steps = RecipeParser.parseInstructions(instructions: instructionString)
     }
-
 }

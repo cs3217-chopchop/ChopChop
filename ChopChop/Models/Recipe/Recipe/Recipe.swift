@@ -138,15 +138,15 @@ class Recipe: FetchableRecord {
     }
 
     required init(row: Row) {
-        id = row["id"]
-        servings = row["servings"]
-        recipeCategoryId = row["recipeCategoryId"]
-        name = row["name"]
-        difficulty = row["difficulty"]
-        steps = row.prefetchedRows["recipeStep"]?.compactMap {
+        id = row[RecipeRecord.Columns.id]
+        recipeCategoryId = row[RecipeRecord.Columns.recipeCategoryId]
+        name = row[RecipeRecord.Columns.name]
+        servings = row[RecipeRecord.Columns.servings]
+        difficulty = row[RecipeRecord.Columns.difficulty]
+        steps = row.prefetchedRows["recipeSteps"]?.compactMap {
             try? RecipeStep(content: RecipeStepRecord(row: $0).content)
         } ?? []
-        ingredients = row.prefetchedRows["recipeIngredient"]?.compactMap {
+        ingredients = row.prefetchedRows["recipeIngredients"]?.compactMap {
             let record = RecipeIngredientRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
                 return nil
