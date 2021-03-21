@@ -127,7 +127,7 @@ struct StorageManager {
 
     func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
             .eraseToAnyPublisher()
     }
 
@@ -139,7 +139,7 @@ struct StorageManager {
                                          expiresBefore: expiresBefore,
                                          query: query,
                                          categoryIds: categoryIds)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
             .eraseToAnyPublisher()
     }
 

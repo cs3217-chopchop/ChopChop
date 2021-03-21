@@ -442,13 +442,17 @@ extension AppDatabase {
     }
 
     func ingredientsPublisher(query: String = "",
-                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[IngredientRecord], Error> {
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
-            .tracking(IngredientRecord.all()
-                        .filteredByCategory(ids: categoryIds)
-                        .filteredByName(query)
-                        .orderedByName()
-                        .fetchAll)
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .filteredByCategory(ids: categoryIds)
+                    .filteredByName(query)
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
@@ -456,14 +460,18 @@ extension AppDatabase {
     func ingredientsPublisher(expiresAfter: Date,
                               expiresBefore: Date,
                               query: String = "",
-                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[IngredientRecord], Error> {
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
-            .tracking(IngredientRecord.all()
-                        .filteredByCategory(ids: categoryIds)
-                        .filteredByName(query)
-                        .filteredByExpiryDate(after: expiresAfter, before: expiresBefore)
-                        .orderedByName()
-                        .fetchAll)
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .filteredByCategory(ids: categoryIds)
+                    .filteredByName(query)
+                    .filteredByExpiryDate(after: expiresAfter, before: expiresBefore)
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }

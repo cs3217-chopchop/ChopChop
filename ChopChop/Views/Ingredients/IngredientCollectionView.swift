@@ -27,17 +27,17 @@ struct IngredientCollectionView: View {
             .padding([.leading, .trailing])
 
             if viewModel.filterByExpiryDate {
-                ExpiryDatePicker
+                expiryDatePicker
             }
 
             if viewModel.ingredients.isEmpty {
-                NotFoundView
+                notFoundView
             } else {
                 switch settings.viewType {
                 case .list:
-                    ListView
+                    listView
                 case .grid:
-                    GridView
+                    gridView
                 }
             }
         }
@@ -59,7 +59,7 @@ struct IngredientCollectionView: View {
         }
     }
 
-    var ExpiryDatePicker: some View {
+    var expiryDatePicker: some View {
         HStack {
             Spacer()
             DatePicker(
@@ -80,7 +80,7 @@ struct IngredientCollectionView: View {
         .padding([.leading, .trailing])
     }
 
-    var NotFoundView: some View {
+    var notFoundView: some View {
         VStack(spacing: 10) {
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
@@ -90,14 +90,14 @@ struct IngredientCollectionView: View {
         .foregroundColor(.secondary)
     }
 
-    var ListView: some View {
+    var listView: some View {
         List(viewModel.ingredients) { ingredient in
             IngredientRow(ingredient: ingredient)
         }
         .animation(.none)
     }
 
-    var GridView: some View {
+    var gridView: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.ingredients) { ingredient in
@@ -127,7 +127,7 @@ struct IngredientCollectionView: View {
                 VStack(alignment: .leading) {
                     Text(ingredient.name)
                         .lineLimit(1)
-                    Text("2.5 kg")
+                    Text(ingredient.quantity)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -163,7 +163,7 @@ struct IngredientCollectionView: View {
                         Text(ingredient.name)
                             .foregroundColor(.white)
                             .lineLimit(1)
-                        Text("2.5 kg")
+                        Text(ingredient.quantity)
                             .foregroundColor(.gray)
                     }
                     .padding()

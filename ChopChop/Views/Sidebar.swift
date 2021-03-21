@@ -7,14 +7,14 @@ import SwiftUI
 
     var body: some View {
         List {
-            RecipesSection
-            IngredientsSection
+            recipesSection
+            ingredientsSection
         }
         .listStyle(SidebarListStyle())
         .navigationTitle(Text("ChopChop"))
     }
 
-    var RecipesSection: some View {
+    var recipesSection: some View {
         Section(header: Text("Recipes")) {
             NavigationLink(
                 destination: RecipeCollectionView(viewModel:
@@ -46,7 +46,7 @@ import SwiftUI
         }
     }
 
-    var IngredientsSection: some View {
+    var ingredientsSection: some View {
         Section(header: Text("Ingredients")) {
             NavigationLink(
                 destination: IngredientCollectionView(viewModel:

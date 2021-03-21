@@ -22,13 +22,13 @@ struct RecipeCollectionView: View {
             .padding([.leading, .trailing])
 
             if viewModel.recipes.isEmpty {
-                NotFoundView
+                notFoundView
             } else {
                 switch settings.viewType {
                 case .list:
-                    ListView
+                    listView
                 case .grid:
-                    GridView
+                    gridView
                 }
             }
         }
@@ -48,7 +48,7 @@ struct RecipeCollectionView: View {
         }
     }
 
-    var NotFoundView: some View {
+    var notFoundView: some View {
         VStack(spacing: 10) {
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
@@ -58,13 +58,13 @@ struct RecipeCollectionView: View {
         .foregroundColor(.secondary)
     }
 
-    var ListView: some View {
+    var listView: some View {
         List(viewModel.recipes) { recipe in
             RecipeRow(recipe: recipe)
         }
     }
 
-    var GridView: some View {
+    var gridView: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.recipes) { recipe in
