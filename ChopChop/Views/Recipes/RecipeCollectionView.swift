@@ -22,13 +22,13 @@ struct RecipeCollectionView: View {
             .padding([.leading, .trailing])
 
             if viewModel.recipes.isEmpty {
-                NotFoundView()
+                NotFoundView
             } else {
                 switch settings.viewType {
                 case .list:
-                    ListView()
+                    ListView
                 case .grid:
-                    GridView()
+                    GridView
                 }
             }
         }
@@ -48,7 +48,7 @@ struct RecipeCollectionView: View {
         }
     }
 
-    func NotFoundView() -> some View {
+    var NotFoundView: some View {
         VStack(spacing: 10) {
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
@@ -58,10 +58,26 @@ struct RecipeCollectionView: View {
         .foregroundColor(.secondary)
     }
 
-    func ListView() -> some View {
+    var ListView: some View {
         List(viewModel.recipes) { recipe in
             RecipeRow(recipe: recipe)
         }
+    }
+
+    var GridView: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.recipes) { recipe in
+                    NavigationLink(
+                        destination: Text(recipe.name)
+                    ) {
+                        GridTile(recipe: recipe)
+                    }
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+        .padding(.top)
     }
 
     func RecipeRow(recipe: RecipeInfo) -> some View {
@@ -84,22 +100,6 @@ struct RecipeCollectionView: View {
             }
             .padding([.top, .bottom], 6)
         }
-    }
-
-    func GridView() -> some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 24) {
-                ForEach(viewModel.recipes) { recipe in
-                    NavigationLink(
-                        destination: Text(recipe.name)
-                    ) {
-                        GridTile(recipe: recipe)
-                    }
-                }
-            }
-            .padding([.bottom, .leading, .trailing])
-        }
-        .padding(.top)
     }
 
     func GridTile(recipe: RecipeInfo) -> some View {

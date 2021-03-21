@@ -13,9 +13,9 @@ extension QuantityRecord: Codable {
         switch self {
         case .count:
             return .count
-        case .mass(_, unit: _):
+        case .mass:
             return .mass
-        case .volume(_, unit: _):
+        case .volume:
             return .volume
         }
     }

@@ -27,17 +27,17 @@ struct IngredientCollectionView: View {
             .padding([.leading, .trailing])
 
             if viewModel.filterByExpiryDate {
-                ExpiryDatePicker()
+                ExpiryDatePicker
             }
 
             if viewModel.ingredients.isEmpty {
-                NotFoundView()
+                NotFoundView
             } else {
                 switch settings.viewType {
                 case .list:
-                    ListView()
+                    ListView
                 case .grid:
-                    GridView()
+                    GridView
                 }
             }
         }
@@ -59,7 +59,7 @@ struct IngredientCollectionView: View {
         }
     }
 
-    func ExpiryDatePicker() -> some View {
+    var ExpiryDatePicker: some View {
         HStack {
             Spacer()
             DatePicker(
@@ -80,7 +80,7 @@ struct IngredientCollectionView: View {
         .padding([.leading, .trailing])
     }
 
-    func NotFoundView() -> some View {
+    var NotFoundView: some View {
         VStack(spacing: 10) {
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
@@ -90,11 +90,27 @@ struct IngredientCollectionView: View {
         .foregroundColor(.secondary)
     }
 
-    func ListView() -> some View {
+    var ListView: some View {
         List(viewModel.ingredients) { ingredient in
             IngredientRow(ingredient: ingredient)
         }
         .animation(.none)
+    }
+
+    var GridView: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.ingredients) { ingredient in
+                    NavigationLink(
+                        destination: Text(ingredient.name)
+                    ) {
+                        GridTile(ingredient: ingredient)
+                    }
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+        .padding(.top)
     }
 
     func IngredientRow(ingredient: IngredientInfo) -> some View {
@@ -118,22 +134,6 @@ struct IngredientCollectionView: View {
             }
             .padding([.top, .bottom], 6)
         }
-    }
-
-    func GridView() -> some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 24) {
-                ForEach(viewModel.ingredients) { ingredient in
-                    NavigationLink(
-                        destination: Text(ingredient.name)
-                    ) {
-                        GridTile(ingredient: ingredient)
-                    }
-                }
-            }
-            .padding([.bottom, .leading, .trailing])
-        }
-        .padding(.top)
     }
 
     func GridTile(ingredient: IngredientInfo) -> some View {
