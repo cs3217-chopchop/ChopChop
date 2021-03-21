@@ -20,11 +20,15 @@ struct RecipeCollectionView: View {
             }
             .padding([.leading, .trailing])
 
-            switch viewModel.viewType {
-            case .list:
-                ListView()
-            case .grid:
-                GridView()
+            if viewModel.recipes.isEmpty {
+                NotFoundView()
+            } else {
+                switch viewModel.viewType {
+                case .list:
+                    ListView()
+                case .grid:
+                    GridView()
+                }
             }
         }
         .navigationTitle(Text(viewModel.title))
@@ -41,6 +45,16 @@ struct RecipeCollectionView: View {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
         }
+    }
+
+    func NotFoundView() -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: "text.badge.xmark")
+                .font(.system(size: 60))
+            Text("No recipes found")
+        }
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+        .foregroundColor(.secondary)
     }
 
     func ListView() -> some View {
