@@ -17,6 +17,19 @@ enum QuantityType: Equatable {
     }
 }
 
+extension QuantityType: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .count:
+            return ""
+        case .mass(let unit):
+            return unit.description
+        case .volume(let unit):
+            return unit.description
+        }
+    }
+}
+
 enum BaseQuantityType: Equatable {
     case count
     case mass

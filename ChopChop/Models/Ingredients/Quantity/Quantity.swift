@@ -209,10 +209,8 @@ extension Quantity: CustomStringConvertible {
         switch type {
         case .count:
             return String(format: "%.1f", value)
-        case .mass(let unit):
-            return String(format: "%.2f \(unit.description)", value)
-        case .volume(let unit):
-            return String(format: "%.2f \(unit.description)", value)
+        default:
+            return String(format: "%.2f \(type.description)", value)
         }
     }
 }
