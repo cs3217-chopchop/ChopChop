@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct RecipeCollectionView: View {
+    @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: RecipeCollectionViewModel
 
     let columns = [
@@ -23,7 +24,7 @@ struct RecipeCollectionView: View {
             if viewModel.recipes.isEmpty {
                 NotFoundView()
             } else {
-                switch viewModel.viewType {
+                switch settings.viewType {
                 case .list:
                     ListView()
                 case .grid:
@@ -35,9 +36,9 @@ struct RecipeCollectionView: View {
         .toolbar {
             HStack {
                 Text("View type:")
-                Picker("View by", selection: $viewModel.viewType) {
-                    Text("List").tag(RecipeCollectionViewModel.ViewType.list)
-                    Text("Grid").tag(RecipeCollectionViewModel.ViewType.grid)
+                Picker("View by", selection: $settings.viewType) {
+                    Text("List").tag(UserSettings.ViewType.list)
+                    Text("Grid").tag(UserSettings.ViewType.grid)
                 }
             }
         }

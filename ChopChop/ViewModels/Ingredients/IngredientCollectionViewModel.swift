@@ -12,7 +12,6 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published var expiryDateStart = Date.today
     @Published var expiryDateEnd = Date.today
     @Published private(set) var ingredients: [IngredientInfo] = []
-    @Published var viewType = ViewType.list
 
     let title: String
     let categoryIds: [Int64?]
@@ -51,11 +50,5 @@ final class IngredientCollectionViewModel: ObservableObject {
         .switchToLatest()
         .eraseToAnyPublisher()
         // swiftlint:enable line_length
-    }
-}
-
-extension IngredientCollectionViewModel {
-    enum ViewType {
-        case list, grid
     }
 }
