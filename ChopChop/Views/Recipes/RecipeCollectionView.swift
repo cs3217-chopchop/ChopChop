@@ -3,6 +3,12 @@ import SwiftUI
 struct RecipeCollectionView: View {
     @ObservedObject var viewModel: RecipeCollectionViewModel
 
+    let columns = [
+        GridItem(),
+        GridItem(),
+        GridItem()
+    ]
+
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
@@ -13,14 +19,33 @@ struct RecipeCollectionView: View {
                                   options: viewModel.recipeIngredients)
             }
             .padding([.leading, .trailing])
-            List(viewModel.recipes) { recipe in
-                RecipeRow(recipe: recipe)
+
+            switch viewModel.viewType {
+            case .list:
+                ListView()
+            case .grid:
+                GridView()
             }
         }
         .navigationTitle(Text(viewModel.title))
+        .toolbar {
+            HStack {
+                Text("View type:")
+                Picker("View by", selection: $viewModel.viewType) {
+                    Text("List").tag(RecipeCollectionViewModel.ViewType.list)
+                    Text("Grid").tag(RecipeCollectionViewModel.ViewType.grid)
+                }
+            }
+        }
         .onDisappear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
+        }
+    }
+
+    func ListView() -> some View {
+        List(viewModel.recipes) { recipe in
+            RecipeRow(recipe: recipe)
         }
     }
 
@@ -37,11 +62,65 @@ struct RecipeCollectionView: View {
                     .clipped()
                 VStack(alignment: .leading) {
                     Text(recipe.name)
+                        .lineLimit(1)
                     RecipeCaption(recipe: recipe)
+                        .foregroundColor(.secondary)
                 }
             }
             .padding([.top, .bottom], 6)
         }
+    }
+
+    func GridView() -> some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.recipes) { recipe in
+                    NavigationLink(
+                        destination: Text(recipe.name)
+                    ) {
+                        GridTile(recipe: recipe)
+                    }
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+        .padding(.top)
+    }
+
+    func GridTile(recipe: RecipeInfo) -> some View {
+        Image("recipe")
+            .resizable()
+            .scaledToFill()
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fill)
+            .cornerRadius(10)
+            .clipped()
+            .overlay(
+                ZStack(alignment: .bottomLeading) {
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .black, location: 0.5)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .cornerRadius(10)
+                        .opacity(0.8)
+                    VStack(alignment: .leading) {
+                        Text(recipe.name)
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        RecipeCaption(recipe: recipe)
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                }
+            )
+            .padding([.leading, .trailing], 8)
     }
 
     func RecipeCaption(recipe: RecipeInfo) -> some View {
@@ -68,7 +147,6 @@ struct RecipeCollectionView: View {
             }
         }
         .font(.caption)
-        .foregroundColor(.secondary)
     }
 }
 

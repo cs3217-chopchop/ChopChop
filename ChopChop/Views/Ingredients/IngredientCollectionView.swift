@@ -70,6 +70,7 @@ struct IngredientCollectionView: View {
                     .clipped()
                 VStack(alignment: .leading) {
                     Text(ingredient.name)
+                        .lineLimit(1)
                     Text("2.5 kg")
                         .font(.caption)
                         .foregroundColor(.secondary)

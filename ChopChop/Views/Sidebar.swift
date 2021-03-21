@@ -33,6 +33,7 @@ import SwiftUI
                 ) {
                     Image(systemName: "folder")
                     Text(category.name)
+                        .lineLimit(1)
                 }
             }
             NavigationLink(
@@ -64,6 +65,7 @@ import SwiftUI
                 ) {
                     Image(systemName: "folder")
                     Text(category.name)
+                        .lineLimit(1)
                 }
             }
             NavigationLink(

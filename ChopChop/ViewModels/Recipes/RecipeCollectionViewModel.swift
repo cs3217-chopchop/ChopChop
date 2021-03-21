@@ -1,10 +1,11 @@
 import Combine
 
 final class RecipeCollectionViewModel: ObservableObject {
-    @Published var query: String = ""
+    @Published var query = ""
     @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
+    @Published var viewType = ViewType.list
 
     let title: String
     let categoryIds: [Int64?]
@@ -49,5 +50,11 @@ final class RecipeCollectionViewModel: ObservableObject {
                 Just<[String]>([])
             }
             .eraseToAnyPublisher()
+    }
+}
+
+extension RecipeCollectionViewModel {
+    enum ViewType {
+        case list, grid
     }
 }

@@ -136,7 +136,8 @@ extension AppDatabase {
         var categories = [
             RecipeCategoryRecord(name: "Japanese"),
             RecipeCategoryRecord(name: "Italian"),
-            RecipeCategoryRecord(name: "American")
+            RecipeCategoryRecord(name: "American"),
+            RecipeCategoryRecord(name: "A Really Really Really Really Really Really Really Really Really Long Category")
         ]
 
         for index in categories.indices {
@@ -156,7 +157,8 @@ extension AppDatabase {
             RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
             RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
             RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(name: "Uncategorised Recipe", servings: Double(Int.random(in: 1...5)))
+            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
+                         servings: Double(Int.random(in: 1...5)))
         ]
 
         for index in recipes.indices {
