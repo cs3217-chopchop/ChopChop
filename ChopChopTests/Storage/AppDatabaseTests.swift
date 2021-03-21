@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length function_body_length file_length
+// swiftlint:disable type_body_length function_body_length file_length line_length
 import XCTest
 import GRDB
 @testable import ChopChop
@@ -22,7 +22,7 @@ class AppDatabaseTests: XCTestCase {
             let columns = try db.columns(in: "recipe")
             let columnNames = Set(columns.map { $0.name })
 
-            XCTAssertEqual(columnNames, ["id", "recipeCategoryId", "name"])
+            XCTAssertEqual(columnNames, ["id", "recipeCategoryId", "name", "servings", "difficulty"])
         }
     }
 
@@ -69,28 +69,28 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Recipe CRUD Tests
 
     func testSaveRecipe_insertsInvalidName_throwsError() throws {
-        var recipe = RecipeRecord(name: "")
+        var recipe = RecipeRecord(name: "", servings: 2)
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe))
     }
 
     func testSaveRecipe_insertsDuplicateName_throwsError() throws {
-        var recipe1 = RecipeRecord(name: "Pancakes")
-        var recipe2 = RecipeRecord(name: "Pancakes")
+        var recipe1 = RecipeRecord(name: "Pancakes", servings: 2)
+        var recipe2 = RecipeRecord(name: "Pancakes", servings: 2)
 
         try appDatabase.saveRecipe(&recipe1)
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe2))
     }
 
     func testSaveRecipe_insertsValidIngredients_success() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
         var steps: [RecipeStepRecord] = []
 
@@ -106,22 +106,22 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsDuplicateIngredientsDifferentRecipes_success() throws {
-        var pancakeRecipe = RecipeRecord(name: "Pancakes")
+        var pancakeRecipe = RecipeRecord(name: "Pancakes", servings: 2)
         var pancakeIngredients = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
-        var scrambledEggRecipe = RecipeRecord(name: "Scrambled Eggs")
+        var scrambledEggRecipe = RecipeRecord(name: "Scrambled Eggs", servings: 2)
         var scrambledEggIngredients = [
             RecipeIngredientRecord(name: "Egg", quantity: .count(3)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.03)),
-            RecipeIngredientRecord(name: "Butter", quantity: .volume(0.01)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.001_25)),
-            RecipeIngredientRecord(name: "Pepper", quantity: .volume(0.002_5))
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.03, unit: .liter)),
+            RecipeIngredientRecord(name: "Butter", quantity: .volume(10, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(1.25, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Pepper", quantity: .volume(2.5, unit: .milliliter))
         ]
         var steps: [RecipeStepRecord] = []
 
@@ -143,14 +143,14 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsInvalidIngredients_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
             RecipeIngredientRecord(name: "", quantity: .count(0))
         ]
         var steps: [RecipeStepRecord] = []
@@ -159,15 +159,15 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
         var steps: [RecipeStepRecord] = []
 
@@ -175,7 +175,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsValidSteps_success() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         var steps = [
             RecipeStepRecord(index: 1, content: """
@@ -211,7 +211,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsInvalidSteps_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         var steps = [
             RecipeStepRecord(index: 1, content: """
@@ -240,7 +240,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsDuplicateStepIndex_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         var steps = [
             RecipeStepRecord(index: 1, content: """
@@ -268,7 +268,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsNonConsecutiveStepIndex_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         var steps = [
             RecipeStepRecord(index: 1, content: """
@@ -296,15 +296,15 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testDeleteRecipes() throws {
-        var recipe1 = RecipeRecord(name: "Pancakes")
-        var recipe2 = RecipeRecord(name: "Scrambled Eggs")
+        var recipe1 = RecipeRecord(name: "Pancakes", servings: 2)
+        var recipe2 = RecipeRecord(name: "Scrambled Eggs", servings: 2)
         var ingredients = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
         var steps = [
             RecipeStepRecord(index: 1, content: """
@@ -367,8 +367,8 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testDeleteAllRecipes() throws {
-        var recipe1 = RecipeRecord(name: "Pancakes")
-        var recipe2 = RecipeRecord(name: "Scrambled Eggs")
+        var recipe1 = RecipeRecord(name: "Pancakes", servings: 2)
+        var recipe2 = RecipeRecord(name: "Scrambled Eggs", servings: 2)
 
         try dbWriter.write { db in
             try recipe1.insert(db)
@@ -398,7 +398,7 @@ class AppDatabaseTests: XCTestCase {
 
     func testDeleteRecipeCategory_recipesRemaining_throwsError() throws {
         var category = RecipeCategoryRecord(name: "American")
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
 
         try dbWriter.write { db in
             try category.insert(db)
@@ -417,7 +417,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsDefaultCategoryNil_success() throws {
-        var recipe = RecipeRecord(name: "Pancakes")
+        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
 
         try appDatabase.saveRecipe(&recipe)
 
@@ -431,7 +431,7 @@ class AppDatabaseTests: XCTestCase {
             try category.insert(db)
         }
 
-        var recipe = RecipeRecord(recipeCategoryId: category.id, name: "Pancakes")
+        var recipe = RecipeRecord(recipeCategoryId: category.id, name: "Pancakes", servings: 2)
 
         try appDatabase.saveRecipe(&recipe)
 
@@ -439,7 +439,7 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testSaveRecipe_insertsMissingCategory_success() throws {
-        var recipe = RecipeRecord(recipeCategoryId: 1, name: "Pancakes")
+        var recipe = RecipeRecord(recipeCategoryId: 1, name: "Pancakes", servings: 2)
 
         try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe))
     }
@@ -542,8 +542,8 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testDeleteAllIngredients() throws {
-        var ingredient1 = RecipeRecord(name: "Salt")
-        var ingredient2 = RecipeRecord(name: "Sugar")
+        var ingredient1 = IngredientRecord(name: "Egg")
+        var ingredient2 = IngredientRecord(name: "Salt")
 
         try dbWriter.write { db in
             try ingredient1.insert(db)
@@ -622,8 +622,8 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Recipes Publisher Tests
 
     func testRecipesOrderedByNamePublisher_publishesWellOrderedRecipes() throws {
-        var recipe1 = RecipeRecord(name: "Scrambled Eggs")
-        var recipe2 = RecipeRecord(name: "Pancakes")
+        var recipe1 = RecipeRecord(name: "Scrambled Eggs", servings: 2)
+        var recipe2 = RecipeRecord(name: "Pancakes", servings: 2)
 
         try dbWriter.write { db in
             try recipe1.insert(db)
@@ -665,10 +665,10 @@ class AppDatabaseTests: XCTestCase {
         var category1 = RecipeCategoryRecord(name: "American")
         var category2 = RecipeCategoryRecord(name: "Japanese")
 
-        var recipe1 = RecipeRecord(name: "Scrambled Eggs")
-        var recipe2 = RecipeRecord(name: "Pancakes")
-        var recipe3 = RecipeRecord(name: "Miso Soup")
-        var recipe4 = RecipeRecord(name: "Oyakodon")
+        var recipe1 = RecipeRecord(name: "Scrambled Eggs", servings: 2)
+        var recipe2 = RecipeRecord(name: "Pancakes", servings: 2)
+        var recipe3 = RecipeRecord(name: "Miso Soup", servings: 2)
+        var recipe4 = RecipeRecord(name: "Oyakodon", servings: 2)
 
         try dbWriter.write { db in
             try category1.insert(db)
@@ -891,14 +891,14 @@ class AppDatabaseTests: XCTestCase {
 
     func testFetchRecipe() throws {
         var categoryRecord = RecipeCategoryRecord(name: "American")
-        var recipeRecord = RecipeRecord(name: "Pancakes")
+        var recipeRecord = RecipeRecord(name: "Pancakes", servings: 1)
         var ingredientRecords = [
-            RecipeIngredientRecord(name: "Flour", quantity: .mass(0.120)),
-            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(0.007_5)),
-            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.000_312_5)),
-            RecipeIngredientRecord(name: "Milk", quantity: .volume(0.250)),
+            RecipeIngredientRecord(name: "Flour", quantity: .mass(120, unit: .gram)),
+            RecipeIngredientRecord(name: "Baking Powder", quantity: .volume(7.5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Salt", quantity: .volume(0.312_5, unit: .milliliter)),
+            RecipeIngredientRecord(name: "Milk", quantity: .volume(1, unit: .cup)),
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(name: "Sugar", quantity: .volume(0.015))
+            RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
         var stepRecords = [
             RecipeStepRecord(index: 1, content: """
@@ -938,21 +938,25 @@ class AppDatabaseTests: XCTestCase {
                 stepRecords[index].recipeId = recipeRecord.id
                 try stepRecords[index].insert(db)
             }
+
+            print(try RecipeStepRecord.fetchAll(db))
         }
 
-        let recipe = Recipe(id: recipeRecord.id,
-                            recipeCategoryId: categoryRecord.id,
+        let recipe = try Recipe(
                             name: recipeRecord.name,
-                            ingredients: ingredientRecords.reduce(into: [:]) {
-                                $0[$1.name] = $1.quantity
-                            },
-                            steps: stepRecords.sorted(by: { $0.index < $1.index }).map { $0.content })
+                            steps: stepRecords.sorted(by: { $0.index < $1.index }).compactMap { try? RecipeStep(content: $0.content) },
+                            ingredients: ingredientRecords.compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) })
+
+        recipe.id = recipeRecord.id
+        recipe.recipeCategoryId = categoryRecord.id
 
         guard let id = recipeRecord.id else {
             XCTFail("Recipes should have a non-nil ID after insertion into database")
             return
         }
 
+        dump(try appDatabase.fetchRecipe(id: id))
+        dump(recipe)
         try XCTAssertEqual(appDatabase.fetchRecipe(id: id), recipe)
     }
 

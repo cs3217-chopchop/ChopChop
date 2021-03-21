@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import Combine
+import UIKit
 
 struct StorageManager {
     let appDatabase: AppDatabase
@@ -12,12 +13,13 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name)
-        var ingredientRecords = recipe.ingredients.map { name, quantity in
-            RecipeIngredientRecord(recipeId: recipe.id, name: name, quantity: quantity)
+        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
+                                        servings: recipe.servings, difficulty: recipe.difficulty)
+        var ingredientRecords = recipe.ingredients.map { ingredient in
+            RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var stepRecords = recipe.steps.enumerated().map { index, content in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: content)
+        var stepRecords = recipe.steps.enumerated().map { index, step in
+            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: step.content)
         }
 
         try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
@@ -118,7 +120,7 @@ struct StorageManager {
 
     func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesOrderedByNamePublisher()
-            .map { $0.map { RecipeCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
             .eraseToAnyPublisher()
     }
 
@@ -147,7 +149,7 @@ struct StorageManager {
     }
 }
 
-// MARK: - Images on Disk
+// MARK: - Image Persistence
 extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
@@ -161,8 +163,8 @@ extension StorageManager {
             return
         }
 
-        deleteRecipeImage(name: oldName)
         try saveRecipeImage(image, name: newName)
+        deleteRecipeImage(name: oldName)
     }
 
     func fetchRecipeImage(name: String) -> UIImage? {
@@ -182,8 +184,8 @@ extension StorageManager {
             return
         }
 
-        deleteIngredientImage(name: oldName)
         try saveIngredientImage(image, name: newName)
+        deleteIngredientImage(name: oldName)
     }
 
     func fetchIngredientImage(name: String) -> UIImage? {
