@@ -3,6 +3,13 @@ import SwiftUI
 struct IngredientCollectionView: View {
     @ObservedObject var viewModel: IngredientCollectionViewModel
 
+    let columns = [
+        GridItem(),
+        GridItem(),
+        GridItem(),
+        GridItem()
+    ]
+
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
@@ -22,12 +29,27 @@ struct IngredientCollectionView: View {
                 ExpiryDatePicker()
             }
 
-            List(viewModel.ingredients) { ingredient in
-                IngredientRow(ingredient: ingredient)
+            if viewModel.ingredients.isEmpty {
+                NotFoundView()
+            } else {
+                switch viewModel.viewType {
+                case .list:
+                    ListView()
+                case .grid:
+                    GridView()
+                }
             }
-            .animation(.none)
         }
         .navigationTitle(Text(viewModel.title))
+        .toolbar {
+            HStack {
+                Text("View type:")
+                Picker("View by", selection: $viewModel.viewType) {
+                    Text("List").tag(IngredientCollectionViewModel.ViewType.list)
+                    Text("Grid").tag(IngredientCollectionViewModel.ViewType.grid)
+                }
+            }
+        }
         .onDisappear {
             viewModel.query = ""
             viewModel.filterByExpiryDate = false
@@ -57,6 +79,23 @@ struct IngredientCollectionView: View {
         .padding([.leading, .trailing])
     }
 
+    func NotFoundView() -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: "text.badge.xmark")
+                .font(.system(size: 60))
+            Text("No ingredients found")
+        }
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+        .foregroundColor(.secondary)
+    }
+
+    func ListView() -> some View {
+        List(viewModel.ingredients) { ingredient in
+            IngredientRow(ingredient: ingredient)
+        }
+        .animation(.none)
+    }
+
     func IngredientRow(ingredient: IngredientInfo) -> some View {
         NavigationLink(
             destination: Text(ingredient.name)
@@ -78,6 +117,58 @@ struct IngredientCollectionView: View {
             }
             .padding([.top, .bottom], 6)
         }
+    }
+
+    func GridView() -> some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.ingredients) { ingredient in
+                    NavigationLink(
+                        destination: Text(ingredient.name)
+                    ) {
+                        GridTile(ingredient: ingredient)
+                    }
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+        .padding(.top)
+    }
+
+    func GridTile(ingredient: IngredientInfo) -> some View {
+        Image("recipe")
+            .resizable()
+            .scaledToFill()
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fill)
+            .cornerRadius(10)
+            .clipped()
+            .overlay(
+                ZStack(alignment: .bottomLeading) {
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .black, location: 0.5)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .cornerRadius(10)
+                        .opacity(0.8)
+                    VStack(alignment: .leading) {
+                        Text(ingredient.name)
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        Text("2.5 kg")
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                }
+            )
+            .padding([.leading, .trailing], 8)
     }
 }
 
