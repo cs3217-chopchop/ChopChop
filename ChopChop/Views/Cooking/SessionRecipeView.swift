@@ -4,16 +4,43 @@ struct SessionRecipeView: View {
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
-        Text("Name: \(viewModel.name)")
-        Text("Servings: \(viewModel.servings, specifier: "%.2f")")
-        Text("Difficulty: \(viewModel.difficulty) / 5")
+        VStack {
+            ZStack(alignment: .bottomLeading) {
+                Image("")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 300)
+                    .clipped()
+                    .overlay(
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
+                    )
+                Text(viewModel.name)
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .padding()
+            }
+            Text("Servings: \(viewModel.servings, specifier: "%.2f")")
+            Text("Difficulty: \(viewModel.difficulty) / 5")
+//            Text("Time Taken: \(viewModel.difficulty) / 5")
+            Text("Ingredients")
+            Text("Steps")
+            ForEach(viewModel.steps, id: \.step.content) { step in
+                // TODO remove id as step.content
+                SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: step))
+            }
 
-        Text("Ingredients")
-
-        Text("Steps")
-        ForEach(viewModel.steps, id: \.step.content) { step in
-            SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: step))
+            Spacer()
+            Button("Complete cooking") {
+                viewModel.toggleShowComplete()
+            }
         }
+        // https://stackoverflow.com/questions/57103800/swiftui-support-multiple-modals
+        .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
+            CompleteSessionRecipeView(viewModel:
+                                        CompleteSessionRecipeViewModel(recipe: viewModel.sessionRecipe.recipe, onClose: viewModel.toggleShowComplete))
+        })
 
     }
 }

@@ -8,6 +8,7 @@ class CountdownTimer {
     private(set) var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private(set) var isRunning = false
+    private(set) var isStart = false
 
     static let minimumTime = 0
     static let maximumTime = 24 * 60 * 60 - 1 // Maximum count is 1 day
@@ -38,6 +39,7 @@ class CountdownTimer {
         remainingTime = defaultTime
         isRunning = true
         timer.merge(with: Just(Date()))
+        isStart = true
     }
 
     func pause() {
@@ -57,11 +59,12 @@ class CountdownTimer {
     func restart() {
         remainingTime = defaultTime
         isRunning = false
+        isStart = false
     }
 
     func updateDefaultTime(defaultTime: Int) throws {
         // cannot update default time while running
-        guard !isRunning else {
+        guard !isRunning && !isStart else {
             return
         }
 

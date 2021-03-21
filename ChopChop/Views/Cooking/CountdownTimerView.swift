@@ -4,15 +4,15 @@ struct CountdownTimerView: View {
     @ObservedObject var viewModel: CountdownTimerViewModel
 
     var body: some View {
-        // TODO
-        if viewModel.isShow == false {
+        if viewModel.isShow {
             HStack {
-                Text("\(viewModel.displayTime)")
+                Text("Timer")
+                Text(viewModel.displayTime)
                     .onReceive(viewModel.countdownTimer.timer) { _ in
                         viewModel.countdown()
                     }
                     .foregroundColor(viewModel.countdownTimer.remainingTime == 0 ? .red : .white)
-                if !viewModel.countdownTimer.isRunning {
+                if !viewModel.countdownTimer.isStart {
                     VStack {
                         Button("+") {
                             viewModel.increaseTime()
@@ -21,20 +21,31 @@ struct CountdownTimerView: View {
                             viewModel.decreaseTime()
                         }
                     }
-                    Button("Start") {
+                    Button(action: {
                         viewModel.start()
+                    }) {
+                        Image(systemName: "hourglass.bottomhalf.fill")
+                            .resizable()
+                            .frame(width: 22, height: 22)
                     }
                 } else {
-                    Button("Pause/Resume") {
+                    Button(action: {
                         viewModel.pauseResume()
+                    }) {
+                        Image(systemName: "playpause")
+                            .resizable()
+                            .frame(width: 22, height: 22)
                     }
-                    Button("Restart") {
+                    Button(action: {
                         viewModel.restart()
+                    }) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .resizable()
+                            .frame(width: 22, height: 22)
                     }
                 }
             }
-            .background(Color.black)
-            .clipShape(Capsule())
+            .foregroundColor(Color.white)
         }
     }
 }

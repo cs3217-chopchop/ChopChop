@@ -141,4 +141,9 @@ Turn ribs and cook until second side is golden brown, 1 or two minutes
         XCTAssertEqual(timeTaken, 0)
     }
 
+    func testParseToTime_differentUnits() {
+        let timeTaken = RecipeStepParser.parseToTime(timeString: "30m to 1h 2 min")
+        XCTAssertEqual(timeTaken, 2_760)
+    }
+
 }

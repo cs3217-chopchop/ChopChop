@@ -13,12 +13,12 @@ class CountdownTimerViewModel: ObservableObject {
         disableStart = countdownTimer.defaultTime == 0
         disableDecreaseTime = countdownTimer.defaultTime == CountdownTimer.minimumTime
         disableIncreaseTime = countdownTimer.defaultTime == CountdownTimer.maximumTime
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
     func countdown() {
         countdownTimer.countdown()
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
     func toggleShow() {
@@ -30,7 +30,7 @@ class CountdownTimerViewModel: ObservableObject {
             return
         }
         countdownTimer.start()
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
     func pauseResume() {
@@ -38,13 +38,13 @@ class CountdownTimerViewModel: ObservableObject {
             countdownTimer.pause()
         } else {
             countdownTimer.resume()
-            displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+            displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
         }
     }
 
     func restart() {
         countdownTimer.restart()
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
     func increaseTime() {
@@ -53,7 +53,7 @@ class CountdownTimerViewModel: ObservableObject {
         }
         try? countdownTimer.updateDefaultTime(defaultTime: countdownTimer.defaultTime + 1)
         disableIncreaseTime = countdownTimer.defaultTime == CountdownTimer.maximumTime
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
     func decreaseTime() {
@@ -62,15 +62,7 @@ class CountdownTimerViewModel: ObservableObject {
         }
         try? countdownTimer.updateDefaultTime(defaultTime: countdownTimer.defaultTime - 1)
         disableDecreaseTime = countdownTimer.defaultTime == CountdownTimer.minimumTime
-        displayTime = CountdownTimerViewModel.getTimerDisplayTime(seconds: countdownTimer.remainingTime)
-    }
-
-    static func getTimerDisplayTime(seconds: Int) -> String {
-        let time = seconds
-        let hour = "\(time / 3_600 / 10 > 0 ? "" : "0")\(time / 3_600)"
-        let minute = "\((time % 3_600) / 60 / 10 > 0 ? "" : "0")\((time % 3_600) / 60)"
-        let second = "\(((time % 3_600) % 60) / 10 > 0 ? "" : "0")\(((time % 3_600) % 60))"
-        return hour + ":" + minute + ":" + second
+        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
 }

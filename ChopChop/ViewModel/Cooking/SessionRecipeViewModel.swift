@@ -6,7 +6,8 @@ class SessionRecipeViewModel: ObservableObject {
     @Published var difficulty: Int
     @Published var ingredients: [RecipeIngredient]
     @Published var steps: [SessionRecipeStep]
-    private let sessionRecipe: SessionRecipe
+    let sessionRecipe: SessionRecipe
+    @Published var isShowComplete = false
 
     init(sessionRecipe: SessionRecipe) {
         self.sessionRecipe = sessionRecipe
@@ -17,7 +18,8 @@ class SessionRecipeViewModel: ObservableObject {
         steps = sessionRecipe.sessionSteps
     }
 
-    var isCompleted: Bool {
-        sessionRecipe.isCompleted
+    func toggleShowComplete() {
+        isShowComplete.toggle()
     }
+
 }

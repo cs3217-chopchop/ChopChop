@@ -13,10 +13,10 @@ class SessionRecipe {
         let actionTimeTracker = ActionTimeTracker()
         sessionSteps = recipeCopy.steps.map { SessionRecipeStep(step: $0, actionTimeTracker: actionTimeTracker) }
     }
-
-    var isCompleted: Bool {
-        sessionSteps.allSatisfy { $0.isCompleted }
-    }
+//
+//    var isCompleted: Bool {
+//        sessionSteps.allSatisfy { $0.isCompleted }
+//    }
 
     private func checkRepresentation() -> Bool {
         guard recipe.steps.count == sessionSteps.count else {
