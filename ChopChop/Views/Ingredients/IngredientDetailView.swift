@@ -6,8 +6,34 @@ struct IngredientDetailView: View {
     var body: some View {
         VStack {
             ingredientBanner
-            toolbar
             IngredientBatchGridView(viewModel: viewModel)
+
+            NavigationLink(
+                destination: addBatchView,
+                tag: .addBatch,
+                selection: $viewModel.activeFormView) {
+                EmptyView()
+            }
+
+            NavigationLink(
+                destination: editIngredientView,
+                tag: .editIngredient,
+                selection: $viewModel.activeFormView) {
+                EmptyView()
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { viewModel.activeFormView = .addBatch }) {
+                    Image(systemName: "plus")
+                }
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { viewModel.activeFormView = .editIngredient }) {
+                    Image(systemName: "square.and.pencil")
+                }
+            }
         }
     }
 

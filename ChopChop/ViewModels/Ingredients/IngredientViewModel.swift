@@ -8,6 +8,7 @@ class IngredientViewModel: ObservableObject {
     @Published private(set) var ingredientName: String = ""
     @Published private(set) var ingredientBatches: [IngredientBatch] = []
     @Published private(set) var ingredientImage = UIImage()
+    @Published var activeFormView: FormView?
 
     private let storageManager = StorageManager()
     private var cancellables = Set<AnyCancellable>()
@@ -27,5 +28,10 @@ class IngredientViewModel: ObservableObject {
                 self?.ingredientBatches = batches
             }
             .store(in: &cancellables)
+    }
+
+    enum FormView {
+        case addBatch
+        case editIngredient
     }
 }
