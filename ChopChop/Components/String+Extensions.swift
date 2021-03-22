@@ -25,19 +25,24 @@ extension String {
         return String(self[start ..< end])
     }
 
-  func componentsSeperatedByStrings(separators: [String]) -> [String] {
-    let inds: [String.Index] = separators.flatMap { s in
-      self.components(separatedBy: s).map { r in [r.startIndex, r.endIndex] } ?? []
-    }.flatMap { $0 }
-    let ended: [String.Index] = [startIndex] + inds + [endIndex]
-    guard ended.count >= 2 else {
-        return [self]
+    func componentsSeperatedByStrings(separators: [String]) -> [String] {
+        let matches = matchesWithIndex(for: separators.joined(separator: "|"), in: self)
+        var characterCount = 0
+        var substrings: [String] = []
+        guard !matches.isEmpty else {
+            return [self]
+        }
+        for (substring, idx) in matches {
+            if characterCount < idx {
+                substrings.append(self[characterCount..<idx])
+            }
+            substrings.append(substring)
+            characterCount = idx + substring.count
+        }
+        if characterCount < count {
+            substrings.append(substring(fromIndex: characterCount))
+        }
+        return substrings
     }
-    let chunks = stride(from: 0, to: ended.count - 2, by: 1)
-    let bounds = chunks.map { i in (ended[i], ended[i + 1]) }
-    return bounds
-      .map { s, e in String(self[s ..< e]) }
-      .filter { sl in !sl.isEmpty }
-  }
 
 }

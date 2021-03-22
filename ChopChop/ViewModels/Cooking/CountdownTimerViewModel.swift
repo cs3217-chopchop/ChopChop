@@ -61,3 +61,9 @@ class CountdownTimerViewModel: ObservableObject {
     }
 
 }
+
+extension CountdownTimerViewModel: Identifiable, Equatable {
+    static func == (lhs: CountdownTimerViewModel, rhs: CountdownTimerViewModel) -> Bool {
+        lhs === rhs
+    }
+}

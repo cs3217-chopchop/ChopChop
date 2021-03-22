@@ -1,6 +1,6 @@
 import Foundation
 
-class SessionRecipeStep {
+class SessionRecipeStep: Identifiable {
     private(set) var isCompleted = false
     private(set) var timeTaken = 0.0 // for user log only
     private(set) var step: RecipeStep

@@ -1,13 +1,15 @@
 import SwiftUI
 
 class DeductibleIngredientViewModel: ObservableObject {
+    let recipeIngredient: RecipeIngredient
     let ingredient: Ingredient
     @Published var deductBy: String
     @Published var isError = false
 
-    init(ingredient: Ingredient, estimatedQuantity: Double) {
+    init(ingredient: Ingredient, recipeIngredient: RecipeIngredient) {
         self.ingredient = ingredient
-        deductBy = String(estimatedQuantity)
+        self.recipeIngredient = recipeIngredient
+        deductBy = String(recipeIngredient.quantity.value)
     }
 
     func updateError(isError: Bool) {

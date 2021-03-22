@@ -3,6 +3,12 @@ import SwiftUI
 struct SessionRecipeStepView: View {
     @ObservedObject var viewModel: SessionRecipeStepViewModel
 
+    let columns = [
+        GridItem(),
+        GridItem(),
+        GridItem()
+    ]
+
     var body: some View {
         Toggle(isOn: $viewModel.isCompleted) {
             viewModel.textWithTimers.reduce(Text(""), {
@@ -12,11 +18,9 @@ struct SessionRecipeStepView: View {
             .strikethrough(viewModel.isCompleted, color: nil)
         }
         .toggleStyle(CheckboxToggleStyle())
-        HStack {
-            ForEach(viewModel.textWithTimers, id: \.0) { _, timer in
-                if let countdownTimer = timer {
-                    CountdownTimerView(viewModel: countdownTimer)
-                }
+        LazyVGrid(columns: columns, spacing: 24) {
+            ForEach(viewModel.countdownTimers) { timer in
+                CountdownTimerView(viewModel: timer)
             }
         }
     }
@@ -24,8 +28,8 @@ struct SessionRecipeStepView: View {
 
 struct SessionRecipeStepView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
-    static let step = try! RecipeStep(content: "Cook for 4 mins and type a super longggggggggggggggggggggggggggggggggggggggggggggggggggggggg")
     static var previews: some View {
-        SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: SessionRecipeStep(step: step, actionTimeTracker: ActionTimeTracker())))
+        SessionRecipeStepView(viewModel:
+                                SessionRecipeStepViewModel(sessionRecipeStep: SessionRecipeStep(step: try! RecipeStep(content: "Cook for 4 mins, super long"), actionTimeTracker: ActionTimeTracker())))
     }
 }

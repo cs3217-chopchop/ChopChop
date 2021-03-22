@@ -50,20 +50,7 @@ struct CookingSelectionView: View {
                 """)
             HStack(spacing: 0) {
                 Text("Difficulty: ")
-
-                if let difficulty = recipe.difficulty {
-                    ForEach(0..<difficulty.rawValue) { _ in
-                        Image(systemName: "star.fill")
-                    }
-
-                    ForEach(difficulty.rawValue..<5) { _ in
-                        Image(systemName: "star")
-                    }
-                } else {
-                    ForEach(0..<5) { _ in
-                        Image(systemName: "star")
-                    }
-                }
+                DifficultyView(difficulty: recipe.difficulty)
             }
         }
         .font(.caption)

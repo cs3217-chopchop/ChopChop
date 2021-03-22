@@ -51,12 +51,21 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 continue
             }
 
-            let quantityType = ingredient.batches[0].quantity.type
+            guard let quantityUsed = try? Quantity(ingredientViewModel.recipeIngredient.quantity.type, value: amount) else {
+                ingredientViewModel.updateError(isError: true)
+                continue
+            }
+
+            guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed), sufficientAmount else {
+                ingredientViewModel.updateError(isError: true)
+                continue
+            }
+
             do {
-                try ingredient.use(quantity: Quantity(quantityType, value: amount))
+                try ingredient.use(quantity: quantityUsed)
                 ingredientsToSave.append(ingredient)
             } catch {
-                ingredientViewModel.updateError(isError: true)
+                assertionFailure("Ingredient should have sufficient quantity")
                 continue
             }
         }
@@ -91,9 +100,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 return nil
             }
 
-            let estimatedQuantity = recipeIngredient.quantity.baseType == mappedIngredient.quantityType ? recipeIngredient.quantity.value : 0
-
-            return DeductibleIngredientViewModel(ingredient: mappedIngredient, estimatedQuantity: estimatedQuantity)
+            return DeductibleIngredientViewModel(ingredient: mappedIngredient, recipeIngredient: recipeIngredient)
         }
     }
 

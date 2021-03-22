@@ -4,7 +4,7 @@ import Foundation
 /**
  Represents some quantity of an ingredient.
  */
-class RecipeIngredient {
+class RecipeIngredient: Identifiable {
     var id: Int64?
     private(set) var name: String
     private(set) var quantity: Quantity

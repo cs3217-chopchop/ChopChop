@@ -3,9 +3,10 @@ import SwiftUI
 class SessionRecipeViewModel: ObservableObject {
     @Published var name: String
     @Published var servings: Double
-    @Published var difficulty: Int
+    @Published var difficulty: Difficulty?
     @Published var ingredients: [RecipeIngredient]
     @Published var steps: [SessionRecipeStep]
+    @Published var totalTimeTaken: String
     let sessionRecipe: SessionRecipe
     @Published var isShowComplete = false
     let completeSessionRecipeViewModel: CompleteSessionRecipeViewModel
@@ -17,8 +18,9 @@ class SessionRecipeViewModel: ObservableObject {
         }
         name = recipe.name
         servings = recipe.servings
-        difficulty = recipe.difficulty?.rawValue ?? 0
+        difficulty = recipe.difficulty
         ingredients = recipe.ingredients
+        totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
         sessionRecipe = SessionRecipe(recipe: recipe)
         steps = sessionRecipe.sessionSteps
         completeSessionRecipeViewModel = CompleteSessionRecipeViewModel(recipe: sessionRecipe.recipe)

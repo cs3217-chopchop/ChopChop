@@ -5,6 +5,10 @@ class SessionRecipeStepViewModel: ObservableObject {
     @Published var textWithTimers: [(String, CountdownTimerViewModel?)] = []
     private let sessionRecipeStep: SessionRecipeStep
 
+    var countdownTimers: [CountdownTimerViewModel] {
+        textWithTimers.compactMap({ $0.1 })
+    }
+
     init(sessionRecipeStep: SessionRecipeStep) {
         self.sessionRecipeStep = sessionRecipeStep
         self.isCompleted = sessionRecipeStep.isCompleted

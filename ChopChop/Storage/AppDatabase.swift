@@ -179,6 +179,58 @@ extension AppDatabase {
         for index in ingredients.indices {
             try ingredients[index].save(db)
         }
+
+        var steps = [
+            // pancakes
+            RecipeStepRecord(recipeId: recipes[0].id, index: 1, content: """
+                In a large bowl, mix dry ingredients together until well-blended.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 2, content: """
+                Add milk and mix well until smooth.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 3, content: """
+                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 4, content: """
+                Beat whites until stiff and then fold into batter gently.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 5, content: """
+                Pour ladles of the mixture into a non-stick pan, one at a time.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 6, content: """
+                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
+                pancakes.
+                """),
+            // katusdon
+            RecipeStepRecord(recipeId: recipes[5].id, index: 1, content: """
+                Gather the ingredients.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 2, content: """
+                Season the pounded pork chops with salt and pepper.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 3, content: """
+                In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 4, content: """
+                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
+                Carefully lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
+                Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through. \
+                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through. \
+                Lastly, Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
+                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
+                Simmer for a few minutes on medium heat. \
+                Serve by placing 1 serving of steamed rice in a large rice bowl. \
+                Top with the simmered tonkatsu on top of the rice. Repeat to make 3 more servings.
+                """)
+        ]
+
+        for index in steps.indices {
+            try steps[index].save(db)
+        }
     }
 }
 

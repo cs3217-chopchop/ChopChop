@@ -4,37 +4,38 @@ struct SessionRecipeView: View {
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
-        VStack {
-            ScrollView {
-                VStack {
-                    ZStack(alignment: .bottomLeading) {
-                        Image("")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 300)
-                            .clipped()
-                            .overlay(
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .background(LinearGradient(gradient:
-                                                                Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
-                            )
-                        Text(viewModel.name)
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
-                            .padding()
-                    }
-                    Text("Servings: \(viewModel.servings, specifier: "%.2f")")
-                    Text("Difficulty: \(viewModel.difficulty) / 5")
-        //            Text("Time Taken: \(viewModel.difficulty) / 5")
-                    Text("Ingredients")
-                    Text("Steps")
-                    ForEach(viewModel.steps, id: \.step.content) { step in
-                        // TODO remove id as step.content
-                        SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: step))
-                    }
-                }
+        ScrollView {
+            ZStack(alignment: .bottomLeading) {
+                Image("")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 300)
+                    .clipped()
+                    .overlay(
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .background(LinearGradient(gradient:
+                                                        Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
+                    )
+                Text(viewModel.name)
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .padding()
             }
+            Text("Time taken: \(viewModel.totalTimeTaken)")
+            Text("""
+                Serves \(viewModel.servings.removeZerosFromEnd()) \(viewModel.servings == 1 ? "person" : "people")
+                """)
+            HStack(spacing: 0) {
+                Text("Difficulty: ")
+                DifficultyView(difficulty: viewModel.difficulty)
+            }
+
+            VStack {
+                ingredients
+                steps
+            }
+            Spacer()
             Button(action: {
                 viewModel.toggleShowComplete()
             }) {
@@ -44,13 +45,30 @@ struct SessionRecipeView: View {
                     .font(.title2)
                     .clipShape(Capsule())
                     .padding()
-
             }.disabled(viewModel.completeSessionRecipeViewModel.isSuccess)
         }
         // https://stackoverflow.com/questions/57103800/swiftui-support-multiple-modals
         .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
             CompleteSessionRecipeView(viewModel: viewModel.completeSessionRecipeViewModel)
         })
+    }
+
+    var ingredients: some View {
+        VStack {
+            Text("Ingredients")
+            ForEach(viewModel.ingredients) { ingredient in
+                Text("\(ingredient.quantity.description) \(ingredient.name)")
+            }
+        }.padding()
+    }
+
+    var steps: some View {
+        VStack {
+            Text("Steps")
+            ForEach(viewModel.steps) { step in
+                SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: step))
+            }
+        }.padding()
     }
 }
 
