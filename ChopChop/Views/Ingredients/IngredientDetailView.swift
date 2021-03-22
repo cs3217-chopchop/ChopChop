@@ -53,10 +53,15 @@ struct IngredientDetailView: View {
                                 startPoint: .top,
                                 endPoint: .bottom))
                 )
-            Text(viewModel.ingredientName)
-                .font(.largeTitle)
-                .foregroundColor(.white)
-                .padding()
+            VStack(alignment: .leading) {
+                Text(viewModel.ingredientName)
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                Text(viewModel.ingredient.quantityType.description)
+                    .font(.caption)
+                    .foregroundColor(.white)
+            }
+            .padding()
         }
     }
 

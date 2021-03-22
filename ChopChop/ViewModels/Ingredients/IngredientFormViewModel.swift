@@ -1,7 +1,7 @@
 import SwiftUI
 
 class IngredientFormViewModel: ObservableObject {
-    private(set) var ingredient: Ingredient
+    private(set) var ingredient: Ingredient?
     let isEdit: Bool
 
     @Published var selectedType: BaseQuantityType
@@ -22,8 +22,8 @@ class IngredientFormViewModel: ObservableObject {
         self.image = StorageManager().fetchIngredientImage(name: ingredient.name) ?? UIImage()
     }
 
-    init() throws {
-        self.ingredient = try Ingredient(name: "temporary", type: .count)
+    init() {
+        self.ingredient = nil
         self.isEdit = false
 
         self.selectedType = .count
@@ -41,16 +41,20 @@ class IngredientFormViewModel: ObservableObject {
         }
 
         if isEdit {
-            try ingredient.rename(inputName)
+            try ingredient?.rename(inputName)
         } else {
             ingredient = try Ingredient(name: inputName, type: selectedType)
+        }
+
+        guard var savedIngredient = ingredient else {
+            return
         }
 
         if image != UIImage() {
             try storageManager.saveIngredientImage(image, name: inputName)
         }
 
-        try storageManager.saveIngredient(&ingredient)
+        try storageManager.saveIngredient(&savedIngredient)
     }
 
     func reset() {

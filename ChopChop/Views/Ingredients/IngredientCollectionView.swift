@@ -15,6 +15,9 @@ struct IngredientCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
             HStack {
+                NavigationLink(destination: IngredientFormView(viewModel: IngredientFormViewModel())) {
+                    Image(systemName: "plus")
+                }
                 Spacer()
                 Button(action: {
                     withAnimation {

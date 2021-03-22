@@ -6,7 +6,9 @@ struct IngredientFormView: View {
 
     var body: some View {
         Form {
-            quantityTypeSection
+            if !viewModel.isEdit {
+                quantityTypeSection
+            }
             nameSection
             imageSection
             saveButton
