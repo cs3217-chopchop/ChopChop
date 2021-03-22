@@ -12,6 +12,6 @@ enum RecipeFormError: String, Error {
     case emptyStepDescription = "Recipe step description cannot be empty."
     case emptyIngredient = "Recipe cannot have no ingredients."
     case emptyIngredientQuantity = "Recipe ingredient amount cannot be empty. If ingredient has no associated amount, input 0."
-    case emptyIngredientDescription
+    case emptyIngredientDescription = "Recipe ingredient name cannot be empty"
     case invalidServing = "Recipe serving is not a valid number."
 }

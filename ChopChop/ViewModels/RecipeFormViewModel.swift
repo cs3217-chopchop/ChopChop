@@ -56,17 +56,17 @@ class RecipeFormViewModel: ObservableObject {
         fetchCategories()
     }
 
-    private func recipeCategoryPublisher() -> AnyPublisher<[RecipeCategory], Never> {
-        storageManager.recipeCategoriesOrderedByNamePublisher()
-            .catch { _ in
-                Just<[RecipeCategory]>([])
-            }
-            .eraseToAnyPublisher()
-    }
+//    private func recipeCategoryPublisher() -> AnyPublisher<[RecipeCategory], Never> {
+//        storageManager.recipeCategoriesOrderedByNamePublisher()
+//            .catch { _ in
+//                Just<[RecipeCategory]>([])
+//            }
+//            .eraseToAnyPublisher()
+//    }
 
     private func fetchCategories() {
         storageManager
-            .recipeCategoriesOrderedByNamePublisher()
+            .recipeCategoriesPublisher()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] value in
                 guard let self = self else {
@@ -145,36 +145,64 @@ class RecipeFormViewModel: ObservableObject {
         ingredientParsingString = ""
     }
 
-    func saveRecipe() throws {
+    func saveRecipe() -> Bool {
         do {
             try checkFormValid()
             var newRecipe = try generateRecipe()
             try storageManager.saveRecipe(&newRecipe)
+            print("success!")
+            return true
         } catch RecipeFormError.emptyName {
             hasError = true
             errorMessage = RecipeFormError.emptyName.rawValue
+            return false
         } catch RecipeFormError.emptyServing {
             hasError = true
             errorMessage = RecipeFormError.emptyServing.rawValue
+            return false
         } catch RecipeFormError.invalidServing {
             hasError = true
             errorMessage = RecipeFormError.invalidServing.rawValue
+            return false
         } catch RecipeFormError.emptyStep {
             hasError = true
             errorMessage = RecipeFormError.emptyStep.rawValue
+            return false
         } catch RecipeFormError.emptyStepDescription {
             hasError = true
             errorMessage = RecipeFormError.emptyStepDescription.rawValue
+            return false
         } catch RecipeFormError.emptyIngredient {
             hasError = true
             errorMessage = RecipeFormError.emptyIngredient.rawValue
+            return false
         } catch RecipeFormError.emptyIngredientQuantity {
             hasError = true
             errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
+            return false
         } catch RecipeFormError.emptyIngredientDescription {
             hasError = true
             errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
+            return false
+        } catch {
+            hasError = true
+            errorMessage = error.localizedDescription
+            return false
         }
+    }
+
+    private func getRecipeCategoryId() -> Int64? {
+        if recipeCategory.isEmpty {
+            return nil
+        }
+
+        for category in allRecipeCategories {
+            if category.name == recipeCategory {
+                return category.id
+            }
+        }
+
+        return nil
     }
 
     func generateRecipe() throws -> Recipe {
@@ -188,6 +216,7 @@ class RecipeFormViewModel: ObservableObject {
                 name: $0.ingredientName,
                 quantity: Quantity($0.unit, value: Double($0.amount) ?? 0)
             )})
+        let recipeCategoryId = getRecipeCategoryId()
 
         let newRecipe = try Recipe(
             name: recipeName,
@@ -196,6 +225,8 @@ class RecipeFormViewModel: ObservableObject {
             steps: recipeStep,
             ingredients: recipeIngredient
         )
+
+        newRecipe.recipeCategoryId = recipeCategoryId
 
         return newRecipe
     }

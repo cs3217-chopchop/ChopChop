@@ -9,13 +9,11 @@ import SwiftUI
 import Combine
 
 struct RecipeFormView: View {
-
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     @ObservedObject var viewModel: RecipeFormViewModel
-    var hasError: Bool
 
     init(viewModel: RecipeFormViewModel) {
         self.viewModel = viewModel
-        hasError = viewModel.hasError
     }
 
     var body: some View {
@@ -54,11 +52,16 @@ struct RecipeFormView: View {
             }
 
             Button("Add Recipe") {
-//                try viewModel.saveRecipe()
+                if viewModel.saveRecipe() {
+                    self.mode.wrappedValue.dismiss()
+                }
             }
         }
+        .alert(isPresented: $viewModel.hasError) {
+            Alert(title: Text("Error"), message: Text(viewModel.errorMessage), dismissButton: .default(Text("Ok")))
+        }
     }
-    
+
     var cuisine: some View {
         HStack {
             Picker("Cuisine", selection: $viewModel.recipeCategory) {

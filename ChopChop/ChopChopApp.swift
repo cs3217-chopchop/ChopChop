@@ -6,6 +6,7 @@ struct ChopChopApp: App {
 
     var body: some Scene {
         WindowGroup {
+//            RecipeFormView(viewModel: RecipeFormViewModel())
             NavigationView {
                 MainView(viewModel: MainViewModel())
             }
