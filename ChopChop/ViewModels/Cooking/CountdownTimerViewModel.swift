@@ -1,6 +1,6 @@
 import SwiftUI
 
-class CountdownTimerViewModel: ObservableObject {
+class CountdownTimerViewModel: ObservableObject, Identifiable {
     let countdownTimer: CountdownTimer
     @Published var displayTime: String
     @Published var disableIncreaseTime: Bool
@@ -60,10 +60,4 @@ class CountdownTimerViewModel: ObservableObject {
         displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }
 
-}
-
-extension CountdownTimerViewModel: Identifiable, Equatable {
-    static func == (lhs: CountdownTimerViewModel, rhs: CountdownTimerViewModel) -> Bool {
-        lhs === rhs
-    }
 }

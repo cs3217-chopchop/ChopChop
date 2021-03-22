@@ -20,6 +20,7 @@ class SessionRecipeViewModel: ObservableObject {
         servings = recipe.servings
         difficulty = recipe.difficulty
         ingredients = recipe.ingredients
+        print(recipe.ingredients.map { $0.name })
         totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
         sessionRecipe = SessionRecipe(recipe: recipe)
         steps = sessionRecipe.sessionSteps

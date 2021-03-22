@@ -5,10 +5,6 @@ class SessionRecipeStepViewModel: ObservableObject {
     @Published var textWithTimers: [(String, CountdownTimerViewModel?)] = []
     private let sessionRecipeStep: SessionRecipeStep
 
-    var countdownTimers: [CountdownTimerViewModel] {
-        textWithTimers.compactMap({ $0.1 })
-    }
-
     init(sessionRecipeStep: SessionRecipeStep) {
         self.sessionRecipeStep = sessionRecipeStep
         self.isCompleted = sessionRecipeStep.isCompleted
@@ -27,16 +23,19 @@ class SessionRecipeStepViewModel: ObservableObject {
     /// ("1 to 2 minutes", timer), (". Yields 12 to 14 pancakes.", nil)]" 
     private func createTextWithTimers(sessionRecipeStep: SessionRecipeStep) -> [(String, CountdownTimerViewModel?)] {
         let splitStepContentBy = sessionRecipeStep.timers.map { $0.0 }
-        let splittedStepContent = sessionRecipeStep.step.content.componentsSeperatedByStrings(separators: splitStepContentBy)
+        let splittedStepContent = sessionRecipeStep.step.content
+            .componentsSeperatedByStrings(separators: splitStepContentBy)
         var stringsToTimers: [(String, CountdownTimerViewModel?)] = []
+        var timerIdx = 0
         for substring in splittedStepContent {
-            guard let idx = (sessionRecipeStep.timers.firstIndex { $0.0 == substring }) else {
+            guard sessionRecipeStep.timers.contains(where: { $0.0 == substring }) else {
                 // no timer associated with substring
                 stringsToTimers.append((substring, nil))
                 continue
             }
             // has timer associated with substring
-            stringsToTimers.append((substring, CountdownTimerViewModel(countdownTimer: sessionRecipeStep.timers[idx].1)))
+            stringsToTimers.append((substring, CountdownTimerViewModel(countdownTimer: sessionRecipeStep.timers[timerIdx].1)))
+            timerIdx += 1
         }
         return stringsToTimers
     }

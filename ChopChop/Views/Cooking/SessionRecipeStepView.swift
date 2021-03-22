@@ -5,7 +5,6 @@ struct SessionRecipeStepView: View {
 
     let columns = [
         GridItem(),
-        GridItem(),
         GridItem()
     ]
 
@@ -19,7 +18,7 @@ struct SessionRecipeStepView: View {
         }
         .toggleStyle(CheckboxToggleStyle())
         LazyVGrid(columns: columns, spacing: 24) {
-            ForEach(viewModel.countdownTimers) { timer in
+            ForEach(viewModel.textWithTimers.compactMap({ $0.1 })) { timer in
                 CountdownTimerView(viewModel: timer)
             }
         }

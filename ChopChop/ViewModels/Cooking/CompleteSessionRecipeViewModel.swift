@@ -20,16 +20,6 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                     self?.deductibleIngredientsViewModels = self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients) ?? []
                 }
             }
-
-        // swiftlint:disable line_length
-        let expiry = Calendar.current.date(byAdding: .day, value: 10, to: Date())
-        guard var butter = try? Ingredient(name: "Butter", type: .count, batches: [IngredientBatch(quantity: Quantity(.count, value: 4), expiryDate: expiry)]),
-              var milk = try? Ingredient(name: "Milk", type: .volume, batches: [IngredientBatch(quantity: Quantity(.count, value: 2_000), expiryDate: expiry)]) else {
-            return
-        }
-        try? StorageManager().deleteAllIngredients()
-        try? StorageManager().saveIngredient(&butter)
-        try? StorageManager().saveIngredient(&milk)
     }
 
     func submit() {
@@ -68,6 +58,10 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 assertionFailure("Ingredient should have sufficient quantity")
                 continue
             }
+        }
+
+        guard (deductibleIngredientsViewModels.allSatisfy { !$0.isError }) else {
+            return
         }
 
         // only do database operations here

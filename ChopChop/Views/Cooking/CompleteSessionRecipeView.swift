@@ -11,9 +11,10 @@ struct CompleteSessionRecipeView: View {
             ForEach(viewModel.deductibleIngredientsViewModels, id: \.ingredient.name) { deductibleIngredient in
                 DeductibleIngredientView(viewModel: deductibleIngredient)
             }
+            Text(viewModel.deductibleIngredientsViewModels.isEmpty ? "No ingredients to deduct" : "")
             Button("Submit") {
                 viewModel.submit()
-            }.disabled(viewModel.isSuccess)
+            }.disabled(viewModel.isSuccess || viewModel.deductibleIngredientsViewModels.isEmpty)
             .font(.title2)
             .padding()
             Text(viewModel.isSuccess ? "Success" : "")

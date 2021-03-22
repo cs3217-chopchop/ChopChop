@@ -17,14 +17,12 @@ import SwiftUI
 
     var cookingSection: some View {
         NavigationLink(
-            destination: CookingSelectionView(viewModel: RecipeCollectionViewModel(
-                                                title: "All Recipes",
+            destination: CookingSelectionView(viewModel: CookingSelectionViewModel(
                                                 categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
         ) {
             Text("Cooking")
                 .font(.title3)
                 .bold()
-//                .foregroundColor(.blue)
         }
     }
 

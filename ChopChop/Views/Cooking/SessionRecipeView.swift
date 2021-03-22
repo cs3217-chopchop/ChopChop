@@ -56,7 +56,7 @@ struct SessionRecipeView: View {
     var ingredients: some View {
         VStack {
             Text("Ingredients")
-            ForEach(viewModel.ingredients) { ingredient in
+            ForEach(viewModel.ingredients, id: \.name) { ingredient in
                 Text("\(ingredient.quantity.description) \(ingredient.name)")
             }
         }.padding()

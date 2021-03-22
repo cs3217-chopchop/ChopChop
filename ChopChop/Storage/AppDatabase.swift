@@ -13,7 +13,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategory") { db in
+        migrator.registerMigration("CreateRecipeCategoryy") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)
@@ -170,6 +170,8 @@ extension AppDatabase {
 
         var ingredients = [
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Flour", quantity: .mass(200, unit: .gram)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Butter", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
@@ -216,9 +218,9 @@ extension AppDatabase {
                 """),
             RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
                 Carefully lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
-                Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through. \
+                Flip and cook the other side for another 10 to 15 minutes, or until browned, crispy, and cooked through. \
                 Again, Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through. \
-                Lastly, Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through.
+                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned, crispy, and cooked through.
                 """),
             RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
                 To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
@@ -261,7 +263,8 @@ extension AppDatabase {
             IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
             IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
             IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
-            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count)
+            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass)
         ]
 
         for index in ingredients.indices {
@@ -285,7 +288,13 @@ extension AppDatabase {
                                   quantity: .mass(1, unit: .kilogram)),
             IngredientBatchRecord(ingredientId: ingredients[4].id,
                                   expiryDate: .today,
-                                  quantity: .mass(2, unit: .kilogram))
+                                  quantity: .mass(2, unit: .kilogram)),
+            IngredientBatchRecord(ingredientId: ingredients[6].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(20, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[6].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
+                                  quantity: .mass(0.05, unit: .kilogram))
         ]
 
         for index in batches.indices {

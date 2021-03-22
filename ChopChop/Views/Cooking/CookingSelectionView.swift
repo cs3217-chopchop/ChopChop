@@ -1,17 +1,16 @@
 import SwiftUI
 
 struct CookingSelectionView: View {
-    @ObservedObject var viewModel: RecipeCollectionViewModel
+    @ObservedObject var viewModel: CookingSelectionViewModel
 
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             listView
         }
-        .navigationTitle(Text(viewModel.title))
+        .navigationTitle(Text("Cooking"))
         .onAppear {
             viewModel.query = ""
-            viewModel.selectedIngredients.removeAll()
         }
     }
 

@@ -56,7 +56,6 @@ class SessionRecipeStepTests: XCTestCase {
         sleep(1)
         try sessionSteps[5].toggleCompleted()
 
-        XCTAssertTrue(sessionRecipe.isCompleted)
         XCTAssertTrue(sessionSteps.allSatisfy { $0.timeTaken != 0 })
     }
 
