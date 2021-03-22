@@ -7,7 +7,7 @@ import Combine
  Invariants:
  - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
-struct IngredientCategory {
+struct IngredientCategory: Identifiable {
     var id: Int64?
     private(set) var name: String
 
@@ -80,7 +80,7 @@ struct IngredientCategory {
      Returns the ingredient with the given name and quantity type,
      or `nil` if it does not exist in the category.
      */
-    func getIngredient(name: String, type: QuantityType) -> Ingredient? {
+    func getIngredient(name: String, type: BaseQuantityType) -> Ingredient? {
         let storageManager = StorageManager()
 
         // TODO: Replace this with storage manager call to get ingredients in this category

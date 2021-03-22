@@ -48,7 +48,7 @@ extension IngredientBatchTests {
     }
 
     func testAdd_differentQuantityType_throwsError() throws {
-        let addedQuantity = try Quantity(.mass, value: 3)
+        let addedQuantity = try Quantity(.mass(.baseUnit), value: 3)
 
         XCTAssertThrowsError(try batch.add(addedQuantity))
 
@@ -88,7 +88,7 @@ extension IngredientBatchTests {
     }
 
     func testSubtract_differentQuantityType_throwsError() throws {
-        let subtractedQuantity = try Quantity(.mass, value: 3)
+        let subtractedQuantity = try Quantity(.mass(.baseUnit), value: 3)
 
         XCTAssertThrowsError(try batch.subtract(subtractedQuantity))
 
@@ -101,7 +101,7 @@ extension IngredientBatchTests {
 // MARK: - Comparable
 extension IngredientBatchTests {
     func testCompare_expiringBatches_success() throws {
-        let laterDate = Date(timeInterval: 1_000, since: .testDate)
+        let laterDate = Date(timeInterval: 86_400, since: .testDate)
 
         let existingQuantity = try Quantity(.count, value: 5)
         let laterBatch = IngredientBatch(
@@ -127,14 +127,14 @@ extension IngredientBatchTests {
 
         XCTAssertEqual(batch, identicalBatch)
 
-        let differentDate = Date(timeInterval: 1_000, since: .testDate)
+        let differentDate = Date(timeInterval: 86_400, since: .testDate)
         let differentDateBatch = IngredientBatch(
             quantity: existingQuantity,
             expiryDate: differentDate)
 
         XCTAssertNotEqual(batch, differentDateBatch)
 
-        let volumeQuantity = try Quantity(.volume, value: 5)
+        let volumeQuantity = try Quantity(.volume(.baseUnit), value: 5)
         let differentQuantityTypeBatch = IngredientBatch(
             quantity: volumeQuantity,
             expiryDate: .testDate)

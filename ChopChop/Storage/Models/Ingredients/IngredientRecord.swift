@@ -1,9 +1,11 @@
+import Foundation
 import GRDB
 
 struct IngredientRecord: Equatable {
     var id: Int64?
     var ingredientCategoryId: Int64?
     var name: String
+    var quantityType: BaseQuantityType
 }
 
 extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
@@ -11,6 +13,7 @@ extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
         static let id = Column(CodingKeys.id)
         static let ingredientCategoryId = Column(CodingKeys.ingredientCategoryId)
         static let name = Column(CodingKeys.name)
+        static let quantityType = Column(CodingKeys.quantityType)
     }
 
     static let databaseTableName = "ingredient"
@@ -39,10 +42,28 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
 
     func orderedByExpiryDate() -> Self {
         annotated(with: IngredientRecord.batches.min(IngredientBatchRecord.Columns.expiryDate))
-            .order(SQLLiteral("minIngredientSetExpiryDate").sqlExpression.ascNullsLast)
+            .order(SQLLiteral("minIngredientBatchExpiryDate").sqlExpression.ascNullsLast)
     }
 
-    func filteredByCategory(ids: [Int64]) -> Self {
-        joining(required: IngredientRecord.category.filter(keys: ids))
+    func filteredByCategory(ids: [Int64?]) -> Self {
+        if ids == [nil] {
+            return filter(IngredientRecord.Columns.ingredientCategoryId == nil)
+        } else if ids.contains(nil) {
+            return joining(optional: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
+        } else {
+            return joining(required: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
+        }
+    }
+
+    func filteredByName(_ query: String) -> Self {
+        filter(IngredientRecord.Columns.name.like("%\(query)%"))
+    }
+
+    func filteredByExpiryDate(after: Date, before: Date) -> Self {
+        // swiftlint:disable contains_over_filter_is_empty
+        having(IngredientRecord.batches
+                .filter(IngredientBatchRecord.Columns.expiryDate == nil
+                            || (after...before).contains(IngredientBatchRecord.Columns.expiryDate)).isEmpty == false)
+        // swiftlint:enable contains_over_filter_is_empty
     }
 }
