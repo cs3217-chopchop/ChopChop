@@ -23,8 +23,8 @@ class CompleteSessionRecipeViewModel: ObservableObject {
 
         // swiftlint:disable line_length
         let expiry = Calendar.current.date(byAdding: .day, value: 10, to: Date())
-        guard var butter = try? Ingredient(name: "Butter", batches: [IngredientBatch(quantity: Quantity(.count, value: 4), expiryDate: expiry)]),
-              var milk = try? Ingredient(name: "Milk", batches: [IngredientBatch(quantity: Quantity(.count, value: 2_000), expiryDate: expiry)]) else {
+        guard var butter = try? Ingredient(name: "Butter", type: .count, batches: [IngredientBatch(quantity: Quantity(.count, value: 4), expiryDate: expiry)]),
+              var milk = try? Ingredient(name: "Milk", type: .volume, batches: [IngredientBatch(quantity: Quantity(.count, value: 2_000), expiryDate: expiry)]) else {
             return
         }
         try? StorageManager().deleteAllIngredients()
@@ -74,7 +74,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        storageManager.ingredientsOrderedByNamePublisher()
+        storageManager.ingredientsPublisher()
             .catch { _ in
                 Just<[IngredientInfo]>([])
             }
@@ -91,7 +91,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 return nil
             }
 
-            let estimatedQuantity = recipeIngredient.quantity.type == mappedIngredient.quantityType ? recipeIngredient.quantity.value : 0
+            let estimatedQuantity = recipeIngredient.quantity.baseType == mappedIngredient.quantityType ? recipeIngredient.quantity.value : 0
 
             return DeductibleIngredientViewModel(ingredient: mappedIngredient, estimatedQuantity: estimatedQuantity)
         }

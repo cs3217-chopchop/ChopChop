@@ -9,13 +9,17 @@ class SessionRecipeViewModel: ObservableObject {
     let sessionRecipe: SessionRecipe
     @Published var isShowComplete = false
     let completeSessionRecipeViewModel: CompleteSessionRecipeViewModel
+    private let storageManager = StorageManager()
 
-    init(sessionRecipe: SessionRecipe) {
-        self.sessionRecipe = sessionRecipe
-        name = sessionRecipe.recipe.name
-        servings = sessionRecipe.recipe.servings
-        difficulty = sessionRecipe.recipe.difficulty?.rawValue ?? 0
-        ingredients = sessionRecipe.recipe.ingredients
+    init(recipeInfo: RecipeInfo) {
+        guard let id = recipeInfo.id, let recipe = try? storageManager.fetchRecipe(id: id) else {
+            fatalError("Recipe does not exist")
+        }
+        name = recipe.name
+        servings = recipe.servings
+        difficulty = recipe.difficulty?.rawValue ?? 0
+        ingredients = recipe.ingredients
+        sessionRecipe = SessionRecipe(recipe: recipe)
         steps = sessionRecipe.sessionSteps
         completeSessionRecipeViewModel = CompleteSessionRecipeViewModel(recipe: sessionRecipe.recipe)
     }

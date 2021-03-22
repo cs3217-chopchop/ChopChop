@@ -22,38 +22,19 @@ class SessionRecipeStepViewModel: ObservableObject {
     /// [("Cook for", nil), ("30s", timer), ("until the edges are dry and bubbles appear on surface. Flip; cook for ", nil),
     /// ("1 to 2 minutes", timer), (". Yields 12 to 14 pancakes.", nil)]" 
     private func createTextWithTimers(sessionRecipeStep: SessionRecipeStep) -> [(String, CountdownTimerViewModel?)] {
-        var textWithTimers: [(String, CountdownTimerViewModel?)] = []
-        var timerCount = 0
-        var characterCountInText = 0
-        let originalText = sessionRecipeStep.step.content
-        let endOfText = sessionRecipeStep.step.content.count
-        while characterCountInText < endOfText {
-            if timerCount >= sessionRecipeStep.timers.count {
-                textWithTimers.append((originalText.substring(fromIndex: characterCountInText), nil))
-                break
+        let splitStepContentBy = sessionRecipeStep.timers.map { $0.0 }
+        let splittedStepContent = sessionRecipeStep.step.content.componentsSeperatedByStrings(separators: splitStepContentBy)
+        var stringsToTimers: [(String, CountdownTimerViewModel?)] = []
+        for substring in splittedStepContent {
+            guard let idx = (sessionRecipeStep.timers.firstIndex { $0.0 == substring }) else {
+                // no timer associated with substring
+                stringsToTimers.append((substring, nil))
+                continue
             }
-
-            let start = characterCountInText
-            let timerText = sessionRecipeStep.timers[timerCount].0
-            let end = characterCountInText + timerText.count
-            if originalText[start..<end] == timerText {
-                textWithTimers.append((timerText, CountdownTimerViewModel(countdownTimer: sessionRecipeStep.timers[timerCount].1)))
-                characterCountInText += timerText.count
-                timerCount += 1
-            } else {
-                if textWithTimers.isEmpty || (textWithTimers.last != nil && textWithTimers.last?.1 != nil) {
-                    // create a new one
-                    textWithTimers.append((originalText[characterCountInText], nil))
-                } else {
-                    // add to previous
-                    textWithTimers[textWithTimers.count - 1].0 += originalText[characterCountInText]
-                }
-                characterCountInText += 1
-            }
+            // has timer associated with substring
+            stringsToTimers.append((substring, CountdownTimerViewModel(countdownTimer: sessionRecipeStep.timers[idx].1)))
         }
-
-        assert(timerCount == sessionRecipeStep.timers.count)
-        return textWithTimers
+        return stringsToTimers
     }
 
 }

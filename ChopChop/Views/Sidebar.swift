@@ -7,11 +7,25 @@ import SwiftUI
 
     var body: some View {
         List {
+            cookingSection
             recipesSection
             ingredientsSection
         }
         .listStyle(SidebarListStyle())
         .navigationTitle(Text("ChopChop"))
+    }
+
+    var cookingSection: some View {
+        NavigationLink(
+            destination: CookingSelectionView(viewModel: RecipeCollectionViewModel(
+                                                title: "All Recipes",
+                                                categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
+        ) {
+            Text("Cooking")
+                .font(.title3)
+                .bold()
+//                .foregroundColor(.blue)
+        }
     }
 
     var recipesSection: some View {

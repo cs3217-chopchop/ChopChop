@@ -441,6 +441,19 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    func ingredientsPublisher() -> AnyPublisher<[Ingredient], Error> {
+        ValueObservation
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func ingredientsPublisher(query: String = "",
                               categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation

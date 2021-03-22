@@ -20,6 +20,6 @@ struct DeductibleIngredientView: View {
 struct DeductibleIngredientView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try line_length
-        DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: try! Ingredient(name: "Butter", batches: []), estimatedQuantity: 4))
+        DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: try! Ingredient(name: "Butter", type: .count, batches: []), estimatedQuantity: 4))
     }
 }

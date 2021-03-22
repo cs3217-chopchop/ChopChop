@@ -125,6 +125,12 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Error> {
+        appDatabase.ingredientsPublisher()
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
+            .eraseToAnyPublisher()
+    }
+
     func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
