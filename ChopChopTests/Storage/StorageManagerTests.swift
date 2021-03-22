@@ -1,4 +1,4 @@
-// swiftlint:disable line_length object_literal
+// swiftlint:disable line_length
 
 import XCTest
 import GRDB
@@ -20,18 +20,24 @@ class StorageManagerTests: XCTestCase {
     func testSaveRecipe() throws {
         var recipe = try Recipe(name: "Pancakes",
                                 steps: [
-                                    try RecipeStep(content: "In a large bowl, mix dry ingredients together until well-blended."),
+                                    try RecipeStep(content: """
+                                        In a large bowl, mix dry ingredients together until well-blended.
+                                        """),
                                     try RecipeStep(content: "Add milk and mix well until smooth.") ,
                                     try RecipeStep(content: """
-                                    Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix \
-                                    well.
-                                    """) ,
-                                    try RecipeStep(content: "Beat whites until stiff and then fold into batter gently") ,
-                                    try RecipeStep(content: "Pour ladles of the mixture into a non-stick pan, one at a time."),
+                                        Separate the egg, placing the whites in a medium bowl and the yolks in the \
+                                        batter. Mix well.
+                                        """) ,
                                     try RecipeStep(content: """
-                                    Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. \
-                                    Yields 12 to 14 pancakes.
-                                    """)
+                                        Beat whites until stiff and then fold into batter gently.
+                                        """) ,
+                                    try RecipeStep(content: """
+                                        Pour ladles of the mixture into a non-stick pan, one at a time.
+                                        """),
+                                    try RecipeStep(content: """
+                                        Cook until the edges are dry and bubbles appear on surface. Flip; cook until \
+                                        golden. Yields 12 to 14 pancakes.
+                                        """)
                                 ],
                                 ingredients: [
                                     try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
@@ -58,15 +64,14 @@ class StorageManagerTests: XCTestCase {
 
     func testSaveIngredient() throws {
         var ingredient = try Ingredient(name: "Egg",
+                                        type: .count,
                                         batches: [
-                                            IngredientBatch(
-                                                quantity: try Quantity(from: .count(12)),
-                                                expiryDate: Calendar.current.startOfDay(for: Date())),
-                                            IngredientBatch(
-                                                quantity: try Quantity(from: .count(13)),
-                                                expiryDate: Calendar.current
-                                                    .startOfDay(for: Date(timeIntervalSinceNow: 60 * 60 * 24))),
-                                            IngredientBatch(quantity: try Quantity(from: .count(14)), expiryDate: nil)
+                                            IngredientBatch(quantity: try Quantity(from: .count(12)),
+                                                            expiryDate: .today),
+                                            IngredientBatch(quantity: try Quantity(from: .count(13)),
+                                                            expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24)
+                                                                .startOfDay),
+                                            IngredientBatch(quantity: try Quantity(from: .count(14)))
                                         ])
 
         try storageManager.saveIngredient(&ingredient)
@@ -85,10 +90,7 @@ class StorageManagerTests: XCTestCase {
 // MARK: - Image Persistence
 extension StorageManagerTests {
     func testIngredientImagePersistence() {
-        guard let image = UIImage(named: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apples")
 
         let imageName = "Apple"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: imageName))
@@ -101,10 +103,7 @@ extension StorageManagerTests {
     }
 
     func testRenameIngredientImage() {
-        guard let image = UIImage(named: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apples")
 
         let oldName = "Apple"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(image, name: oldName))
@@ -122,15 +121,8 @@ extension StorageManagerTests {
     }
 
     func testOverwriteExistingIngredientImage() {
-        guard let existingImage = UIImage(named: "apples") else {
-            XCTFail("Image asset not found")
-            return
-        }
-
-        guard let newImage = UIImage(named: "oranges") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let existingImage = UIImage(imageLiteralResourceName: "apples")
+        let newImage = UIImage(imageLiteralResourceName: "oranges")
 
         let imageName = "Fruit"
         XCTAssertNoThrow(try storageManager.saveIngredientImage(existingImage, name: imageName))
@@ -146,10 +138,7 @@ extension StorageManagerTests {
     }
 
     func testRecipeImagePersistence() {
-        guard let image = UIImage(named: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let imageName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
@@ -162,10 +151,7 @@ extension StorageManagerTests {
     }
 
     func testRenameRecipeImage() {
-        guard let image = UIImage(named: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let oldName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: oldName))
@@ -183,15 +169,8 @@ extension StorageManagerTests {
     }
 
     func testOverwriteExistingRecipeImage() {
-        guard let existingImage = UIImage(named: "apple-pie") else {
-            XCTFail("Image asset not found")
-            return
-        }
-
-        guard let newImage = UIImage(named: "apple-pie-slice") else {
-            XCTFail("Image asset not found")
-            return
-        }
+        let existingImage = UIImage(imageLiteralResourceName: "apple-pie")
+        let newImage = UIImage(imageLiteralResourceName: "apple-pie-slice")
 
         let imageName = "Apple Pie"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))

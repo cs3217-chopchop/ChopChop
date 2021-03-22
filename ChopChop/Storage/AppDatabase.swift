@@ -95,11 +95,14 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                     .collate(.localizedStandardCompare)
+                t.column("quantityType", .text)
+                    .notNull()
+                    .check { BaseQuantityType.allCases.map { $0.rawValue }.contains($0) }
             }
         }
 
-        migrator.registerMigration("CreateIngredientSet") { db in
-            try db.create(table: "ingredientSet") { t in
+        migrator.registerMigration("CreateIngredientBatch") { db in
+            try db.create(table: "ingredientBatch") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("ingredientId", .integer)
                     .notNull()
@@ -119,6 +122,123 @@ struct AppDatabase {
     init(_ dbWriter: DatabaseWriter) throws {
         self.dbWriter = dbWriter
         try migrator.migrate(dbWriter)
+    }
+}
+
+// MARK: - Database: Preloaded Recipes
+extension AppDatabase {
+    func createPreloadedRecipesIfEmpty() throws {
+        try dbWriter.write { db in
+            if try RecipeRecord.fetchCount(db) == 0 {
+                try createPreloadedRecipes(db)
+            }
+        }
+    }
+
+    private func createPreloadedRecipes(_ db: Database) throws {
+        var categories = [
+            RecipeCategoryRecord(name: "Japanese"),
+            RecipeCategoryRecord(name: "Italian"),
+            RecipeCategoryRecord(name: "American"),
+            RecipeCategoryRecord(name: "A Really Really Really Really Really Really Really Really Really Long Category")
+        ]
+
+        for index in categories.indices {
+            try categories[index].save(db)
+        }
+
+        var recipes = [
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[1].id,
+                         name: "Carbonara",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Scrambled Eggs",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
+                         servings: Double(Int.random(in: 1...5)))
+        ]
+
+        for index in recipes.indices {
+            try recipes[index].save(db)
+        }
+
+        var ingredients = [
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
+            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
+            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram))
+        ]
+
+        for index in ingredients.indices {
+            try ingredients[index].save(db)
+        }
+    }
+}
+
+// MARK: - Database: Preloaded Ingredients
+extension AppDatabase {
+    func createPreloadedIngredientsIfEmpty() throws {
+        try dbWriter.write { db in
+            if try IngredientRecord.fetchCount(db) == 0 {
+                try createPreloadedIngredients(db)
+            }
+        }
+    }
+
+    private func createPreloadedIngredients(_ db: Database) throws {
+        var categories = [
+            IngredientCategoryRecord(name: "Spices"),
+            IngredientCategoryRecord(name: "Dairy"),
+            IngredientCategoryRecord(name: "Grains")
+        ]
+
+        for index in categories.indices {
+            try categories[index].save(db)
+        }
+
+        var ingredients = [
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
+            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count)
+        ]
+
+        for index in ingredients.indices {
+            try ingredients[index].save(db)
+        }
+
+        var batches = [
+            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(500, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(200, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: .today,
+                                  quantity: .volume(2, unit: .liter)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7).startOfDay,
+                                  quantity: .volume(1.5, unit: .liter)),
+            IngredientBatchRecord(ingredientId: ingredients[2].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
+                                  quantity: .volume(3, unit: .liter)),
+            IngredientBatchRecord(ingredientId: ingredients[3].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(1, unit: .kilogram)),
+            IngredientBatchRecord(ingredientId: ingredients[4].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(2, unit: .kilogram))
+        ]
+
+        for index in batches.indices {
+            try batches[index].save(db)
+        }
     }
 }
 
@@ -183,18 +303,22 @@ extension AppDatabase {
 
     func saveIngredient(_ ingredient: inout IngredientRecord, batches: inout [IngredientBatchRecord]) throws {
         try dbWriter.write { db in
+            guard batches.allSatisfy({ $0.quantity.type == ingredient.quantityType }) else {
+                throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+            }
+
             try ingredient.save(db)
 
             guard batches.compactMap({ $0.ingredientId }).allSatisfy({ $0 == ingredient.id }) else {
-                throw DatabaseError(message: "Ingredient sets belong to the wrong ingredient.")
+                throw DatabaseError(message: "Ingredient batches belong to the wrong ingredient.")
             }
 
-            // Delete all sets that are not in the array
+            // Delete all batches that are not in the array
             try ingredient.batches
                 .filter(!batches.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
                 .deleteAll(db)
 
-            // Save ingredient sets
+            // Save ingredient batches
             for index in batches.indices {
                 batches[index].ingredientId = ingredient.id
                 try batches[index].save(db)
@@ -289,49 +413,70 @@ extension AppDatabase {
 // MARK: - Database Access: Publishers
 
 extension AppDatabase {
-    func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeRecord], Error> {
+    func recipesPublisher(query: String = "",
+                          categoryIds: [Int64?] = [nil],
+                          ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
         ValueObservation
-            .tracking(RecipeRecord.all().orderedByName().fetchAll)
+            .tracking(RecipeRecord.all()
+                        .filteredByCategory(ids: categoryIds)
+                        .filteredByName(query)
+                        .filteredByIngredients(ingredients)
+                        .orderedByName()
+                        .fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeRecord], Error> {
-        ValueObservation
-            .tracking(RecipeRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
-            .publisher(in: dbWriter, scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-
-    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
+    func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientRecord], Error> {
+    func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
-            .tracking(IngredientRecord.all().orderedByName().fetchAll)
+            .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientRecord], Error> {
+    func ingredientsPublisher(query: String = "",
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
-            .tracking(IngredientRecord.all().filteredByCategory(ids: ids).orderedByName().fetchAll)
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .filteredByCategory(ids: categoryIds)
+                    .filteredByName(query)
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientRecord], Error> {
+    func ingredientsPublisher(expiresAfter: Date,
+                              expiresBefore: Date,
+                              query: String = "",
+                              categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
-            .tracking(IngredientRecord.all().orderedByExpiryDate().fetchAll)
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .filteredByCategory(ids: categoryIds)
+                    .filteredByName(query)
+                    .filteredByExpiryDate(after: expiresAfter, before: expiresBefore)
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
 
-    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
+    func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
         ValueObservation
             .tracking(IngredientCategoryRecord.all().orderedByName().fetchAll)
             .publisher(in: dbWriter, scheduling: .immediate)

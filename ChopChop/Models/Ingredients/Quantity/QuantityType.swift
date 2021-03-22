@@ -1,3 +1,4 @@
+import GRDB
 enum QuantityType: Equatable, CaseIterable, Hashable {
     static var allCases: [QuantityType] {
         [
@@ -38,7 +39,7 @@ extension QuantityType: CustomStringConvertible {
     }
 }
 
-enum BaseQuantityType: Equatable {
+enum BaseQuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {
     case count
     case mass
     case volume

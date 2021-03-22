@@ -1,5 +1,3 @@
-// swiftlint:disable line_length
-
 import XCTest
 @testable import ChopChop
 
@@ -58,8 +56,9 @@ Allow 10 minutes for pressure to build.
     }
 
     func testParseTimeTaken_notStep_parserNotPerfect() {
-        let timeTaken = RecipeStepParser.parseTimeTaken(step:
-                                                            "5 calories; protein 0.2g; carbohydrates 0.9g; fat 0.2g; sodium 184.8mg")
+        let timeTaken = RecipeStepParser.parseTimeTaken(step: """
+            5 calories; protein 0.2g; carbohydrates 0.9g; fat 0.2g; sodium 184.8mg
+            """)
         XCTAssertEqual(timeTaken, 11_088)
     }
 
@@ -83,8 +82,9 @@ Turn ribs and cook until second side is golden brown, 1 or two minutes
     }
 
     func testParseTimeDurations_empty() {
-        let durations = RecipeStepParser.parseTimerDurations(step:
-                                                                "Turn 5 ribs and cook until second side is golden brown mins")
+        let durations = RecipeStepParser.parseTimerDurations(step: """
+            Turn 5 ribs and cook until second side is golden brown mins
+        """)
         XCTAssertEqual(durations, [])
     }
 
