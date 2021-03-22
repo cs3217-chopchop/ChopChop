@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 
 final class IngredientCollectionViewModel: ObservableObject {
     @Published var query: String = ""
@@ -30,25 +31,36 @@ final class IngredientCollectionViewModel: ObservableObject {
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        // swiftlint:disable line_length
-        $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd).map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
-            -> AnyPublisher<[IngredientInfo], Error> in
-            if filterByExpiryDate {
-                return storageManager.ingredientsPublisher(query: query,
-                                                           categoryIds: categoryIds,
-                                                           expiresAfter: expiryDateStart,
-                                                           expiresBefore: expiryDateEnd)
-            } else {
-                return storageManager.ingredientsPublisher(query: query, categoryIds: categoryIds)
+        $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd)
+            .map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
+                -> AnyPublisher<[IngredientInfo], Error> in
+                if filterByExpiryDate {
+                    return storageManager.ingredientsPublisher(query: query,
+                                                               categoryIds: categoryIds,
+                                                               expiresAfter: expiryDateStart,
+                                                               expiresBefore: expiryDateEnd)
+                } else {
+                    return storageManager.ingredientsPublisher(query: query, categoryIds: categoryIds)
+                }
             }
-        }
-        .map { ingredientsPublisher in
-            ingredientsPublisher.catch { _ in
-                Just<[IngredientInfo]>([])
+            .map { ingredientsPublisher in
+                ingredientsPublisher.catch { _ in
+                    Just<[IngredientInfo]>([])
+                }
             }
+            .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+
+    func getIngredient(info: IngredientInfo) -> Ingredient? {
+        guard let id = info.id else {
+            return nil
         }
-        .switchToLatest()
-        .eraseToAnyPublisher()
-        // swiftlint:enable line_length
+
+        return try? storageManager.fetchIngredient(id: id)
+    }
+
+    func getIngredientImage(ingredient: Ingredient) -> UIImage {
+        storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
     }
 }

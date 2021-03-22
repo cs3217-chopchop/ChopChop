@@ -1,42 +1,50 @@
 import SwiftUI
 
 struct IngredientDetailView: View {
-    let viewModel: IngredientViewModel
+    @ObservedObject var viewModel: IngredientViewModel
 
     var body: some View {
-        NavigationView {
-            EmptyView()
+        VStack {
+            ingredientBanner
+            toolbar
+            IngredientBatchGridView(viewModel: viewModel)
+        }
+    }
 
-            VStack {
-                ZStack(alignment: .bottomLeading) {
-                    Image(uiImage: viewModel.image)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 300)
-                        .clipped()
-                        .overlay(
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
-                        )
-                    Text(viewModel.name)
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
-                        .padding()
-                }
+    var ingredientBanner: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image(uiImage: viewModel.ingredientImage)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 300)
+                .clipped()
+                .overlay(
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.clear, .clear, .black]),
+                                startPoint: .top,
+                                endPoint: .bottom))
+                )
+            Text(viewModel.ingredientName)
+                .font(.largeTitle)
+                .foregroundColor(.white)
+                .padding()
+        }
+    }
 
-                IngredientBatchGridView(viewModel: viewModel)
+    var toolbar: some View {
+        HStack {
+            Spacer()
+            NavigationLink(destination: addBatchView) {
+                Image(systemName: "plus")
             }
-            .toolbar {
-                NavigationLink(destination: addBatchView) {
-                    Image(systemName: "plus")
-                }
-
-                NavigationLink(destination: editIngredientView) {
-                    Image(systemName: "square.and.pencil")
-                }
+            NavigationLink(destination: editIngredientView) {
+                Image(systemName: "square.and.pencil")
             }
         }
+        .padding()
     }
 
     var editIngredientView: some View {
@@ -56,23 +64,43 @@ struct IngredientDetailView: View {
 struct IngredientDetailView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        IngredientDetailView(
-            viewModel: IngredientViewModel(
-                ingredient: try! Ingredient(
-                    name: "Apple",
-                    type: .count,
-                    batches: [
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date()),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(100_000)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(200_000))
+        Group {
+            IngredientDetailView(
+                viewModel: IngredientViewModel(
+                    ingredient: try! Ingredient(
+                        name: "Apple",
+                        type: .count,
+                        batches: [
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date()),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3)),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date().addingTimeInterval(100_000)),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date().addingTimeInterval(200_000))
                     ])))
+            IngredientDetailView(
+                viewModel: IngredientViewModel(
+                    ingredient: try! Ingredient(
+                        name: "Apple",
+                        type: .count,
+                        batches: [
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date()),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3)),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date().addingTimeInterval(100_000)),
+                            IngredientBatch(
+                                quantity: try! Quantity(.count, value: 3),
+                                expiryDate: Date().addingTimeInterval(200_000))
+                        ])))
+        }
     }
 }

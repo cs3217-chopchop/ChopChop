@@ -243,4 +243,5 @@ enum QuantityError: Error {
     case negativeQuantity
     case divisionByZero
     case incompatibleTypes
+    case invalidUnit
 }

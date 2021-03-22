@@ -12,22 +12,33 @@ struct IngredientBatchFormView: View {
         }
     }
 
+    @ViewBuilder
     var quantitySection: some View {
         Section(header: Text("QUANTITY")) {
-            // TODO: integrate quantity units
-            let units = ["ml", "l"]
             HStack {
                 TextField("Quantity", text: $viewModel.inputQuantity)
                     .keyboardType(.numberPad)
                     .frame(width: 100)
                 Text(viewModel.selectedUnit)
                 Spacer()
-                Picker("Unit", selection: $viewModel.selectedUnit) {
-                    ForEach(units, id: \.self) {
-                        Text($0)
+                switch viewModel.ingredient.quantityType {
+                case .count:
+                    EmptyView()
+                case .mass:
+                    Picker("Unit", selection: $viewModel.selectedUnit) {
+                        ForEach(viewModel.massUnits, id: \.self) {
+                            Text($0)
+                        }
                     }
+                    .pickerStyle(MenuPickerStyle())
+                case .volume:
+                    Picker("Unit", selection: $viewModel.selectedUnit) {
+                        ForEach(viewModel.volumeUnits, id: \.self) {
+                            Text($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
                 }
-                .pickerStyle(MenuPickerStyle())
             }
         }
     }

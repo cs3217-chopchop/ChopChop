@@ -4,12 +4,14 @@ class IngredientFormViewModel: ObservableObject {
     private(set) var ingredient: Ingredient
     let isEdit: Bool
 
-    @Published var selectedType: QuantityType
+    @Published var selectedType: BaseQuantityType
     @Published var inputName: String
     @Published var image: UIImage
 
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
+
+    private let storageManager = StorageManager()
 
     init(edit ingredient: Ingredient) {
         self.ingredient = ingredient
@@ -17,7 +19,7 @@ class IngredientFormViewModel: ObservableObject {
 
         self.selectedType = ingredient.quantityType
         self.inputName = ingredient.name
-        self.image = ingredient.image ?? UIImage()
+        self.image = StorageManager().fetchIngredientImage(name: ingredient.name) ?? UIImage()
     }
 
     init() throws {
@@ -34,22 +36,26 @@ class IngredientFormViewModel: ObservableObject {
     }
 
     func save() throws {
-        let storageManager = StorageManager()
-
         guard areFieldsValid else {
             return
         }
 
         if isEdit {
             try ingredient.rename(inputName)
-
-            if image != UIImage() {
-                try storageManager.saveIngredientImage(image, name: inputName)
-            }
         } else {
             ingredient = try Ingredient(name: inputName, type: selectedType)
         }
 
+        if image != UIImage() {
+            try storageManager.saveIngredientImage(image, name: inputName)
+        }
+
         try storageManager.saveIngredient(&ingredient)
+    }
+
+    func reset() {
+        self.selectedType = .count
+        self.inputName = ""
+        self.image = UIImage()
     }
 }

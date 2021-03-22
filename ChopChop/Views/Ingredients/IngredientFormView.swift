@@ -22,7 +22,7 @@ struct IngredientFormView: View {
                 Text(viewModel.selectedType.description)
                 Spacer()
                 Picker("Quantity Type", selection: $viewModel.selectedType) {
-                    ForEach(QuantityType.allCases, id: \.self) {
+                    ForEach(BaseQuantityType.allCases, id: \.self) {
                         Text($0.description)
                     }
                 }
@@ -64,7 +64,15 @@ struct IngredientFormView: View {
 
     var saveButton: some View {
         Button("Save") {
-            presentationMode.wrappedValue.dismiss()
+            defer {
+                presentationMode.wrappedValue.dismiss()
+            }
+
+            do {
+                try viewModel.save()
+            } catch {
+                return
+            }
         }
     }
 }

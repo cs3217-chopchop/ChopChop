@@ -1,21 +1,31 @@
+import SwiftUI
 import UIKit
+import Combine
 
-class IngredientViewModel {
-    let ingredient: Ingredient
+class IngredientViewModel: ObservableObject {
+    @ObservedObject var ingredient: Ingredient
+
+    @Published private(set) var ingredientName: String = ""
+    @Published private(set) var ingredientBatches: [IngredientBatch] = []
+    @Published private(set) var ingredientImage = UIImage()
+
+    private let storageManager = StorageManager()
+    private var cancellables = Set<AnyCancellable>()
 
     init(ingredient: Ingredient) {
         self.ingredient = ingredient
-    }
 
-    var name: String {
-        ingredient.name
-    }
+        ingredient.$name
+            .sink { [weak self] name in
+                self?.ingredientName = name
+                self?.ingredientImage = StorageManager().fetchIngredientImage(name: name) ?? UIImage()
+            }
+            .store(in: &cancellables)
 
-    var batches: [IngredientBatch] {
-        ingredient.batches
-    }
-
-    var image: UIImage {
-        ingredient.image ?? UIImage()
+        ingredient.$batches
+            .sink { [weak self] batches in
+                self?.ingredientBatches = batches
+            }
+            .store(in: &cancellables)
     }
 }

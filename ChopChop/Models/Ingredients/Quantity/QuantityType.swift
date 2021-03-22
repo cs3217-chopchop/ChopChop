@@ -31,9 +31,3 @@ extension QuantityType: CustomStringConvertible {
         }
     }
 }
-
-enum BaseQuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {
-    case count
-    case mass
-    case volume
-}

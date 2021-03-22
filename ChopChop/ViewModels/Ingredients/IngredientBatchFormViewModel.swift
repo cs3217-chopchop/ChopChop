@@ -15,7 +15,7 @@ class IngredientBatchFormViewModel: ObservableObject {
         self.ingredient = ingredient
         self.isEdit = true
 
-        self.selectedUnit = batch.quantity.unit
+        self.selectedUnit = batch.quantity.type.description
         self.inputQuantity = String(batch.quantity.value)
 
         if let expiryDate = batch.expiryDate {
@@ -28,13 +28,23 @@ class IngredientBatchFormViewModel: ObservableObject {
     }
 
     init(addBatchTo ingredient: Ingredient) throws {
-        let quantity = try Quantity(ingredient.quantityType, value: 0)
+        var quantity: Quantity
+
+        switch ingredient.quantityType {
+        case .count:
+            quantity = try Quantity(.count, value: 0)
+        case .mass:
+            quantity = try Quantity(.mass(.baseUnit), value: 0)
+        case .volume:
+            quantity = try Quantity(.volume(.baseUnit), value: 0)
+        }
+
         self.batch = IngredientBatch(quantity: quantity)
         self.ingredient = ingredient
         self.isEdit = false
 
-        self.selectedUnit = ""
-        self.inputQuantity = "0"
+        self.selectedUnit = batch.quantity.type.description
+        self.inputQuantity = String(batch.quantity.value)
         self.expiryDateEnabled = false
         self.selectedDate = Date()
     }
@@ -49,12 +59,28 @@ class IngredientBatchFormViewModel: ObservableObject {
             return
         }
 
-        // TODO: handle quantity conversion
         guard let convertedValue = Double(inputQuantity) else {
             return
         }
 
-        let newQuantity = try Quantity(ingredient.quantityType, value: convertedValue)
+        var newQuantity: Quantity
+        switch ingredient.quantityType {
+        case .count:
+            newQuantity = try Quantity(.count, value: convertedValue)
+        case .mass:
+            guard let unit = massUnitMap[selectedUnit] else {
+                throw QuantityError.invalidUnit
+            }
+
+            newQuantity = try Quantity(.mass(unit), value: convertedValue)
+        case .volume:
+            guard let unit = volumeUnitMap[selectedUnit] else {
+                throw QuantityError.invalidUnit
+            }
+
+            newQuantity = try Quantity(.volume(unit), value: convertedValue)
+        }
+
         let newExpiryDate: Date? = expiryDateEnabled ? selectedDate : nil
 
         if isEdit {
@@ -64,5 +90,31 @@ class IngredientBatchFormViewModel: ObservableObject {
         try ingredient.add(quantity: newQuantity, expiryDate: newExpiryDate)
 
         try StorageManager().saveIngredient(&ingredient)
+    }
+
+    let massUnitMap: [String: MassUnit] = [
+        "kg": .kilogram,
+        "g": .gram,
+        "lb": .pound,
+        "oz": .ounce
+    ]
+
+    let volumeUnitMap: [String: VolumeUnit] = [
+        "L": .liter,
+        "ml": .milliliter,
+        "cups": .cup,
+        "tbsp": .tablespoon,
+        "tsp": .teaspoon,
+        "gallons": .gallon,
+        "quarts": .quart,
+        "pints": .pint
+    ]
+
+    var massUnits: [String] {
+        Array(massUnitMap.keys)
+    }
+
+    var volumeUnits: [String] {
+        Array(volumeUnitMap.keys)
     }
 }
