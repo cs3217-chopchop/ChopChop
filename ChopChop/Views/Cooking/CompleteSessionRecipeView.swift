@@ -11,27 +11,21 @@ struct CompleteSessionRecipeView: View {
             ForEach(viewModel.deductibleIngredientsViewModels, id: \.ingredient.name) { deductibleIngredient in
                 DeductibleIngredientView(viewModel: deductibleIngredient)
             }
-
-//            Toggle(isOn: $viewModel.isSaveRecipe) {
-//                Text("Make changes to recipe?")
-//                    .font(.title2)
-//                    .padding()
-//            }
-            .toggleStyle(CheckboxToggleStyle())
-
             Button("Submit") {
                 viewModel.submit()
-            }
+            }.disabled(viewModel.isSuccess)
             .font(.title2)
             .padding()
+            Text(viewModel.isSuccess ? "Success" : "")
+                .foregroundColor(.green)
+                .padding()
         }
     }
 }
 
  struct CompleteSessionView_Previews: PreviewProvider {
-    static func someFunction() {}
     static var previews: some View {
         // swiftlint:disable force_try
-        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes"), onClose: someFunction))
+        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes")))
     }
  }

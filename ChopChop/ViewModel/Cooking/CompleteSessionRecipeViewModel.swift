@@ -3,23 +3,33 @@ import Combine
 
 class CompleteSessionRecipeViewModel: ObservableObject {
     @Published var deductibleIngredientsViewModels: [DeductibleIngredientViewModel] = []
+    @Published var isSuccess = false
     private var recipe: Recipe
-    private let onClose: () -> Void
 
     private let storageManager = StorageManager()
     private(set) var ingredientsInStore: [IngredientInfo] = []
     private var ingredientsCancellable: AnyCancellable?
 
-    init(recipe: Recipe, onClose: @escaping () -> Void) {
+    init(recipe: Recipe) {
         self.recipe = recipe
-        self.onClose = onClose
 
         ingredientsCancellable = ingredientsPublisher()
             .sink { [weak self] ingredients in
                 self?.ingredientsInStore = ingredients
-                self?.deductibleIngredientsViewModels = self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients) ?? []
+                if self?.isSuccess == false {
+                    self?.deductibleIngredientsViewModels = self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients) ?? []
+                }
             }
 
+        // swiftlint:disable line_length
+        let expiry = Calendar.current.date(byAdding: .day, value: 10, to: Date())
+        guard var butter = try? Ingredient(name: "Butter", batches: [IngredientBatch(quantity: Quantity(.count, value: 4), expiryDate: expiry)]),
+              var milk = try? Ingredient(name: "Milk", batches: [IngredientBatch(quantity: Quantity(.count, value: 2_000), expiryDate: expiry)]) else {
+            return
+        }
+        try? StorageManager().deleteAllIngredients()
+        try? StorageManager().saveIngredient(&butter)
+        try? StorageManager().saveIngredient(&milk)
     }
 
     func submit() {
@@ -34,13 +44,14 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
 
             guard let id = ingredientViewModel.ingredient.id else {
+                assertionFailure("Ingredient should have id")
                 continue
             }
             guard let ingredient = try? storageManager.fetchIngredient(id: id) else {
                 continue
             }
 
-            let quantityType = ingredient.quantityType
+            let quantityType = ingredient.batches[0].quantity.type
             do {
                 try ingredient.use(quantity: Quantity(quantityType, value: amount))
                 ingredientsToSave.append(ingredient)
@@ -59,11 +70,11 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        onClose()
+        isSuccess = deductibleIngredientsViewModels.allSatisfy { !$0.isError }
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        return storageManager.ingredientsOrderedByNamePublisher()
+        storageManager.ingredientsOrderedByNamePublisher()
             .catch { _ in
                 Just<[IngredientInfo]>([])
             }

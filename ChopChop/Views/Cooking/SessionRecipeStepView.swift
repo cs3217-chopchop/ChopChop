@@ -5,23 +5,20 @@ struct SessionRecipeStepView: View {
 
     var body: some View {
         Toggle(isOn: $viewModel.isCompleted) {
-//            viewModel.textWithTimers.reduce(Text(""), {
-//                $0 + Text("\($1.0)")
-//            })
-//            .foregroundColor(viewModel.isCompleted ? Color.gray : Color.black)
-//            .strikethrough(viewModel.isCompleted, color: nil)
-            ForEach(viewModel.textWithTimers, id: \.0) { text, timer in
+            viewModel.textWithTimers.reduce(Text(""), {
+                $0 + Text("\($1.0)")
+                    .foregroundColor(viewModel.isCompleted ? Color.gray : $1.1 == nil ? .black : .blue)
+            })
+            .strikethrough(viewModel.isCompleted, color: nil)
+        }
+        .toggleStyle(CheckboxToggleStyle())
+        HStack {
+            ForEach(viewModel.textWithTimers, id: \.0) { _, timer in
                 if let countdownTimer = timer {
-                    TextWithTimerView(viewModel: viewModel, text: text, timer: CountdownTimerViewModel(countdownTimer: countdownTimer))
-                } else {
-                    Text(text)
-                        .foregroundColor(viewModel.isCompleted ? .gray : .black)
-                        .strikethrough(viewModel.isCompleted, color: nil)
-                        .lineLimit(1)
+                    CountdownTimerView(viewModel: countdownTimer)
                 }
             }
         }
-        .toggleStyle(CheckboxToggleStyle())
     }
 }
 

@@ -18,7 +18,7 @@ struct ChopChopApp: App {
                                                                                                                                                                                   try! RecipeStep(content: """
                                                                                                                                                                                   Cook for 30s until the edges are dry and bubbles appear on surface. Flip; cook for 1 to 2 minutes. \
                                                                                                                                                                                   Yields 12 to 14 pancakes.
-                                                                                                                                                                                  """)], ingredients: []))))
+                                                                                                                                                                                  """)], ingredients: [try! RecipeIngredient(name: "Butter", quantity: Quantity(.count, value: 3)), try! RecipeIngredient(name: "Milk", quantity: Quantity(.volume, value: 300)), try! RecipeIngredient(name: "Milkss", quantity: Quantity(.volume, value: 300))]))))
         }
     }
 }

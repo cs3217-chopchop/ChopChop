@@ -5,21 +5,21 @@ struct DeductibleIngredientView: View {
 
     var body: some View {
         HStack {
-            Text(viewModel.ingredient.name)
+            // TODO
+            Text(viewModel.ingredient.name + " (" + "units" + ")")
             TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
                 .keyboardType(.decimalPad)
-                .foregroundColor(.black)
+                .foregroundColor(viewModel.isError ? .red : .black)
                 .frame(width: 200, height: 50, alignment: .center)
                 .border(Color.black, width: 1)
-            Text(viewModel.isError ? "Invalid Quantity" : "")
-                .foregroundColor(.red)
+                .padding()
         }
     }
 }
 
 struct DeductibleIngredientView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try
-        DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: try! Ingredient(name: "Butter", batches: [])))
+        // swiftlint:disable force_try line_length
+        DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: try! Ingredient(name: "Butter", batches: []), estimatedQuantity: 4))
     }
 }

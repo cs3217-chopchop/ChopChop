@@ -1,7 +1,6 @@
 import SwiftUI
 
 class CountdownTimerViewModel: ObservableObject {
-    @Published var isShow = false
     let countdownTimer: CountdownTimer
     @Published var displayTime: String
     @Published var disableIncreaseTime: Bool
@@ -19,10 +18,6 @@ class CountdownTimerViewModel: ObservableObject {
     func countdown() {
         countdownTimer.countdown()
         displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
-
-    func toggleShow() {
-        isShow.toggle()
     }
 
     func start() {
