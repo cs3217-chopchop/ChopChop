@@ -2,11 +2,14 @@ import SwiftUI
 
 @main
 struct ChopChopApp: App {
-    let appDatabase = AppDatabase.shared
+    @StateObject var settings = UserSettings()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                MainView(viewModel: MainViewModel())
+            }
+            .environmentObject(settings)
         }
     }
 }

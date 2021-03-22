@@ -45,7 +45,22 @@ extension DerivableRequest where RowDecoder == RecipeRecord {
         order(RecipeRecord.Columns.name)
     }
 
-    func filteredByCategory(ids: [Int64]) -> Self {
-        joining(required: RecipeRecord.category.filter(keys: ids))
+    func filteredByCategory(ids: [Int64?]) -> Self {
+        if ids == [nil] {
+            return filter(RecipeRecord.Columns.recipeCategoryId == nil)
+        } else if ids.contains(nil) {
+            return joining(optional: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+        } else {
+            return joining(required: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+        }
+    }
+
+    func filteredByName(_ query: String) -> Self {
+        filter(RecipeRecord.Columns.name.like("%\(query)%"))
+    }
+
+    func filteredByIngredients(_ ingredients: [String]) -> Self {
+        having(RecipeRecord.ingredients
+                .filter(ingredients.contains(RecipeIngredientRecord.Columns.name)).count == ingredients.count)
     }
 }

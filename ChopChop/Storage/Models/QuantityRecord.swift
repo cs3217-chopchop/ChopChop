@@ -9,6 +9,17 @@ extension QuantityRecord: Codable {
         case count, mass, volume, unit
     }
 
+    var type: BaseQuantityType {
+        switch self {
+        case .count:
+            return .count
+        case .mass:
+            return .mass
+        case .volume:
+            return .volume
+        }
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

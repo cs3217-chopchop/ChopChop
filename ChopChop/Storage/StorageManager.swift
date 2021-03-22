@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import Combine
+import Foundation
 import UIKit
 
 struct StorageManager {
@@ -38,12 +39,12 @@ struct StorageManager {
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.ingredientCategoryId,
-                                                name: ingredient.name)
+                                                name: ingredient.name,
+                                                quantityType: ingredient.quantityType)
         var batchRecords = ingredient.batches.map { batch in
-            IngredientBatchRecord(
-                ingredientId: ingredient.id,
-                expiryDate: batch.expiryDate,
-                quantity: batch.quantity.record)
+            IngredientBatchRecord(ingredientId: ingredient.id,
+                                  expiryDate: batch.expiryDate,
+                                  quantity: batch.quantity.record)
         }
 
         try appDatabase.saveIngredient(&ingredientRecord, batches: &batchRecords)
@@ -106,44 +107,46 @@ struct StorageManager {
 
     // MARK: - Database Access: Publishers
 
-    func recipesOrderedByNamePublisher() -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesOrderedByNamePublisher()
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
+    func recipesPublisher(query: String,
+                          categoryIds: [Int64?],
+                          ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
+        appDatabase.recipesPublisher(query: query, categoryIds: categoryIds, ingredients: ingredients)
+            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name, servings: $0.servings, difficulty: $0.difficulty) } }
             .eraseToAnyPublisher()
     }
 
-    func recipesFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[RecipeInfo], Error> {
-        appDatabase.recipesFilteredByCategoryOrderedByNamePublisher(ids: ids)
-            .map { $0.map { RecipeInfo(id: $0.id, name: $0.name) } }
-            .eraseToAnyPublisher()
-    }
-
-    func recipeCategoriesOrderedByNamePublisher() -> AnyPublisher<[RecipeCategory], Error> {
-        appDatabase.recipeCategoriesOrderedByNamePublisher()
+    func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
+        appDatabase.recipeCategoriesPublisher()
             .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByNamePublisher() -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsOrderedByNamePublisher()
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
+    func recipeIngredientsPublisher(categoryIds: [Int64?]) -> AnyPublisher<[String], Error> {
+        appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
+            .map { Array(Set($0.map { $0.name })).sorted() }
             .eraseToAnyPublisher()
     }
 
-    func ingredientsFilteredByCategoryOrderedByNamePublisher(ids: [Int64]) -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsFilteredByCategoryOrderedByNamePublisher(ids: ids)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
+    func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
+        appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
             .eraseToAnyPublisher()
     }
 
-    func ingredientsOrderedByExpiryDatePublisher() -> AnyPublisher<[IngredientInfo], Error> {
-        appDatabase.ingredientsOrderedByExpiryDatePublisher()
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name) } }
+    func ingredientsPublisher(query: String,
+                              categoryIds: [Int64?],
+                              expiresAfter: Date,
+                              expiresBefore: Date) -> AnyPublisher<[IngredientInfo], Error> {
+        appDatabase.ingredientsPublisher(expiresAfter: expiresAfter,
+                                         expiresBefore: expiresBefore,
+                                         query: query,
+                                         categoryIds: categoryIds)
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
             .eraseToAnyPublisher()
     }
 
-    func ingredientCategoriesOrderedByNamePublisher() -> AnyPublisher<[IngredientCategory], Error> {
-        appDatabase.ingredientCategoriesOrderedByNamePublisher()
+    func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Error> {
+        appDatabase.ingredientCategoriesPublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }

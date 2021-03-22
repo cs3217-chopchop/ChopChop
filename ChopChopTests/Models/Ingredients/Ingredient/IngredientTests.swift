@@ -236,8 +236,8 @@ extension IngredientTests {
 
     func testUse_existingExpiredBatch_ignoresExpiredBatch() throws {
         let existingQuantity = try Quantity(.count, value: 5)
-        let expiredDate = Calendar.current.startOfDay(for: Date()).addingTimeInterval(-86_400)
-        let testDate = Calendar.current.startOfDay(for: Date()).addingTimeInterval(86_400)
+        let expiredDate = Date.today.addingTimeInterval(-86_400)
+        let testDate = Date.today.addingTimeInterval(86_400)
 
         try addTestQuantity(5, expiryDate: expiredDate)
         try addTestQuantity(5, expiryDate: testDate)

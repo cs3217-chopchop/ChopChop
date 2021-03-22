@@ -35,11 +35,11 @@ class Ingredient: FetchableRecord {
     }
 
     required init(row: Row) {
-        id = row["id"]
-        ingredientCategoryId = row["ingredientCategoryId"]
-        quantityType = .count
-        name = row["name"]
-        batches = row.prefetchedRows["ingredientSets"]?.compactMap {
+        id = row[IngredientRecord.Columns.id]
+        ingredientCategoryId = row[IngredientRecord.Columns.ingredientCategoryId]
+        quantityType = row[IngredientRecord.Columns.quantityType]
+        name = row[IngredientRecord.Columns.name]
+        batches = row.prefetchedRows["ingredientBatches"]?.compactMap {
             let record = IngredientBatchRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
                 return nil
@@ -49,6 +49,7 @@ class Ingredient: FetchableRecord {
         } ?? []
     }
 
+<<<<<<< HEAD
     // TODO: Remove this after quantity types are added into db
     convenience init(name: String, batches: [IngredientBatch]) throws {
         try self.init(name: name, type: .count)
@@ -59,6 +60,8 @@ class Ingredient: FetchableRecord {
         StorageManager().fetchIngredientImage(name: name)
     }
 
+=======
+>>>>>>> main
     var notExpiredBatches: [IngredientBatch] {
         batches.filter { batch in
             guard let expiryDate = batch.expiryDate else {
