@@ -169,6 +169,8 @@ class RecipeFormViewModel: ObservableObject {
                 errorMessage = RecipeFormError.emptyIngredient.rawValue
             case RecipeFormError.emptyIngredientQuantity:
                 errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
+            case RecipeFormError.invalidIngredientQuantity:
+                errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
             case RecipeFormError.emptyIngredientDescription:
                 errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
             case DatabaseError.SQLITE_CONSTRAINT:
@@ -200,10 +202,8 @@ class RecipeFormViewModel: ObservableObject {
 
         let recipeStep = try steps.map({ try RecipeStep(content: $0) })
         let recipeIngredient = try ingredients.map({
-            try RecipeIngredient(
-                name: $0.ingredientName,
-                quantity: Quantity($0.unit, value: Double($0.amount) ?? 0)
-            )})
+            try $0.convertToIngredient()
+        })
         let recipeCategoryId = getRecipeCategoryId()
 
         let newRecipe = try Recipe(

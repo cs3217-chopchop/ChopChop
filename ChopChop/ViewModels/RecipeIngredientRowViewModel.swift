@@ -29,4 +29,11 @@ class RecipeIngredientRowViewModel: ObservableObject {
             amount = filtered
         }
     }
+
+    func convertToIngredient() throws -> RecipeIngredient {
+        guard let quantity = Double(amount) else {
+            throw RecipeFormError.invalidIngredientQuantity
+        }
+        return try RecipeIngredient(name: ingredientName, quantity: Quantity(unit, value: quantity))
+    }
 }
