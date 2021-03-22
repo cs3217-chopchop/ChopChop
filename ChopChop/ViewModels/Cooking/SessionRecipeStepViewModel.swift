@@ -1,9 +1,16 @@
 import SwiftUI
 
-class SessionRecipeStepViewModel: ObservableObject {
+class SessionRecipeStepViewModel: ObservableObject, Identifiable {
     @Published var isCompleted: Bool
     @Published var textWithTimers: [(String, CountdownTimerViewModel?)] = []
     private let sessionRecipeStep: SessionRecipeStep
+    @Published var isDisabled = false {
+        didSet {
+            if isDisabled {
+                textWithTimers.forEach { $0.1?.isDisabled = true }
+            }
+        }
+    }
 
     init(sessionRecipeStep: SessionRecipeStep) {
         self.sessionRecipeStep = sessionRecipeStep
@@ -12,9 +19,11 @@ class SessionRecipeStepViewModel: ObservableObject {
     }
 
     func toggleCompleted() {
+        guard !isDisabled else {
+            return
+        }
         sessionRecipeStep.toggleCompleted()
         isCompleted = sessionRecipeStep.isCompleted
-
     }
 
     /// Breaks up the contents of a step to an array of tuple containing substring of the content and an optional CountdownTimerViewModel

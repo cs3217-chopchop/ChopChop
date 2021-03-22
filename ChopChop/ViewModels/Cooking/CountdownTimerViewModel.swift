@@ -6,6 +6,7 @@ class CountdownTimerViewModel: ObservableObject, Identifiable {
     @Published var disableIncreaseTime: Bool
     @Published var disableDecreaseTime: Bool
     @Published var disableStart: Bool
+    var isDisabled: Bool = false
 
     init(countdownTimer: CountdownTimer) {
         self.countdownTimer = countdownTimer
@@ -16,6 +17,9 @@ class CountdownTimerViewModel: ObservableObject, Identifiable {
     }
 
     func countdown() {
+        guard !isDisabled else {
+            return
+        }
         countdownTimer.countdown()
         displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
     }

@@ -4,16 +4,28 @@ struct DeductibleIngredientView: View {
     @ObservedObject var viewModel: DeductibleIngredientViewModel
 
     var body: some View {
-        HStack {
+        HStack(alignment: .center) {
             Text(viewModel.ingredient.name)
-            TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
-                .keyboardType(.decimalPad)
-                .foregroundColor(viewModel.isError ? .red : .black)
-                .frame(width: 100, height: 50, alignment: .center)
-                .border(Color.black, width: 1)
-                .multilineTextAlignment(.center)
-                .padding()
-            Text(viewModel.recipeIngredient.quantity.type.description)
+            VStack {
+                TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
+                    .keyboardType(.decimalPad)
+                    .foregroundColor(viewModel.errorMsg.isEmpty ? .black : .red)
+                    .frame(width: 100, height: 50, alignment: .center)
+                    .border(Color.black, width: 1)
+                    .multilineTextAlignment(.center)
+
+                Text(viewModel.errorMsg)
+                    .foregroundColor(.red)
+            }
+            Menu(viewModel.unit.nonEmptyDescription) {
+                ForEach(QuantityType.allCases, id: \.description) { type in
+                    Button(action: {
+                        viewModel.updateUnit(unit: type)
+                    }) {
+                        Text(type.nonEmptyDescription)
+                    }
+                }
+            }
         }
     }
 }

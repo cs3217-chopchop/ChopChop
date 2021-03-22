@@ -13,7 +13,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategoryy") { db in
+        migrator.registerMigration("CreateRecipeCategory") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)
@@ -175,7 +175,14 @@ extension AppDatabase {
             RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
-            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram))
+            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pork Chop", quantity: .mass(100, unit: .ounce)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Egg", quantity: .count(3)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Salt", quantity: .count(0)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pepper", quantity: .count(0)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Oil", quantity: .volume(10, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Onion", quantity: .count(3)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Rice", quantity: .count(3))
         ]
 
         for index in ingredients.indices {
@@ -226,7 +233,7 @@ extension AppDatabase {
                 To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
                 Simmer for a few minutes on medium heat. \
                 Serve by placing 1 serving of steamed rice in a large rice bowl. \
-                Top with the simmered tonkatsu on top of the rice. Repeat to make 3 more servings.
+                Repeat to make 3 more servings.
                 """)
         ]
 
@@ -264,7 +271,10 @@ extension AppDatabase {
             IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
             IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
             IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass)
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Egg", quantityType: .count),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Salt", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Oil", quantityType: .volume)
         ]
 
         for index in ingredients.indices {
@@ -294,7 +304,16 @@ extension AppDatabase {
                                   quantity: .mass(20, unit: .gram)),
             IngredientBatchRecord(ingredientId: ingredients[6].id,
                                   expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .mass(0.05, unit: .kilogram))
+                                  quantity: .mass(0.05, unit: .kilogram)),
+            IngredientBatchRecord(ingredientId: ingredients[7].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
+                                  quantity: .count(3)),
+            IngredientBatchRecord(ingredientId: ingredients[8].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(20, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[9].id,
+                                  expiryDate: .today,
+                                  quantity: .volume(20, unit: .pint))
         ]
 
         for index in batches.indices {

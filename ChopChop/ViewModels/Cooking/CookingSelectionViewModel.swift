@@ -9,7 +9,15 @@ final class CookingSelectionViewModel: ObservableObject {
     private var recipesCancellable: AnyCancellable?
     private var recipeIngredientsCancellable: AnyCancellable?
 
-    let categoryIds: [Int64?]
+    private let categoryIds: [Int64?]
+
+    private(set) var sessionRecipeViewModel: SessionRecipeViewModel? {
+        didSet {
+            if sessionRecipeViewModel?.sessionRecipe.isCompleted == true {
+                sessionRecipeViewModel = nil
+            }
+        }
+    }
 
     init(categoryIds: [Int64?]) {
         self.categoryIds = categoryIds
@@ -33,6 +41,10 @@ final class CookingSelectionViewModel: ObservableObject {
         }
         .switchToLatest()
         .eraseToAnyPublisher()
+    }
+
+    func updateSessionRecipeViewModel(_ sessionRecipeViewModel: SessionRecipeViewModel?) {
+        self.sessionRecipeViewModel = sessionRecipeViewModel
     }
 
 }

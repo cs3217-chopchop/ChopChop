@@ -3,6 +3,7 @@ import Foundation
 class SessionRecipe {
     private(set) var recipe: Recipe
     private(set) var sessionSteps: [SessionRecipeStep]
+    private(set) var isCompleted = false
 
     init(recipe: Recipe) {
         self.recipe = recipe
@@ -23,6 +24,10 @@ class SessionRecipe {
         }
 
         return true
+    }
+
+    func updateCompleted() {
+        isCompleted = true
     }
 
 }

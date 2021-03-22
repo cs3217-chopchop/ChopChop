@@ -15,7 +15,7 @@ struct SessionRecipeStepView: View {
                     .foregroundColor(viewModel.isCompleted ? Color.gray : $1.1 == nil ? .black : .blue)
             })
             .strikethrough(viewModel.isCompleted, color: nil)
-        }
+        }.disabled(viewModel.isDisabled)
         .toggleStyle(CheckboxToggleStyle())
         LazyVGrid(columns: columns, spacing: 24) {
             ForEach(viewModel.textWithTimers.compactMap({ $0.1 })) { timer in

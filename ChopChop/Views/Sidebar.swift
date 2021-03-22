@@ -4,6 +4,7 @@ import SwiftUI
     var recipeCategories: [RecipeCategory] = []
     var ingredientCategories: [IngredientCategory] = []
     let allRecipesViewModel: RecipeCollectionViewModel
+    let cookingSelectionViewModel: CookingSelectionViewModel
 
     var body: some View {
         List {
@@ -17,8 +18,7 @@ import SwiftUI
 
     var cookingSection: some View {
         NavigationLink(
-            destination: CookingSelectionView(viewModel: CookingSelectionViewModel(
-                                                categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
+            destination: CookingSelectionView(viewModel: cookingSelectionViewModel)
         ) {
             Text("Cooking")
                 .font(.title3)
@@ -93,6 +93,6 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""))
+        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""), cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
     }
  }

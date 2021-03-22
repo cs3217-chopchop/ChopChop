@@ -66,7 +66,7 @@ struct SessionRecipeView: View {
         VStack {
             Text("Steps")
             ForEach(viewModel.steps) { step in
-                SessionRecipeStepView(viewModel: SessionRecipeStepViewModel(sessionRecipeStep: step))
+                SessionRecipeStepView(viewModel: step)
             }
         }.padding()
     }

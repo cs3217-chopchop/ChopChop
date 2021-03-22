@@ -26,10 +26,10 @@ class CompleteSessionRecipeViewModel: ObservableObject {
         var ingredientsToSave: [Ingredient] = []
         // atomic
         for ingredientViewModel in deductibleIngredientsViewModels {
-            ingredientViewModel.updateError(isError: false) // reset error
+            ingredientViewModel.updateError(msg: "") // reset error
 
             guard let amount = Double(ingredientViewModel.deductBy) else {
-                ingredientViewModel.updateError(isError: true)
+                ingredientViewModel.updateError(msg: "Not a valid number")
                 continue
             }
 
@@ -41,13 +41,18 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 continue
             }
 
-            guard let quantityUsed = try? Quantity(ingredientViewModel.recipeIngredient.quantity.type, value: amount) else {
-                ingredientViewModel.updateError(isError: true)
+            guard let quantityUsed = try? Quantity(ingredientViewModel.unit, value: amount) else {
+                ingredientViewModel.updateError(msg: "Not a valid number")
                 continue
             }
 
-            guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed), sufficientAmount else {
-                ingredientViewModel.updateError(isError: true)
+            guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
+                ingredientViewModel.updateError(msg: "Not a valid quantity type")
+                continue
+            }
+
+            guard sufficientAmount else {
+                ingredientViewModel.updateError(msg: "Insufficient quantity in ingredient store")
                 continue
             }
 
@@ -60,7 +65,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        guard (deductibleIngredientsViewModels.allSatisfy { !$0.isError }) else {
+        guard (deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }) else {
             return
         }
 
@@ -73,7 +78,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        isSuccess = deductibleIngredientsViewModels.allSatisfy { !$0.isError }
+        isSuccess = deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {

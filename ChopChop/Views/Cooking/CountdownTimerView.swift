@@ -16,28 +16,34 @@ struct CountdownTimerView: View {
                     Button("+") {
                         viewModel.increaseTime()
                     }
+                    .disabled(viewModel.isDisabled)
                     Button("-") {
                         viewModel.decreaseTime()
                     }
+                    .disabled(viewModel.isDisabled)
                 }
                 Button(action: {
                     viewModel.start()
                 }) {
                     Image(systemName: "hourglass.bottomhalf.fill")
                 }
+                .disabled(viewModel.isDisabled)
             } else {
                 Button(action: {
                     viewModel.pauseResume()
                 }) {
                     Image(systemName: "playpause")
                 }
+                .disabled(viewModel.isDisabled)
                 Button(action: {
                     viewModel.restart()
                 }) {
                     Image(systemName: "arrow.counterclockwise")
                 }
+                .disabled(viewModel.isDisabled)
             }
         }
+        .disabled(viewModel.isDisabled)
         .frame(width: 220, height: 60, alignment: .center)
         .foregroundColor(.white)
         .background(Color.blue)
