@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Combine
+import GRDB
 
 class RecipeFormViewModel: ObservableObject {
 //    private var recipe: Recipe?
@@ -150,45 +151,34 @@ class RecipeFormViewModel: ObservableObject {
             try checkFormValid()
             var newRecipe = try generateRecipe()
             try storageManager.saveRecipe(&newRecipe)
-            print("success!")
             return true
-        } catch RecipeFormError.emptyName {
-            hasError = true
-            errorMessage = RecipeFormError.emptyName.rawValue
-            return false
-        } catch RecipeFormError.emptyServing {
-            hasError = true
-            errorMessage = RecipeFormError.emptyServing.rawValue
-            return false
-        } catch RecipeFormError.invalidServing {
-            hasError = true
-            errorMessage = RecipeFormError.invalidServing.rawValue
-            return false
-        } catch RecipeFormError.emptyStep {
-            hasError = true
-            errorMessage = RecipeFormError.emptyStep.rawValue
-            return false
-        } catch RecipeFormError.emptyStepDescription {
-            hasError = true
-            errorMessage = RecipeFormError.emptyStepDescription.rawValue
-            return false
-        } catch RecipeFormError.emptyIngredient {
-            hasError = true
-            errorMessage = RecipeFormError.emptyIngredient.rawValue
-            return false
-        } catch RecipeFormError.emptyIngredientQuantity {
-            hasError = true
-            errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
-            return false
-        } catch RecipeFormError.emptyIngredientDescription {
-            hasError = true
-            errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
-            return false
         } catch {
             hasError = true
-            errorMessage = error.localizedDescription
+            switch error {
+            case RecipeFormError.emptyName:
+                errorMessage = RecipeFormError.emptyName.rawValue
+            case RecipeFormError.emptyServing:
+                errorMessage = RecipeFormError.emptyServing.rawValue
+            case RecipeFormError.invalidServing:
+                errorMessage = RecipeFormError.invalidServing.rawValue
+            case RecipeFormError.emptyStep:
+                errorMessage = RecipeFormError.emptyStep.rawValue
+            case RecipeFormError.emptyStepDescription:
+                errorMessage = RecipeFormError.emptyStepDescription.rawValue
+            case RecipeFormError.emptyIngredient:
+                errorMessage = RecipeFormError.emptyIngredient.rawValue
+            case RecipeFormError.emptyIngredientQuantity:
+                errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
+            case RecipeFormError.emptyIngredientDescription:
+                errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
+            case DatabaseError.SQLITE_CONSTRAINT:
+                errorMessage = "You already have a recipe with the same name."
+            default:
+                errorMessage = error.localizedDescription
+            }
             return false
         }
+
     }
 
     private func getRecipeCategoryId() -> Int64? {
@@ -196,10 +186,8 @@ class RecipeFormViewModel: ObservableObject {
             return nil
         }
 
-        for category in allRecipeCategories {
-            if category.name == recipeCategory {
-                return category.id
-            }
+        for category in allRecipeCategories where category.name == recipeCategory {
+            return category.id
         }
 
         return nil
