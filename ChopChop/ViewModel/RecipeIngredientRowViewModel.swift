@@ -12,12 +12,10 @@ class RecipeIngredientRowViewModel: ObservableObject {
             ensureValidAmount()
         }
     }
-    @Published var unit: String = ""
+    @Published var unit: QuantityType = .count
     @Published var ingredientName: String = ""
 
-    static var unitList = ["gram", "kilogram", "tablespoon", "milliliter", "teaspoon", "liter", "count"]
-
-    init(amount: String, unit: String, ingredientName: String) {
+    init(amount: String, unit: QuantityType, ingredientName: String) {
         self.amount = amount
         self.unit = unit
         self.ingredientName = ingredientName

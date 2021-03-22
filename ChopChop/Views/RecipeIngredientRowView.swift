@@ -15,13 +15,13 @@ struct RecipeIngredientRowView: View {
         HStack {
             quantity
             Picker("Unit", selection: $viewModel.unit) {
-                ForEach(RecipeIngredientRowViewModel.unitList, id: \.self) {
-                    Text($0)
+                ForEach(QuantityType.allCases, id: \.self) {
+                    Text($0.description)
                 }
             }
             .pickerStyle(MenuPickerStyle())
             Spacer()
-            Text(viewModel.unit)
+            Text(viewModel.unit.description)
             TextField("Ingredient", text: $viewModel.ingredientName)
         }
     }

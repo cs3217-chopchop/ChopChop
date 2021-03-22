@@ -11,17 +11,19 @@ import Combine
 struct RecipeFormView: View {
 
     @ObservedObject var viewModel: RecipeFormViewModel
+    var hasError: Bool
+
+    init(viewModel: RecipeFormViewModel) {
+        self.viewModel = viewModel
+        hasError = viewModel.hasError
+    }
 
     var body: some View {
         Form {
             Section(header: Text("General Details")) {
                 TextField("Recipe name", text: $viewModel.recipeName)
                 TextField("Serving size", text: $viewModel.serving)
-                Picker("Cuisine", selection: $viewModel.recipeCategory) {
-                    ForEach(viewModel.existingRecipeCategories, id: \.self) {
-                        Text($0)
-                    }
-                }
+                cuisine
                 .pickerStyle(MenuPickerStyle())
                 difficulty
             }
@@ -54,6 +56,18 @@ struct RecipeFormView: View {
             Button("Add Recipe") {
 //                try viewModel.saveRecipe()
             }
+        }
+    }
+    
+    var cuisine: some View {
+        HStack {
+            Picker("Cuisine", selection: $viewModel.recipeCategory) {
+                ForEach(viewModel.allRecipeCategories.map({ $0.name }), id: \.self) {
+                    Text($0)
+                }
+            }
+            Spacer()
+            Text(viewModel.recipeCategory)
         }
     }
 
