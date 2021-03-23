@@ -15,6 +15,12 @@ struct IngredientCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
             HStack {
+                NavigationLink(
+                    destination: IngredientFormView(
+                        viewModel: IngredientFormViewModel(
+                            addToCategory: viewModel.categoryId))) {
+                    Image(systemName: "plus")
+                }
                 Spacer()
                 Button(action: {
                     withAnimation {
@@ -92,7 +98,7 @@ struct IngredientCollectionView: View {
 
     var listView: some View {
         List(viewModel.ingredients) { ingredient in
-            IngredientRow(ingredient: ingredient)
+            IngredientRow(info: ingredient)
         }
         .animation(.none)
     }
@@ -101,11 +107,7 @@ struct IngredientCollectionView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.ingredients) { ingredient in
-                    NavigationLink(
-                        destination: Text(ingredient.name)
-                    ) {
-                        GridTile(ingredient: ingredient)
-                    }
+                    GridTile(info: ingredient)
                 }
             }
             .padding([.bottom, .leading, .trailing])
@@ -113,63 +115,79 @@ struct IngredientCollectionView: View {
         .padding(.top)
     }
 
-    func IngredientRow(ingredient: IngredientInfo) -> some View {
-        NavigationLink(
-            destination: Text(ingredient.name)
-        ) {
-            HStack(alignment: .top) {
-                Image("recipe")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 48, height: 48)
-                    .cornerRadius(10)
-                    .clipped()
-                VStack(alignment: .leading) {
-                    Text(ingredient.name)
-                        .lineLimit(1)
-                    Text(ingredient.quantity)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+    @ViewBuilder
+    func IngredientRow(info: IngredientInfo) -> some View {
+        if let ingredient = viewModel.getIngredient(info: info) {
+            NavigationLink(
+                destination: IngredientDetail(ingredient: ingredient)
+            ) {
+                HStack(alignment: .top) {
+                    Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 48, height: 48)
+                        .cornerRadius(10)
+                        .clipped()
+                    VStack(alignment: .leading) {
+                        Text(ingredient.name)
+                            .lineLimit(1)
+                        Text("Total: \(ingredient.totalQuantityDescription), Usable: \(ingredient.totalUsableQuantityDescription)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .padding([.top, .bottom], 6)
             }
-            .padding([.top, .bottom], 6)
         }
     }
 
-    func GridTile(ingredient: IngredientInfo) -> some View {
-        Image("recipe")
-            .resizable()
-            .scaledToFill()
-            .frame(minWidth: 0, maxWidth: .infinity)
-            .aspectRatio(1, contentMode: .fill)
-            .cornerRadius(10)
-            .clipped()
-            .overlay(
-                ZStack(alignment: .bottomLeading) {
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(stops: [
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .black, location: 0.5)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .cornerRadius(10)
-                        .opacity(0.8)
-                    VStack(alignment: .leading) {
-                        Text(ingredient.name)
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                        Text(ingredient.quantity)
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                }
-            )
-            .padding([.leading, .trailing], 8)
+    @ViewBuilder
+    func GridTile(info: IngredientInfo) -> some View {
+        if let ingredient = viewModel.getIngredient(info: info) {
+            NavigationLink(
+                destination: IngredientDetail(ingredient: ingredient)
+            ) {
+                Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
+                    .resizable()
+                    .scaledToFill()
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                    .aspectRatio(1, contentMode: .fill)
+                    .cornerRadius(10)
+                    .clipped()
+                    .overlay(
+                        ZStack(alignment: .bottomLeading) {
+                            Rectangle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(stops: [
+                                            .init(color: .clear, location: 0),
+                                            .init(color: .black, location: 0.5)
+                                        ]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .cornerRadius(10)
+                                .opacity(0.8)
+                            VStack(alignment: .leading) {
+                                Text(ingredient.name)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                Text("Total: \(ingredient.totalQuantityDescription)\nUsable: \(ingredient.totalUsableQuantityDescription)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                        }
+                    )
+                    .padding([.leading, .trailing], 8)
+            }
+        }
+    }
+
+    func IngredientDetail(ingredient: Ingredient) -> some View {
+        let ingredientViewModel = IngredientViewModel(ingredient: ingredient)
+        return IngredientDetailView(viewModel: ingredientViewModel)
     }
 }
 

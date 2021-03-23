@@ -7,7 +7,7 @@ import Combine
  Invariants:
  - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
-struct IngredientCategory: Identifiable {
+struct IngredientCategory: Identifiable, Hashable {
     var id: Int64?
     private(set) var name: String
 
@@ -42,26 +42,25 @@ struct IngredientCategory: Identifiable {
      If the category contains an existing ingredient with the same name and quantity type,
      combines the given ingredient instead.
      */
-    func add(_ addedIngredient: inout Ingredient) throws {
+    func add(_ addedIngredient: Ingredient) throws {
         let storageManager = StorageManager()
+        var ingredientInfos: [IngredientInfo] = []
 
-        // TODO: Replace this with storage manager call to get ingredients in this category
-        let ingredients: [Ingredient] = []
+        _ = storageManager.ingredientsPublisher(query: "", categoryIds: [id])
+            .sink(receiveCompletion: { _ in }, receiveValue: { ingredients in
+                ingredientInfos = ingredients
+            })
 
-        guard var existingIngredient = ingredients.first(where: { $0 == addedIngredient }) else {
+        guard let existingIngredientInfo = ingredientInfos.first(where: { $0.name == addedIngredient.name }),
+              let existingIngredientId = existingIngredientInfo.id,
+              let existingIngredient = try storageManager.fetchIngredient(id: existingIngredientId) else {
             addedIngredient.ingredientCategoryId = id
-            try storageManager.saveIngredient(&addedIngredient)
             return
         }
 
-        do {
-            try existingIngredient.combine(with: addedIngredient)
-            try storageManager.saveIngredient(&existingIngredient)
-            if let addedId = addedIngredient.id {
-                try storageManager.deleteIngredients(ids: [addedId])
-            }
-        } catch {
-            return
+        try existingIngredient.combine(with: addedIngredient)
+        if let addedId = addedIngredient.id {
+            try storageManager.deleteIngredients(ids: [addedId])
         }
     }
 

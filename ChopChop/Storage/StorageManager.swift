@@ -1,6 +1,6 @@
-import Combine
 import Foundation
 import UIKit
+import Combine
 
 struct StorageManager {
     let appDatabase: AppDatabase
@@ -160,7 +160,7 @@ struct StorageManager {
     }
 }
 
-// MARK: - Images Persistence
+// MARK: - Image Persistence
 extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
@@ -191,6 +191,10 @@ extension StorageManager {
     }
 
     func renameIngredientImage(from oldName: String, to newName: String) throws {
+        guard oldName != newName else {
+            return
+        }
+
         guard let image = fetchIngredientImage(name: oldName) else {
             return
         }
