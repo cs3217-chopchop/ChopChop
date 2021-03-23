@@ -20,7 +20,7 @@ struct CompleteSessionRecipeView: View {
             Text(viewModel.isSuccess ? "Success" : "")
                 .foregroundColor(.green)
                 .padding()
-        }
+        }.padding()
     }
 }
 

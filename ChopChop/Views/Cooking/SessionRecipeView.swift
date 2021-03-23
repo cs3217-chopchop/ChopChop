@@ -35,10 +35,9 @@ struct SessionRecipeView: View {
             Text(viewModel.recipeCategory)
             Text("Time taken: \(viewModel.totalTimeTaken)")
 
-            VStack(alignment: .leading) {
-                ingredients
-                steps
-            }
+            ingredients
+            steps
+
             Spacer()
             Button(action: {
                 viewModel.toggleShowComplete()
@@ -70,17 +69,15 @@ struct SessionRecipeView: View {
 
     var steps: some View {
         VStack {
-            VStack(alignment: .center) {
-                Text("Steps")
-                    .font(.title2)
-                    .bold()
-            }
+            Text("Steps")
+                .font(.title2)
+                .bold()
             VStack(alignment: .leading) {
                 ForEach(viewModel.steps) { step in
                     SessionRecipeStepView(viewModel: step)
                 }
             }
-        }.padding()
+        }.padding([.horizontal], 100)
     }
 }
 
