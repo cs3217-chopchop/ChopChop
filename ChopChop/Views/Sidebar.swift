@@ -1,10 +1,15 @@
 import SwiftUI
 
  struct Sidebar: View {
+    @State var editMode: EditMode = .inactive
+
     var recipeCategories: [RecipeCategory] = []
     var ingredientCategories: [IngredientCategory] = []
     let allRecipesViewModel: RecipeCollectionViewModel
     let cookingSelectionViewModel: CookingSelectionViewModel
+
+    let deleteRecipeCategories: (IndexSet) -> Void
+    let deleteIngredientCategories: (IndexSet) -> Void
 
     var body: some View {
         List {
@@ -13,7 +18,11 @@ import SwiftUI
             ingredientsSection
         }
         .listStyle(SidebarListStyle())
+        .toolbar {
+            EditButton()
+        }
         .navigationTitle(Text("ChopChop"))
+        .environment(\.editMode, $editMode)
     }
 
     var cookingSection: some View {
@@ -49,6 +58,8 @@ import SwiftUI
                         .lineLimit(1)
                 }
             }
+            .onDelete(perform: deleteRecipeCategories)
+            .deleteDisabled(!editMode.isEditing)
             NavigationLink(
                 destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
             ) {
@@ -81,6 +92,8 @@ import SwiftUI
                         .lineLimit(1)
                 }
             }
+            .onDelete(perform: deleteIngredientCategories)
+            .deleteDisabled(!editMode.isEditing)
             NavigationLink(
                 destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
             ) {
@@ -94,6 +107,8 @@ import SwiftUI
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
         Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""),
-                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
+                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []),
+                deleteRecipeCategories: { _ in },
+                deleteIngredientCategories: { _ in })
     }
  }

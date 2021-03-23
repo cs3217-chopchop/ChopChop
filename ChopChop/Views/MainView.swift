@@ -18,7 +18,9 @@ struct MainView: View {
         Sidebar(recipeCategories: viewModel.recipeCategories,
                 ingredientCategories: viewModel.ingredientCategories,
                 allRecipesViewModel: allRecipesViewModel,
-                cookingSelectionViewModel: cookingSelectionViewModel)
+                cookingSelectionViewModel: cookingSelectionViewModel,
+                deleteRecipeCategories: viewModel.deleteRecipeCategories,
+                deleteIngredientCategories: viewModel.deleteIngredientCategories)
 
         RecipeCollectionView(viewModel: allRecipesViewModel)
     }
