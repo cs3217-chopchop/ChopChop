@@ -1,7 +1,7 @@
 import SwiftUI
 
  struct Sidebar: View {
-    @State var editMode: EditMode = .inactive
+    @State var editMode = EditMode.inactive
 
     var recipeCategories: [RecipeCategory] = []
     var ingredientCategories: [IngredientCategory] = []
@@ -43,9 +43,9 @@ import SwiftUI
                                                         title: "All Recipes",
                                                         categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
             ) {
-                Image(systemName: "tray.2")
-                Text("All Recipes")
+                Label("All Recipes", systemImage: "tray.2")
             }
+
             ForEach(recipeCategories) { category in
                 NavigationLink(
                     destination: RecipeCollectionView(viewModel:
@@ -53,18 +53,29 @@ import SwiftUI
                                                             title: category.name,
                                                             categoryIds: [category.id].compactMap { $0 }))
                 ) {
-                    Image(systemName: "folder")
-                    Text(category.name)
-                        .lineLimit(1)
+                    Label {
+                        Text(category.name)
+                            .lineLimit(1)
+                    } icon: {
+                        Image(systemName: "folder")
+                    }
                 }
             }
             .onDelete(perform: deleteRecipeCategories)
             .deleteDisabled(!editMode.isEditing)
+
             NavigationLink(
                 destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
             ) {
-                Image(systemName: "questionmark.folder")
-                Text("Uncategorised")
+                Label("Uncategorised", systemImage: "questionmark.folder")
+            }
+
+            if editMode.isEditing {
+                Button(action: {
+                    print("add")
+                }) {
+                    Label("Add a recipe category...", systemImage: "plus")
+                }
             }
         }
     }
@@ -77,9 +88,9 @@ import SwiftUI
                                                         title: "All Ingredients",
                                                         categoryIds: ingredientCategories.compactMap { $0.id } + [nil]))
             ) {
-                Image(systemName: "tray.2")
-                Text("All Ingredients")
+                Label("All Ingredients", systemImage: "tray.2")
             }
+
             ForEach(ingredientCategories) { category in
                 NavigationLink(
                     destination: IngredientCollectionView(viewModel:
@@ -87,18 +98,30 @@ import SwiftUI
                                                             title: category.name,
                                                             categoryIds: [category.id].compactMap { $0 }))
                 ) {
-                    Image(systemName: "folder")
-                    Text(category.name)
-                        .lineLimit(1)
+                    Label {
+                        Text(category.name)
+                            .lineLimit(1)
+                    } icon: {
+                        Image(systemName: "folder")
+                    }
+
                 }
             }
             .onDelete(perform: deleteIngredientCategories)
             .deleteDisabled(!editMode.isEditing)
+
             NavigationLink(
                 destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
             ) {
-                Image(systemName: "questionmark.folder")
-                Text("Uncategorised")
+                Label("Uncategorised", systemImage: "questionmark.folder")
+            }
+
+            if editMode.isEditing {
+                Button(action: {
+                    print("add")
+                }) {
+                    Label("Add an ingredient category...", systemImage: "plus")
+                }
             }
         }
     }
