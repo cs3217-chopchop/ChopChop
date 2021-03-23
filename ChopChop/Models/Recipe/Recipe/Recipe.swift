@@ -2,14 +2,14 @@ import Foundation
 import GRDB
 
 /// Note there is no relationship between steps and ingredients after parsing stage
-class Recipe: FetchableRecord {
+class Recipe: FetchableRecord, ObservableObject {
     var id: Int64?
-    private(set) var name: String
-    private(set) var servings: Double
-    var recipeCategoryId: Int64?
-    private(set) var difficulty: Difficulty?
-    private(set) var steps: [RecipeStep]
-    private(set) var ingredients: [RecipeIngredient]
+    @Published private(set) var name: String
+    @Published private(set) var servings: Double
+    @Published var recipeCategoryId: Int64?
+    @Published private(set) var difficulty: Difficulty?
+    @Published private(set) var steps: [RecipeStep]
+    @Published private(set) var ingredients: [RecipeIngredient]
 
     init(name: String, servings: Double = 1, difficulty: Difficulty? = nil,
          steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = []) throws {
@@ -39,9 +39,33 @@ class Recipe: FetchableRecord {
         assert(checkRepresentation())
     }
 
+    func updateServing(_ serving: Double) {
+        assert(checkRepresentation())
+        self.servings = serving
+        assert(checkRepresentation())
+    }
+
+    func updateSteps(_ steps: [RecipeStep]) {
+        assert(checkRepresentation())
+        self.steps = steps
+        assert(checkRepresentation())
+    }
+
+    func updateIngredients(_ ingredients: [RecipeIngredient]) {
+        assert(checkRepresentation())
+        self.ingredients = ingredients
+        assert(checkRepresentation())
+    }
+
     func updateDifficulty(_ difficulty: Difficulty) {
         assert(checkRepresentation())
         self.difficulty = difficulty
+        assert(checkRepresentation())
+    }
+
+    func updateCategory(_ categoryId: Int64?) {
+        assert(checkRepresentation())
+        self.recipeCategoryId = categoryId
         assert(checkRepresentation())
     }
 

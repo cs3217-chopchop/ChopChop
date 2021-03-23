@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 struct RecipeFormView: View {
-    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    @Environment(\.presentationMode) var mode
     @ObservedObject var viewModel: RecipeFormViewModel
 
     init(viewModel: RecipeFormViewModel) {
@@ -61,7 +61,7 @@ struct RecipeFormView: View {
 
             Button(viewModel.isEdit ? "Save Recipe" : "Add Recipe") {
                 if viewModel.saveRecipe() {
-                    self.mode.wrappedValue.dismiss()
+                    mode.wrappedValue.dismiss()
                 }
             }
         }

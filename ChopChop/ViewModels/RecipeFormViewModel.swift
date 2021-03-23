@@ -139,8 +139,13 @@ class RecipeFormViewModel: ObservableObject {
     func saveRecipe() -> Bool {
         do {
             try checkFormValid()
-            var newRecipe = try generateRecipe()
-            try storageManager.saveRecipe(&newRecipe)
+            if isEdit {
+                var updatedRecipe = try updateRecipe()
+                try storageManager.saveRecipe(&updatedRecipe)
+            } else {
+                var newRecipe = try generateRecipe()
+                try storageManager.saveRecipe(&newRecipe)
+            }
             return true
         } catch {
             hasError = true
@@ -210,5 +215,30 @@ class RecipeFormViewModel: ObservableObject {
         newRecipe.recipeCategoryId = recipeCategoryId
 
         return newRecipe
+    }
+
+    func updateRecipe() throws -> Recipe {
+        guard let recipe = existingRecipe else {
+            fatalError("No existing recipe.")
+        }
+
+        guard let servingSize = Double(serving) else {
+            throw RecipeFormError.invalidServing
+        }
+
+        let recipeStep = try steps.map({ try RecipeStep(content: $0) })
+        let recipeIngredient = try ingredients.map({
+            try $0.convertToIngredient()
+        })
+        let recipeCategoryId = getRecipeCategoryId()
+
+        try recipe.updateName(recipeName)
+        recipe.updateServing(servingSize)
+        recipe.updateCategory(recipeCategoryId)
+        recipe.updateDifficulty(difficulty)
+        recipe.updateSteps(recipeStep)
+        recipe.updateIngredients(recipeIngredient)
+        return recipe
+
     }
 }
