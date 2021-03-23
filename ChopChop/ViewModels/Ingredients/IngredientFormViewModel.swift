@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 class IngredientFormViewModel: ObservableObject {
     private(set) var ingredient: Ingredient?
@@ -6,12 +7,15 @@ class IngredientFormViewModel: ObservableObject {
 
     @Published var selectedType: BaseQuantityType
     @Published var inputName: String
+    @Published var selectedCategory: IngredientCategory?
     @Published var image: UIImage
+    @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
     private let storageManager = StorageManager()
+    private var ingredientCategoriesCancellable: AnyCancellable?
 
     init(edit ingredient: Ingredient) {
         self.ingredient = ingredient
@@ -19,16 +23,28 @@ class IngredientFormViewModel: ObservableObject {
 
         self.selectedType = ingredient.quantityType
         self.inputName = ingredient.name
-        self.image = StorageManager().fetchIngredientImage(name: ingredient.name) ?? UIImage()
+        self.image = storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
+
+        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
+            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
+                self?.ingredientCategories = categories
+                self?.selectedCategory = categories.first(where: { $0.id == ingredient.ingredientCategoryId })
+            })
     }
 
-    init() {
+    init(addToCategory categoryId: Int64?) {
         self.ingredient = nil
         self.isEdit = false
 
         self.selectedType = .count
         self.inputName = ""
         self.image = UIImage()
+
+        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
+            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
+                self?.ingredientCategories = categories
+                self?.selectedCategory = categories.first(where: { $0.id == categoryId })
+            })
     }
 
     var areFieldsValid: Bool {
@@ -50,6 +66,12 @@ class IngredientFormViewModel: ObservableObject {
             return
         }
 
+        if let category = selectedCategory {
+            try category.add(savedIngredient)
+        } else {
+            savedIngredient.ingredientCategoryId = nil
+        }
+
         if image != UIImage() {
             try storageManager.saveIngredientImage(image, name: inputName)
         }
@@ -60,6 +82,7 @@ class IngredientFormViewModel: ObservableObject {
     func reset() {
         self.selectedType = .count
         self.inputName = ""
+        self.selectedCategory = nil
         self.image = UIImage()
     }
 }

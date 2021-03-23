@@ -15,7 +15,10 @@ struct IngredientCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
             HStack {
-                NavigationLink(destination: IngredientFormView(viewModel: IngredientFormViewModel())) {
+                NavigationLink(
+                    destination: IngredientFormView(
+                        viewModel: IngredientFormViewModel(
+                            addToCategory: viewModel.categoryId))) {
                     Image(systemName: "plus")
                 }
                 Spacer()

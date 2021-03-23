@@ -181,6 +181,10 @@ extension StorageManager {
     }
 
     func renameIngredientImage(from oldName: String, to newName: String) throws {
+        guard oldName != newName else {
+            return
+        }
+
         guard let image = fetchIngredientImage(name: oldName) else {
             return
         }

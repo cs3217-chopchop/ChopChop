@@ -10,6 +10,7 @@ struct IngredientFormView: View {
                 quantityTypeSection
             }
             nameSection
+            categorySection
             imageSection
             saveButton
         }
@@ -28,14 +29,32 @@ struct IngredientFormView: View {
                         Text($0.description)
                     }
                 }
+                .pickerStyle(MenuPickerStyle())
             }
-            .pickerStyle(MenuPickerStyle())
         }
     }
 
     var nameSection: some View {
         Section(header: Text("NAME")) {
             TextField("Name", text: $viewModel.inputName)
+        }
+    }
+
+    var categorySection: some View {
+        Section(header: Text("CATEGORY")) {
+            HStack {
+                Text(viewModel.selectedCategory?.name ?? "Uncategorised")
+                Spacer()
+                Picker(
+                    selection: $viewModel.selectedCategory,
+                    label: Image(systemName: "tag.circle")) {
+                    Text("Uncategorised").tag(nil as IngredientCategory?)
+                    ForEach(viewModel.ingredientCategories, id: \.id) {
+                        Text($0.name).tag($0 as IngredientCategory?)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+            }
         }
     }
 

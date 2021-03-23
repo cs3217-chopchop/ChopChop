@@ -30,6 +30,18 @@ final class IngredientCollectionViewModel: ObservableObject {
             }
     }
 
+    var categoryId: Int64? {
+        guard !categoryIds.isEmpty else {
+            return nil
+        }
+
+        guard categoryIds.count == 1, let id = categoryIds.first else {
+            return nil
+        }
+
+        return id
+    }
+
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
         $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd)
             .map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
