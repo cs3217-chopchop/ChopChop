@@ -32,6 +32,9 @@ struct RecipeParser {
      */
     static func parseInstructions(instructions: String) -> [String] {
         let trimmedInstructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedInstructions.isEmpty {
+            return []
+        }
         if trimmedInstructions.contains(where: \.isNewline) {
             return splitByNewLine(text: trimmedInstructions)
         }
@@ -79,6 +82,9 @@ struct RecipeParser {
 
     static func parseIngredientString(ingredientString: String) -> [String: Quantity] {
         let trimmedIngredient = ingredientString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedIngredient.isEmpty {
+            return [:]
+        }
         var ingredientList = [String]()
         if trimmedIngredient.contains(where: \.isNewline) {
             ingredientList = splitByNewLine(text: ingredientString)

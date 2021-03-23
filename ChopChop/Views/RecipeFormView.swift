@@ -37,10 +37,18 @@ struct RecipeFormView: View {
             }
 
             Section(header: Text("Quick Parse")) {
-                TextEditor(text: $viewModel.instructionParsingString)
-                    .disableAutocorrection(true)
-                TextEditor(text: $viewModel.ingredientParsingString)
-                    .disableAutocorrection(true)
+                HStack {
+                    Text("Ingredient")
+                    TextEditor(text: $viewModel.ingredientParsingString)
+                        .disableAutocorrection(true)
+                }
+
+                HStack {
+                    Text("Instructions")
+                    TextEditor(text: $viewModel.instructionParsingString)
+                        .disableAutocorrection(true)
+                }
+
                 Button(
                     action: {
                         viewModel.parseData()
@@ -51,7 +59,7 @@ struct RecipeFormView: View {
                 )
             }
 
-            Button("Add Recipe") {
+            Button(viewModel.isEdit ? "Save Recipe" : "Add Recipe") {
                 if viewModel.saveRecipe() {
                     self.mode.wrappedValue.dismiss()
                 }
@@ -60,6 +68,7 @@ struct RecipeFormView: View {
         .alert(isPresented: $viewModel.hasError) {
             Alert(title: Text("Error"), message: Text(viewModel.errorMessage), dismissButton: .default(Text("Ok")))
         }
+        .navigationTitle(viewModel.isEdit ? Text("Edit Recipe") : Text("Add Recipe"))
     }
 
     var cuisine: some View {

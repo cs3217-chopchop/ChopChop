@@ -208,7 +208,11 @@ extension Quantity: CustomStringConvertible {
     var description: String {
         switch type {
         case .count:
-            return String(format: "%.1f", value)
+            if value == 0 {
+                return ""
+            } else {
+                return String(format: "%.1f", value)
+            }
         default:
             return String(format: "%.2f \(type.description)", value)
         }

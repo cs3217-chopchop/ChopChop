@@ -54,6 +54,13 @@ extension RecipeIngredient: Equatable {
     }
 }
 
+extension RecipeIngredient: CustomStringConvertible {
+    var description: String {
+        "\(quantity.description) \(name)"
+    }
+
+}
+
 extension RecipeIngredient: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         guard let copy = try? RecipeIngredient(name: name, quantity: quantity) else {

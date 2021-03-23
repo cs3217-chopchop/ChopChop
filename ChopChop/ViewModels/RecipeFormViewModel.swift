@@ -9,10 +9,11 @@ import Combine
 import GRDB
 
 class RecipeFormViewModel: ObservableObject {
-//    private var recipe: Recipe?
+
     @Published var hasError: Bool = false
-    var errorMessage = ""
-    var isEdit = false
+    private var recipeId: Int64?
+    private(set) var errorMessage = ""
+    private(set) var isEdit = false
     private let storageManager = StorageManager()
     private var recipeCategoryCancellable = Set<AnyCancellable>()
     @Published var recipeName = ""
@@ -31,16 +32,11 @@ class RecipeFormViewModel: ObservableObject {
     @Published var instructionParsingString = ""
 
     init(recipe: Recipe) {
-//        storage = StorageManager()
+        recipeId = recipe.id
         recipeName = recipe.name
         serving = recipe.servings.description
         difficulty = recipe.difficulty ?? .veryEasy
 
-//        recipeCategoryCancellable = storageManager
-//            .recipeCategoriesOrderedByNamePublisher()
-//            .sink { [weak self] categories in
-//                self?.allRecipeCategories = categories
-//            }
         steps = recipe.steps.map({ $0.content })
         ingredients = recipe.ingredients.map({
             RecipeIngredientRowViewModel(
@@ -56,14 +52,6 @@ class RecipeFormViewModel: ObservableObject {
     init() {
         fetchCategories()
     }
-
-//    private func recipeCategoryPublisher() -> AnyPublisher<[RecipeCategory], Never> {
-//        storageManager.recipeCategoriesOrderedByNamePublisher()
-//            .catch { _ in
-//                Just<[RecipeCategory]>([])
-//            }
-//            .eraseToAnyPublisher()
-//    }
 
     private func fetchCategories() {
         storageManager
@@ -154,33 +142,36 @@ class RecipeFormViewModel: ObservableObject {
             return true
         } catch {
             hasError = true
-            switch error {
-            case RecipeFormError.emptyName:
-                errorMessage = RecipeFormError.emptyName.rawValue
-            case RecipeFormError.emptyServing:
-                errorMessage = RecipeFormError.emptyServing.rawValue
-            case RecipeFormError.invalidServing:
-                errorMessage = RecipeFormError.invalidServing.rawValue
-            case RecipeFormError.emptyStep:
-                errorMessage = RecipeFormError.emptyStep.rawValue
-            case RecipeFormError.emptyStepDescription:
-                errorMessage = RecipeFormError.emptyStepDescription.rawValue
-            case RecipeFormError.emptyIngredient:
-                errorMessage = RecipeFormError.emptyIngredient.rawValue
-            case RecipeFormError.emptyIngredientQuantity:
-                errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
-            case RecipeFormError.invalidIngredientQuantity:
-                errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
-            case RecipeFormError.emptyIngredientDescription:
-                errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
-            case DatabaseError.SQLITE_CONSTRAINT:
-                errorMessage = "You already have a recipe with the same name."
-            default:
-                errorMessage = error.localizedDescription
-            }
+            setErrorMessage(error: error)
             return false
         }
+    }
 
+    private func setErrorMessage(error: Error) {
+        switch error {
+        case RecipeFormError.emptyName:
+            errorMessage = RecipeFormError.emptyName.rawValue
+        case RecipeFormError.emptyServing:
+            errorMessage = RecipeFormError.emptyServing.rawValue
+        case RecipeFormError.invalidServing:
+            errorMessage = RecipeFormError.invalidServing.rawValue
+        case RecipeFormError.emptyStep:
+            errorMessage = RecipeFormError.emptyStep.rawValue
+        case RecipeFormError.emptyStepDescription:
+            errorMessage = RecipeFormError.emptyStepDescription.rawValue
+        case RecipeFormError.emptyIngredient:
+            errorMessage = RecipeFormError.emptyIngredient.rawValue
+        case RecipeFormError.emptyIngredientQuantity:
+            errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
+        case RecipeFormError.invalidIngredientQuantity:
+            errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
+        case RecipeFormError.emptyIngredientDescription:
+            errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
+        case DatabaseError.SQLITE_CONSTRAINT:
+            errorMessage = "You already have a recipe with the same name."
+        default:
+            errorMessage = error.localizedDescription
+        }
     }
 
     private func getRecipeCategoryId() -> Int64? {
@@ -213,7 +204,7 @@ class RecipeFormViewModel: ObservableObject {
             steps: recipeStep,
             ingredients: recipeIngredient
         )
-
+        newRecipe.id = recipeId
         newRecipe.recipeCategoryId = recipeCategoryId
 
         return newRecipe
