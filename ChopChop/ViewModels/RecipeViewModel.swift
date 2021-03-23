@@ -10,14 +10,14 @@ import SwiftUI
 class RecipeViewModel: ObservableObject {
     private(set) var recipe: Recipe
     private(set) var hasError = false
-    private(set) var recipeName: String
-    private(set) var serving: String
-    private(set) var recipeCategory: String = ""
-    private(set) var difficulty: Difficulty?
+    @Published private(set) var recipeName: String
+    @Published private(set) var serving: String
+    @Published private(set) var recipeCategory: String = ""
+    @Published private(set) var difficulty: Difficulty?
     private var storage = StorageManager()
-    private(set) var errorMessage = ""
-    private(set) var steps = [String]()
-    private(set) var ingredients = [String]()
+    @Published private(set) var errorMessage = ""
+    @Published private(set) var steps = [String]()
+    @Published private(set) var ingredients = [String]()
 
     init(id: Int64?) {
 

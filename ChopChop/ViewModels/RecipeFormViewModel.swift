@@ -10,6 +10,7 @@ import GRDB
 
 class RecipeFormViewModel: ObservableObject {
 
+    private var existingRecipe: Recipe?
     @Published var hasError: Bool = false
     private var recipeId: Int64?
     private(set) var errorMessage = ""
@@ -32,6 +33,7 @@ class RecipeFormViewModel: ObservableObject {
     @Published var instructionParsingString = ""
 
     init(recipe: Recipe) {
+        existingRecipe = recipe
         recipeId = recipe.id
         recipeName = recipe.name
         serving = recipe.servings.description
@@ -78,7 +80,7 @@ class RecipeFormViewModel: ObservableObject {
     }
 
     func ensureValidServing() {
-        let filtered = serving.filter { "0123456789".contains($0) }
+        let filtered = serving.filter { "0123456789.".contains($0) }
         if filtered != serving {
             serving = filtered
         }
