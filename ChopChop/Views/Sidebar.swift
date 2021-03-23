@@ -93,6 +93,7 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""), cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
+        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""),
+                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
     }
  }

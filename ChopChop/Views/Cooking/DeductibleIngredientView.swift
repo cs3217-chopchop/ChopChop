@@ -6,23 +6,22 @@ struct DeductibleIngredientView: View {
     var body: some View {
         HStack(alignment: .center) {
             Text(viewModel.ingredient.name)
-            VStack {
+            VStack(alignment: .leading) {
                 TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
                     .keyboardType(.decimalPad)
                     .foregroundColor(viewModel.errorMsg.isEmpty ? .black : .red)
                     .frame(width: 100, height: 50, alignment: .center)
                     .border(Color.black, width: 1)
                     .multilineTextAlignment(.center)
-
                 Text(viewModel.errorMsg)
                     .foregroundColor(.red)
             }
-            Menu(viewModel.unit.nonEmptyDescription) {
+            Menu(viewModel.unit.description) {
                 ForEach(QuantityType.allCases, id: \.description) { type in
                     Button(action: {
                         viewModel.updateUnit(unit: type)
                     }) {
-                        Text(type.nonEmptyDescription)
+                        Text(type.description)
                     }
                 }
             }

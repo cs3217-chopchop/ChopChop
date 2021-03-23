@@ -224,10 +224,10 @@ extension AppDatabase {
                 Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
                 """),
             RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
-                Carefully lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
-                Flip and cook the other side for another 10 to 15 minutes, or until browned, crispy, and cooked through. \
-                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, and cooked through. \
-                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned, crispy, and cooked through.
+                Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
+                Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
+                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
+                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
                 """),
             RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
                 To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
@@ -486,6 +486,14 @@ extension AppDatabase {
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
+        }
+    }
+
+    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
+        try dbWriter.read { db in
+            let request = RecipeCategoryRecord
+                .filter(key: id)
+            return try RecipeCategory.fetchOne(db, request)
         }
     }
 }

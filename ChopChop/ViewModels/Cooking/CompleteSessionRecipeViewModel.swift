@@ -16,9 +16,12 @@ class CompleteSessionRecipeViewModel: ObservableObject {
         ingredientsCancellable = ingredientsPublisher()
             .sink { [weak self] ingredients in
                 self?.ingredientsInStore = ingredients
-                if self?.isSuccess == false {
-                    self?.deductibleIngredientsViewModels = self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients) ?? []
+                guard self?.isSuccess == false else {
+                    return
                 }
+                self?.deductibleIngredientsViewModels =
+                    self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients)
+                    ?? []
             }
     }
 
@@ -33,11 +36,10 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 continue
             }
 
-            guard let id = ingredientViewModel.ingredient.id else {
-                assertionFailure("Ingredient should have id")
-                continue
-            }
-            guard let ingredient = try? storageManager.fetchIngredient(id: id) else {
+            guard let id = ingredientViewModel.ingredient.id,
+                  let ingredient = try? storageManager.fetchIngredient(id: id) else {
+                // publisher would have updated viewModels otherwise
+                assertionFailure("Ingredient should exist in store")
                 continue
             }
 
@@ -47,7 +49,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
 
             guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
-                ingredientViewModel.updateError(msg: "Not a valid quantity type")
+                ingredientViewModel.updateError(msg: "Not a valid unit. Change to \(quantityUsed.baseType == .count ? "mass/volume" : "count" )")
                 continue
             }
 
@@ -89,10 +91,12 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func convertToDeductibleIngredientViewModels(recipeIngredients: [RecipeIngredient]) -> [DeductibleIngredientViewModel] {
+    private func convertToDeductibleIngredientViewModels(recipeIngredients: [RecipeIngredient]) ->
+    [DeductibleIngredientViewModel] {
 
         recipeIngredients.compactMap { recipeIngredient -> DeductibleIngredientViewModel? in
-            guard let mappedIngredientId = (ingredientsInStore.first { $0.name == recipeIngredient.name })?.id else {
+            guard let mappedIngredientId =
+                    (ingredientsInStore.first { $0.name == recipeIngredient.name })?.id else {
                 return nil
             }
             guard let mappedIngredient = try? storageManager.fetchIngredient(id: mappedIngredientId) else {

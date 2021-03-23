@@ -103,6 +103,10 @@ struct StorageManager {
         try appDatabase.fetchIngredient(id: id)
     }
 
+    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategory(id: id)
+    }
+
     // MARK: - Database Access: Publishers
 
     func recipesPublisher(query: String,

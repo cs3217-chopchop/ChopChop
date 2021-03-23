@@ -6,7 +6,7 @@ struct SessionRecipeView: View {
     var body: some View {
         ScrollView {
             ZStack(alignment: .bottomLeading) {
-                Image("")
+                Image(uiImage: viewModel.image)
                     .resizable()
                     .scaledToFill()
                     .frame(height: 300)
@@ -22,7 +22,9 @@ struct SessionRecipeView: View {
                     .foregroundColor(.white)
                     .padding()
             }
-            Text("Time taken: \(viewModel.totalTimeTaken)")
+            Text("Details")
+                .font(.title2)
+                .bold()
             Text("""
                 Serves \(viewModel.servings.removeZerosFromEnd()) \(viewModel.servings == 1 ? "person" : "people")
                 """)
@@ -30,8 +32,10 @@ struct SessionRecipeView: View {
                 Text("Difficulty: ")
                 DifficultyView(difficulty: viewModel.difficulty)
             }
+            Text(viewModel.recipeCategory)
+            Text("Time taken: \(viewModel.totalTimeTaken)")
 
-            VStack {
+            VStack(alignment: .leading) {
                 ingredients
                 steps
             }
@@ -54,19 +58,27 @@ struct SessionRecipeView: View {
     }
 
     var ingredients: some View {
-        VStack {
+        VStack(alignment: .center) {
             Text("Ingredients")
+                .font(.title2)
+                .bold()
             ForEach(viewModel.ingredients, id: \.name) { ingredient in
-                Text("\(ingredient.quantity.description) \(ingredient.name)")
+                Text(ingredient.description)
             }
         }.padding()
     }
 
     var steps: some View {
         VStack {
-            Text("Steps")
-            ForEach(viewModel.steps) { step in
-                SessionRecipeStepView(viewModel: step)
+            VStack(alignment: .center) {
+                Text("Steps")
+                    .font(.title2)
+                    .bold()
+            }
+            VStack(alignment: .leading) {
+                ForEach(viewModel.steps) { step in
+                    SessionRecipeStepView(viewModel: step)
+                }
             }
         }.padding()
     }
@@ -74,7 +86,7 @@ struct SessionRecipeView: View {
 
 struct SessionRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try line_length
-        SessionRecipeView(viewModel: SessionRecipeViewModel(recipeInfo: RecipeInfo(id: 5, name: "Pancakes", servings: 5, difficulty: Difficulty.easy)))
+        SessionRecipeView(viewModel: SessionRecipeViewModel(recipeInfo:
+                                                                RecipeInfo(id: 5, name: "Pancakes", servings: 5, difficulty: Difficulty.easy)))
     }
 }

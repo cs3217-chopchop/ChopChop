@@ -16,7 +16,6 @@ func matchesWithIndex(for regex: String, in text: String) -> [(String, Int)] {
             return (String(text[range]), $0.range.lowerBound)
         }
     } catch {
-        print("invalid regex: \(error.localizedDescription)")
         return []
     }
 }

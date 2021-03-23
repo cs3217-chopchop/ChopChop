@@ -55,11 +55,11 @@ Allow 10 minutes for pressure to build.
         XCTAssertEqual(timeTaken, 0)
     }
 
-    func testParseTimeTaken_notStep_parserNotPerfect() {
+    func testParseTimeTaken_notStep() {
         let timeTaken = RecipeStepParser.parseTimeTaken(step: """
             5 calories; protein 0.2g; carbohydrates 0.9g; fat 0.2g; sodium 184.8mg
             """)
-        XCTAssertEqual(timeTaken, 11_088)
+        XCTAssertEqual(timeTaken, 0)
     }
 
     func testParseTimeDurations() {

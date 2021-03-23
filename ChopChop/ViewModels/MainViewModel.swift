@@ -8,7 +8,7 @@ final class MainViewModel: ObservableObject {
     private var recipeCategoriesCancellable: AnyCancellable?
     private var ingredientCategoriesCancellable: AnyCancellable?
 
-    var currentCookingSession: SessionRecipe? // persist cooking session
+    var currentCookingSession: SessionRecipe?
 
     init() {
         recipeCategoriesCancellable = recipeCategoriesPublisher()

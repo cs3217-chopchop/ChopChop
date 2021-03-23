@@ -7,6 +7,7 @@ class SessionRecipeViewModel: ObservableObject {
     @Published var ingredients: [RecipeIngredient]
     @Published var steps: [SessionRecipeStepViewModel]
     @Published var totalTimeTaken: String
+    @Published var recipeCategory: String
     let sessionRecipe: SessionRecipe
     @Published var isShowComplete = false {
         didSet {
@@ -17,6 +18,7 @@ class SessionRecipeViewModel: ObservableObject {
         }
     }
     let completeSessionRecipeViewModel: CompleteSessionRecipeViewModel
+    @Published var image: UIImage
 
     private let storageManager = StorageManager()
 
@@ -32,6 +34,14 @@ class SessionRecipeViewModel: ObservableObject {
         sessionRecipe = SessionRecipe(recipe: recipe)
         steps = sessionRecipe.sessionSteps.map { SessionRecipeStepViewModel(sessionRecipeStep: $0) }
         completeSessionRecipeViewModel = CompleteSessionRecipeViewModel(recipe: sessionRecipe.recipe)
+        image = storageManager.fetchIngredientImage(name: recipe.name) ?? UIImage(imageLiteralResourceName: "recipe")
+
+        guard let categoryId = recipe.recipeCategoryId,
+              let recipeCategory = try? storageManager.fetchRecipeCategory(id: categoryId)?.name else {
+            self.recipeCategory = ""
+            return
+        }
+        self.recipeCategory = recipeCategory
     }
 
     func toggleShowComplete() {

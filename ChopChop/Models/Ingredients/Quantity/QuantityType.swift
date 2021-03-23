@@ -31,17 +31,6 @@ extension QuantityType: CustomStringConvertible {
     var description: String {
         switch self {
         case .count:
-            return ""
-        case .mass(let unit):
-            return unit.description
-        case .volume(let unit):
-            return unit.description
-        }
-    }
-
-    var nonEmptyDescription: String {
-        switch self {
-        case .count:
             return "count"
         case .mass(let unit):
             return unit.description
@@ -49,6 +38,7 @@ extension QuantityType: CustomStringConvertible {
             return unit.description
         }
     }
+
 }
 
 enum BaseQuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {
