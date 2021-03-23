@@ -14,6 +14,9 @@ struct RecipeCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
+                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
+                    Text("Add recipe")
+                }
                 Spacer()
                 MultiselectPicker("Filter by ingredient",
                                   selections: $viewModel.selectedIngredients,
@@ -60,7 +63,14 @@ struct RecipeCollectionView: View {
 
     var listView: some View {
         List(viewModel.recipes) { recipe in
-            RecipeRow(recipe: recipe)
+            NavigationLink(
+                destination: RecipeView(
+                    viewModel: RecipeViewModel(
+                        id: recipe.id)
+                )
+            ) {
+                RecipeRow(recipe: recipe)
+            }
         }
     }
 
@@ -69,7 +79,10 @@ struct RecipeCollectionView: View {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.recipes) { recipe in
                     NavigationLink(
-                        destination: Text(recipe.name)
+                        destination: RecipeView(
+                            viewModel: RecipeViewModel(
+                                id: recipe.id)
+                        )
                     ) {
                         GridTile(recipe: recipe)
                     }

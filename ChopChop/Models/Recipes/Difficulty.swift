@@ -8,3 +8,21 @@ enum Difficulty: Int, Codable, CaseIterable, DatabaseValueConvertible {
     case hard
     case veryHard
 }
+
+// MARK: - CustomStringConvertible
+extension Difficulty {
+    var description: String {
+        switch self {
+        case .veryEasy:
+            return "Very Easy"
+        case .easy:
+            return "Easy"
+        case .medium:
+            return "Medium"
+        case .hard:
+            return "Hard"
+        case .veryHard:
+            return "Very Hard"
+        }
+    }
+}
