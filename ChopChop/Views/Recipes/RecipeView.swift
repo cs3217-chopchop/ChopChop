@@ -45,19 +45,31 @@ struct RecipeView: View {
     }
 
     var recipeDetails: some View {
-        VStack {
-            Text("Serves \(viewModel.serving)")
-            Text(viewModel.difficulty?.description ?? "")
-            Text(viewModel.recipeCategory)
+        VStack(alignment: .center) {
+            Text("General").font(.title).underline()
+            VStack {
+                Text("Serves \(viewModel.serving)")
+                Text(viewModel.difficulty?.description ?? "")
+                Text(viewModel.recipeCategory)
+            }.font(.body)
             Spacer()
-            ForEach(viewModel.ingredients, id: \.self) { ingredient in
-                Text(ingredient.description)
-            }
+            Text("Ingredients").font(.title).underline()
             Spacer()
-            ForEach(0..<viewModel.steps.count, id: \.self) { idx in
-                Text("Step \(idx + 1): \(viewModel.steps[idx])")
-            }
+            VStack(alignment: .leading) {
+                ForEach(viewModel.ingredients, id: \.self) { ingredient in
+                    Text(ingredient.description)
+                }
+            }.font(.body)
+            Spacer()
+            Text("Instructions").font(.title).underline()
+            Spacer()
+            VStack(alignment: .leading) {
+                ForEach(0..<viewModel.steps.count, id: \.self) { idx in
+                    Text("Step \(idx + 1): \(viewModel.steps[idx])")
+                }
+            }.font(.body)
         }
+        .padding()
     }
 
     var defaultRecipeBanner: some View {

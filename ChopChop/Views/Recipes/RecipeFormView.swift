@@ -19,15 +19,10 @@ struct RecipeFormView: View {
     var body: some View {
         Form {
             generalSection
-
             imageSection
-
             ingredientSection
-
             instructionSection
-
             parsingSection
-
             actionButton
         }
         .alert(isPresented: $viewModel.hasError) {
