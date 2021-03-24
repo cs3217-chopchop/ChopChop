@@ -43,11 +43,7 @@ extension ImagePicker {
                 parent.presentationMode.wrappedValue.dismiss()
             }
 
-            if var image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-//                if parent.sourceType == .camera, let cg = image.cgImage {
-//                    image = UIImage(cgImage: cg, scale: 1.0, orientation: .downMirrored)
-//                }
-
+            if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 parent.selectedImage = image
             }
         }
