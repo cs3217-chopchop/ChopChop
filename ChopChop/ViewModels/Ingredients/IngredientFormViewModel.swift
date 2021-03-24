@@ -58,6 +58,10 @@ class IngredientFormViewModel: ObservableObject {
 
         if isEdit {
             try ingredient?.rename(inputName)
+
+            if image != UIImage() {
+                try storageManager.saveIngredientImage(image, name: inputName)
+            }
         } else {
             ingredient = try Ingredient(name: inputName, type: selectedType)
         }

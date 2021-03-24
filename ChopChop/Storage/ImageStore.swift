@@ -37,14 +37,15 @@ struct ImageStore {
         for imageName: String,
         folderName: String = "",
         fileExtension: String = "png") -> URL? {
-
         guard !imageName.isEmpty else {
             return nil
         }
 
         let directory = ImageStore.fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
 
-        guard let folderURL = directory?.appendingPathComponent("Images").appendingPathComponent(folderName) else {
+        guard let folderURL = directory?
+            .appendingPathComponent("Images")
+            .appendingPathComponent(folderName) else {
             return nil
         }
 
@@ -54,8 +55,7 @@ struct ImageStore {
             return nil
         }
 
-        return folderURL
-            .appendingPathComponent("\(imageName).\(fileExtension)")
+        return folderURL.appendingPathComponent("\(imageName).\(fileExtension)")
     }
 }
 
