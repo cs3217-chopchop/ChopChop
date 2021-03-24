@@ -17,6 +17,7 @@ struct IngredientFormView: View {
         .sheet(isPresented: $viewModel.isShowingPhotoLibrary) {
             ImagePicker(sourceType: viewModel.pickerSourceType, selectedImage: $viewModel.image)
         }
+        .alert(item: $viewModel.alertIdentifier, content: handleAlert)
     }
 
     var quantityTypeSection: some View {
@@ -85,15 +86,36 @@ struct IngredientFormView: View {
 
     var saveButton: some View {
         Button("Save") {
-            defer {
-                presentationMode.wrappedValue.dismiss()
-            }
-
             do {
                 try viewModel.save()
+                presentationMode.wrappedValue.dismiss()
+            } catch IngredientError.emptyName {
+                viewModel.setAlertState(.emptyName)
+            } catch StorageError.saveImageFailure {
+                viewModel.setAlertState(.saveImageError)
             } catch {
-                return
+                viewModel.setAlertState(.saveError)
             }
+        }
+    }
+
+    func handleAlert(_ alert: IngredientFormViewModel.AlertIdentifier) -> Alert {
+        switch alert.id {
+        case .emptyName:
+            return Alert(
+                title: Text("Invalid name"),
+                message: Text("Ingredient name cannot be empty"),
+                dismissButton: .default(Text("OK")))
+        case .saveImageError:
+            return Alert(
+                title: Text("Image error"),
+                message: Text("An error occurred with saving the image"),
+                dismissButton: .default(Text("OK")))
+        case .saveError:
+            return Alert(
+                title: Text("Save error"),
+                message: Text("An error occurred with saving the ingredient"),
+                dismissButton: .default(Text("OK")))
         }
     }
 }

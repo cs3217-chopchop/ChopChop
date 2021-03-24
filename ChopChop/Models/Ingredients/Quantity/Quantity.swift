@@ -268,4 +268,5 @@ enum QuantityError: Error {
     case divisionByZero
     case incompatibleTypes
     case invalidUnit
+    case invalidQuantity
 }

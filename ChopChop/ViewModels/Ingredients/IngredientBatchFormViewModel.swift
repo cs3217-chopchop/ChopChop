@@ -10,6 +10,8 @@ class IngredientBatchFormViewModel: ObservableObject {
     @Published var expiryDateEnabled: Bool
     @Published var selectedDate: Date
 
+    @Published var alertIdentifier: AlertIdentifier?
+
     init(edit batch: IngredientBatch, in ingredient: Ingredient) {
         self.batch = batch
         self.ingredient = ingredient
@@ -23,7 +25,9 @@ class IngredientBatchFormViewModel: ObservableObject {
             self.selectedDate = expiryDate
         } else {
             self.expiryDateEnabled = false
-            self.selectedDate = Date()
+            self.selectedDate = Calendar.current // Set selected date to one week from today
+                .startOfDay(for: Date())
+                .addingTimeInterval(24 * 60 * 60 * 7)
         }
     }
 
@@ -49,21 +53,13 @@ class IngredientBatchFormViewModel: ObservableObject {
         self.selectedDate = Date()
     }
 
-    var areFieldsValid: Bool {
-        // TODO: validate selected unit and input quantity
-        true
-    }
-
     func save() throws {
-        guard areFieldsValid else {
-            return
-        }
-
         guard let convertedValue = Double(inputQuantity) else {
-            return
+            throw QuantityError.invalidQuantity
         }
 
         var newQuantity: Quantity
+
         switch ingredient.quantityType {
         case .count:
             newQuantity = try Quantity(.count, value: convertedValue)
@@ -116,5 +112,21 @@ class IngredientBatchFormViewModel: ObservableObject {
 
     var volumeUnits: [String] {
         Array(volumeUnitMap.keys)
+    }
+
+    struct AlertIdentifier: Identifiable {
+        var id: AlertState
+
+        enum AlertState {
+            case invalidQuantity
+            case negativeQuantity
+            case invalidQuantityUnit
+            case incompatibleQuantityTypes
+            case saveError
+        }
+    }
+
+    func setAlertState(_ state: AlertIdentifier.AlertState) {
+        self.alertIdentifier = AlertIdentifier(id: state)
     }
 }

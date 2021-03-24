@@ -10,6 +10,7 @@ struct IngredientBatchFormView: View {
             expiryDateSection
             saveButton
         }
+        .alert(item: $viewModel.alertIdentifier, content: handleAlert)
     }
 
     @ViewBuilder
@@ -58,22 +59,50 @@ struct IngredientBatchFormView: View {
     }
 
     var saveButton: some View {
-        Button(action: save) {
-            Text("Save")
-                .foregroundColor(viewModel.areFieldsValid ? .blue : .gray)
+        Button("Save") {
+            do {
+                try viewModel.save()
+                presentationMode.wrappedValue.dismiss()
+            } catch QuantityError.invalidQuantity {
+                viewModel.setAlertState(.invalidQuantity)
+            } catch QuantityError.negativeQuantity {
+                viewModel.setAlertState(.negativeQuantity)
+            } catch QuantityError.invalidUnit {
+                viewModel.setAlertState(.invalidQuantityUnit)
+            } catch QuantityError.incompatibleTypes {
+                viewModel.setAlertState(.incompatibleQuantityTypes)
+            } catch {
+                viewModel.setAlertState(.saveError)
+            }
         }
-        .disabled(!viewModel.areFieldsValid)
     }
 
-    func save() {
-        defer {
-            presentationMode.wrappedValue.dismiss()
-        }
-
-        do {
-            try viewModel.save()
-        } catch {
-            return
+    func handleAlert(_ alert: IngredientBatchFormViewModel.AlertIdentifier) -> Alert {
+        switch alert.id {
+        case .invalidQuantity:
+            return Alert(
+                title: Text("Invalid quantity"),
+                message: Text("Quantity must be a decimal number"),
+                dismissButton: .default(Text("OK")))
+        case .negativeQuantity:
+            return Alert(
+                title: Text("Negative quantity"),
+                message: Text("Quantity must be non negative"),
+                dismissButton: .default(Text("OK")))
+        case .invalidQuantityUnit:
+            return Alert(
+                title: Text("Invalid unit"),
+                dismissButton: .default(Text("OK")))
+        case .incompatibleQuantityTypes:
+            return Alert(
+                title: Text("Invalid type"),
+                message: Text("Quantity type must match ingredient type"),
+                dismissButton: .default(Text("OK")))
+        case .saveError:
+            return Alert(
+                title: Text("Save error"),
+                message: Text("An error occurred with saving the batch"),
+                dismissButton: .default(Text("OK")))
         }
     }
 }

@@ -11,6 +11,8 @@ class IngredientFormViewModel: ObservableObject {
     @Published var image: UIImage
     @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
+    @Published var alertIdentifier: AlertIdentifier?
+
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
@@ -47,15 +49,7 @@ class IngredientFormViewModel: ObservableObject {
             })
     }
 
-    var areFieldsValid: Bool {
-        !inputName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     func save() throws {
-        guard areFieldsValid else {
-            return
-        }
-
         if isEdit {
             try ingredient?.rename(inputName)
 
@@ -88,5 +82,19 @@ class IngredientFormViewModel: ObservableObject {
         self.inputName = ""
         self.selectedCategory = nil
         self.image = UIImage()
+    }
+
+    struct AlertIdentifier: Identifiable {
+        var id: AlertState
+
+        enum AlertState {
+            case emptyName
+            case saveImageError
+            case saveError
+        }
+    }
+
+    func setAlertState(_ state: AlertIdentifier.AlertState) {
+        self.alertIdentifier = AlertIdentifier(id: state)
     }
 }

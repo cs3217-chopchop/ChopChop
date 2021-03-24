@@ -212,6 +212,14 @@ extension StorageManager {
     }
 
     func saveIngredientImage(_ image: UIImage, name: String) throws {
-        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
+        do {
+            try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
+        } catch {
+            throw StorageError.saveImageFailure
+        }
     }
+}
+
+enum StorageError: Error {
+    case saveImageFailure
 }
