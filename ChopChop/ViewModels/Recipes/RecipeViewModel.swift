@@ -10,7 +10,13 @@ import Combine
 
 class RecipeViewModel: ObservableObject {
     @ObservedObject private(set) var recipe: Recipe
+
+    private var storage = StorageManager()
+    private var cancellables = Set<AnyCancellable>()
+    private let storageManager = StorageManager()
+
     private(set) var hasError = false
+
     @Published var isShowingForm = false
     @Published var isShowingPhotoLibrary = false
     @Published private(set) var recipeName: String = ""
@@ -18,13 +24,9 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var recipeCategory: String = ""
     @Published private(set) var difficulty: Difficulty?
     @Published var image: UIImage
-    private var storage = StorageManager()
     @Published private(set) var errorMessage = ""
     @Published private(set) var steps = [String]()
     @Published private(set) var ingredients = [String]()
-    private var cancellables = Set<AnyCancellable>()
-    private let storageManager = StorageManager()
-    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
     init(id: Int64?) {
         guard let recipeId = id else {

@@ -11,15 +11,18 @@ import GRDB
 class RecipeFormViewModel: ObservableObject {
 
     private var existingRecipe: Recipe?
-    @Published var hasError: Bool = false
     private var recipeId: Int64?
+    private let storageManager = StorageManager()
+    private var recipeCategoryCancellable = Set<AnyCancellable>()
+
     private(set) var errorMessage = ""
     private(set) var isEdit = false
-    private let storageManager = StorageManager()
+
+    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
+
+    @Published var hasError: Bool = false
     @Published var isShowingPhotoLibrary = false
     @Published var image = UIImage()
-    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
-    private var recipeCategoryCancellable = Set<AnyCancellable>()
     @Published var recipeName = ""
     @Published var serving = "" {
         didSet {
@@ -29,7 +32,6 @@ class RecipeFormViewModel: ObservableObject {
     @Published var allRecipeCategories = [RecipeCategory]()
     @Published var recipeCategory = ""
     @Published var difficulty: Difficulty = .veryEasy
-    private var storage = StorageManager()
     @Published var steps = [String]()
     @Published var ingredients = [RecipeIngredientRowViewModel]()
     @Published var ingredientParsingString = ""
