@@ -747,7 +747,7 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Ingredients Publisher Tests
 
     func testIngredientsPublisher_publishesRightOnSubscription() throws {
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         _ = appDatabase.ingredientsPublisher().sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
@@ -761,16 +761,16 @@ class AppDatabaseTests: XCTestCase {
     }
 
     func testIngredientsPublisher_orderedByName_publishesOrderedIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Sugar", quantityType: .mass)
-        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
+        var ingredientRecord1 = IngredientRecord(name: "Sugar", quantityType: .mass)
+        var ingredientRecord2 = IngredientRecord(name: "Salt", quantityType: .mass)
 
         try dbWriter.write { db in
-            try ingredient1.insert(db)
-            try ingredient2.insert(db)
+            try ingredientRecord1.insert(db)
+            try ingredientRecord2.insert(db)
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher().sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
@@ -784,6 +784,9 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
+        let ingredient1 = try Ingredient(name: "Sugar", type: .mass)
+        let ingredient2 = try Ingredient(name: "Salt", type: .mass)
+
         XCTAssertEqual(ingredients, [ingredient2, ingredient1])
     }
 
@@ -791,24 +794,24 @@ class AppDatabaseTests: XCTestCase {
         var category1 = IngredientCategoryRecord(name: "Spices")
         var category2 = IngredientCategoryRecord(name: "Dairy")
 
-        var ingredient1 = IngredientRecord(name: "Sugar", quantityType: .mass)
-        var ingredient2 = IngredientRecord(name: "Salt", quantityType: .mass)
-        var ingredient3 = IngredientRecord(name: "Milk", quantityType: .volume)
-        var ingredient4 = IngredientRecord(name: "Egg", quantityType: .count)
+        var ingredientRecord1 = IngredientRecord(name: "Sugar", quantityType: .mass)
+        var ingredientRecord2 = IngredientRecord(name: "Salt", quantityType: .mass)
+        var ingredientRecord3 = IngredientRecord(name: "Milk", quantityType: .volume)
+        var ingredientRecord4 = IngredientRecord(name: "Egg", quantityType: .count)
 
         try dbWriter.write { db in
             try category1.insert(db)
             try category2.insert(db)
 
-            ingredient1.ingredientCategoryId = category1.id
-            ingredient2.ingredientCategoryId = category1.id
-            ingredient3.ingredientCategoryId = category2.id
-            ingredient4.ingredientCategoryId = category2.id
+            ingredientRecord1.ingredientCategoryId = category1.id
+            ingredientRecord2.ingredientCategoryId = category1.id
+            ingredientRecord3.ingredientCategoryId = category2.id
+            ingredientRecord4.ingredientCategoryId = category2.id
 
-            try ingredient1.insert(db)
-            try ingredient2.insert(db)
-            try ingredient3.insert(db)
-            try ingredient4.insert(db)
+            try ingredientRecord1.insert(db)
+            try ingredientRecord2.insert(db)
+            try ingredientRecord3.insert(db)
+            try ingredientRecord4.insert(db)
         }
 
         guard let id = category2.id else {
@@ -817,7 +820,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher(categoryIds: [id])
             .sink { completion in
             if case let .failure(error) = completion {
@@ -832,22 +835,25 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
+        let ingredient3 = try Ingredient(name: "Milk", type: .volume)
+        let ingredient4 = try Ingredient(name: "Egg", type: .count)
+
         XCTAssertEqual(ingredients, [ingredient4, ingredient3])
     }
 
     func testIngredientsPublisher_filteredByName_publishesFilteredIngredients() throws {
-        var ingredient1 = IngredientRecord(name: "Baking Powder", quantityType: .mass)
-        var ingredient2 = IngredientRecord(name: "Baking Soda", quantityType: .mass)
-        var ingredient3 = IngredientRecord(name: "Salt", quantityType: .mass)
+        var ingredientRecord1 = IngredientRecord(name: "Baking Powder", quantityType: .mass)
+        var ingredientRecord2 = IngredientRecord(name: "Baking Soda", quantityType: .mass)
+        var ingredientRecord3 = IngredientRecord(name: "Salt", quantityType: .mass)
 
         try dbWriter.write { db in
-            try ingredient1.insert(db)
-            try ingredient2.insert(db)
-            try ingredient3.insert(db)
+            try ingredientRecord1.insert(db)
+            try ingredientRecord2.insert(db)
+            try ingredientRecord3.insert(db)
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher(query: "baking").sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
@@ -860,6 +866,9 @@ class AppDatabaseTests: XCTestCase {
         withExtendedLifetime(cancellable) {
             waitForExpectations(timeout: 1, handler: nil)
         }
+
+        let ingredient1 = try Ingredient(name: "Baking Powder", type: .mass)
+        let ingredient2 = try Ingredient(name: "Baking Soda", type: .mass)
 
         XCTAssertEqual(ingredients, [ingredient1, ingredient2])
     }

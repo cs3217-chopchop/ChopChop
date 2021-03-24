@@ -82,6 +82,24 @@ extension QuantityTests {
             try? Quantity(.volume(.milliliter), value: 500))
     }
 
+    func testPlus_incompatibleTypeZeroValue_success() {
+        XCTAssertEqual(
+            try? Quantity(.count, value: 0) + Quantity(.volume(.milliliter), value: 200),
+            try? Quantity(.volume(.milliliter), value: 200))
+
+        XCTAssertEqual(
+            try? Quantity(.mass(.gram), value: 300) + Quantity(.count, value: 0),
+            try? Quantity(.mass(.gram), value: 300))
+
+        XCTAssertEqual(
+            try? Quantity(.volume(.milliliter), value: 0) + Quantity(.count, value: 10),
+            try? Quantity(.count, value: 10))
+
+        XCTAssertEqual(
+            try? Quantity(.count, value: 10) + Quantity(.mass(.gram), value: 0),
+            try? Quantity(.count, value: 10))
+    }
+
     func testPlus_incompatibleQuantityTypes_throwsError() {
         XCTAssertThrowsError(try Quantity(.count, value: 1) + Quantity(.volume(.baseUnit), value: 0.5))
         XCTAssertThrowsError(try Quantity(.count, value: 1) + Quantity(.mass(.baseUnit), value: 0.5))
@@ -122,6 +140,25 @@ extension QuantityTests {
         XCTAssertEqual(
             try? Quantity(.volume(.milliliter), value: 500) - Quantity(.mass(.gram), value: 300),
             try? Quantity(.volume(.milliliter), value: 200))
+    }
+
+    func testMinus_incompatibleTypeZeroRightValue_success() {
+        XCTAssertEqual(
+            try? Quantity(.mass(.gram), value: 500) - Quantity(.count, value: 0),
+            try? Quantity(.mass(.gram), value: 500))
+
+        XCTAssertEqual(
+            try? Quantity(.volume(.milliliter), value: 500) - Quantity(.count, value: 0),
+            try? Quantity(.volume(.milliliter), value: 500))
+
+        XCTAssertEqual(
+            try? Quantity(.count, value: 10) - Quantity(.mass(.gram), value: 0),
+            try? Quantity(.count, value: 10))
+
+        XCTAssertEqual(
+            try? Quantity(.count, value: 10) - Quantity(.volume(.milliliter), value: 0),
+            try? Quantity(.count, value: 10))
+
     }
 
     func testMinus_incompatibleQuantityTypes_throwsError() {
@@ -298,6 +335,23 @@ extension QuantityTests {
         let leftMass = try Quantity(.mass(.gram), value: 20)
         let rightVolume = try Quantity(.volume(.liter), value: 1)
         XCTAssertTrue(try leftMass < rightVolume)
+    }
+
+    func testLessThan_incompatibleTypeZeroValue_success() throws {
+        let zeroCount = try Quantity(.count, value: 0)
+        let rightMass = try Quantity(.mass(.kilogram), value: 1)
+        let rightVolume = try Quantity(.volume(.liter), value: 1)
+        XCTAssertTrue(try zeroCount < rightMass)
+        XCTAssertTrue(try zeroCount < rightVolume)
+
+        let count = try Quantity(.count, value: 10)
+        let zeroMass = try Quantity(.mass(.kilogram), value: 0)
+        let zeroVolume = try Quantity(.volume(.liter), value: 0)
+        XCTAssertTrue(try zeroMass < count)
+        XCTAssertTrue(try zeroVolume < count)
+
+        XCTAssertFalse(try zeroCount < zeroMass)
+        XCTAssertFalse(try zeroCount < zeroVolume)
     }
 
     func testEqualTo_sameQuantityTypeAndUnit_success() throws {
