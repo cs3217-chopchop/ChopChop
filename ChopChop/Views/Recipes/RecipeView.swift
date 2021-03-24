@@ -33,22 +33,36 @@ struct RecipeView: View {
                 }
             }
         }
-        .navigationTitle(viewModel.recipeName)
-        .toolbar {
+        .background(
             NavigationLink(
                 destination: RecipeFormView(
                     viewModel: RecipeFormViewModel(
                         recipe: viewModel.recipe
                     )
-                )
+                ),
+                isActive: $viewModel.isShowingForm
             ) {
-                Text("Edit Recipe")
+                EmptyView()
             }
+        )
+        .navigationTitle(viewModel.recipeName)
+        .toolbar {
+            Button("Edit Recipe") {
+                viewModel.isShowingForm = true
+            }
+//            NavigationLink(
+//                destination: RecipeFormView(
+//                    viewModel: RecipeFormViewModel(
+//                        recipe: viewModel.recipe
+//                    )
+//                )
+//            ) {
+//                Text("Edit Recipe")
+//            }
         }
-//        .onAppear {
-////            viewModel.loadRecipe(id: viewModel.recipe.id)
-//            print("hi")
-//        }
+        .onAppear {
+            viewModel.isShowingForm = false
+        }
     }
 }
 

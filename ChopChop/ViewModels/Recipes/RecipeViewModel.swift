@@ -11,6 +11,7 @@ import Combine
 class RecipeViewModel: ObservableObject {
     @ObservedObject private(set) var recipe: Recipe
     private(set) var hasError = false
+    @Published var isShowingForm = false
     @Published private(set) var recipeName: String = ""
     @Published private(set) var serving: String = ""
     @Published private(set) var recipeCategory: String = ""

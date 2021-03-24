@@ -48,6 +48,13 @@ class RecipeFormViewModel: ObservableObject {
             )
         })
         fetchCategories()
+        if let categoryId = recipe.recipeCategoryId {
+            do {
+                recipeCategory = try storageManager.fetchCategory(id: categoryId)?.name ?? ""
+            } catch {
+
+            }
+        }
         isEdit = true
     }
 
@@ -139,11 +146,14 @@ class RecipeFormViewModel: ObservableObject {
     func saveRecipe() -> Bool {
         do {
             try checkFormValid()
+            var newRecipe = try generateRecipe()
             if isEdit {
-                var updatedRecipe = try updateRecipe()
-                try storageManager.saveRecipe(&updatedRecipe)
+                guard var recipe = existingRecipe else {
+                    fatalError("Missing existing recipe.")
+                }
+                recipe.updateRecipe(newRecipe)
+                try storageManager.saveRecipe(&recipe)
             } else {
-                var newRecipe = try generateRecipe()
                 try storageManager.saveRecipe(&newRecipe)
             }
             return true
@@ -213,32 +223,6 @@ class RecipeFormViewModel: ObservableObject {
         )
         newRecipe.id = recipeId
         newRecipe.recipeCategoryId = recipeCategoryId
-
         return newRecipe
-    }
-
-    func updateRecipe() throws -> Recipe {
-        guard let recipe = existingRecipe else {
-            fatalError("No existing recipe.")
-        }
-
-        guard let servingSize = Double(serving) else {
-            throw RecipeFormError.invalidServing
-        }
-
-        let recipeStep = try steps.map({ try RecipeStep(content: $0) })
-        let recipeIngredient = try ingredients.map({
-            try $0.convertToIngredient()
-        })
-        let recipeCategoryId = getRecipeCategoryId()
-
-        try recipe.updateName(recipeName)
-        recipe.updateServing(servingSize)
-        recipe.updateCategory(recipeCategoryId)
-        recipe.updateDifficulty(difficulty)
-        recipe.updateSteps(recipeStep)
-        recipe.updateIngredients(recipeIngredient)
-        return recipe
-
     }
 }

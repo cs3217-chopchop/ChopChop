@@ -39,35 +39,46 @@ class Recipe: FetchableRecord, ObservableObject {
         assert(checkRepresentation())
     }
 
-    func updateServing(_ serving: Double) {
+    func updateRecipe(_ newRecipe: Recipe) {
         assert(checkRepresentation())
-        self.servings = serving
-        assert(checkRepresentation())
-    }
-
-    func updateSteps(_ steps: [RecipeStep]) {
-        assert(checkRepresentation())
-        self.steps = steps
-        assert(checkRepresentation())
-    }
-
-    func updateIngredients(_ ingredients: [RecipeIngredient]) {
-        assert(checkRepresentation())
-        self.ingredients = ingredients
+        name = newRecipe.name
+        servings = newRecipe.servings
+        recipeCategoryId = newRecipe.recipeCategoryId
+        difficulty = newRecipe.difficulty
+        steps = newRecipe.steps
+        ingredients = newRecipe.ingredients
         assert(checkRepresentation())
     }
-
-    func updateDifficulty(_ difficulty: Difficulty) {
-        assert(checkRepresentation())
-        self.difficulty = difficulty
-        assert(checkRepresentation())
-    }
-
-    func updateCategory(_ categoryId: Int64?) {
-        assert(checkRepresentation())
-        self.recipeCategoryId = categoryId
-        assert(checkRepresentation())
-    }
+//
+//    func updateServing(_ serving: Double) {
+//        assert(checkRepresentation())
+//        self.servings = serving
+//        assert(checkRepresentation())
+//    }
+//
+//    func updateSteps(_ steps: [RecipeStep]) {
+//        assert(checkRepresentation())
+//        self.steps = steps
+//        assert(checkRepresentation())
+//    }
+//
+//    func updateIngredients(_ ingredients: [RecipeIngredient]) {
+//        assert(checkRepresentation())
+//        self.ingredients = ingredients
+//        assert(checkRepresentation())
+//    }
+//
+//    func updateDifficulty(_ difficulty: Difficulty) {
+//        assert(checkRepresentation())
+//        self.difficulty = difficulty
+//        assert(checkRepresentation())
+//    }
+//
+//    func updateCategory(_ categoryId: Int64?) {
+//        assert(checkRepresentation())
+//        self.recipeCategoryId = categoryId
+//        assert(checkRepresentation())
+//    }
 
     // step related functions
     func addStep(content: String) throws {
