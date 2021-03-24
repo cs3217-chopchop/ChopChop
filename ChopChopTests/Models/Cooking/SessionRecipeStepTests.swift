@@ -26,11 +26,11 @@ class SessionRecipeStepTests: XCTestCase {
             XCTFail("No steps in recipe")
             return
         }
-        try lastSessionStep.toggleCompleted()
+        lastSessionStep.toggleCompleted()
         XCTAssertTrue(lastSessionStep.isCompleted)
         XCTAssertNotEqual(lastSessionStep.timeTaken, 0) // means updated
 
-        try lastSessionStep.toggleCompleted()
+        lastSessionStep.toggleCompleted()
         XCTAssertFalse(lastSessionStep.isCompleted)
         XCTAssertEqual(lastSessionStep.timeTaken, 0)
     }
@@ -40,23 +40,22 @@ class SessionRecipeStepTests: XCTestCase {
 
         // there are 6 steps
         let sessionSteps = sessionRecipe.sessionSteps
-        try sessionSteps[0].toggleCompleted()
+        sessionSteps[0].toggleCompleted()
         sleep(1)
-        try sessionSteps[1].toggleCompleted()
+        sessionSteps[1].toggleCompleted()
         sleep(1)
-        try sessionSteps[1].toggleCompleted()
+        sessionSteps[1].toggleCompleted()
         sleep(1)
-        try sessionSteps[3].toggleCompleted()
+        sessionSteps[3].toggleCompleted()
         sleep(1)
-        try sessionSteps[1].toggleCompleted()
+        sessionSteps[1].toggleCompleted()
         sleep(1)
-        try sessionSteps[2].toggleCompleted()
+        sessionSteps[2].toggleCompleted()
         sleep(1)
-        try sessionSteps[4].toggleCompleted()
+        sessionSteps[4].toggleCompleted()
         sleep(1)
-        try sessionSteps[5].toggleCompleted()
+        sessionSteps[5].toggleCompleted()
 
-        XCTAssertTrue(sessionRecipe.isCompleted)
         XCTAssertTrue(sessionSteps.allSatisfy { $0.timeTaken != 0 })
     }
 

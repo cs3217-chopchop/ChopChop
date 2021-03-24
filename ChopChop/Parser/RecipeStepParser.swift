@@ -26,6 +26,7 @@ struct RecipeStepParser {
     static let randomShortString = "[a-z\\d\\-_\\s]{0,6}" // any <=6 chars
     static let randomShortStringBetweenMagnitudeAndUnit = optional(str: "[a-z\\d\\-_\\s]{0,5} ")
     static let specialAndDelimiter = " {0,6}(and|&)? {0,6}"
+    static let excludeCharacters = "(?=([^a-z]|$))" // or end of line
 
     static let defaultTime = 0
 
@@ -52,8 +53,10 @@ struct RecipeStepParser {
         numbersJoined = "(" + numbersJoined + ")"
 
         let mostBasicTimeWithOptionalUnit = numbersJoined +
-            optional(str: randomShortStringBetweenMagnitudeAndUnit + timeUnitsJoined) // 30 mins or 30
-        let mostBasicTimeWithCompulsoryUnit = numbersJoined + randomShortStringBetweenMagnitudeAndUnit + timeUnitsJoined
+            optional(str: randomShortStringBetweenMagnitudeAndUnit +
+                        timeUnitsJoined + excludeCharacters)
+        let mostBasicTimeWithCompulsoryUnit = numbersJoined + randomShortStringBetweenMagnitudeAndUnit +
+            timeUnitsJoined + excludeCharacters
         let optionalRangeString = optional(str: mostBasicTimeWithOptionalUnit +
                                             optional(str: randomShortString + mostBasicTimeWithOptionalUnit)
                                             + randomShortString + delimitersJoined + randomShortString) // 1h 30mins to

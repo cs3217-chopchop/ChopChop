@@ -1,6 +1,6 @@
 import GRDB
 
-enum QuantityType: Equatable {
+enum QuantityType: Equatable, CaseIterable {
     static let massToVolumeBaseRatio = 1.0
 
     case count
@@ -17,17 +17,26 @@ enum QuantityType: Equatable {
             return .volume
         }
     }
+
+    static var allCases: [QuantityType] {
+        [
+            .count, .mass(.gram), .mass(.kilogram), .mass(.ounce), .mass(.pound), .volume(.cup),
+            .volume(.gallon), .volume(.liter), .volume(.milliliter), .volume(.pint), .volume(.quart),
+            .volume(.tablespoon), .volume(.teaspoon)
+        ]
+    }
 }
 
 extension QuantityType: CustomStringConvertible {
     var description: String {
         switch self {
         case .count:
-            return ""
+            return "count"
         case .mass(let unit):
             return unit.description
         case .volume(let unit):
             return unit.description
         }
     }
+
 }
