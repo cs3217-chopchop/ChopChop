@@ -170,14 +170,75 @@ extension AppDatabase {
 
         var ingredients = [
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Flour", quantity: .mass(200, unit: .gram)),
+            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Butter", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
             RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
-            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram))
+            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pork Chop", quantity: .mass(100, unit: .ounce)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Egg", quantity: .count(3)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Salt", quantity: .count(0)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pepper", quantity: .count(0)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Oil", quantity: .volume(10, unit: .milliliter)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Onion", quantity: .count(3)),
+            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Rice", quantity: .count(3))
         ]
 
         for index in ingredients.indices {
             try ingredients[index].save(db)
+        }
+
+        var steps = [
+            // pancakes
+            RecipeStepRecord(recipeId: recipes[0].id, index: 1, content: """
+                In a large bowl, mix dry ingredients together until well-blended.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 2, content: """
+                Add milk and mix well until smooth.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 3, content: """
+                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 4, content: """
+                Beat whites until stiff and then fold into batter gently.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 5, content: """
+                Pour ladles of the mixture into a non-stick pan, one at a time.
+                """),
+            RecipeStepRecord(recipeId: recipes[0].id, index: 6, content: """
+                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
+                pancakes.
+                """),
+            // katusdon
+            RecipeStepRecord(recipeId: recipes[5].id, index: 1, content: """
+                Gather the ingredients.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 2, content: """
+                Season the pounded pork chops with salt and pepper.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 3, content: """
+                In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 4, content: """
+                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
+                Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
+                Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
+                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
+                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
+                """),
+            RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
+                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
+                Simmer for a few minutes on medium heat. \
+                Serve by placing 1 serving of steamed rice in a large rice bowl. \
+                Repeat to make 3 more servings.
+                """)
+        ]
+
+        for index in steps.indices {
+            try steps[index].save(db)
         }
     }
 }
@@ -209,7 +270,11 @@ extension AppDatabase {
             IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
             IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
             IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
-            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count)
+            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Egg", quantityType: .count),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Salt", quantityType: .mass),
+            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Oil", quantityType: .volume)
         ]
 
         for index in ingredients.indices {
@@ -233,7 +298,22 @@ extension AppDatabase {
                                   quantity: .mass(1, unit: .kilogram)),
             IngredientBatchRecord(ingredientId: ingredients[4].id,
                                   expiryDate: .today,
-                                  quantity: .mass(2, unit: .kilogram))
+                                  quantity: .mass(2, unit: .kilogram)),
+            IngredientBatchRecord(ingredientId: ingredients[6].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(20, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[6].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
+                                  quantity: .mass(0.05, unit: .kilogram)),
+            IngredientBatchRecord(ingredientId: ingredients[7].id,
+                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
+                                  quantity: .count(3)),
+            IngredientBatchRecord(ingredientId: ingredients[8].id,
+                                  expiryDate: .today,
+                                  quantity: .mass(20, unit: .gram)),
+            IngredientBatchRecord(ingredientId: ingredients[9].id,
+                                  expiryDate: .today,
+                                  quantity: .volume(20, unit: .pint))
         ]
 
         for index in batches.indices {
@@ -408,6 +488,14 @@ extension AppDatabase {
             return try Ingredient.fetchOne(db, request)
         }
     }
+
+    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
+        try dbWriter.read { db in
+            let request = RecipeCategoryRecord
+                .filter(key: id)
+            return try RecipeCategory.fetchOne(db, request)
+        }
+    }
 }
 
 // MARK: - Database Access: Publishers
@@ -437,6 +525,19 @@ extension AppDatabase {
     func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsPublisher() -> AnyPublisher<[Ingredient], Error> {
+        ValueObservation
+            .tracking({ db in
+                let request = IngredientRecord.all()
+                    .orderedByName()
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchAll(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
