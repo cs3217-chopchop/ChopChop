@@ -56,7 +56,7 @@ class RecipeFormViewModel: ObservableObject {
         fetchCategories()
         if let categoryId = recipe.recipeCategoryId {
             do {
-                recipeCategory = try storageManager.fetchCategory(id: categoryId)?.name ?? ""
+                recipeCategory = try storageManager.fetchRecipeCategory(id: categoryId)?.name ?? ""
             } catch {
 
             }

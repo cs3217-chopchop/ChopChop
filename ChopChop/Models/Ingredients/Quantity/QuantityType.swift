@@ -37,6 +37,7 @@ extension QuantityType: CustomStringConvertible {
             return unit.description
         }
     }
+
 }
 
 enum BaseQuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {

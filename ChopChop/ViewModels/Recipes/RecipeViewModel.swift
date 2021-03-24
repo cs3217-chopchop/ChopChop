@@ -20,7 +20,7 @@ class RecipeViewModel: ObservableObject {
     @Published var isShowingForm = false
     @Published var isShowingPhotoLibrary = false
     @Published private(set) var recipeName: String = ""
-    @Published private(set) var serving: String = ""
+    @Published private(set) var serving: Double = 1
     @Published private(set) var recipeCategory: String = ""
     @Published private(set) var difficulty: Difficulty?
     @Published var image: UIImage
@@ -52,10 +52,10 @@ class RecipeViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        serving = recipe.servings.description
+        serving = recipe.servings
         if let categoryId = recipe.recipeCategoryId {
             do {
-                recipeCategory = try storage.fetchCategory(id: categoryId)?.name ?? ""
+                recipeCategory = try storage.fetchRecipeCategory(id: categoryId)?.name ?? ""
             } catch {
 
             }
@@ -65,7 +65,7 @@ class RecipeViewModel: ObservableObject {
             .sink { [weak self] category in
                 if let categoryId = category {
                     do {
-                        self?.recipeCategory = try self?.storage.fetchCategory(id: categoryId)?.name ?? ""
+                        self?.recipeCategory = try self?.storage.fetchRecipeCategory(id: categoryId)?.name ?? ""
                     } catch {
 
                     }

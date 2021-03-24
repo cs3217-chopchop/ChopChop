@@ -47,27 +47,13 @@ struct RecipeView: View {
     var recipeDetails: some View {
         VStack(alignment: .center) {
             Text("General").font(.title).underline()
-            VStack {
-                Text("Serves \(viewModel.serving)")
-                Text(viewModel.difficulty?.description ?? "")
-                Text(viewModel.recipeCategory)
-            }.font(.body)
+            general
             Spacer()
             Text("Ingredients").font(.title).underline()
-            Spacer()
-            VStack(alignment: .leading) {
-                ForEach(viewModel.ingredients, id: \.self) { ingredient in
-                    Text(ingredient.description)
-                }
-            }.font(.body)
+            ingredient
             Spacer()
             Text("Instructions").font(.title).underline()
-            Spacer()
-            VStack(alignment: .leading) {
-                ForEach(0..<viewModel.steps.count, id: \.self) { idx in
-                    Text("Step \(idx + 1): \(viewModel.steps[idx])")
-                }
-            }.font(.body)
+            instruction
         }
         .padding()
     }
@@ -87,6 +73,36 @@ struct RecipeView: View {
                             startPoint: .top,
                             endPoint: .bottom))
             )
+    }
+
+    var general: some View {
+        VStack {
+            Text("Serves \(viewModel.serving.removeZerosFromEnd()) \(viewModel.serving == 1 ? "person" : "people")")
+            HStack {
+                Text("Difficulty: ")
+                DifficultyView(difficulty: viewModel.difficulty)
+            }
+            HStack {
+                Text("Cuisine: ")
+                Text(viewModel.recipeCategory.isEmpty ? "Unspecified" : viewModel.recipeCategory)
+            }
+        }.font(.body)
+    }
+
+    var ingredient: some View {
+        VStack(alignment: .leading) {
+            ForEach(viewModel.ingredients, id: \.self) { ingredient in
+                Text(ingredient.description)
+            }
+        }.font(.body)
+    }
+
+    var instruction: some View {
+        VStack(alignment: .leading) {
+            ForEach(0..<viewModel.steps.count, id: \.self) { idx in
+                Text("Step \(idx + 1): \(viewModel.steps[idx])")
+            }
+        }.font(.body)
     }
 
     var recipeBanner: some View {

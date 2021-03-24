@@ -753,6 +753,7 @@ class AppDatabaseTests: XCTestCase {
                 XCTFail("Unexpected error \(error)")
             }
         } receiveValue: {
+
             ingredients = $0
         }
 

@@ -103,8 +103,8 @@ struct StorageManager {
         try appDatabase.fetchIngredient(id: id)
     }
 
-    func fetchCategory(id: Int64) throws -> RecipeCategory? {
-        try appDatabase.fetchCategory(id: id)
+    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategory(id: id)
     }
 
     // MARK: - Database Access: Publishers
@@ -126,6 +126,12 @@ struct StorageManager {
     func recipeIngredientsPublisher(categoryIds: [Int64?]) -> AnyPublisher<[String], Error> {
         appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
             .map { Array(Set($0.map { $0.name })).sorted() }
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Error> {
+        appDatabase.ingredientsPublisher()
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
             .eraseToAnyPublisher()
     }
 
