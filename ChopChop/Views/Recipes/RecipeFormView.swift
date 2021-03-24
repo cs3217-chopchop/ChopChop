@@ -18,57 +18,107 @@ struct RecipeFormView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("General Details")) {
-                TextField("Recipe name", text: $viewModel.recipeName)
-                TextField("Serving size", text: $viewModel.serving)
-                cuisine
-                .pickerStyle(MenuPickerStyle())
-                difficulty
-            }
+            generalSection
 
-            Section(header: Text("Ingredient List")) {
-                ingredients
-                addIngredientButton
-            }
+            imageSection
 
-            Section(header: Text("Instructions")) {
-                steps
-                addStepButton
-            }
+            ingredientSection
 
-            Section(header: Text("Quick Parse")) {
-                HStack {
-                    Text("Ingredient")
-                    TextEditor(text: $viewModel.ingredientParsingString)
-                        .disableAutocorrection(true)
-                }
+            instructionSection
 
-                HStack {
-                    Text("Instructions")
-                    TextEditor(text: $viewModel.instructionParsingString)
-                        .disableAutocorrection(true)
-                }
+            parsingSection
 
-                Button(
-                    action: {
-                        viewModel.parseData()
-                    },
-                    label: {
-                        Text("Parse data")
-                    }
-                )
-            }
-
-            Button(viewModel.isEdit ? "Save Recipe" : "Add Recipe") {
-                if viewModel.saveRecipe() {
-                    mode.wrappedValue.dismiss()
-                }
-            }
+            actionButton
         }
         .alert(isPresented: $viewModel.hasError) {
             Alert(title: Text("Error"), message: Text(viewModel.errorMessage), dismissButton: .default(Text("Ok")))
         }
         .navigationTitle(viewModel.isEdit ? Text("Edit Recipe") : Text("Add Recipe"))
+        .sheet(isPresented: $viewModel.isShowingPhotoLibrary) {
+            ImagePicker(sourceType: viewModel.pickerSourceType, selectedImage: $viewModel.image)
+        }
+    }
+
+    var generalSection: some View {
+        Section(header: Text("General Details")) {
+            TextField("Recipe name", text: $viewModel.recipeName)
+            TextField("Serving size", text: $viewModel.serving)
+            cuisine
+            .pickerStyle(MenuPickerStyle())
+            difficulty
+        }
+    }
+
+    var instructionSection: some View {
+        Section(header: Text("Instructions")) {
+            steps
+            addStepButton
+        }
+    }
+
+    var ingredientSection: some View {
+        Section(header: Text("Ingredient List")) {
+            ingredients
+            addIngredientButton
+        }
+    }
+
+    var actionButton: some View {
+        Button(viewModel.isEdit ? "Save Recipe" : "Add Recipe") {
+            if viewModel.saveRecipe() {
+                mode.wrappedValue.dismiss()
+            }
+        }
+    }
+
+    var parsingSection: some View {
+        Section(header: Text("Quick Parse")) {
+            HStack {
+                Text("Ingredient")
+                TextEditor(text: $viewModel.ingredientParsingString)
+                    .disableAutocorrection(true)
+            }
+
+            HStack {
+                Text("Instructions")
+                TextEditor(text: $viewModel.instructionParsingString)
+                    .disableAutocorrection(true)
+            }
+
+            Button(
+                action: {
+                    viewModel.parseData()
+                },
+                label: {
+                    Text("Parse data")
+                }
+            )
+        }
+    }
+
+    @ViewBuilder
+    var imageSection: some View {
+       Section(header: Text("IMAGE")) {
+           if viewModel.image != UIImage() {
+               Image(uiImage: viewModel.image)
+                   .resizable()
+                   .scaledToFill()
+                   .frame(height: 300)
+           }
+           HStack {
+               Button("Upload Image") {
+                   viewModel.pickerSourceType = .photoLibrary
+                   viewModel.isShowingPhotoLibrary = true
+               }
+               .buttonStyle(BorderlessButtonStyle())
+               Spacer()
+               Button("Take Photo") {
+                   viewModel.pickerSourceType = .camera
+                   viewModel.isShowingPhotoLibrary = true
+               }
+               .buttonStyle(BorderlessButtonStyle())
+           }
+       }
     }
 
     var cuisine: some View {

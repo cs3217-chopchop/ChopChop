@@ -16,6 +16,9 @@ class RecipeFormViewModel: ObservableObject {
     private(set) var errorMessage = ""
     private(set) var isEdit = false
     private let storageManager = StorageManager()
+    @Published var isShowingPhotoLibrary = false
+    @Published var image = UIImage()
+    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
     private var recipeCategoryCancellable = Set<AnyCancellable>()
     @Published var recipeName = ""
     @Published var serving = "" {
@@ -47,6 +50,7 @@ class RecipeFormViewModel: ObservableObject {
                 ingredientName: $0.name
             )
         })
+        image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
         fetchCategories()
         if let categoryId = recipe.recipeCategoryId {
             do {
@@ -155,6 +159,9 @@ class RecipeFormViewModel: ObservableObject {
                 try storageManager.saveRecipe(&recipe)
             } else {
                 try storageManager.saveRecipe(&newRecipe)
+            }
+            if image != UIImage() {
+                try storageManager.saveRecipeImage(image, name: recipeName)
             }
             return true
         } catch {
