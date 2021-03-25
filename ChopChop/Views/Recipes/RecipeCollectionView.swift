@@ -166,11 +166,11 @@ struct RecipeCollectionView: View {
                 Text("Difficulty: ")
 
                 if let difficulty = recipe.difficulty {
-                    ForEach(0..<difficulty.rawValue) { _ in
+                    ForEach(0..<difficulty.rawValue, id: \.self) { _ in
                         Image(systemName: "star.fill")
                     }
 
-                    ForEach(difficulty.rawValue..<5) { _ in
+                    ForEach(difficulty.rawValue..<5, id: \.self) { _ in
                         Image(systemName: "star")
                     }
                 } else {
