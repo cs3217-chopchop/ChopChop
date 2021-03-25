@@ -137,7 +137,7 @@ struct IngredientCollectionView: View {
                     VStack(alignment: .leading) {
                         Text(ingredient.name)
                             .lineLimit(1)
-                        Text("Total: \(ingredient.totalQuantityDescription), Usable: \(ingredient.totalUsableQuantityDescription)")
+                        Text("Quantity: \(ingredient.totalQuantityDescription)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -179,7 +179,7 @@ struct IngredientCollectionView: View {
                                 Text(ingredient.name)
                                     .foregroundColor(.white)
                                     .lineLimit(1)
-                                Text("Total: \(ingredient.totalQuantityDescription)\nUsable: \(ingredient.totalUsableQuantityDescription)")
+                                Text("Quantity: \(ingredient.totalQuantityDescription)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }

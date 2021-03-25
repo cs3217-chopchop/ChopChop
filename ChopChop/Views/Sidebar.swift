@@ -88,8 +88,9 @@ import SwiftUI
 
     var cookingSection: some View {
         NavigationLink(
-            destination: CookingSelectionView(viewModel: CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
-                                                                                    .compactMap { $0.id } + [nil]))
+            destination: CookingSelectionView(viewModel:
+                                                CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
+                                                                            .compactMap { $0.id } + [nil]))
         ) {
             Text("Cooking")
                 .font(.title3)

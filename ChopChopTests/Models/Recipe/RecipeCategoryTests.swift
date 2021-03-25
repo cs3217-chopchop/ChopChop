@@ -21,19 +21,19 @@ class RecipeCategoryTests: XCTestCase {
     }
 
     func testRename() throws {
-        var recipeCategory = try RecipeCategory(name: name1, id: 1)
+        let recipeCategory = try RecipeCategory(name: name1, id: 1)
         try recipeCategory.rename(name2)
         XCTAssertEqual(recipeCategory.name, name2)
     }
 
     func testRename_noChange() throws {
-        var recipeCategory = try RecipeCategory(name: name2, id: 1)
+        let recipeCategory = try RecipeCategory(name: name2, id: 1)
         try recipeCategory.rename(name2WithWhiteSpace)
         XCTAssertEqual(recipeCategory.name, name2)
     }
 
     func testRename_whiteSpace_fail() throws {
-        var recipeCategory = try RecipeCategory(name: name1, id: 1)
+        let recipeCategory = try RecipeCategory(name: name1, id: 1)
         XCTAssertThrowsError(try recipeCategory.rename(whiteSpace))
     }
 }
