@@ -29,16 +29,6 @@ class Recipe: FetchableRecord, ObservableObject {
         assert(checkRepresentation())
     }
 
-    func updateName(_ name: String) throws {
-        assert(checkRepresentation())
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
-            throw RecipeError.invalidName
-        }
-        self.name = trimmedName
-        assert(checkRepresentation())
-    }
-
     func updateRecipe(_ newRecipe: Recipe) {
         assert(checkRepresentation())
         name = newRecipe.name
@@ -191,12 +181,12 @@ extension Recipe: NSCopying {
     }
 }
 
-enum RecipeError: Error {
-    case invalidName
-    case invalidServings
-    case invalidCuisine
-    case invalidIngredients
-    case nonExistentStep
-    case nonExistentIngredient
-    case invalidReorderSteps
+enum RecipeError: String, Error {
+    case invalidName = "Recipe name cannot be empty."
+    case invalidServings = "Recipe serving should be positive."
+    case invalidCuisine = "Cuisine chosen is non-existent."
+    case invalidIngredients = "Ingredients are invalid."
+    case nonExistentStep = "Recipe step is non-existent."
+    case nonExistentIngredient = "Ingredients are non-existent."
+    case invalidReorderSteps = "Invalid reorder steps."
 }

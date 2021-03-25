@@ -28,39 +28,62 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var steps = [String]()
     @Published private(set) var ingredients = [String]()
 
-    init(id: Int64?) {
-        guard let recipeId = id else {
-            fatalError("Recipe does not have a id.")
-        }
-        var fetchedRecipe: Recipe?
-
-        do {
-            fetchedRecipe = try storage.fetchRecipe(id: recipeId)
-        } catch {
-            hasError = true
-            errorMessage = "Recipe failed to load."
-        }
-
-        guard let recipe = fetchedRecipe else {
-            fatalError("Recipe not fetched.")
-        }
+    init(recipe: Recipe) {
         self.recipe = recipe
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
+
+        bindName()
+        bindServing()
+        bindRecipeCategory()
+        bindDifficulty()
+        bindSteps()
+        bindInstructions()
+    }
+
+    private func bindName() {
         recipe.$name
             .sink { [weak self] name in
                 self?.recipeName = name
             }
             .store(in: &cancellables)
+    }
 
-        serving = recipe.servings
-        if let categoryId = recipe.recipeCategoryId {
-            do {
-                recipeCategory = try storage.fetchRecipeCategory(id: categoryId)?.name ?? ""
-            } catch {
+    private func bindServing() {
+        recipe.$servings
+            .sink { [weak self] serving in
+                self?.serving = serving
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindDifficulty() {
+        recipe.$difficulty
+            .sink { [weak self] difficulty in
+                self?.difficulty = difficulty
 
             }
-        }
+            .store(in: &cancellables)
+    }
 
+    private func bindSteps() {
+        recipe.$steps
+            .sink { [weak self] steps in
+                self?.steps = steps.map({ $0.content })
+
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindInstructions() {
+        recipe.$ingredients
+            .sink { [weak self] ingredient in
+                self?.ingredients = ingredient.map({ $0.description })
+
+            }
+            .store(in: &cancellables)
+    }
+
+    private func bindRecipeCategory() {
         recipe.$recipeCategoryId
             .sink { [weak self] category in
                 if let categoryId = category {
@@ -70,27 +93,6 @@ class RecipeViewModel: ObservableObject {
 
                     }
                 }
-            }
-            .store(in: &cancellables)
-
-        recipe.$difficulty
-            .sink { [weak self] difficulty in
-                self?.difficulty = difficulty
-
-            }
-            .store(in: &cancellables)
-
-        recipe.$steps
-            .sink { [weak self] steps in
-                self?.steps = steps.map({ $0.content })
-
-            }
-            .store(in: &cancellables)
-
-        recipe.$ingredients
-            .sink { [weak self] ingredient in
-                self?.ingredients = ingredient.map({ $0.description })
-
             }
             .store(in: &cancellables)
     }

@@ -479,7 +479,7 @@ extension AppDatabase {
         }
     }
 
-    func fetchCategory(id: Int64) throws -> RecipeCategory? {
+    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
         try dbWriter.read { db in
             let request = RecipeCategoryRecord
                 .filter(key: id)
@@ -494,14 +494,6 @@ extension AppDatabase {
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
-        }
-    }
-
-    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
-        try dbWriter.read { db in
-            let request = RecipeCategoryRecord
-                .filter(key: id)
-            return try RecipeCategory.fetchOne(db, request)
         }
     }
 }

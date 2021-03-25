@@ -15,7 +15,7 @@ struct RecipeCollectionView: View {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
                 NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
-                    Text("Add recipe")
+                    Image(systemName: "plus")
                 }
                 Spacer()
                 MultiselectPicker("Filter by ingredient",
@@ -63,14 +63,7 @@ struct RecipeCollectionView: View {
 
     var listView: some View {
         List(viewModel.recipes) { recipe in
-            NavigationLink(
-                destination: RecipeView(
-                    viewModel: RecipeViewModel(
-                        id: recipe.id)
-                )
-            ) {
-                RecipeRow(recipe: recipe)
-            }
+            RecipeRow(recipe: recipe)
         }
     }
 
@@ -78,14 +71,7 @@ struct RecipeCollectionView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.recipes) { recipe in
-                    NavigationLink(
-                        destination: RecipeView(
-                            viewModel: RecipeViewModel(
-                                id: recipe.id)
-                        )
-                    ) {
-                        GridTile(recipe: recipe)
-                    }
+                    GridTile(recipe: recipe)
                 }
             }
             .padding([.bottom, .leading, .trailing])
@@ -93,29 +79,49 @@ struct RecipeCollectionView: View {
         .padding(.top)
     }
 
+    @ViewBuilder
     func RecipeRow(recipe: RecipeInfo) -> some View {
-        NavigationLink(
-            destination: Text(recipe.name)
-        ) {
-            HStack(alignment: .top) {
-                Image("recipe")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .cornerRadius(10)
-                    .clipped()
-                VStack(alignment: .leading) {
-                    Text(recipe.name)
-                        .lineLimit(1)
-                    RecipeCaption(recipe: recipe)
-                        .foregroundColor(.secondary)
+        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+            NavigationLink(
+                destination: RecipeView(
+                    viewModel: RecipeViewModel(
+                        recipe: fetchedRecipe)
+                )
+            ) {
+                HStack(alignment: .top) {
+                    Image("recipe")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .cornerRadius(10)
+                        .clipped()
+                    VStack(alignment: .leading) {
+                        Text(recipe.name)
+                            .lineLimit(1)
+                        RecipeCaption(recipe: recipe)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .padding([.top, .bottom], 6)
             }
-            .padding([.top, .bottom], 6)
         }
     }
 
+    @ViewBuilder
     func GridTile(recipe: RecipeInfo) -> some View {
+        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+            NavigationLink(
+                destination: RecipeView(
+                    viewModel: RecipeViewModel(
+                        recipe: fetchedRecipe)
+                )
+            ) {
+                GridTileImage(recipe: recipe)
+            }
+        }
+    }
+
+    func GridTileImage(recipe: RecipeInfo) -> some View {
         Image("recipe")
             .resizable()
             .scaledToFill()

@@ -71,23 +71,6 @@ class RecipeTests: XCTestCase {
         XCTAssertThrowsError(try Recipe(name: "Recipe", servings: -2))
     }
 
-    func testUpdateName() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        try recipe.updateName("Soft Pancakes  ")
-        XCTAssertEqual(recipe.name, "Soft Pancakes")
-    }
-
-    func testUpdateName_empty() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.updateName("  "))
-    }
-
-    func testUpdateDifficulty() {
-        let recipe = RecipeTests.generateSampleRecipe()
-        recipe.updateDifficulty(Difficulty.hard)
-        XCTAssertEqual(recipe.difficulty, Difficulty.hard)
-    }
-
     func testAddStep() throws {
         let recipe = RecipeTests.generateSampleRecipe()
         try recipe.addStep(content: "Wait some more")

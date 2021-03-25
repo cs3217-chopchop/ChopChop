@@ -31,7 +31,7 @@ class RecipeFormViewModel: ObservableObject {
     }
     @Published var allRecipeCategories = [RecipeCategory]()
     @Published var recipeCategory = ""
-    @Published var difficulty: Difficulty = .veryEasy
+    @Published var difficulty: String = ""
     @Published var steps = [String]()
     @Published var ingredients = [RecipeIngredientRowViewModel]()
     @Published var ingredientParsingString = ""
@@ -42,8 +42,7 @@ class RecipeFormViewModel: ObservableObject {
         recipeId = recipe.id
         recipeName = recipe.name
         serving = recipe.servings.description
-        difficulty = recipe.difficulty ?? .veryEasy
-
+        difficulty = recipe.difficulty?.description ?? ""
         steps = recipe.steps.map({ $0.content })
         ingredients = recipe.ingredients.map({
             RecipeIngredientRowViewModel(
@@ -54,13 +53,6 @@ class RecipeFormViewModel: ObservableObject {
         })
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
         fetchCategories()
-        if let categoryId = recipe.recipeCategoryId {
-            do {
-                recipeCategory = try storageManager.fetchRecipeCategory(id: categoryId)?.name ?? ""
-            } catch {
-
-            }
-        }
         isEdit = true
     }
 
@@ -73,21 +65,19 @@ class RecipeFormViewModel: ObservableObject {
             .recipeCategoriesPublisher()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] value in
-                guard let self = self else {
-                    return
-                }
                 switch value {
                 case .failure:
-                    self.allRecipeCategories = []
+                    self?.allRecipeCategories = []
+                    self?.recipeCategory = ""
                 case .finished:
                     break
                 }
             },
             receiveValue: { [weak self] categories in
-                guard let self = self else {
-                    return
+                self?.allRecipeCategories = categories
+                if let categoryId = self?.existingRecipe?.recipeCategoryId {
+                    self?.recipeCategory = categories.first(where: { $0.id == categoryId })?.name ?? ""
                 }
-                self.allRecipeCategories = categories
             })
             .store(in: &recipeCategoryCancellable)
     }
@@ -96,40 +86,6 @@ class RecipeFormViewModel: ObservableObject {
         let filtered = serving.filter { "0123456789.".contains($0) }
         if filtered != serving {
             serving = filtered
-        }
-    }
-
-    func checkFormValid() throws {
-        if recipeName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            throw RecipeFormError.emptyName
-        }
-
-        if serving.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            throw RecipeFormError.emptyServing
-        }
-
-        if steps.isEmpty {
-            throw RecipeFormError.emptyStep
-        }
-
-        for step in steps {
-            if step.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                throw RecipeFormError.emptyStepDescription
-            }
-        }
-
-        if ingredients.isEmpty {
-            throw RecipeFormError.emptyIngredient
-        }
-
-        for ingredient in ingredients {
-            if ingredient.amount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                throw RecipeFormError.emptyIngredientQuantity
-            }
-
-            if ingredient.ingredientName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                throw RecipeFormError.emptyIngredientDescription
-            }
         }
     }
 
@@ -151,7 +107,6 @@ class RecipeFormViewModel: ObservableObject {
 
     func saveRecipe() -> Bool {
         do {
-            try checkFormValid()
             var newRecipe = try generateRecipe()
             if isEdit {
                 guard var recipe = existingRecipe else {
@@ -175,24 +130,18 @@ class RecipeFormViewModel: ObservableObject {
 
     private func setErrorMessage(error: Error) {
         switch error {
-        case RecipeFormError.emptyName:
-            errorMessage = RecipeFormError.emptyName.rawValue
-        case RecipeFormError.emptyServing:
-            errorMessage = RecipeFormError.emptyServing.rawValue
+        case RecipeError.invalidName:
+            errorMessage = RecipeError.invalidName.rawValue
+        case RecipeError.invalidServings:
+            errorMessage = RecipeError.invalidServings.rawValue
         case RecipeFormError.invalidServing:
             errorMessage = RecipeFormError.invalidServing.rawValue
-        case RecipeFormError.emptyStep:
-            errorMessage = RecipeFormError.emptyStep.rawValue
-        case RecipeFormError.emptyStepDescription:
-            errorMessage = RecipeFormError.emptyStepDescription.rawValue
-        case RecipeFormError.emptyIngredient:
-            errorMessage = RecipeFormError.emptyIngredient.rawValue
-        case RecipeFormError.emptyIngredientQuantity:
-            errorMessage = RecipeFormError.emptyIngredientQuantity.rawValue
+        case RecipeStepError.invalidContent:
+            errorMessage = RecipeStepError.invalidContent.rawValue
         case RecipeFormError.invalidIngredientQuantity:
             errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
-        case RecipeFormError.emptyIngredientDescription:
-            errorMessage = RecipeFormError.emptyIngredientDescription.rawValue
+        case IngredientError.emptyName:
+            errorMessage = IngredientError.emptyName.rawValue
         case DatabaseError.SQLITE_CONSTRAINT:
             errorMessage = "You already have a recipe with the same name."
         default:
@@ -222,11 +171,12 @@ class RecipeFormViewModel: ObservableObject {
             try $0.convertToIngredient()
         })
         let recipeCategoryId = getRecipeCategoryId()
+        let recipeDifficulty = difficulty.isEmpty ? nil : try Difficulty(description: difficulty)
 
         let newRecipe = try Recipe(
             name: recipeName,
             servings: servingSize,
-            difficulty: difficulty,
+            difficulty: recipeDifficulty,
             steps: recipeStep,
             ingredients: recipeIngredient
         )
@@ -234,4 +184,9 @@ class RecipeFormViewModel: ObservableObject {
         newRecipe.recipeCategoryId = recipeCategoryId
         return newRecipe
     }
+}
+
+enum RecipeFormError: String, Error {
+    case invalidIngredientQuantity = "Recipe ingredient amount is not a valid number."
+    case invalidServing = "Recipe serving is empty or not a valid number."
 }

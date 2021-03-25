@@ -35,8 +35,8 @@ struct RecipeView: View {
         )
         .navigationTitle(viewModel.recipeName)
         .toolbar {
-            Button("Edit Recipe") {
-                viewModel.isShowingForm = true
+            Button(action: { viewModel.isShowingForm = true }) {
+                Image(systemName: "square.and.pencil")
             }
         }
         .onAppear {
@@ -125,6 +125,7 @@ struct RecipeView: View {
 
 struct RecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeView(viewModel: RecipeViewModel(id: 43))
+        // swiftlint:disable force_try
+        RecipeView(viewModel: RecipeViewModel(recipe: try! Recipe(name: "Test")))
     }
 }

@@ -273,9 +273,9 @@ extension Ingredient: Equatable {
     }
 }
 
-enum IngredientError: Error {
-    case emptyName
-    case nonExistentBatch
-    case insufficientQuantity
-    case differentIngredients
+enum IngredientError: String, Error {
+    case emptyName = "Ingredient name cannot be empty."
+    case nonExistentBatch = "Ingredient batch is non-existent."
+    case insufficientQuantity = "Ingredient has insufficient quantity."
+    case differentIngredients = "Ingredients are different."
 }
