@@ -179,11 +179,8 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-<<<<<<< HEAD
         Sidebar(viewModel: SidebarViewModel(),
-                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
-=======
-        Sidebar(viewModel: SidebarViewModel(), editMode: .constant(EditMode.inactive))
->>>>>>> 003c60d (Add adding categories)
+                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []),
+                editMode: .constant(EditMode.inactive))
     }
  }
