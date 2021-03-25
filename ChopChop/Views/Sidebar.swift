@@ -3,13 +3,17 @@ import SwiftUI
  struct Sidebar: View {
     @State var editMode = EditMode.inactive
 
+    @State private var alertIsPresented = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+
     var recipeCategories: [RecipeCategory] = []
     var ingredientCategories: [IngredientCategory] = []
     let allRecipesViewModel: RecipeCollectionViewModel
     let cookingSelectionViewModel: CookingSelectionViewModel
 
-    let deleteRecipeCategories: (IndexSet) -> Void
-    let deleteIngredientCategories: (IndexSet) -> Void
+    let deleteRecipeCategories: (IndexSet) throws -> Void
+    let deleteIngredientCategories: (IndexSet) throws -> Void
 
     var body: some View {
         List {
@@ -22,6 +26,9 @@ import SwiftUI
             EditButton()
         }
         .navigationTitle(Text("ChopChop"))
+        .alert(isPresented: $alertIsPresented) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        }
         .environment(\.editMode, $editMode)
     }
 
@@ -61,7 +68,16 @@ import SwiftUI
                     }
                 }
             }
-            .onDelete(perform: deleteRecipeCategories)
+            .onDelete { offsets in
+                do {
+                    try deleteRecipeCategories(offsets)
+                } catch {
+                    alertTitle = "Database error"
+                    alertMessage = "\(error)"
+
+                    alertIsPresented = true
+                }
+            }
             .deleteDisabled(!editMode.isEditing)
 
             NavigationLink(
@@ -107,7 +123,16 @@ import SwiftUI
 
                 }
             }
-            .onDelete(perform: deleteIngredientCategories)
+            .onDelete { offsets in
+                do {
+                    try deleteIngredientCategories(offsets)
+                } catch {
+                    alertTitle = "Database error"
+                    alertMessage = "\(error)"
+
+                    alertIsPresented = true
+                }
+            }
             .deleteDisabled(!editMode.isEditing)
 
             NavigationLink(

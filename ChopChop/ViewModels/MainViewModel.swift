@@ -23,14 +23,14 @@ final class MainViewModel: ObservableObject {
             }
     }
 
-    func deleteRecipeCategories(at offsets: IndexSet) {
+    func deleteRecipeCategories(at offsets: IndexSet) throws {
         let ids = offsets.compactMap { recipeCategories[$0].id }
-        try? storageManager.deleteRecipeCategories(ids: ids)
+        try storageManager.deleteRecipeCategories(ids: ids)
     }
 
-    func deleteIngredientCategories(at offsets: IndexSet) {
+    func deleteIngredientCategories(at offsets: IndexSet) throws {
         let ids = offsets.compactMap { ingredientCategories[$0].id }
-        try? storageManager.deleteIngredientCategories(ids: ids)
+        try storageManager.deleteIngredientCategories(ids: ids)
     }
 
     private func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
