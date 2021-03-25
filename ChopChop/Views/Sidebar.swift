@@ -1,19 +1,11 @@
 import SwiftUI
 
  struct Sidebar: View {
-    @State var editMode = EditMode.inactive
+    @ObservedObject var viewModel: SidebarViewModel
 
-    @State private var alertIsPresented = false
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-
-    var recipeCategories: [RecipeCategory] = []
-    var ingredientCategories: [IngredientCategory] = []
-    let allRecipesViewModel: RecipeCollectionViewModel
     let cookingSelectionViewModel: CookingSelectionViewModel
 
-    let deleteRecipeCategories: (IndexSet) throws -> Void
-    let deleteIngredientCategories: (IndexSet) throws -> Void
+    @State private var sheetIsPresented = false
 
     var body: some View {
         List {
@@ -23,13 +15,29 @@ import SwiftUI
         }
         .listStyle(SidebarListStyle())
         .toolbar {
-            EditButton()
+            HStack(spacing: 16) {
+                if viewModel.editMode.isEditing {
+                    Menu {
+                        Button("Recipe Category", action: {
+                            sheetIsPresented = true
+                        })
+                        Button("Ingredient Category", action: {})
+                    } label: {
+                        Text("Add")
+                    }
+                    .sheet(isPresented: $sheetIsPresented) {
+                        Text("yolo")
+                    }
+                }
+
+                EditButton()
+            }
         }
         .navigationTitle(Text("ChopChop"))
-        .alert(isPresented: $alertIsPresented) {
-            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .environment(\.editMode, $editMode)
+        .environment(\.editMode, $viewModel.editMode)
     }
 
     var cookingSection: some View {
@@ -42,18 +50,45 @@ import SwiftUI
         }
     }
 
+//    var addRecipeCategorySheet: some View {
+//        VStack {
+//            Text("Add Recipe Category")
+//                .font(.title)
+//            TextField("Category", text: $categoryName)
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .padding()
+//            Button("Done", action: {
+//                sheetIsPresented = false
+//            })
+//        }
+//    }
+//
+//    var addIngredientCategorySheet: some View {
+//        VStack {
+//            Text("Add Ingredient Category")
+//                .font(.title)
+//            TextField("Category", text: $categoryName)
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .padding()
+//            Button("Done", action: {
+//                sheetIsPresented = false
+//            })
+//        }
+//    }
+
     var recipesSection: some View {
         Section(header: Text("Recipes")) {
             NavigationLink(
                 destination: RecipeCollectionView(viewModel:
                                                     RecipeCollectionViewModel(
                                                         title: "All Recipes",
-                                                        categoryIds: recipeCategories.compactMap { $0.id } + [nil]))
+                                                        categoryIds: viewModel.recipeCategories
+                                                            .compactMap { $0.id } + [nil]))
             ) {
                 Label("All Recipes", systemImage: "tray.2")
             }
 
-            ForEach(recipeCategories) { category in
+            ForEach(viewModel.recipeCategories) { category in
                 NavigationLink(
                     destination: RecipeCollectionView(viewModel:
                                                         RecipeCollectionViewModel(
@@ -68,30 +103,13 @@ import SwiftUI
                     }
                 }
             }
-            .onDelete { offsets in
-                do {
-                    try deleteRecipeCategories(offsets)
-                } catch {
-                    alertTitle = "Database error"
-                    alertMessage = "\(error)"
-
-                    alertIsPresented = true
-                }
-            }
-            .deleteDisabled(!editMode.isEditing)
+            .onDelete(perform: viewModel.deleteRecipeCategories)
+            .deleteDisabled(!viewModel.editMode.isEditing)
 
             NavigationLink(
                 destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
             ) {
                 Label("Uncategorised", systemImage: "questionmark.folder")
-            }
-
-            if editMode.isEditing {
-                Button(action: {
-                    print("add")
-                }) {
-                    Label("Add a recipe category...", systemImage: "plus")
-                }
             }
         }
     }
@@ -102,12 +120,13 @@ import SwiftUI
                 destination: IngredientCollectionView(viewModel:
                                                     IngredientCollectionViewModel(
                                                         title: "All Ingredients",
-                                                        categoryIds: ingredientCategories.compactMap { $0.id } + [nil]))
+                                                        categoryIds: viewModel.ingredientCategories
+                                                            .compactMap { $0.id } + [nil]))
             ) {
                 Label("All Ingredients", systemImage: "tray.2")
             }
 
-            ForEach(ingredientCategories) { category in
+            ForEach(viewModel.ingredientCategories) { category in
                 NavigationLink(
                     destination: IngredientCollectionView(viewModel:
                                                         IngredientCollectionViewModel(
@@ -123,30 +142,13 @@ import SwiftUI
 
                 }
             }
-            .onDelete { offsets in
-                do {
-                    try deleteIngredientCategories(offsets)
-                } catch {
-                    alertTitle = "Database error"
-                    alertMessage = "\(error)"
-
-                    alertIsPresented = true
-                }
-            }
-            .deleteDisabled(!editMode.isEditing)
+            .onDelete(perform: viewModel.deleteIngredientCategories)
+            .deleteDisabled(!viewModel.editMode.isEditing)
 
             NavigationLink(
                 destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
             ) {
                 Label("Uncategorised", systemImage: "questionmark.folder")
-            }
-
-            if editMode.isEditing {
-                Button(action: {
-                    print("add")
-                }) {
-                    Label("Add an ingredient category...", systemImage: "plus")
-                }
             }
         }
     }
@@ -154,9 +156,7 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(allRecipesViewModel: RecipeCollectionViewModel(title: ""),
-                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []),
-                deleteRecipeCategories: { _ in },
-                deleteIngredientCategories: { _ in })
+        Sidebar(viewModel: SidebarViewModel(),
+                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
     }
  }
