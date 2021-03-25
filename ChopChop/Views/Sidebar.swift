@@ -5,7 +5,7 @@ import SwiftUI
 
     let cookingSelectionViewModel: CookingSelectionViewModel
 
-    @State private var sheetIsPresented = false
+    @Binding var editMode: EditMode
 
     var body: some View {
         List {
@@ -16,17 +16,18 @@ import SwiftUI
         .listStyle(SidebarListStyle())
         .toolbar {
             HStack(spacing: 16) {
-                if viewModel.editMode.isEditing {
+                if editMode.isEditing {
                     Menu {
                         Button("Recipe Category", action: {
-                            sheetIsPresented = true
+                            viewModel.sheetIsPresented = true
+                            viewModel.categoryType = .recipe
                         })
-                        Button("Ingredient Category", action: {})
+                        Button("Ingredient Category", action: {
+                            viewModel.sheetIsPresented = true
+                            viewModel.categoryType = .ingredient
+                        })
                     } label: {
                         Text("Add")
-                    }
-                    .sheet(isPresented: $sheetIsPresented) {
-                        Text("yolo")
                     }
                 }
 
@@ -37,7 +38,55 @@ import SwiftUI
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .environment(\.editMode, $viewModel.editMode)
+        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: {
+            switch viewModel.categoryType {
+            case .recipe:
+                viewModel.addRecipeCategory(name: viewModel.categoryName)
+            case .ingredient:
+                viewModel.addIngredientCategory(name: viewModel.categoryName)
+            case .none:
+                return
+            }
+
+            viewModel.categoryName = ""
+            viewModel.categoryType = nil
+        }) {
+            switch viewModel.categoryType {
+            case .recipe:
+                addRecipeCategorySheet
+            case .ingredient:
+                addIngredientCategorySheet
+            case .none:
+                EmptyView()
+            }
+        }
+        .environment(\.editMode, $editMode)
+    }
+
+    var addRecipeCategorySheet: some View {
+        VStack {
+            Text("Add Recipe Category")
+                .font(.title)
+            TextField("Category", text: $viewModel.categoryName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Button("Done", action: {
+                viewModel.sheetIsPresented = false
+            })
+        }
+    }
+
+    var addIngredientCategorySheet: some View {
+        VStack {
+            Text("Add Ingredient Category")
+                .font(.title)
+            TextField("Category", text: $viewModel.categoryName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Button("Done", action: {
+                viewModel.sheetIsPresented = false
+            })
+        }
     }
 
     var cookingSection: some View {
@@ -49,32 +98,6 @@ import SwiftUI
                 .bold()
         }
     }
-
-//    var addRecipeCategorySheet: some View {
-//        VStack {
-//            Text("Add Recipe Category")
-//                .font(.title)
-//            TextField("Category", text: $categoryName)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .padding()
-//            Button("Done", action: {
-//                sheetIsPresented = false
-//            })
-//        }
-//    }
-//
-//    var addIngredientCategorySheet: some View {
-//        VStack {
-//            Text("Add Ingredient Category")
-//                .font(.title)
-//            TextField("Category", text: $categoryName)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .padding()
-//            Button("Done", action: {
-//                sheetIsPresented = false
-//            })
-//        }
-//    }
 
     var recipesSection: some View {
         Section(header: Text("Recipes")) {
@@ -104,7 +127,7 @@ import SwiftUI
                 }
             }
             .onDelete(perform: viewModel.deleteRecipeCategories)
-            .deleteDisabled(!viewModel.editMode.isEditing)
+            .deleteDisabled(!editMode.isEditing)
 
             NavigationLink(
                 destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
@@ -143,7 +166,7 @@ import SwiftUI
                 }
             }
             .onDelete(perform: viewModel.deleteIngredientCategories)
-            .deleteDisabled(!viewModel.editMode.isEditing)
+            .deleteDisabled(!editMode.isEditing)
 
             NavigationLink(
                 destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
@@ -156,7 +179,11 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
+<<<<<<< HEAD
         Sidebar(viewModel: SidebarViewModel(),
                 cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []))
+=======
+        Sidebar(viewModel: SidebarViewModel(), editMode: .constant(EditMode.inactive))
+>>>>>>> 003c60d (Add adding categories)
     }
  }

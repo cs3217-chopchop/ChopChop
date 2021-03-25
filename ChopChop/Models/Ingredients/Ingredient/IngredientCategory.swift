@@ -1,5 +1,6 @@
 import GRDB
 import Combine
+import Foundation
 
 /**
  Represents a collection of ingredients grouped under a category.
@@ -15,7 +16,7 @@ struct IngredientCategory: Identifiable, Hashable {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw IngredientError.emptyName
+            throw IngredientCategoryError.emptyName
         }
 
         self.id = id
@@ -25,13 +26,13 @@ struct IngredientCategory: Identifiable, Hashable {
     /**
      Renames the ingredient category with a given name.
      - Throws:
-        - `IngredientError.emptyName`: if the given name is empty.
+        - `IngredientCategoryError.emptyName`: if the given name is empty.
      */
     mutating func rename(_ newName: String) throws {
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw IngredientError.emptyName
+            throw IngredientCategoryError.emptyName
         }
 
         name = trimmedName
@@ -95,5 +96,16 @@ extension IngredientCategory: FetchableRecord {
     init(row: Row) {
         id = row["id"]
         name = row["name"]
+    }
+}
+
+enum IngredientCategoryError: LocalizedError {
+    case emptyName
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyName:
+            return "Category name cannot be empty"
+        }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct MainView: View {
     @ObservedObject var viewModel: MainViewModel
     let cookingSelectionViewModel: CookingSelectionViewModel
+    @State var editMode = EditMode.inactive
 
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
@@ -12,7 +13,8 @@ struct MainView: View {
 
     var body: some View {
         Sidebar(viewModel: SidebarViewModel(),
-                cookingSelectionViewModel: cookingSelectionViewModel)
+                cookingSelectionViewModel: cookingSelectionViewModel,
+                editMode: $editMode)
 
         RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",
                                                                   categoryIds: viewModel.recipeCategories

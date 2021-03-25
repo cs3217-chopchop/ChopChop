@@ -2,13 +2,16 @@ import Combine
 import SwiftUI
 
 final class SidebarViewModel: ObservableObject {
-    @Published var editMode = EditMode.inactive
     @Published private(set) var recipeCategories: [RecipeCategory] = []
     @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
+
+    @Published var sheetIsPresented = false
+    @Published var categoryName = ""
+    @Published var categoryType: CategoryType?
 
     private let storageManager = StorageManager()
     private var recipeCategoriesCancellable: AnyCancellable?
@@ -24,6 +27,40 @@ final class SidebarViewModel: ObservableObject {
             .sink { [weak self] categories in
                 self?.ingredientCategories = categories
             }
+    }
+
+    func addRecipeCategory(name: String) {
+        do {
+            var category = try RecipeCategory(name: name)
+            try storageManager.saveRecipeCategory(&category)
+        } catch {
+            if let message = (error as? LocalizedError)?.errorDescription {
+                alertTitle = "Error"
+                alertMessage = message
+            } else {
+                alertTitle = "Database error"
+                alertMessage = "\(error)"
+            }
+
+            alertIsPresented = true
+        }
+    }
+
+    func addIngredientCategory(name: String) {
+        do {
+            var category = try IngredientCategory(name: name)
+            try storageManager.saveIngredientCategory(&category)
+        } catch {
+            if let message = (error as? LocalizedError)?.errorDescription {
+                alertTitle = "Error"
+                alertMessage = message
+            } else {
+                alertTitle = "Database error"
+                alertMessage = "\(error)"
+            }
+
+            alertIsPresented = true
+        }
     }
 
     func deleteRecipeCategories(at offsets: IndexSet) {
@@ -64,5 +101,11 @@ final class SidebarViewModel: ObservableObject {
                 Just<[IngredientCategory]>([])
             }
             .eraseToAnyPublisher()
+    }
+}
+
+extension SidebarViewModel {
+    enum CategoryType {
+        case recipe, ingredient
     }
 }
