@@ -14,6 +14,10 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published var expiryDateEnd = Date.today
     @Published private(set) var ingredients: [IngredientInfo] = []
 
+    @Published var alertIsPresented = false
+    @Published var alertTitle = ""
+    @Published var alertMessage = ""
+
     let title: String
     let categoryIds: [Int64?]
 
@@ -42,9 +46,16 @@ final class IngredientCollectionViewModel: ObservableObject {
         return id
     }
 
-    func deleteIngredients(at offsets: IndexSet) throws {
-        let ids = offsets.compactMap { ingredients[$0].id }
-        try storageManager.deleteIngredients(ids: ids)
+    func deleteIngredients(at offsets: IndexSet) {
+        do {
+            let ids = offsets.compactMap { ingredients[$0].id }
+            try storageManager.deleteIngredients(ids: ids)
+        } catch {
+            alertTitle = "Database error"
+            alertMessage = "\(error)"
+
+            alertIsPresented = true
+        }
     }
 
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {

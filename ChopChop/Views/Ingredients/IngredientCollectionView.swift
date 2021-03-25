@@ -4,10 +4,6 @@ struct IngredientCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: IngredientCollectionViewModel
 
-    @State private var alertIsPresented = false
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-
     let columns = [
         GridItem(),
         GridItem(),
@@ -61,8 +57,8 @@ struct IngredientCollectionView: View {
                 }
             }
         }
-        .alert(isPresented: $alertIsPresented) {
-            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
         .onAppear {
             viewModel.query = ""
@@ -108,16 +104,7 @@ struct IngredientCollectionView: View {
             ForEach(viewModel.ingredients) { ingredient in
                 IngredientRow(info: ingredient)
             }
-            .onDelete { offsets in
-                do {
-                    try viewModel.deleteIngredients(at: offsets)
-                } catch {
-                    alertTitle = "Database error"
-                    alertMessage = "\(error)"
-
-                    alertIsPresented = true
-                }
-            }
+            .onDelete(perform: viewModel.deleteIngredients)
             .animation(.none)
         }
     }
@@ -203,18 +190,11 @@ struct IngredientCollectionView: View {
             }
             .contextMenu {
                 Button(action: {
-                    do {
-                        guard let index = viewModel.ingredients.firstIndex(where: { $0 == info }) else {
-                            return
-                        }
-
-                        try viewModel.deleteIngredients(at: [index])
-                    } catch {
-                        alertTitle = "Database error"
-                        alertMessage = "\(error)"
-
-                        alertIsPresented = true
+                    guard let index = viewModel.ingredients.firstIndex(where: { $0 == info }) else {
+                        return
                     }
+
+                    viewModel.deleteIngredients(at: [index])
                 }) {
                     Label("Delete Ingredient", systemImage: "trash")
                 }

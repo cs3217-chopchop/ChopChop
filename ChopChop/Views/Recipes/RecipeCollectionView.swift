@@ -4,10 +4,6 @@ struct RecipeCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: RecipeCollectionViewModel
 
-    @State private var alertIsPresented = false
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-
     let columns = [
         GridItem(),
         GridItem(),
@@ -46,8 +42,8 @@ struct RecipeCollectionView: View {
                 }
             }
         }
-        .alert(isPresented: $alertIsPresented) {
-            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
         .onAppear {
             viewModel.query = ""
@@ -70,16 +66,7 @@ struct RecipeCollectionView: View {
             ForEach(viewModel.recipes) { recipe in
                 RecipeRow(recipe: recipe)
             }
-            .onDelete { offsets in
-                do {
-                    try viewModel.deleteRecipes(at: offsets)
-                } catch {
-                    alertTitle = "Database error"
-                    alertMessage = "\(error)"
-
-                    alertIsPresented = true
-                }
-            }
+            .onDelete(perform: viewModel.deleteRecipes)
         }
     }
 
@@ -94,18 +81,11 @@ struct RecipeCollectionView: View {
                     }
                     .contextMenu {
                         Button(action: {
-                            do {
-                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
-                                    return
-                                }
-
-                                try viewModel.deleteRecipes(at: [index])
-                            } catch {
-                                alertTitle = "Database error"
-                                alertMessage = "\(error)"
-
-                                alertIsPresented = true
+                            guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                return
                             }
+
+                            viewModel.deleteRecipes(at: [index])
                         }) {
                             Label("Delete Recipe", systemImage: "trash")
                         }

@@ -7,6 +7,10 @@ final class RecipeCollectionViewModel: ObservableObject {
     @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
 
+    @Published var alertIsPresented = false
+    @Published var alertTitle = ""
+    @Published var alertMessage = ""
+
     let title: String
     let categoryIds: [Int64?]
 
@@ -28,9 +32,16 @@ final class RecipeCollectionViewModel: ObservableObject {
             }
     }
 
-    func deleteRecipes(at offsets: IndexSet) throws {
-        let ids = offsets.compactMap { recipes[$0].id }
-        try storageManager.deleteRecipes(ids: ids)
+    func deleteRecipes(at offsets: IndexSet) {
+        do {
+            let ids = offsets.compactMap { recipes[$0].id }
+            try storageManager.deleteRecipes(ids: ids)
+        } catch {
+            alertTitle = "Database error"
+            alertMessage = "\(error)"
+
+            alertIsPresented = true
+        }
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
