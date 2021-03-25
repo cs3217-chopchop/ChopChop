@@ -4,6 +4,10 @@ struct RecipeCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: RecipeCollectionViewModel
 
+    @State private var alertIsPresented = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+
     let columns = [
         GridItem(),
         GridItem(),
@@ -42,6 +46,9 @@ struct RecipeCollectionView: View {
                 }
             }
         }
+        .alert(isPresented: $alertIsPresented) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        }
         .onAppear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
@@ -59,8 +66,20 @@ struct RecipeCollectionView: View {
     }
 
     var listView: some View {
-        List(viewModel.recipes) { recipe in
-            RecipeRow(recipe: recipe)
+        List {
+            ForEach(viewModel.recipes) { recipe in
+                RecipeRow(recipe: recipe)
+            }
+            .onDelete { offsets in
+                do {
+                    try viewModel.deleteRecipes(at: offsets)
+                } catch {
+                    alertTitle = "Database error"
+                    alertMessage = "\(error)"
+
+                    alertIsPresented = true
+                }
+            }
         }
     }
 
@@ -72,6 +91,24 @@ struct RecipeCollectionView: View {
                         destination: Text(recipe.name)
                     ) {
                         GridTile(recipe: recipe)
+                    }
+                    .contextMenu {
+                        Button(action: {
+                            do {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                    return
+                                }
+
+                                try viewModel.deleteRecipes(at: [index])
+                            } catch {
+                                alertTitle = "Database error"
+                                alertMessage = "\(error)"
+
+                                alertIsPresented = true
+                            }
+                        }) {
+                            Label("Delete Recipe", systemImage: "trash")
+                        }
                     }
                 }
             }

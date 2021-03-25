@@ -42,6 +42,11 @@ final class IngredientCollectionViewModel: ObservableObject {
         return id
     }
 
+    func deleteIngredients(at offsets: IndexSet) throws {
+        let ids = offsets.compactMap { ingredients[$0].id }
+        try storageManager.deleteIngredients(ids: ids)
+    }
+
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
         $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd)
             .map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd

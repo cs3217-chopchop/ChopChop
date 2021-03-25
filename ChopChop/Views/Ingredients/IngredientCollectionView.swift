@@ -4,6 +4,10 @@ struct IngredientCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: IngredientCollectionViewModel
 
+    @State private var alertIsPresented = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+
     let columns = [
         GridItem(),
         GridItem(),
@@ -57,6 +61,9 @@ struct IngredientCollectionView: View {
                 }
             }
         }
+        .alert(isPresented: $alertIsPresented) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage))
+        }
         .onAppear {
             viewModel.query = ""
             viewModel.filterByExpiryDate = false
@@ -97,10 +104,22 @@ struct IngredientCollectionView: View {
     }
 
     var listView: some View {
-        List(viewModel.ingredients) { ingredient in
-            IngredientRow(info: ingredient)
+        List {
+            ForEach(viewModel.ingredients) { ingredient in
+                IngredientRow(info: ingredient)
+            }
+            .onDelete { offsets in
+                do {
+                    try viewModel.deleteIngredients(at: offsets)
+                } catch {
+                    alertTitle = "Database error"
+                    alertMessage = "\(error)"
+
+                    alertIsPresented = true
+                }
+            }
+            .animation(.none)
         }
-        .animation(.none)
     }
 
     var gridView: some View {
@@ -181,6 +200,24 @@ struct IngredientCollectionView: View {
                         }
                     )
                     .padding([.leading, .trailing], 8)
+            }
+            .contextMenu {
+                Button(action: {
+                    do {
+                        guard let index = viewModel.ingredients.firstIndex(where: { $0 == info }) else {
+                            return
+                        }
+
+                        try viewModel.deleteIngredients(at: [index])
+                    } catch {
+                        alertTitle = "Database error"
+                        alertMessage = "\(error)"
+
+                        alertIsPresented = true
+                    }
+                }) {
+                    Label("Delete Ingredient", systemImage: "trash")
+                }
             }
         }
     }

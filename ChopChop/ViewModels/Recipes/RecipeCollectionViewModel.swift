@@ -1,8 +1,9 @@
 import Combine
+import Foundation
 
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query = ""
-    @Published private(set) var recipes: [RecipeInfo] = []
+    @Published var recipes: [RecipeInfo] = []
     @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
 
@@ -25,6 +26,11 @@ final class RecipeCollectionViewModel: ObservableObject {
             .sink { [weak self] ingredients in
                 self?.recipeIngredients = Set(ingredients)
             }
+    }
+
+    func deleteRecipes(at offsets: IndexSet) throws {
+        let ids = offsets.compactMap { recipes[$0].id }
+        try storageManager.deleteRecipes(ids: ids)
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
