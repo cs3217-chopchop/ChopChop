@@ -1,6 +1,6 @@
-import Combine
 import Foundation
 import UIKit
+import Combine
 
 struct StorageManager {
     let appDatabase: AppDatabase
@@ -119,7 +119,7 @@ struct StorageManager {
 
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesPublisher()
-            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? RecipeCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }
 
@@ -160,7 +160,7 @@ struct StorageManager {
     }
 }
 
-// MARK: - Images Persistence
+// MARK: - Image Persistence
 extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
@@ -170,6 +170,10 @@ extension StorageManager {
     }
 
     func renameRecipeImage(from oldName: String, to newName: String) throws {
+        guard oldName != newName else {
+            return
+        }
+
         guard let image = fetchRecipeImage(name: oldName) else {
             return
         }
@@ -191,6 +195,10 @@ extension StorageManager {
     }
 
     func renameIngredientImage(from oldName: String, to newName: String) throws {
+        guard oldName != newName else {
+            return
+        }
+
         guard let image = fetchIngredientImage(name: oldName) else {
             return
         }
@@ -204,6 +212,14 @@ extension StorageManager {
     }
 
     func saveIngredientImage(_ image: UIImage, name: String) throws {
-        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
+        do {
+            try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.ingredientFolderName)
+        } catch {
+            throw StorageError.saveImageFailure
+        }
     }
+}
+
+enum StorageError: Error {
+    case saveImageFailure
 }

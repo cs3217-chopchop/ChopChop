@@ -1,11 +1,12 @@
 import Foundation
+import SwiftUI
 
 /**
  Represents a batch of an ingredient.
  A batch contains some quantity of an ingredient with the same expiry date.
  */
-class IngredientBatch {
-    private(set) var quantity: Quantity
+class IngredientBatch: ObservableObject {
+    @Published private(set) var quantity: Quantity
     let expiryDate: Date?
 
     init(quantity: Quantity, expiryDate: Date? = nil) {
@@ -23,6 +24,10 @@ class IngredientBatch {
 
     func subtract(_ quantity: Quantity) throws {
         try self.quantity -= quantity
+    }
+
+    func updateQuantity(_ quantity: Quantity) {
+        self.quantity = quantity
     }
 }
 

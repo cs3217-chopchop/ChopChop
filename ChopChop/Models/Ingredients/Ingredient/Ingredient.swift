@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import GRDB
 
 /**
@@ -8,13 +9,13 @@ import GRDB
  - All quantities are of the same type.
  - Each batch has a unique expiry date.
  */
-class Ingredient: FetchableRecord {
+class Ingredient: FetchableRecord, ObservableObject {
     var id: Int64?
     var ingredientCategoryId: Int64?
     let quantityType: BaseQuantityType
 
-    private(set) var name: String
-    private(set) var batches: [IngredientBatch]
+    @Published private(set) var name: String
+    @Published private(set) var batches: [IngredientBatch]
 
     init(name: String, type: BaseQuantityType, batches: [IngredientBatch] = []) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -69,6 +70,28 @@ class Ingredient: FetchableRecord {
             .map { $0.quantity.baseValue }
             .reduce(0.0, +)
     }
+
+    var totalQuantityDescription: String {
+        getQuantityDescription(value: totalQuantity)
+    }
+
+    var totalUsableQuantityDescription: String {
+        getQuantityDescription(value: totalUsableQuantity)
+    }
+
+    private func getQuantityDescription(value: Double) -> String {
+        switch quantityType {
+        case .count:
+            let description = try? Quantity(.count, value: value).description
+            return description ?? "None"
+        case .mass:
+            let description = try? Quantity(.mass(.baseUnit), value: value).description
+            return description ?? "None"
+        case .volume:
+            let description = try? Quantity(.volume(.baseUnit), value: value).description
+            return description ?? "None"
+        }
+    }
 }
 
 extension Ingredient {
@@ -78,13 +101,13 @@ extension Ingredient {
         - `IngredientError.emptyName`: if the given name is empty.
      */
     func rename(_ newName: String) throws {
-        // TODO: rename image name as well
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
             throw IngredientError.emptyName
         }
 
+        try StorageManager().renameIngredientImage(from: self.name, to: trimmedName)
         self.name = trimmedName
     }
 

@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 
 final class IngredientCollectionViewModel: ObservableObject {
     @Published var query: String = ""
@@ -12,6 +13,10 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published var expiryDateStart = Date.today
     @Published var expiryDateEnd = Date.today
     @Published private(set) var ingredients: [IngredientInfo] = []
+
+    @Published var alertIsPresented = false
+    @Published var alertTitle = ""
+    @Published var alertMessage = ""
 
     let title: String
     let categoryIds: [Int64?]
@@ -29,26 +34,61 @@ final class IngredientCollectionViewModel: ObservableObject {
             }
     }
 
+    var categoryId: Int64? {
+        guard !categoryIds.isEmpty else {
+            return nil
+        }
+
+        guard categoryIds.count == 1, let id = categoryIds.first else {
+            return nil
+        }
+
+        return id
+    }
+
+    func deleteIngredients(at offsets: IndexSet) {
+        do {
+            let ids = offsets.compactMap { ingredients[$0].id }
+            try storageManager.deleteIngredients(ids: ids)
+        } catch {
+            alertTitle = "Database error"
+            alertMessage = "\(error)"
+
+            alertIsPresented = true
+        }
+    }
+
     private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        // swiftlint:disable line_length
-        $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd).map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
-            -> AnyPublisher<[IngredientInfo], Error> in
-            if filterByExpiryDate {
-                return storageManager.ingredientsPublisher(query: query,
-                                                           categoryIds: categoryIds,
-                                                           expiresAfter: expiryDateStart,
-                                                           expiresBefore: expiryDateEnd)
-            } else {
-                return storageManager.ingredientsPublisher(query: query, categoryIds: categoryIds)
+        $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd)
+            .map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd
+                -> AnyPublisher<[IngredientInfo], Error> in
+                if filterByExpiryDate {
+                    return storageManager.ingredientsPublisher(query: query,
+                                                               categoryIds: categoryIds,
+                                                               expiresAfter: expiryDateStart,
+                                                               expiresBefore: expiryDateEnd)
+                } else {
+                    return storageManager.ingredientsPublisher(query: query, categoryIds: categoryIds)
+                }
             }
-        }
-        .map { ingredientsPublisher in
-            ingredientsPublisher.catch { _ in
-                Just<[IngredientInfo]>([])
+            .map { ingredientsPublisher in
+                ingredientsPublisher.catch { _ in
+                    Just<[IngredientInfo]>([])
+                }
             }
+            .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+
+    func getIngredient(info: IngredientInfo) -> Ingredient? {
+        guard let id = info.id else {
+            return nil
         }
-        .switchToLatest()
-        .eraseToAnyPublisher()
-        // swiftlint:enable line_length
+
+        return try? storageManager.fetchIngredient(id: id)
+    }
+
+    func getIngredientImage(ingredient: Ingredient) -> UIImage {
+        storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
     }
 }

@@ -6,7 +6,7 @@ class CountdownTimerViewModel: ObservableObject, Identifiable {
     @Published var disableIncreaseTime: Bool
     @Published var disableDecreaseTime: Bool
     @Published var disableStart: Bool
-    var isDisabled: Bool = false
+    var isDisabled = false
 
     init(countdownTimer: CountdownTimer) {
         self.countdownTimer = countdownTimer

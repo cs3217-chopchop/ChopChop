@@ -44,6 +44,14 @@ extension Quantity {
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     static func + (left: Quantity, right: Quantity) throws -> Quantity {
+        guard left.value != 0 else {
+            return right
+        }
+
+        guard right.value != 0 else {
+            return left
+        }
+
         switch (left.type, right.type) {
         case (.count, .count):
             let sum = left.value + right.value
@@ -98,6 +106,10 @@ extension Quantity {
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     static func - (left: Quantity, right: Quantity) throws -> Quantity {
+        guard right.value != 0 else {
+            return left
+        }
+
         switch (left.type, right.type) {
         case (.count, .count):
             let difference = left.value - right.value
@@ -178,6 +190,14 @@ extension Quantity {
         - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
      */
     static func < (left: Quantity, right: Quantity) throws -> Bool {
+        guard right.value != 0 else {
+            return false
+        }
+
+        guard left.value != 0 else {
+            return true
+        }
+
         var rightValue: Double
 
         switch (left.type, right.type) {
@@ -209,12 +229,12 @@ extension Quantity: CustomStringConvertible {
         switch type {
         case .count:
             if value == 0 {
-                return ""
+                return "None"
             } else {
-                return String(format: "%.1f", value)
+                return value.removeZerosFromEnd()
             }
         default:
-            return String(format: "%.2f \(type.description)", value)
+            return "\(value.removeZerosFromEnd()) \(type.description)"
         }
     }
 }
@@ -247,4 +267,6 @@ enum QuantityError: Error {
     case negativeQuantity
     case divisionByZero
     case incompatibleTypes
+    case invalidUnit
+    case invalidQuantity
 }

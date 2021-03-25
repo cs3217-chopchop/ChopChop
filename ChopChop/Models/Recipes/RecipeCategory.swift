@@ -1,10 +1,11 @@
+import Foundation
 import GRDB
 
 class RecipeCategory: Identifiable, FetchableRecord {
     var id: Int64?
     private(set) var name: String
 
-    init(id: Int64?, name: String) throws {
+    init(name: String, id: Int64? = nil) throws {
         self.id = id
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
@@ -28,6 +29,13 @@ class RecipeCategory: Identifiable, FetchableRecord {
 
 }
 
-enum RecipeCategoryError: Error {
+enum RecipeCategoryError: LocalizedError {
     case invalidName
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidName:
+            return "Category name cannot be empty"
+        }
+    }
 }

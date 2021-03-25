@@ -45,6 +45,9 @@ struct RecipeCollectionView: View {
                 }
             }
         }
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
+        }
         .onAppear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
@@ -62,8 +65,11 @@ struct RecipeCollectionView: View {
     }
 
     var listView: some View {
-        List(viewModel.recipes) { recipe in
-            RecipeRow(recipe: recipe)
+        List {
+            ForEach(viewModel.recipes) { recipe in
+                RecipeRow(recipe: recipe)
+            }
+            .onDelete(perform: viewModel.deleteRecipes)
         }
     }
 
@@ -72,6 +78,17 @@ struct RecipeCollectionView: View {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.recipes) { recipe in
                     GridTile(recipe: recipe)
+                        .contextMenu {
+                            Button(action: {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                    return
+                                }
+
+                                viewModel.deleteRecipes(at: [index])
+                            }) {
+                                Label("Delete Recipe", systemImage: "trash")
+                            }
+                        }
                 }
             }
             .padding([.bottom, .leading, .trailing])
@@ -118,6 +135,7 @@ struct RecipeCollectionView: View {
             ) {
                 GridTileImage(recipe: recipe)
             }
+
         }
     }
 

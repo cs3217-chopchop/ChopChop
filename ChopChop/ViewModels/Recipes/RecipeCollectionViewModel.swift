@@ -1,10 +1,15 @@
 import Combine
+import Foundation
 
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query = ""
     @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
+
+    @Published var alertIsPresented = false
+    @Published var alertTitle = ""
+    @Published var alertMessage = ""
 
     let title: String
     let categoryIds: [Int64?]
@@ -25,6 +30,18 @@ final class RecipeCollectionViewModel: ObservableObject {
             .sink { [weak self] ingredients in
                 self?.recipeIngredients = Set(ingredients)
             }
+    }
+
+    func deleteRecipes(at offsets: IndexSet) {
+        do {
+            let ids = offsets.compactMap { recipes[$0].id }
+            try storageManager.deleteRecipes(ids: ids)
+        } catch {
+            alertTitle = "Database error"
+            alertMessage = "\(error)"
+
+            alertIsPresented = true
+        }
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
