@@ -2,9 +2,6 @@ import SwiftUI
 
  struct Sidebar: View {
     @ObservedObject var viewModel: SidebarViewModel
-
-    let cookingSelectionViewModel: CookingSelectionViewModel
-
     @Binding var editMode: EditMode
 
     var body: some View {
@@ -91,7 +88,8 @@ import SwiftUI
 
     var cookingSection: some View {
         NavigationLink(
-            destination: CookingSelectionView(viewModel: cookingSelectionViewModel)
+            destination: CookingSelectionView(viewModel: CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
+                                                                                    .compactMap { $0.id } + [nil]))
         ) {
             Text("Cooking")
                 .font(.title3)
@@ -179,8 +177,6 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(viewModel: SidebarViewModel(),
-                cookingSelectionViewModel: CookingSelectionViewModel(categoryIds: []),
-                editMode: .constant(EditMode.inactive))
+        Sidebar(viewModel: SidebarViewModel(), editMode: .constant(EditMode.inactive))
     }
  }

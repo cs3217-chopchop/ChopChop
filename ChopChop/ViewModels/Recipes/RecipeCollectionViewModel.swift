@@ -3,7 +3,7 @@ import Foundation
 
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query = ""
-    @Published var recipes: [RecipeInfo] = []
+    @Published private(set) var recipes: [RecipeInfo] = []
     @Published private(set) var recipeIngredients: Set<String> = []
     @Published var selectedIngredients: Set<String> = []
 
