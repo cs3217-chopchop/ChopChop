@@ -31,7 +31,7 @@ struct AppDatabase {
                 t.autoIncrementedPrimaryKey("id")
                 t.column("recipeCategoryId", .integer)
                     .indexed()
-                    .references("recipeCategory", onDelete: .restrict)
+                    .references("recipeCategory", onDelete: .setNull)
                 t.column("name", .text)
                     .notNull()
                     .unique()
@@ -91,7 +91,7 @@ struct AppDatabase {
                 t.autoIncrementedPrimaryKey("id")
                 t.column("ingredientCategoryId", .integer)
                     .indexed()
-                    .references("ingredientCategory", onDelete: .restrict)
+                    .references("ingredientCategory", onDelete: .setNull)
                 t.column("name", .text)
                     .notNull()
                     .unique()
@@ -131,7 +131,7 @@ struct AppDatabase {
 extension AppDatabase {
     func createPreloadedRecipesIfEmpty() throws {
         try dbWriter.write { db in
-            if try RecipeRecord.fetchCount(db) == 0 {
+            if try RecipeRecord.fetchCount(db) == 0 && RecipeCategoryRecord.fetchCount(db) == 0 {
                 try createPreloadedRecipes(db)
             }
         }
@@ -249,7 +249,7 @@ extension AppDatabase {
 extension AppDatabase {
     func createPreloadedIngredientsIfEmpty() throws {
         try dbWriter.write { db in
-            if try IngredientRecord.fetchCount(db) == 0 {
+            if try IngredientRecord.fetchCount(db) == 0 && IngredientCategoryRecord.fetchCount(db) == 0 {
                 try createPreloadedIngredients(db)
             }
         }

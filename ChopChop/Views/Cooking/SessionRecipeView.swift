@@ -14,8 +14,9 @@ struct SessionRecipeView: View {
                     .overlay(
                         Rectangle()
                             .foregroundColor(.clear)
-                            .background(LinearGradient(gradient:
-                                                        Gradient(colors: [.clear, .clear, .black]), startPoint: .top, endPoint: .bottom))
+                            .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]),
+                                                       startPoint: .top,
+                                                       endPoint: .bottom))
                     )
                 Text(viewModel.name)
                     .font(.largeTitle)
@@ -84,6 +85,9 @@ struct SessionRecipeView: View {
 struct SessionRecipeView_Previews: PreviewProvider {
     static var previews: some View {
         SessionRecipeView(viewModel: SessionRecipeViewModel(recipeInfo:
-                                                                RecipeInfo(id: 5, name: "Pancakes", servings: 5, difficulty: Difficulty.easy)))
+                                                                RecipeInfo(id: 5,
+                                                                           name: "Pancakes",
+                                                                           servings: 5,
+                                                                           difficulty: Difficulty.easy)))
     }
 }

@@ -11,9 +11,9 @@ struct DeductibleIngredientView: View {
                     .frame(width: 100, height: 30)
                 TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
                     .keyboardType(.decimalPad)
-                    .foregroundColor(viewModel.errorMsg.isEmpty ? .black : .red)
+                    .foregroundColor(viewModel.errorMsg.isEmpty ? .primary : .red)
                     .frame(width: 100, height: 50, alignment: .center)
-                    .border(Color.black, width: 1)
+                    .border(Color.primary, width: 1)
                     .multilineTextAlignment(.center)
                 Menu(viewModel.unit.description) {
                     ForEach(QuantityType.allCases, id: \.description) { type in

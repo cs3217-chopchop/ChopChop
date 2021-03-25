@@ -119,7 +119,7 @@ struct StorageManager {
 
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesPublisher()
-            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name ) } }
+            .map { $0.compactMap { try? RecipeCategory(name: $0.name, id: $0.id) } }
             .eraseToAnyPublisher()
     }
 

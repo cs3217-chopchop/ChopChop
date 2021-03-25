@@ -42,6 +42,9 @@ struct RecipeCollectionView: View {
                 }
             }
         }
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
+        }
         .onAppear {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
@@ -59,8 +62,11 @@ struct RecipeCollectionView: View {
     }
 
     var listView: some View {
-        List(viewModel.recipes) { recipe in
-            RecipeRow(recipe: recipe)
+        List {
+            ForEach(viewModel.recipes) { recipe in
+                RecipeRow(recipe: recipe)
+            }
+            .onDelete(perform: viewModel.deleteRecipes)
         }
     }
 
@@ -72,6 +78,17 @@ struct RecipeCollectionView: View {
                         destination: Text(recipe.name)
                     ) {
                         GridTile(recipe: recipe)
+                    }
+                    .contextMenu {
+                        Button(action: {
+                            guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                return
+                            }
+
+                            viewModel.deleteRecipes(at: [index])
+                        }) {
+                            Label("Delete Recipe", systemImage: "trash")
+                        }
                     }
                 }
             }

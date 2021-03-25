@@ -229,12 +229,12 @@ extension Quantity: CustomStringConvertible {
         switch type {
         case .count:
             if value == 0 {
-                return ""
+                return "None"
             } else {
-                return String(format: "%.1f", value)
+                return value.removeZerosFromEnd()
             }
         default:
-            return String(format: "%.2f \(type.description)", value)
+            return "\(value.removeZerosFromEnd()) \(type.description)"
         }
     }
 }

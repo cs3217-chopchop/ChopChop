@@ -57,6 +57,9 @@ struct IngredientCollectionView: View {
                 }
             }
         }
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
+        }
         .onAppear {
             viewModel.query = ""
             viewModel.filterByExpiryDate = false
@@ -97,10 +100,13 @@ struct IngredientCollectionView: View {
     }
 
     var listView: some View {
-        List(viewModel.ingredients) { ingredient in
-            IngredientRow(info: ingredient)
+        List {
+            ForEach(viewModel.ingredients) { ingredient in
+                IngredientRow(info: ingredient)
+            }
+            .onDelete(perform: viewModel.deleteIngredients)
+            .animation(.none)
         }
-        .animation(.none)
     }
 
     var gridView: some View {
@@ -131,7 +137,7 @@ struct IngredientCollectionView: View {
                     VStack(alignment: .leading) {
                         Text(ingredient.name)
                             .lineLimit(1)
-                        Text("Total: \(ingredient.totalQuantityDescription), Usable: \(ingredient.totalUsableQuantityDescription)")
+                        Text("Quantity: \(ingredient.totalQuantityDescription)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -173,7 +179,7 @@ struct IngredientCollectionView: View {
                                 Text(ingredient.name)
                                     .foregroundColor(.white)
                                     .lineLimit(1)
-                                Text("Total: \(ingredient.totalQuantityDescription)\nUsable: \(ingredient.totalUsableQuantityDescription)")
+                                Text("Quantity: \(ingredient.totalQuantityDescription)")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -181,6 +187,17 @@ struct IngredientCollectionView: View {
                         }
                     )
                     .padding([.leading, .trailing], 8)
+            }
+            .contextMenu {
+                Button(action: {
+                    guard let index = viewModel.ingredients.firstIndex(where: { $0 == info }) else {
+                        return
+                    }
+
+                    viewModel.deleteIngredients(at: [index])
+                }) {
+                    Label("Delete Ingredient", systemImage: "trash")
+                }
             }
         }
     }

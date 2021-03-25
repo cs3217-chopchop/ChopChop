@@ -12,7 +12,7 @@ struct SessionRecipeStepView: View {
         Toggle(isOn: $viewModel.isCompleted) {
             viewModel.textWithTimers.reduce(Text(""), {
                 $0 + Text("\($1.0)")
-                    .foregroundColor(viewModel.isCompleted ? Color.gray : $1.1 == nil ? .black : .blue)
+                    .foregroundColor(viewModel.isCompleted ? .secondary : $1.1 == nil ? .primary : .blue)
             })
             .strikethrough(viewModel.isCompleted, color: nil)
         }.disabled(viewModel.isDisabled)
