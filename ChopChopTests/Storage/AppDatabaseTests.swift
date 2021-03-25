@@ -396,7 +396,7 @@ class AppDatabaseTests: XCTestCase {
         try XCTAssertThrowsError(appDatabase.saveRecipeCategory(&category2))
     }
 
-    func testDeleteRecipeCategory_recipesRemaining_throwsError() throws {
+    func testDeleteRecipeCategory_recipesRemaining_success() throws {
         var category = RecipeCategoryRecord(name: "American")
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
 
@@ -413,7 +413,18 @@ class AppDatabaseTests: XCTestCase {
             return
         }
 
-        try XCTAssertThrowsError(appDatabase.deleteRecipeCategories(ids: [id]))
+        try appDatabase.deleteRecipeCategories(ids: [id])
+
+        try dbWriter.read { db in
+            try XCTAssertFalse(category.exists(db))
+
+            // Deleting categories should set the category ID of its contained recipes to nil
+            if let fetchedRecipe = try RecipeRecord.fetchOne(db, key: recipe.id) {
+                XCTAssertNil(fetchedRecipe.recipeCategoryId)
+            } else {
+                XCTFail("Inserted recipe cannot be found")
+            }
+        }
     }
 
     func testSaveRecipe_insertsDefaultCategoryNil_success() throws {
@@ -578,7 +589,7 @@ class AppDatabaseTests: XCTestCase {
         try XCTAssertThrowsError(appDatabase.saveIngredientCategory(&category2))
     }
 
-    func testDeleteIngredientCategory_recipesRemaining_throwsError() throws {
+    func testDeleteIngredientCategory_ingredientsRemaining_success() throws {
         var category = IngredientCategoryRecord(name: "Spices")
         var ingredient = IngredientRecord(name: "Pepper", quantityType: .mass)
 
@@ -595,7 +606,18 @@ class AppDatabaseTests: XCTestCase {
             return
         }
 
-        try XCTAssertThrowsError(appDatabase.deleteIngredientCategories(ids: [id]))
+        try appDatabase.deleteIngredientCategories(ids: [id])
+
+        try dbWriter.read { db in
+            try XCTAssertFalse(category.exists(db))
+
+            // Deleting categories should set the category ID of its contained ingredients to nil
+            if let fetchedIngredient = try IngredientRecord.fetchOne(db, key: ingredient.id) {
+                XCTAssertNil(fetchedIngredient.ingredientCategoryId)
+            } else {
+                XCTFail("Inserted ingredient cannot be found")
+            }
+        }
     }
 
     func testSaveIngredient_insertsDefaultCategoryNil_success() throws {
