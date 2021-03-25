@@ -76,6 +76,19 @@ class RecipeTests: XCTestCase {
         try recipe.addStep(content: "Wait some more")
         XCTAssertEqual(recipe.steps.last, try RecipeStep(content: "Wait some more"))
     }
+    
+    func testUpdateRecipe() throws {
+        let newRecipe = RecipeTests.generateSampleRecipe()
+        let recipeToUpdate = try Recipe(name: "Pizza", servings: 4, difficulty: Difficulty.hard,
+                              steps: RecipeTests.generateSteps(), ingredients: RecipeTests.generateIngredients())
+        newRecipe.updateRecipe(recipeToUpdate)
+        XCTAssertEqual(newRecipe.name, recipeToUpdate.name)
+        XCTAssertEqual(newRecipe.servings, recipeToUpdate.servings)
+        XCTAssertEqual(newRecipe.difficulty, recipeToUpdate.difficulty)
+        XCTAssertEqual(newRecipe.recipeCategoryId, newRecipe.recipeCategoryId)
+        XCTAssertEqual(newRecipe.steps, recipeToUpdate.steps)
+        XCTAssertEqual(newRecipe.ingredients, recipeToUpdate.ingredients)
+    }
 
     func testAddStep_empty() throws {
         let recipe = RecipeTests.generateSampleRecipe()
