@@ -17,11 +17,12 @@ struct ImageStore {
             return nil
         }
 
-        return UIImage(contentsOfFile: imagePath.path)
+        let image = UIImage(contentsOfFile: imagePath.path)
+        return image
     }
 
     static func save(image: UIImage, name: String, inFolderNamed folderName: String = "") throws {
-        guard let imageData = image.pngData() else {
+        guard let imageData = image.png() else {
             throw ImageStoreError.imageCreationFailure
         }
 
@@ -42,7 +43,9 @@ struct ImageStore {
 
         let directory = ImageStore.fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
 
-        guard let folderURL = directory?.appendingPathComponent("Images").appendingPathComponent(folderName) else {
+        guard let folderURL = directory?
+            .appendingPathComponent("Images")
+            .appendingPathComponent(folderName) else {
             return nil
         }
 
@@ -52,12 +55,28 @@ struct ImageStore {
             return nil
         }
 
-        return folderURL
-            .appendingPathComponent("\(imageName).\(fileExtension)")
+        return folderURL.appendingPathComponent("\(imageName).\(fileExtension)")
     }
 }
 
 enum ImageStoreError: Error {
     case imageCreationFailure
     case pathCreationFailure
+}
+
+// MARK: - PNG data with correct orientation
+extension UIImage {
+    func png(isOpaque: Bool = true) -> Data? {
+        flattened(isOpaque: isOpaque).pngData()
+    }
+
+    func flattened(isOpaque: Bool = true) -> UIImage {
+        if imageOrientation == .up {
+            return self
+        }
+
+        let format = imageRendererFormat
+        format.opaque = isOpaque
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in draw(at: .zero) }
+    }
 }
