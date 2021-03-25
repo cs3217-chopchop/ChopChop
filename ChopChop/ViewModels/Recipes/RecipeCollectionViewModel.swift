@@ -70,7 +70,7 @@ final class RecipeCollectionViewModel: ObservableObject {
 
     func getRecipe(info: RecipeInfo) -> Recipe? {
         guard let id = info.id else {
-            fatalError("Missing recipe id.")
+            return nil
         }
 
         return try? storageManager.fetchRecipe(id: id)
