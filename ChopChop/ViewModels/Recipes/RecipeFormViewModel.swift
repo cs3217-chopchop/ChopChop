@@ -24,11 +24,7 @@ class RecipeFormViewModel: ObservableObject {
     @Published var isShowingPhotoLibrary = false
     @Published var image = UIImage()
     @Published var recipeName = ""
-    @Published var serving = "" {
-        didSet {
-            ensureValidServing()
-        }
-    }
+    @Published var serving = ""
     @Published var allRecipeCategories = [RecipeCategory]()
     @Published var recipeCategory = ""
     @Published var difficulty: String = ""
@@ -80,13 +76,6 @@ class RecipeFormViewModel: ObservableObject {
                 }
             })
             .store(in: &recipeCategoryCancellable)
-    }
-
-    func ensureValidServing() {
-        let filtered = serving.filter { "0123456789.".contains($0) }
-        if filtered != serving {
-            serving = filtered
-        }
     }
 
     func parseData() {
