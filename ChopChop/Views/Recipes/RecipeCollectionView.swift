@@ -14,6 +14,9 @@ struct RecipeCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
+                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
+                    Image(systemName: "plus")
+                }
                 Spacer()
                 MultiselectPicker("Filter by ingredient",
                                   selections: $viewModel.selectedIngredients,
@@ -74,22 +77,18 @@ struct RecipeCollectionView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 24) {
                 ForEach(viewModel.recipes) { recipe in
-                    NavigationLink(
-                        destination: Text(recipe.name)
-                    ) {
-                        GridTile(recipe: recipe)
-                    }
-                    .contextMenu {
-                        Button(action: {
-                            guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
-                                return
-                            }
+                    GridTile(recipe: recipe)
+                        .contextMenu {
+                            Button(action: {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                    return
+                                }
 
-                            viewModel.deleteRecipes(at: [index])
-                        }) {
-                            Label("Delete Recipe", systemImage: "trash")
+                                viewModel.deleteRecipes(at: [index])
+                            }) {
+                                Label("Delete Recipe", systemImage: "trash")
+                            }
                         }
-                    }
                 }
             }
             .padding([.bottom, .leading, .trailing])
@@ -97,29 +96,50 @@ struct RecipeCollectionView: View {
         .padding(.top)
     }
 
+    @ViewBuilder
     func RecipeRow(recipe: RecipeInfo) -> some View {
-        NavigationLink(
-            destination: Text(recipe.name)
-        ) {
-            HStack(alignment: .top) {
-                Image("recipe")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .cornerRadius(10)
-                    .clipped()
-                VStack(alignment: .leading) {
-                    Text(recipe.name)
-                        .lineLimit(1)
-                    RecipeCaption(recipe: recipe)
-                        .foregroundColor(.secondary)
+        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+            NavigationLink(
+                destination: RecipeView(
+                    viewModel: RecipeViewModel(
+                        recipe: fetchedRecipe)
+                )
+            ) {
+                HStack(alignment: .top) {
+                    Image("recipe")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .cornerRadius(10)
+                        .clipped()
+                    VStack(alignment: .leading) {
+                        Text(recipe.name)
+                            .lineLimit(1)
+                        RecipeCaption(recipe: recipe)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .padding([.top, .bottom], 6)
             }
-            .padding([.top, .bottom], 6)
         }
     }
 
+    @ViewBuilder
     func GridTile(recipe: RecipeInfo) -> some View {
+        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+            NavigationLink(
+                destination: RecipeView(
+                    viewModel: RecipeViewModel(
+                        recipe: fetchedRecipe)
+                )
+            ) {
+                GridTileImage(recipe: recipe)
+            }
+
+        }
+    }
+
+    func GridTileImage(recipe: RecipeInfo) -> some View {
         Image("recipe")
             .resizable()
             .scaledToFill()
@@ -164,11 +184,11 @@ struct RecipeCollectionView: View {
                 Text("Difficulty: ")
 
                 if let difficulty = recipe.difficulty {
-                    ForEach(0..<difficulty.rawValue) { _ in
+                    ForEach(0..<difficulty.rawValue, id: \.self) { _ in
                         Image(systemName: "star.fill")
                     }
 
-                    ForEach(difficulty.rawValue..<5) { _ in
+                    ForEach(difficulty.rawValue..<5, id: \.self) { _ in
                         Image(systemName: "star")
                     }
                 } else {

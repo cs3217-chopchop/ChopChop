@@ -48,17 +48,17 @@ class RecipeIngredient: Identifiable {
 
 }
 
+extension RecipeIngredient: Equatable {
+    static func == (lhs: RecipeIngredient, rhs: RecipeIngredient) -> Bool {
+        lhs.quantity == rhs.quantity && lhs.name == rhs.name
+    }
+}
+
 extension RecipeIngredient: CustomStringConvertible {
     var description: String {
         "\(quantity.description) \(name)"
     }
 
-}
-
-extension RecipeIngredient: Equatable {
-    static func == (lhs: RecipeIngredient, rhs: RecipeIngredient) -> Bool {
-        lhs.quantity == rhs.quantity && lhs.name == rhs.name
-    }
 }
 
 extension RecipeIngredient: NSCopying {

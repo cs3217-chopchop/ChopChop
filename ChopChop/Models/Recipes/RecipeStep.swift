@@ -44,6 +44,6 @@ extension RecipeStep: NSCopying {
     }
 }
 
-enum RecipeStepError: Error {
-    case invalidContent
+enum RecipeStepError: String, Error {
+    case invalidContent = "Recipe Step content cannot be empty."
 }

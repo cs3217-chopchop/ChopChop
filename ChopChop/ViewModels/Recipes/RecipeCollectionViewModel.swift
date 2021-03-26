@@ -67,4 +67,12 @@ final class RecipeCollectionViewModel: ObservableObject {
             }
             .eraseToAnyPublisher()
     }
+
+    func getRecipe(info: RecipeInfo) -> Recipe? {
+        guard let id = info.id else {
+            return nil
+        }
+
+        return try? storageManager.fetchRecipe(id: id)
+    }
 }

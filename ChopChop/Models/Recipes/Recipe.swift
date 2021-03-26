@@ -2,14 +2,14 @@ import Foundation
 import GRDB
 
 /// Note there is no relationship between steps and ingredients after parsing stage
-class Recipe: FetchableRecord {
+class Recipe: FetchableRecord, ObservableObject {
     var id: Int64?
-    private(set) var name: String
-    private(set) var servings: Double
-    var recipeCategoryId: Int64?
-    private(set) var difficulty: Difficulty?
-    private(set) var steps: [RecipeStep]
-    private(set) var ingredients: [RecipeIngredient]
+    @Published private(set) var name: String
+    @Published private(set) var servings: Double
+    @Published var recipeCategoryId: Int64?
+    @Published private(set) var difficulty: Difficulty?
+    @Published private(set) var steps: [RecipeStep]
+    @Published private(set) var ingredients: [RecipeIngredient]
 
     init(name: String, servings: Double = 1, difficulty: Difficulty? = nil,
          steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = []) throws {
@@ -29,19 +29,14 @@ class Recipe: FetchableRecord {
         assert(checkRepresentation())
     }
 
-    func updateName(_ name: String) throws {
+    func updateRecipe(_ newRecipe: Recipe) {
         assert(checkRepresentation())
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
-            throw RecipeError.invalidName
-        }
-        self.name = trimmedName
-        assert(checkRepresentation())
-    }
-
-    func updateDifficulty(_ difficulty: Difficulty) {
-        assert(checkRepresentation())
-        self.difficulty = difficulty
+        name = newRecipe.name
+        servings = newRecipe.servings
+        recipeCategoryId = newRecipe.recipeCategoryId
+        difficulty = newRecipe.difficulty
+        steps = newRecipe.steps
+        ingredients = newRecipe.ingredients
         assert(checkRepresentation())
     }
 
@@ -186,12 +181,12 @@ extension Recipe: NSCopying {
     }
 }
 
-enum RecipeError: Error {
-    case invalidName
-    case invalidServings
-    case invalidCuisine
-    case invalidIngredients
-    case nonExistentStep
-    case nonExistentIngredient
-    case invalidReorderSteps
+enum RecipeError: String, Error {
+    case invalidName = "Recipe name cannot be empty."
+    case invalidServings = "Recipe serving should be positive."
+    case invalidCuisine = "Cuisine chosen is non-existent."
+    case invalidIngredients = "Ingredients are invalid."
+    case nonExistentStep = "Recipe step is non-existent."
+    case nonExistentIngredient = "Ingredients are non-existent."
+    case invalidReorderSteps = "Invalid reorder steps."
 }
