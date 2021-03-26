@@ -1,4 +1,4 @@
-// swiftlint:disable file_length
+// swiftlint:disable file_length function_body_length
 
 import Combine
 import Foundation

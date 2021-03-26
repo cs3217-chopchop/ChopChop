@@ -75,21 +75,6 @@ struct IngredientCategory: Identifiable, Hashable {
         removedIngredient.ingredientCategoryId = nil
         try storageManager.saveIngredient(&removedIngredient)
     }
-
-    /**
-     Returns the ingredient with the given name and quantity type,
-     or `nil` if it does not exist in the category.
-     */
-    func getIngredient(name: String, type: BaseQuantityType) -> Ingredient? {
-        let storageManager = StorageManager()
-
-        // TODO: Replace this with storage manager call to get ingredients in this category
-        let ingredients: [Ingredient] = []
-
-        return ingredients.first { ingredient in
-            ingredient.name == name && ingredient.quantityType == type
-        }
-    }
 }
 
 extension IngredientCategory: FetchableRecord {

@@ -87,11 +87,13 @@ class IngredientFormViewModel: ObservableObject {
     struct AlertIdentifier: Identifiable {
         var id: AlertState
 
+        // swiftlint:disable nesting
         enum AlertState {
             case emptyName
             case saveImageError
             case saveError
         }
+        // swiftlint:enable nesting
     }
 
     func setAlertState(_ state: AlertIdentifier.AlertState) {
