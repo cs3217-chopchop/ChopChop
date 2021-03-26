@@ -20,7 +20,7 @@ class RecipeFormViewModel: ObservableObject {
 
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
-    @Published var hasError: Bool = false
+    @Published var hasError = false
     @Published var isShowingPhotoLibrary = false
     @Published var image = UIImage()
     @Published var recipeName = ""

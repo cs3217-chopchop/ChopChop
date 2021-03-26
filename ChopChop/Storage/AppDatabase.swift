@@ -39,7 +39,9 @@ struct AppDatabase {
                     .collate(.localizedStandardCompare)
                 t.column("servings", .double)
                     .notNull()
+                    .check { $0 > 0 }
                 t.column("difficulty", .integer)
+                    .check { Difficulty.allCases.map { $0.rawValue }.contains($0) }
             }
         }
 
@@ -68,6 +70,7 @@ struct AppDatabase {
                     .references("recipe", onDelete: .cascade)
                 t.column("index", .integer)
                     .notNull()
+                    .check { $0 > 0 }
                 t.column("content", .text)
                     .notNull()
                     .check { $0 != "" }
@@ -503,6 +506,20 @@ extension AppDatabase {
 // MARK: - Database Access: Publishers
 
 extension AppDatabase {
+    func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
+        ValueObservation
+            .tracking({ db in
+                let request = RecipeRecord
+                    .filter(key: id)
+                    .including(all: RecipeRecord.ingredients)
+                    .including(all: RecipeRecord.steps)
+
+                return try Recipe.fetchOne(db, request)
+            })
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
     func recipesPublisher(query: String = "",
                           categoryIds: [Int64?] = [nil],
                           ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
@@ -527,6 +544,19 @@ extension AppDatabase {
     func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
+            .publisher(in: dbWriter, scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+
+    func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Error> {
+        ValueObservation
+            .tracking({ db in
+                let request = IngredientRecord
+                    .filter(key: id)
+                    .including(all: IngredientRecord.batches)
+
+                return try Ingredient.fetchOne(db, request)
+            })
             .publisher(in: dbWriter, scheduling: .immediate)
             .eraseToAnyPublisher()
     }
