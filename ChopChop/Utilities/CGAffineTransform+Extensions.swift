@@ -1,4 +1,4 @@
-import CoreGraphics
+import SwiftUI
 
 extension CGAffineTransform {
     static func rotate(around point: CGPoint, by angle: CGFloat) -> CGAffineTransform {
@@ -6,5 +6,9 @@ extension CGAffineTransform {
         let rotate = CGAffineTransform(rotationAngle: angle)
 
         return translate.inverted().concatenating(rotate).concatenating(translate)
+    }
+
+    static func rotate(around point: CGPoint, by angle: Angle) -> CGAffineTransform {
+        rotate(around: point, by: CGFloat(angle.radians))
     }
 }

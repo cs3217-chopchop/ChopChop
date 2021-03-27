@@ -16,15 +16,16 @@ struct Line: Shape {
     }
 
     func path(in rect: CGRect) -> Path {
-        let center = from + (to - from) / 2
-        let leftArrow = (center - (to - from).normalized() * 10).rotate(around: center, by: .pi / 3)
-        let rightArrow = (center - (to - from).normalized() * 10).rotate(around: center, by: -.pi / 3)
-        let topArrow = center + (to - from).normalized() * 10
+        let vector = to - from
+        let center = from + vector / 2
+        let leftPoint = (center - vector.normalized() * 8).rotate(around: center, by: .degrees(60))
+        let midPoint = center + vector.normalized() * 8
+        let rightPoint = (center - vector.normalized() * 8).rotate(around: center, by: .degrees(-60))
 
         return Path { path in
             path.move(to: from)
             path.addLine(to: to)
-            path.addLines([leftArrow, topArrow, rightArrow])
+            path.addLines([leftPoint, midPoint, rightPoint])
         }
     }
 }

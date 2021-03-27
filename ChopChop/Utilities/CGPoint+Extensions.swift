@@ -1,4 +1,4 @@
-import CoreGraphics
+import SwiftUI
 
 extension CGPoint {
     static func + (lhs: CGPoint, rhs: CGVector) -> CGPoint {
@@ -29,23 +29,15 @@ extension CGPoint {
         applying(.rotate(around: point, by: angle))
     }
 
+    func rotate(around point: CGPoint, by angle: Angle) -> CGPoint {
+        rotate(around: point, by: CGFloat(angle.radians))
+    }
+
     func distance(to point: CGPoint) -> CGFloat {
         (point - self).magnitude()
     }
 
-    func distance(to line: (CGPoint, CGPoint)) -> CGFloat {
-        abs((line.1.x - line.0.x) * (line.0.y - y) - (line.0.x - x) * (line.1.y - line.0.y))
-            / line.0.distance(to: line.1)
-    }
-
     func angle(to point: CGPoint) -> CGFloat {
         (point - self).angle()
-    }
-}
-
-extension CGPoint: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(x)
-        hasher.combine(y)
     }
 }
