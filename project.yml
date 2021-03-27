@@ -9,6 +9,9 @@ packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: 5.6.0
+  SwiftGraph:
+    url: https://github.com/davecom/SwiftGraph
+    from: 3.1.0
 targets:
   ChopChop:
     type: application
@@ -16,6 +19,7 @@ targets:
     sources: ChopChop
     dependencies:
       - package: GRDB
+      - package: SwiftGraph
     preBuildScripts:
       - script: |
           if which swiftlint >/dev/null; then

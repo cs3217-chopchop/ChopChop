@@ -6,10 +6,11 @@ struct ChopChopApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                MainView(viewModel: MainViewModel())
-            }
-            .environmentObject(settings)
+//            NavigationView {
+//                MainView(viewModel: MainViewModel())
+//            }
+//            .environmentObject(settings)
+            GraphView(viewModel: GraphViewModel())
         }
     }
 }
