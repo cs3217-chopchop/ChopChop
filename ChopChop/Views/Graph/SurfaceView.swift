@@ -24,13 +24,20 @@ struct SurfaceView: View {
                                            dy: portalPosition.y + dragOffset.height))
             }
             .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        processDragChange(value, containerSize: geometry.size)
-                    }
-                    .onEnded { value in
-                        processDragEnd(value)
-                    }
+                LongPressGesture().sequenced(before: DragGesture(minimumDistance: 0).onEnded { value in
+                    viewModel.graph.addVertex(Node(position: value.location - CGVector(dx: portalPosition.x,
+                                                                                       dy: portalPosition.y),
+                                                   text: "Lorem ipsum"))
+                    selection.objectWillChange.send()
+                }).exclusively(before:
+                    DragGesture()
+                        .onChanged { value in
+                            processDragChange(value, containerSize: geometry.size)
+                        }
+                        .onEnded { value in
+                            processDragEnd(value)
+                        }
+                )
             )
         }
     }

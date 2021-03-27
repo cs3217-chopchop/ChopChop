@@ -21,26 +21,26 @@ struct GraphView: View {
             }
 
             if let nodes = graph.topologicalSort() {
-                ForEach(nodes.indices) { index in
-                    NodeView(selection: selection, node: nodes[index], index: index + 1)
-                        .position(nodes[index].position + offset
-                                    + (selectedNode == nodes[index]
+                ForEach(nodes) { node in
+                    NodeView(selection: selection, node: node, index: 1)
+                        .position(node.position + offset
+                                    + (selectedNode == node
                                         ? CGVector(dx: dragOffset.width, dy: dragOffset.height)
                                         : .zero))
                         .onTapGesture {
-                            selection.toggleNode(nodes[index])
+                            selection.toggleNode(node)
                         }
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
                                     dragOffset = value.translation
-                                    selectedNode = nodes[index]
+                                    selectedNode = node
                                 }
                                 .onEnded { value in
                                     dragOffset = .zero
                                     selectedNode = nil
-                                    nodes[index].position += CGVector(dx: value.translation.width,
-                                                                      dy: value.translation.height)
+                                    node.position += CGVector(dx: value.translation.width,
+                                                              dy: value.translation.height)
                                 }
                         )
                 }

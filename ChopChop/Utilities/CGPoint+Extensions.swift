@@ -24,6 +24,25 @@ extension CGPoint {
     // swiftlint:enable shorthand_operator
 }
 
+extension CGPoint {
+    func rotate(around point: CGPoint, by angle: CGFloat) -> CGPoint {
+        applying(.rotate(around: point, by: angle))
+    }
+
+    func distance(to point: CGPoint) -> CGFloat {
+        (point - self).magnitude()
+    }
+
+    func distance(to line: (CGPoint, CGPoint)) -> CGFloat {
+        abs((line.1.x - line.0.x) * (line.0.y - y) - (line.0.x - x) * (line.1.y - line.0.y))
+            / line.0.distance(to: line.1)
+    }
+
+    func angle(to point: CGPoint) -> CGFloat {
+        (point - self).angle()
+    }
+}
+
 extension CGPoint: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(x)
