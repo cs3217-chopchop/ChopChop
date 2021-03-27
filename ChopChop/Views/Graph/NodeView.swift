@@ -33,7 +33,6 @@ struct NodeView: View {
             )
             .frame(width: isSelected ? 360 : 120, height: isSelected ? 240 : 80)
             .zIndex(isSelected ? 1 : 0)
-            .animation(.default)
     }
 }
 

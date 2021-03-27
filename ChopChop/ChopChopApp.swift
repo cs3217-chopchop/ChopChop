@@ -10,7 +10,8 @@ struct ChopChopApp: App {
 //                MainView(viewModel: MainViewModel())
 //            }
 //            .environmentObject(settings)
-            GraphView(viewModel: GraphViewModel())
+//            GraphView(viewModel: GraphViewModel())
+            SurfaceView(viewModel: SurfaceViewModel())
         }
     }
 }
