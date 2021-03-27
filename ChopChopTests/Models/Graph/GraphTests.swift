@@ -2,14 +2,22 @@ import XCTest
 @testable import ChopChop
 
 class GraphTests: XCTestCase {
-    func makeEmptyGraph(isDirected: Bool) -> Graph<Int> {
-        let graph = Graph<Int>(isDirected: isDirected)
+    struct IntNode: Node {
+        var label: Int
+
+        init(_ label: Int) {
+            self.label = label
+        }
+    }
+
+    func makeEmptyGraph(isDirected: Bool) -> Graph<IntNode> {
+        let graph = Graph<IntNode>(isDirected: isDirected)
         assert(graph.nodes.isEmpty)
         return graph
     }
 
-    func makeGraphWithNodes(isDirected: Bool, _ nodes: Node<Int>...) -> Graph<Int> {
-        let graph = Graph<Int>(isDirected: isDirected)
+    func makeGraphWithNodes(isDirected: Bool, _ nodes: IntNode...) -> Graph<IntNode> {
+        let graph = Graph<IntNode>(isDirected: isDirected)
 
         for node in nodes {
             graph.addNode(node)
@@ -18,8 +26,8 @@ class GraphTests: XCTestCase {
         return graph
     }
 
-    func makeGraphWithEdges(isDirected: Bool, _ edges: Edge<Int>?...) -> Graph<Int> {
-        let graph = Graph<Int>(isDirected: isDirected)
+    func makeGraphWithEdges(isDirected: Bool, _ edges: Edge<IntNode>?...) -> Graph<IntNode> {
+        let graph = Graph<IntNode>(isDirected: isDirected)
 
         for edge in edges {
             if let validEdge = edge {
@@ -34,7 +42,7 @@ class GraphTests: XCTestCase {
 // MARK: - init
 extension GraphTests {
     func testConstruct() {
-        let graph = Graph<Int>(isDirected: true)
+        let graph = Graph<IntNode>(isDirected: true)
 
         XCTAssertTrue(graph.nodes.isEmpty, "Graph should initially be empty")
         XCTAssertTrue(graph.edges.isEmpty, "Graph should initially be empty")
@@ -44,7 +52,7 @@ extension GraphTests {
 // MARK: - addNode
 extension GraphTests {
     func testAddNode_newNode_success() {
-        let addedNode = Node(1)
+        let addedNode = IntNode(1)
 
         let graph = makeEmptyGraph(isDirected: true)
 
@@ -54,7 +62,7 @@ extension GraphTests {
     }
 
     func testAddNode_existingNode_doNothing() {
-        let existingNode = Node(1)
+        let existingNode = IntNode(1)
 
         let graph = makeGraphWithNodes(isDirected: true, existingNode)
 
@@ -68,7 +76,7 @@ extension GraphTests {
 // MARK: - removeNode
 extension GraphTests {
     func testRemoveNode_existingNode_success() {
-        let removedNode = Node(1)
+        let removedNode = IntNode(1)
 
         let graph = makeGraphWithNodes(isDirected: true, removedNode)
 
@@ -78,10 +86,10 @@ extension GraphTests {
     }
 
     func testRemoveNode_graphWithEdges_connectedEdgesRemoved() throws {
-        let removedNode = Node(1)
-        let edgeWithDestinationRemoved = try XCTUnwrap(Edge(source: Node(2), destination: removedNode))
-        let edgeWithSourceRemoved = try XCTUnwrap(Edge(source: removedNode, destination: Node(3)))
-        let unconnectedEdge = try XCTUnwrap(Edge(source: Node(2), destination: Node(3)))
+        let removedNode = IntNode(1)
+        let edgeWithDestinationRemoved = try XCTUnwrap(Edge(source: IntNode(2), destination: removedNode))
+        let edgeWithSourceRemoved = try XCTUnwrap(Edge(source: removedNode, destination: IntNode(3)))
+        let unconnectedEdge = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(3)))
 
         let graph = makeGraphWithEdges(
             isDirected: true,
@@ -99,7 +107,7 @@ extension GraphTests {
     func testRemoveNode_emptyGraph_doNothing() {
         let graph = makeEmptyGraph(isDirected: true)
 
-        graph.removeNode(Node(1))
+        graph.removeNode(IntNode(1))
 
         XCTAssertTrue(graph.nodes.isEmpty, "Graph should still be empty")
     }
@@ -108,7 +116,7 @@ extension GraphTests {
 // MARK: - containsNode
 extension GraphTests {
     func testContainsNode_existingNode_returnTrue() {
-        let testNode = Node(1)
+        let testNode = IntNode(1)
 
         let graph = makeGraphWithNodes(isDirected: true, testNode)
 
@@ -118,15 +126,15 @@ extension GraphTests {
     func testContainsNode_emptyGraph_returnFalse() {
         let graph = makeEmptyGraph(isDirected: true)
 
-        XCTAssertFalse(graph.containsNode(Node(1)), "Empty graph should not contain node")
+        XCTAssertFalse(graph.containsNode(IntNode(1)), "Empty graph should not contain node")
     }
 }
 
 // MARK: - addEdge
 extension GraphTests {
     func testAddEdge_graphWithNodes_success() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let addedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
 
         let graph = makeGraphWithNodes(isDirected: true, source, destination)
@@ -137,8 +145,8 @@ extension GraphTests {
     }
 
     func testAddEdge_graphWithoutNodes_missingNodesAdded() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let addedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
 
         let graph = makeEmptyGraph(isDirected: true)
@@ -151,8 +159,8 @@ extension GraphTests {
     }
 
     func testAddEdge_multipleEdgesWithSameSourceAndDestination_success() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let testEdgeA = try XCTUnwrap(Edge(source: source, destination: destination, weight: 1.0))
         let testEdgeB = try XCTUnwrap(Edge(source: source, destination: destination, weight: 2.0))
 
@@ -167,8 +175,8 @@ extension GraphTests {
     }
 
     func testAddEdge_undirectedGraph_reverseEdgeAdded() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let addedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
         let reverseEdge = addedEdge.reversed()
 
@@ -180,7 +188,7 @@ extension GraphTests {
     }
 
     func testAddEdge_undirectedGraphAddLoop_oneEdgeAdded() throws {
-        let node = Node(1)
+        let node = IntNode(1)
         let loop = try XCTUnwrap(Edge(source: node, destination: node))
 
         let graph = makeGraphWithNodes(isDirected: false, node)
@@ -194,7 +202,7 @@ extension GraphTests {
 // MARK: - removeEdge
 extension GraphTests {
     func testRemoveEdge_graphWithEdge_success() throws {
-        let removedEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let removedEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
 
         let graph = makeGraphWithEdges(isDirected: true, removedEdge)
 
@@ -204,7 +212,7 @@ extension GraphTests {
     }
 
     func testRemoveEdge_graphWithoutEdge_doNothing() throws {
-        let edge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let edge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
 
         let graph = makeEmptyGraph(isDirected: true)
 
@@ -214,8 +222,8 @@ extension GraphTests {
     }
 
     func testRemoveEdge_undirectedGraph_reverseEdgeRemoved() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let removedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
         let reverseEdge = removedEdge.reversed()
 
@@ -230,7 +238,7 @@ extension GraphTests {
 // MARK: - containsEdge
 extension GraphTests {
     func testContainsEdge_graphWithEdge_returnTrue() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
 
         let graph = makeGraphWithEdges(isDirected: true, existingEdge)
 
@@ -238,7 +246,7 @@ extension GraphTests {
     }
 
     func testContainsEdge_graphWithoutEdge_returnFalse() throws {
-        let edge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let edge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
 
         let graph = makeEmptyGraph(isDirected: true)
 
@@ -246,7 +254,7 @@ extension GraphTests {
     }
 
     func testContainsEdge_undirectedGraphWithEdge_containsReverseEdge() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
         let reverseEdge = existingEdge.reversed()
 
         let graph = makeGraphWithEdges(isDirected: false, existingEdge)
@@ -258,8 +266,8 @@ extension GraphTests {
 // MARK: - nodes
 extension GraphTests {
     func testNodes_graphWithNodes_success() {
-        let testNodeA = Node(1)
-        let testNodeB = Node(2)
+        let testNodeA = IntNode(1)
+        let testNodeB = IntNode(2)
 
         let graph = makeGraphWithNodes(isDirected: true, testNodeA, testNodeB)
 
@@ -278,9 +286,9 @@ extension GraphTests {
 // MARK: - edges
 extension GraphTests {
     func testEdges_directedGraph_success() throws {
-        let testEdgeA = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
-        let testEdgeB = try XCTUnwrap(Edge(source: Node(2), destination: Node(3)))
-        let testEdgeC = try XCTUnwrap(Edge(source: Node(1), destination: Node(3)))
+        let testEdgeA = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
+        let testEdgeB = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(3)))
+        let testEdgeC = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(3)))
 
         let graph = makeGraphWithEdges(isDirected: true, testEdgeA, testEdgeB, testEdgeC)
 
@@ -290,8 +298,8 @@ extension GraphTests {
     }
 
     func testEdges_multipleEdgesWithSameSourceAndDestination_success() throws {
-        let source = Node(1)
-        let destination = Node(2)
+        let source = IntNode(1)
+        let destination = IntNode(2)
         let testEdgeA = try XCTUnwrap(Edge(source: source, destination: destination, weight: 1.0))
         let testEdgeB = try XCTUnwrap(Edge(source: source, destination: destination, weight: 2.0))
 
@@ -303,7 +311,7 @@ extension GraphTests {
     }
 
     func testEdges_undirectedGraph_reverseEdgesIncluded() throws {
-        let testEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
+        let testEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
 
         let graph = makeGraphWithEdges(isDirected: false, testEdge)
 

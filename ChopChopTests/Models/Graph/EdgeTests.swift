@@ -4,9 +4,17 @@ import XCTest
 @testable import ChopChop
 
 class EdgeTests: XCTestCase {
+    struct TestNode: Node {
+        var label: String
+
+        init(_ label: String) {
+            self.label = label
+        }
+    }
+
     func testConstruct() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         let edge = Edge(source: node1, destination: node2, weight: 2.0)
 
         XCTAssertEqual(edge?.source, node1, "Edge's source is not constructed properly")
@@ -15,15 +23,15 @@ class EdgeTests: XCTestCase {
     }
 
     func testRepInvariant_nonNegativeWeight() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         XCTAssertNil(Edge(source: node1, destination: node2, weight: -3.0),
                      "Edges with negative weight should not be constructed")
     }
 
     func testReversed_swapSourceAndDestinationWithSameWeight() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         let edge = Edge(source: node1, destination: node2, weight: 3.0)
         let reversedEdge = edge?.reversed()
 
@@ -33,8 +41,8 @@ class EdgeTests: XCTestCase {
     }
 
     func testReversed_twiceReversedEdge_sameEdge() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         let edge = Edge(source: node1, destination: node2, weight: 3.0)
         let twiceReversedEdge = edge?.reversed().reversed()
 
@@ -42,8 +50,8 @@ class EdgeTests: XCTestCase {
     }
 
     func testEqual_sameSourceSameDestinationSameWeight_isEqual() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         let edge1 = Edge(source: node1, destination: node2, weight: 5.0)
         let edge2 = Edge(source: node1, destination: node2, weight: 5.0)
 
@@ -51,8 +59,8 @@ class EdgeTests: XCTestCase {
     }
 
     func testEqual_differentWeight_isNotEqual() {
-        let node1 = Node("A")
-        let node2 = Node("B")
+        let node1 = TestNode("A")
+        let node2 = TestNode("B")
         let edge1 = Edge(source: node1, destination: node2, weight: 5.0)
         let edge2 = Edge(source: node1, destination: node2, weight: 10.0)
 

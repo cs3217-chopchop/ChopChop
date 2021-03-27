@@ -3,12 +3,20 @@ import XCTest
 @testable import ChopChop
 
 class DirectedAcyclicGraphTests: XCTestCase {
-    var dag: DirectedAcyclicGraph<Int>!
+    struct IntNode: Node {
+        var label: Int
+
+        init(_ label: Int) {
+            self.label = label
+        }
+    }
+
+    var dag: DirectedAcyclicGraph<IntNode>!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        dag = DirectedAcyclicGraph<Int>()
+        dag = DirectedAcyclicGraph<IntNode>()
     }
 
     override func tearDownWithError() throws {
@@ -17,22 +25,22 @@ class DirectedAcyclicGraphTests: XCTestCase {
         try super.tearDownWithError()
     }
 
-    func makeTestDAG() throws -> DirectedAcyclicGraph<Int> {
+    func makeTestDAG() throws -> DirectedAcyclicGraph<IntNode> {
         try makeDAGWithEdges(
-            Edge(source: Node(1), destination: Node(2)),
-            Edge(source: Node(1), destination: Node(6)),
-            Edge(source: Node(1), destination: Node(7)),
-            Edge(source: Node(2), destination: Node(3)),
-            Edge(source: Node(2), destination: Node(5)),
-            Edge(source: Node(3), destination: Node(7)),
-            Edge(source: Node(4), destination: Node(3)),
-            Edge(source: Node(5), destination: Node(4)),
-            Edge(source: Node(6), destination: Node(4))
+            Edge(source: IntNode(1), destination: IntNode(2)),
+            Edge(source: IntNode(1), destination: IntNode(6)),
+            Edge(source: IntNode(1), destination: IntNode(7)),
+            Edge(source: IntNode(2), destination: IntNode(3)),
+            Edge(source: IntNode(2), destination: IntNode(5)),
+            Edge(source: IntNode(3), destination: IntNode(7)),
+            Edge(source: IntNode(4), destination: IntNode(3)),
+            Edge(source: IntNode(5), destination: IntNode(4)),
+            Edge(source: IntNode(6), destination: IntNode(4))
         )
     }
 
-    func makeDAGWithEdges(_ edges: Edge<Int>?...) throws -> DirectedAcyclicGraph<Int> {
-        let dag = DirectedAcyclicGraph<Int>()
+    func makeDAGWithEdges(_ edges: Edge<IntNode>?...) throws -> DirectedAcyclicGraph<IntNode> {
+        let dag = DirectedAcyclicGraph<IntNode>()
 
         for edge in edges {
             if let validEdge = edge {
@@ -47,11 +55,11 @@ class DirectedAcyclicGraphTests: XCTestCase {
 // MARK: - containsEdge
 extension DirectedAcyclicGraphTests {
     func testContainsEdge_existingEdgeSameNodesDifferentWeight_returnTrue() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2), weight: 1.0))
+        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 1.0))
 
         try dag.addEdge(existingEdge)
 
-        let testEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2), weight: 2.0))
+        let testEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 2.0))
 
         XCTAssertTrue(dag.containsEdge(testEdge), "Graph should contain edge with same nodes but different weight")
     }
@@ -60,9 +68,9 @@ extension DirectedAcyclicGraphTests {
 // MARK: - addEdge
 extension DirectedAcyclicGraphTests {
     func testAddEdge_validEdge_success() throws {
-        let validEdge1 = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
-        let validEdge2 = try XCTUnwrap(Edge(source: Node(2), destination: Node(3)))
-        let validEdge3 = try XCTUnwrap(Edge(source: Node(1), destination: Node(3)))
+        let validEdge1 = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
+        let validEdge2 = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(3)))
+        let validEdge3 = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(3)))
 
         XCTAssertNoThrow(try dag.addEdge(validEdge1))
         XCTAssertNoThrow(try dag.addEdge(validEdge2))
@@ -70,26 +78,26 @@ extension DirectedAcyclicGraphTests {
     }
 
     func testAddEdge_existingEdge_throwsError() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2), weight: 1.0))
+        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 1.0))
 
         try dag.addEdge(existingEdge)
 
         XCTAssertThrowsError(try dag.addEdge(existingEdge))
 
-        let sameNodesEdge = try XCTUnwrap(Edge(source: Node(1), destination: Node(2), weight: 2.0))
+        let sameNodesEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 2.0))
 
         XCTAssertThrowsError(try dag.addEdge(sameNodesEdge))
     }
 
     func testAddEdge_formsCycle_throwsError() throws {
-        let existingEdge1 = try XCTUnwrap(Edge(source: Node(1), destination: Node(2)))
-        let existingEdge2 = try XCTUnwrap(Edge(source: Node(2), destination: Node(3)))
+        let existingEdge1 = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
+        let existingEdge2 = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(3)))
 
         try dag.addEdge(existingEdge1)
         try dag.addEdge(existingEdge2)
 
-        let invalidEdge1 = try XCTUnwrap(Edge(source: Node(2), destination: Node(1)))
-        let invalidEdge2 = try XCTUnwrap(Edge(source: Node(3), destination: Node(1)))
+        let invalidEdge1 = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(1)))
+        let invalidEdge2 = try XCTUnwrap(Edge(source: IntNode(3), destination: IntNode(1)))
 
         XCTAssertThrowsError(try dag.addEdge(invalidEdge1))
         XCTAssertThrowsError(try dag.addEdge(invalidEdge2))
@@ -103,31 +111,31 @@ extension DirectedAcyclicGraphTests {
 
         let expectedResults = [
             [
-                Node(1),
-                Node(2),
-                Node(5),
-                Node(6),
-                Node(4),
-                Node(3),
-                Node(7)
+                IntNode(1),
+                IntNode(2),
+                IntNode(5),
+                IntNode(6),
+                IntNode(4),
+                IntNode(3),
+                IntNode(7)
             ],
             [
-                Node(1),
-                Node(2),
-                Node(6),
-                Node(5),
-                Node(4),
-                Node(3),
-                Node(7)
+                IntNode(1),
+                IntNode(2),
+                IntNode(6),
+                IntNode(5),
+                IntNode(4),
+                IntNode(3),
+                IntNode(7)
             ],
             [
-                Node(1),
-                Node(6),
-                Node(2),
-                Node(5),
-                Node(4),
-                Node(3),
-                Node(7)
+                IntNode(1),
+                IntNode(6),
+                IntNode(2),
+                IntNode(5),
+                IntNode(4),
+                IntNode(3),
+                IntNode(7)
             ]
         ]
 
@@ -143,16 +151,16 @@ extension DirectedAcyclicGraphTests {
         dag = try makeTestDAG()
 
         let expectedResult = [
-            [Node(1)],
-            [Node(2), Node(6)],
-            [Node(5)],
-            [Node(4)],
-            [Node(3)],
-            [Node(7)]
+            [IntNode(1)],
+            [IntNode(2), IntNode(6)],
+            [IntNode(5)],
+            [IntNode(4)],
+            [IntNode(3)],
+            [IntNode(7)]
         ]
 
         let result = dag.getNodeLayers()
 
-        XCTAssertEqual(result, expectedResult, "Node layers should be computed correctly")
+        XCTAssertEqual(result, expectedResult, "IntNode layers should be computed correctly")
     }
 }
