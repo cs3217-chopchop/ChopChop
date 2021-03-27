@@ -1,10 +1,25 @@
 import CoreGraphics
 
 extension CGPoint {
-    func distance(to point: CGPoint) -> CGFloat {
-        let dx = point.x - x
-        let dy = point.y - y
-
-        return sqrt(dx * dx + dy * dy)
+    static func + (lhs: CGPoint, rhs: CGVector) -> CGPoint {
+        CGPoint(x: lhs.x + rhs.dx, y: lhs.y + rhs.dy)
     }
+
+    static func - (lhs: CGPoint, rhs: CGVector) -> CGPoint {
+        CGPoint(x: lhs.x - rhs.dx, y: lhs.y - rhs.dy)
+    }
+
+    static func - (lhs: CGPoint, rhs: CGPoint) -> CGVector {
+        CGVector(dx: lhs.x - rhs.x, dy: lhs.y - rhs.y)
+    }
+
+    // swiftlint:disable shorthand_operator
+    static func += (lhs: inout CGPoint, rhs: CGVector) {
+        lhs = lhs + rhs
+    }
+
+    static func -= (lhs: inout CGPoint, rhs: CGVector) {
+        lhs = lhs - rhs
+    }
+    // swiftlint:enable shorthand_operator
 }

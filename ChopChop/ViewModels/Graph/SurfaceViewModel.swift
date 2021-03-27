@@ -7,7 +7,7 @@ final class SurfaceViewModel: ObservableObject {
 
     init() {
         let vertices = [
-            Node(position: CGPoint(x: 500, y: 100), text: """
+            Node(position: CGPoint(x: 500, y: -100), text: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
             Node(position: CGPoint(x: 500, y: 200), text: "Add milk and mix well until smooth."),
