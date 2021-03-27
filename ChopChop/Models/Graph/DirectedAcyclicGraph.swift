@@ -1,3 +1,11 @@
+/**
+ The `DirectedAcyclicGraph` ADT is able to represent a simple, directed, acyclic graph.
+ 
+ The representation invariants for a DAG g are:
+ - g is a simple graph (multiple edges with the same source and destination node not allowed)
+ - g is a directed graph
+ - g is acyclic (does not contain a cycle)
+ */
 class DirectedAcyclicGraph<T: Hashable & Codable>: Graph<T> {
     init() {
         super.init(isDirected: true)
@@ -110,7 +118,7 @@ class DirectedAcyclicGraph<T: Hashable & Codable>: Graph<T> {
         visitedNodes[currentIdx] = true
 
         for idx in getIndexOfNodesAdjacent(to: currentNode, nodes: nodes) where !visitedNodes[idx] {
-            topologicalSortHelper(currentIdx, nodes: nodes, visitedNodes: &visitedNodes, nodeStack: &nodeStack)
+            topologicalSortHelper(idx, nodes: nodes, visitedNodes: &visitedNodes, nodeStack: &nodeStack)
         }
 
         // After all children are traversed, push current node into stack

@@ -91,6 +91,7 @@ class Graph<T: Hashable & Codable> {
         }
 
         edgesFromSourceNode.removeAll { $0 == removedEdge }
+        adjacencyList[sourceNode] = edgesFromSourceNode
     }
 
     func addEdge(_ addedEdge: E) throws {
