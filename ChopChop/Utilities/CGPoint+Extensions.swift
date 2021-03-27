@@ -23,3 +23,10 @@ extension CGPoint {
     }
     // swiftlint:enable shorthand_operator
 }
+
+extension CGPoint: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(x)
+        hasher.combine(y)
+    }
+}
