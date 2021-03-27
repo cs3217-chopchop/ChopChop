@@ -1,10 +1,12 @@
-class SessionRecipeStepNode: Node {
-    var label: SessionRecipeStep
-    var isCompletable: Bool = false
-    var isCompleted: Bool = false
+import SwiftUI
 
-    init(_ label: SessionRecipeStep) {
-        self.label = label
+class SessionRecipeStepNode: Node, ObservableObject {
+    var label: RecipeStep
+    @Published var isCompletable: Bool = false
+    @Published var isCompleted: Bool = false
+
+    init(_ node: RecipeStepNode) {
+        self.label = node.label
     }
 }
 
