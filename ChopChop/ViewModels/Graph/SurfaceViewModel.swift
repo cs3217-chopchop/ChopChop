@@ -22,13 +22,13 @@ final class SurfaceViewModel: ObservableObject {
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """),
-            Node(position: CGPoint(x: 500, y: 500), text: """
+            Node(position: CGPoint(x: 300, y: 900), text: """
                 ad fasd fas dfas dkfamsdo fiasmd oiamdov iamdfvoi dmfoiv dmsfovi mdsfoiv mdsofiv msdfoivmsdfovi \
                 padofim sdpofimasp oifmdp jfmsdpfvjsdpfvoj msdfpvomsd fpvokmdscpoask dm[oismdc[asokdcma s[odkcm as[ckm \
                 [odifm [asoidmfpdfms fdo ismdfpv odsifmvpsodi fmvsdokf vmdp sofmv pdosfivm sdofivm sdpfoivm sdfpo \
                 psodfim vsdpfoiv mdspfokv mfpo imdsfpov imsdfpo imvsdfpoi msvpdofvm pdsofimv spdofimv spdfomv
                 """),
-            Node(position: CGPoint(x: 500, y: 600), text: "H")
+            Node(position: CGPoint(x: 500, y: 800), text: "H")
         ]
 
         graph = UnweightedGraph(vertices: vertices)

@@ -14,7 +14,7 @@ struct SurfaceView: View {
     @State var initialPortalPosition: CGPoint?
 
     var body: some View {
-        GeometryReader { _ in
+        GeometryReader { geometry in
             ZStack {
                 Rectangle()
                     .fill(Color.yellow)
@@ -23,9 +23,9 @@ struct SurfaceView: View {
                             y: portalPosition.y + dragOffset.height)
             }
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        processDragChange(value)
+                        processDragChange(value, containerSize: geometry.size)
                     }
                     .onEnded { value in
                         processDragEnd(value)
@@ -36,17 +36,42 @@ struct SurfaceView: View {
 }
 
 extension SurfaceView {
-    func processDragChange(_ value: DragGesture.Value) {
-        isDraggingGraph = true
-        dragOffset = value.translation
+    func hitTest(point: CGPoint, parent: CGSize) -> Node? {
+        for node in viewModel.graph.vertices {
+            let endPoint = CGPoint(x: node.position.x + portalPosition.x
+                                    - (selection.isNodeSelected(node) ? NodeView.expandedSize.width : NodeView.initialSize.width) / 2,
+                                   y: node.position.y + portalPosition.y
+                                    - (selection.isNodeSelected(node) ? NodeView.expandedSize.height : NodeView.initialSize.height) / 2)
+            let rect = CGRect(origin: endPoint,
+                              size: selection.isNodeSelected(node) ? NodeView.expandedSize : NodeView.initialSize)
+
+            if rect.contains(point) {
+                print("gotcha")
+                return node
+            }
+        }
+
+        return nil
+    }
+
+    func processDragChange(_ value: DragGesture.Value, containerSize: CGSize) {
+        if let node = hitTest(point: value.startLocation, parent: containerSize) {
+            print(node.text)
+            selection.toggleNode(node)
+        } else {
+            isDraggingGraph = true
+            dragOffset = value.translation
+        }
     }
 
     func processDragEnd(_ value: DragGesture.Value) {
-        isDraggingGraph = false
-        dragOffset = .zero
+        if isDraggingGraph {
+            isDraggingGraph = false
+            dragOffset = .zero
 
-        portalPosition = CGPoint(x: portalPosition.x + value.translation.width,
-                                 y: portalPosition.y + value.translation.height)
+            portalPosition = CGPoint(x: portalPosition.x + value.translation.width,
+                                     y: portalPosition.y + value.translation.height)
+        }
     }
 }
 
