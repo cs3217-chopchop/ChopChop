@@ -6,7 +6,7 @@
  - g is a directed graph
  - g is acyclic (does not contain a cycle)
  */
-class DirectedAcyclicGraph<T: Hashable & Codable>: Graph<T> {
+class DirectedAcyclicGraph<N: Node>: Graph<N> {
     init() {
         super.init(isDirected: true)
     }
@@ -65,7 +65,12 @@ class DirectedAcyclicGraph<T: Hashable & Codable>: Graph<T> {
         return false
     }
 
-    private func containsCycleHelper(_ currentIdx: Int, nodes: [N], visitedNodes: inout [Bool], nodesInPath: inout [Bool]) -> Bool {
+    private func containsCycleHelper(
+        _ currentIdx: Int,
+        nodes: [N],
+        visitedNodes: inout [Bool],
+        nodesInPath: inout [Bool]) -> Bool {
+
         // If current node is already in the path, cycle found.
         if nodesInPath[currentIdx] {
             return true
@@ -149,7 +154,7 @@ class DirectedAcyclicGraph<T: Hashable & Codable>: Graph<T> {
         return nodeLayers
     }
 
-    private func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
+    func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
         let destinationNodes = Set(edges.map { $0.destination })
         return nodes.filter { !destinationNodes.contains($0) }
     }

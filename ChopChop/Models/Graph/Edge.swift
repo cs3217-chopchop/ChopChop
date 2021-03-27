@@ -1,6 +1,4 @@
-struct Edge<T: Hashable & Codable>: Hashable, Codable {
-    typealias N = Node<T>
-
+struct Edge<N: Node>: Hashable {
     let source: N
     let destination: N
     let weight: Double
@@ -19,7 +17,7 @@ struct Edge<T: Hashable & Codable>: Hashable, Codable {
         self.weight = weight
     }
 
-    func reversed() -> Edge<T> {
+    func reversed() -> Edge<N> {
         guard let reversedEdge = Edge(source: destination, destination: source, weight: weight) else {
             fatalError("Current edge is invalid")
         }

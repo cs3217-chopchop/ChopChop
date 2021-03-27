@@ -1,6 +1,5 @@
-class Graph<T: Hashable & Codable> {
-    typealias N = Node<T>
-    typealias E = Edge<T>
+class Graph<N: Node> {
+    typealias E = Edge<N>
 
     let isDirected: Bool
 

@@ -1,7 +1,5 @@
-struct Node<T: Hashable & Codable>: Hashable, Codable {
-    var label: T
+protocol Node: Hashable {
+    associatedtype T: Hashable
 
-    init(_ label: T) {
-        self.label = label
-    }
+    var label: T { get }
 }
