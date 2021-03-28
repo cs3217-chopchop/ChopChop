@@ -37,6 +37,7 @@ struct NodeView: View {
                         ScrollView {
                             Text(node.text)
                                 .lineLimit(isSelected ? nil : 1)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                         }
                     }
 
