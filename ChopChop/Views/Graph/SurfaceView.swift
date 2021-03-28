@@ -46,7 +46,7 @@ struct SurfaceView: View {
 
                 if let nodes = viewModel.graph.topologicalSort() {
                     ForEach(nodes) { node in
-                        NodeView(selection: selection, node: node, index: 1, removeNode: { node in
+                        NodeView(selection: selection, node: node, index: (nodes.firstIndex(of: node) ?? 0) + 1, removeNode: { node in
                             viewModel.graph.removeVertex(node)
                         })
                             .position(node.position + offset
@@ -66,7 +66,6 @@ struct SurfaceView: View {
                                                                      to: value.location)
                                                 }
                                                 .onEnded { value in
-                                                    print(value.location)
                                                     if let targetNode = hitTest(point: value.location, parent: geometry.size) {
                                                         viewModel.graph.addEdge(from: node, to: targetNode, directed: true)
                                                     }
@@ -122,12 +121,10 @@ extension SurfaceView {
         for node in viewModel.graph.vertices {
             let endPoint = CGPoint(x: node.position.x + portalPosition.x - 60,
                                    y: node.position.y + portalPosition.y - 40)
-            print("endPoint: \(endPoint)")
             let rect = CGRect(origin: endPoint,
                               size: CGSize(width: 120, height: 80))
 
             if rect.contains(point) {
-                print(node.text)
                 return node
             }
         }
