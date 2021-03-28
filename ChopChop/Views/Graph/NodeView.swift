@@ -1,3 +1,4 @@
+import SwiftGraph
 import SwiftUI
 
 struct NodeView: View {
@@ -5,8 +6,11 @@ struct NodeView: View {
     static let expandedSize = CGSize(width: 360, height: 240)
 
     @ObservedObject var selection: SelectionHandler
-    @State var node: Node
+    @State var isEditing = false
+    @State var text = ""
+    var node: Node
     let index: Int
+    let removeNode: (Node) -> Void
 
     var isSelected: Bool {
         selection.isNodeSelected(node)
@@ -24,9 +28,52 @@ struct NodeView: View {
                     Text("Step \(index)")
                         .font(.headline)
 
-                    ScrollView {
-                        Text(node.text)
-                            .lineLimit(isSelected ? nil : 1)
+                    if isEditing {
+                        TextEditor(text: $text)
+                            .onTapGesture {
+                                print("lol")
+                            }
+                    } else {
+                        ScrollView {
+                            Text(node.text)
+                                .lineLimit(isSelected ? nil : 1)
+                        }
+                    }
+
+                    if isSelected {
+                        if isEditing {
+                            HStack {
+                                Button(action: {
+                                    node.text = text
+                                    isEditing = false
+                                }) {
+                                    Text("Save")
+                                }
+                                Spacer()
+                                Button(action: {
+                                    text = ""
+                                    isEditing = false
+                                }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        } else {
+                            HStack {
+                                Button(action: {
+                                    text = node.text
+                                    isEditing = true
+                                }) {
+                                    Image(systemName: "square.and.pencil")
+                                }
+                                Spacer()
+                                Button(action: {
+                                    removeNode(node)
+                                    selection.objectWillChange.send()
+                                }) {
+                                    Image(systemName: "trash")
+                                }
+                            }
+                        }
                     }
                 }
                 .padding()

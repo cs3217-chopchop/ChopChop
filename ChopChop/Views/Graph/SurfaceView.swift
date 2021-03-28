@@ -46,7 +46,9 @@ struct SurfaceView: View {
 
                 if let nodes = viewModel.graph.topologicalSort() {
                     ForEach(nodes) { node in
-                        NodeView(selection: selection, node: node, index: 1)
+                        NodeView(selection: selection, node: node, index: 1, removeNode: { node in
+                            viewModel.graph.removeVertex(node)
+                        })
                             .position(node.position + offset
                                         + (selectedNode == node
                                             ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height)
@@ -56,9 +58,6 @@ struct SurfaceView: View {
                             }
                             .gesture(
                                 LongPressGesture()
-                                    .onEnded { _ in
-                                        print("move!")
-                                    }
                                     .sequenced(before:
                                         DragGesture()
                                                 .updating($dragInfo) { value, state, _ in
