@@ -33,30 +33,32 @@ struct NodeView: View {
             )
             .overlay(
                 VStack {
-                    if let index = viewModel.index {
-                        Text("Step \(index + 1)")
-                            .font(.headline)
-                    }
-
-                    if viewModel.isEditing {
-                        TextEditor(text: $viewModel.text)
-                            .background(Color.primary.opacity(0.1))
-                            .transition(.scale)
-                            // Prevent taps from propogating
-                            .onTapGesture {}
-                    } else {
-                        ScrollView(isSelected ? [.vertical] : []) {
-                            Text(viewModel.node.text.isEmpty ? "Add step details..." : viewModel.node.text)
-                                .lineLimit(isSelected ? nil : 1)
-                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                                .foregroundColor(viewModel.node.text.isEmpty ? .secondary : .primary)
+                    if viewModel.index != nil {
+                        if let index = viewModel.index {
+                            Text("Step \(index + 1)")
+                                .font(.headline)
                         }
-                    }
 
-                    if isSelected {
-                        detailView
-                            .transition(AnyTransition.scale
-                                            .combined(with: AnyTransition.move(edge: .top)))
+                        if viewModel.isEditing {
+                            TextEditor(text: $viewModel.text)
+                                .background(Color.primary.opacity(0.1))
+                                .transition(.scale)
+                                // Prevent taps from propogating
+                                .onTapGesture {}
+                        } else {
+                            ScrollView(isSelected ? [.vertical] : []) {
+                                Text(viewModel.node.text.isEmpty ? "Add step details..." : viewModel.node.text)
+                                    .lineLimit(isSelected ? nil : 1)
+                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                                    .foregroundColor(viewModel.node.text.isEmpty ? .secondary : .primary)
+                            }
+                        }
+
+                        if isSelected {
+                            detailView
+                                .transition(AnyTransition.scale
+                                                .combined(with: AnyTransition.move(edge: .top)))
+                        }
                     }
                 }
                 .padding()

@@ -119,7 +119,7 @@ struct GraphView: View {
 
     func placeholderNodeView(position: CGPoint) -> some View {
         NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: Node()), selection: selection)
-            .position(position + viewModel.portalPosition + portalDragOffset)
+            .position(position)
             .opacity(0.4)
     }
 }
