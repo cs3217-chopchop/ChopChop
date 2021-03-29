@@ -9,36 +9,16 @@ struct GraphView: View {
     @GestureState var nodeDragOffset: GraphViewModel.NodeDragInfo?
     @GestureState var lineDragInfo: GraphViewModel.LineDragInfo?
 
-//    @State var portalPosition = CGPoint.zero
-//    @State var dragOffset = CGSize.zero
-//    @State var isDragging = false
-//    @State var isDraggingGraph = false
-//
-//    @State var zoomScale: CGFloat = 1.0
-//    @State var initialZoomScale: CGFloat?
-//    @State var initialPortalPosition: CGPoint?
-//
-//    @State var dragOffset2: CGSize = .zero
-//    @State var selectedNode: Node?
-//    @GestureState var dragInfo: DragInfo?
-
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 linesView
 
                 if let info = lineDragInfo {
-                    Line(from: info.from, to: info.to)
-                        .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
-                                                                    dash: [10],
-                                                                    dashPhase: viewModel.linePhase))
-                        .onAppear {
-                            withAnimation(Animation.linear.repeatForever(autoreverses: false)) {
-                                viewModel.linePhase -= 20
-                            }
-                        }
+                    placeholderLineView(info: info)
                 }
 
+                // TODO: Figure out TextEditor bug
                 if let nodes = viewModel.graph.topologicalSort() {
                     ForEach(nodes) { node in
                         NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node), selection: selection)
@@ -51,27 +31,24 @@ struct GraphView: View {
                             }
                             .gesture(
                                 LongPressGesture()
-                                    .sequenced(before:
-                                        DragGesture()
-                                                .updating($lineDragInfo) { value, state, _ in
-                                                    state = viewModel.onLongPressDragNode(value, position: node.position)
-                                                }
-                                                .onEnded { value in
-                                                    viewModel.onLongPressDragNodeEnd(value, node: node, parentSize: geometry.size)
-                                                }
+                                    .sequenced(before: DragGesture()
+                                        .updating($lineDragInfo) { value, state, _ in
+                                            state = viewModel.onLongPressDragNode(value, position: node.position)
+                                        }
+                                        .onEnded { value in
+                                            viewModel.onLongPressDragNodeEnd(value,
+                                                                             node: node,
+                                                                             parentSize: geometry.size)
+                                        }
                                     )
-                                    .exclusively(before:
-                                        DragGesture()
-                                            .updating($nodeDragOffset) { value, state, _ in
-                                                state = GraphViewModel
-                                                    .NodeDragInfo(id: node.id,
-                                                                  offset: CGVector(dx: value.translation.width,
-                                                                                   dy: value.translation.height))
-                                            }
-                                            .onEnded { value in
-                                                node.position += CGVector(dx: value.translation.width,
-                                                                          dy: value.translation.height)
-                                            }
+                                    .exclusively(before: DragGesture()
+                                        .updating($nodeDragOffset) { value, state, _ in
+                                            state = viewModel.onDragNode(value, node: node)
+                                        }
+                                        .onEnded { value in
+                                            node.position += CGVector(dx: value.translation.width,
+                                                                      dy: value.translation.height)
+                                        }
                                 )
                             )
                     }
@@ -87,12 +64,11 @@ struct GraphView: View {
             .gesture(
                 LongPressGesture()
                     .sequenced(before: DragGesture(minimumDistance: 0).onEnded(viewModel.onLongPressPortal))
-                    .exclusively(before:
-                        DragGesture()
-                            .updating($portalDragOffset) { value, state, _ in
-                                state = CGVector(dx: value.translation.width, dy: value.translation.height)
-                            }
-                            .onEnded(viewModel.onDragPortal)
+                    .exclusively(before: DragGesture()
+                        .updating($portalDragOffset) { value, state, _ in
+                            state = CGVector(dx: value.translation.width, dy: value.translation.height)
+                        }
+                        .onEnded(viewModel.onDragPortal)
                     )
             )
         }
@@ -120,6 +96,18 @@ struct GraphView: View {
                     }
             }
         }
+    }
+
+    func placeholderLineView(info: GraphViewModel.LineDragInfo) -> some View {
+        Line(from: info.from, to: info.to)
+            .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
+                                                        dash: [10],
+                                                        dashPhase: viewModel.linePhase))
+            .onAppear {
+                withAnimation(Animation.linear.repeatForever(autoreverses: false)) {
+                    viewModel.linePhase -= 20
+                }
+            }
     }
 }
 

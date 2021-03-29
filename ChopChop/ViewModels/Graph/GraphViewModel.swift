@@ -19,6 +19,10 @@ final class GraphViewModel: ObservableObject {
         _ = graph.addVertex(Node(position: value.location - portalPosition))
         self.objectWillChange.send()
     }
+    
+    func onDragNode(_ value: DragGesture.Value, node: Node) -> NodeDragInfo {
+        NodeDragInfo(id: node.id, offset: CGVector(dx: value.translation.width, dy: value.translation.height))
+    }
 
     func onLongPressDragNode(_ value: DragGesture.Value, position: CGPoint) -> LineDragInfo {
         LineDragInfo(from: position + portalPosition, to: value.location)
