@@ -2,6 +2,9 @@ import SwiftGraph
 import SwiftUI
 
 struct NodeView: View {
+    static let normalSize = CGSize(width: 120, height: 84)
+    static let expandedSize = CGSize(width: 360, height: 240)
+
     @ObservedObject var viewModel: NodeViewModel
     @ObservedObject var selection: SelectionHandler
 
@@ -58,7 +61,8 @@ struct NodeView: View {
                 }
                 .padding()
             )
-            .frame(width: isSelected ? 360 : 120, height: isSelected ? 240 : 84)
+            .frame(width: isSelected ? NodeView.expandedSize.width : NodeView.normalSize.width,
+                   height: isSelected ? NodeView.expandedSize.height : NodeView.normalSize.height)
             .zIndex(isSelected ? 1 : 0)
     }
 

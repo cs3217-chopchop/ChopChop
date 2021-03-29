@@ -1,66 +1,49 @@
+import SwiftGraph
 import SwiftUI
 
 struct GraphView: View {
     @ObservedObject var viewModel: GraphViewModel
     @ObservedObject var selection = SelectionHandler()
 
-    @State var portalPosition = CGPoint.zero
-    @State var dragOffset = CGSize.zero
-    @State var isDragging = false
-    @State var isDraggingGraph = false
+    @GestureState var portalDragOffset = CGVector.zero
+    @GestureState var nodeDragOffset: GraphViewModel.NodeDragInfo?
+    @GestureState var lineDragInfo: GraphViewModel.LineDragInfo?
 
-    @State var zoomScale: CGFloat = 1.0
-    @State var initialZoomScale: CGFloat?
-    @State var initialPortalPosition: CGPoint?
-
-    @State var dragOffset2: CGSize = .zero
-    @State var selectedNode: Node?
-    @GestureState var dragInfo: DragInfo?
-
-    @State private var phase: CGFloat = 0
-
-    struct DragInfo {
-        var from: CGPoint
-        var to: CGPoint
-    }
-
-    var offset: CGVector {
-        CGVector(dx: portalPosition.x + dragOffset.width, dy: portalPosition.y + dragOffset.height)
-    }
+//    @State var portalPosition = CGPoint.zero
+//    @State var dragOffset = CGSize.zero
+//    @State var isDragging = false
+//    @State var isDraggingGraph = false
+//
+//    @State var zoomScale: CGFloat = 1.0
+//    @State var initialZoomScale: CGFloat?
+//    @State var initialPortalPosition: CGPoint?
+//
+//    @State var dragOffset2: CGSize = .zero
+//    @State var selectedNode: Node?
+//    @GestureState var dragInfo: DragInfo?
 
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                ForEach(viewModel.graph.edgeList(), id: \.description) { edge in
-                    Line(from: viewModel.graph.vertexAtIndex(edge.u).position + offset
-                            + (selectedNode == viewModel.graph.vertexAtIndex(edge.u)
-                                ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height) : .zero),
-                         to: viewModel.graph.vertexAtIndex(edge.v).position + offset
-                            + (selectedNode == viewModel.graph.vertexAtIndex(edge.v)
-                                ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height) : .zero))
-                        .stroke(Color.primary, lineWidth: 1.8)
-                }
+                linesView
 
-                if let info = dragInfo {
+                if let info = lineDragInfo {
                     Line(from: info.from, to: info.to)
                         .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
-                                                                    dash: [5, 10],
-                                                                    dashPhase: phase))
+                                                                    dash: [10],
+                                                                    dashPhase: viewModel.linePhase))
                         .onAppear {
                             withAnimation(Animation.linear.repeatForever(autoreverses: false)) {
-                                phase -= 15
+                                viewModel.linePhase -= 20
                             }
                         }
                 }
 
                 if let nodes = viewModel.graph.topologicalSort() {
                     ForEach(nodes) { node in
-                        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node),
-                                 selection: selection)
-                            .position(node.position + offset
-                                        + (selectedNode == node
-                                            ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height)
-                                            : .zero))
+                        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node), selection: selection)
+                            .position(node.position + viewModel.portalPosition + portalDragOffset
+                                        + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
                             .onTapGesture {
                                 withAnimation {
                                     selection.toggleNode(node)
@@ -70,26 +53,22 @@ struct GraphView: View {
                                 LongPressGesture()
                                     .sequenced(before:
                                         DragGesture()
-                                                .updating($dragInfo) { value, state, _ in
-                                                    state = DragInfo(from: node.position + CGVector(dx: portalPosition.x,
-                                                                                                    dy: portalPosition.y),
-                                                                     to: value.location)
+                                                .updating($lineDragInfo) { value, state, _ in
+                                                    state = viewModel.onLongPressDragNode(value, position: node.position)
                                                 }
                                                 .onEnded { value in
-                                                    if let targetNode = hitTest(point: value.location, parent: geometry.size) {
-                                                        viewModel.graph.addEdge(from: node, to: targetNode, directed: true)
-                                                    }
+                                                    viewModel.onLongPressDragNodeEnd(value, node: node, parentSize: geometry.size)
                                                 }
                                     )
                                     .exclusively(before:
                                         DragGesture()
-                                            .onChanged { value in
-                                                dragOffset2 = value.translation
-                                                selectedNode = node
+                                            .updating($nodeDragOffset) { value, state, _ in
+                                                state = GraphViewModel
+                                                    .NodeDragInfo(id: node.id,
+                                                                  offset: CGVector(dx: value.translation.width,
+                                                                                   dy: value.translation.height))
                                             }
                                             .onEnded { value in
-                                                dragOffset2 = .zero
-                                                selectedNode = nil
                                                 node.position += CGVector(dx: value.translation.width,
                                                                           dy: value.translation.height)
                                             }
@@ -106,46 +85,46 @@ struct GraphView: View {
                 }
             }
             .gesture(
-                LongPressGesture().sequenced(before: DragGesture(minimumDistance: 0).onEnded { value in
-                    viewModel.graph.addVertex(Node(position: value.location - CGVector(dx: portalPosition.x,
-                                                                                       dy: portalPosition.y)))
-                    selection.objectWillChange.send()
-                }).exclusively(before:
-                    DragGesture()
-                        .onChanged { value in
-                            dragOffset = value.translation
-                        }
-                        .onEnded { value in
-                            dragOffset = .zero
-
-                            portalPosition = CGPoint(x: portalPosition.x + value.translation.width,
-                                                     y: portalPosition.y + value.translation.height)
-                        }
-                )
+                LongPressGesture()
+                    .sequenced(before: DragGesture(minimumDistance: 0).onEnded(viewModel.onLongPressPortal))
+                    .exclusively(before:
+                        DragGesture()
+                            .updating($portalDragOffset) { value, state, _ in
+                                state = CGVector(dx: value.translation.width, dy: value.translation.height)
+                            }
+                            .onEnded(viewModel.onDragPortal)
+                    )
             )
         }
     }
-}
 
-extension GraphView {
-    func hitTest(point: CGPoint, parent: CGSize) -> Node? {
-        for node in viewModel.graph.vertices {
-            let endPoint = CGPoint(x: node.position.x + portalPosition.x - 60,
-                                   y: node.position.y + portalPosition.y - 40)
-            let rect = CGRect(origin: endPoint,
-                              size: CGSize(width: 120, height: 80))
-
-            if rect.contains(point) {
-                return node
+    var linesView: some View {
+        ForEach(viewModel.graph.edgeList(), id: \.self) { edge in
+            if let offset = nodeDragOffset {
+                Line(from: viewModel.graph.vertexAtIndex(edge.u).position
+                        + viewModel.portalPosition + portalDragOffset
+                        + (viewModel.graph.vertexAtIndex(edge.u).id == offset.id ? offset.offset : .zero),
+                     to: viewModel.graph.vertexAtIndex(edge.v).position
+                        + viewModel.portalPosition + portalDragOffset
+                        + (viewModel.graph.vertexAtIndex(edge.v).id == offset.id ? offset.offset : .zero))
+                    .stroke(Color.primary, lineWidth: 1.8)
+            } else {
+                Line(from: viewModel.graph.vertexAtIndex(edge.u).position
+                        + viewModel.portalPosition + portalDragOffset,
+                     to: viewModel.graph.vertexAtIndex(edge.v).position
+                        + viewModel.portalPosition + portalDragOffset)
+                    .stroke(Color.primary, lineWidth: 1.8)
+                    .onLongPressGesture {
+                        viewModel.graph.removeEdge(edge)
+                        viewModel.objectWillChange.send()
+                    }
             }
         }
-
-        return nil
     }
 }
 
-// struct SurfaceView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SurfaceView()
-//    }
-// }
+ struct GraphView_Previews: PreviewProvider {
+    static var previews: some View {
+        GraphView(viewModel: GraphViewModel(graph: UnweightedGraph()))
+    }
+ }
