@@ -18,8 +18,8 @@ struct Line: Shape {
     func path(in rect: CGRect) -> Path {
         let lineVector = to - from
         let center = from + lineVector / 2
-        let arrowVector = lineVector.normalized() * 8
-        let arrowAngle = Angle.degrees(60)
+        let arrowVector = lineVector.normalized() * 6
+        let arrowAngle = Angle.degrees(75)
 
         let leftPoint = (center - arrowVector).rotate(around: center, by: arrowAngle)
         let midPoint = center + arrowVector

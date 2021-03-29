@@ -36,12 +36,12 @@ struct SurfaceView: View {
                          to: viewModel.graph.vertexAtIndex(edge.v).position + offset
                             + (selectedNode == viewModel.graph.vertexAtIndex(edge.v)
                                 ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height) : .zero))
-                        .stroke(Color.blue, lineWidth: 3)
+                        .stroke(Color.primary, lineWidth: 1.8)
                 }
 
                 if let info = dragInfo {
                     Line(from: info.from, to: info.to)
-                        .stroke(Color.red, lineWidth: 3)
+                        .stroke(Color.secondary, lineWidth: 1.8)
                 }
 
                 if let nodes = viewModel.graph.topologicalSort() {
@@ -93,7 +93,7 @@ struct SurfaceView: View {
 //            .background(Color.orange)
             .onTapGesture {
                 withAnimation {
-                    selection.unselectAllNodes()
+                    selection.deselectAllNodes()
                 }
             }
             .gesture(

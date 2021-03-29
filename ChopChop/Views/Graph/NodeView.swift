@@ -38,6 +38,7 @@ struct NodeView: View {
                     if viewModel.isEditing {
                         TextEditor(text: $viewModel.text)
                             .background(Color.primary.opacity(0.1))
+                            .transition(.scale)
                             // Prevent taps from propogating
                             .onTapGesture {}
                     } else {
