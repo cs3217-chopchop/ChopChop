@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct SurfaceView: View {
-    @ObservedObject var viewModel: SurfaceViewModel
+struct GraphView: View {
+    @ObservedObject var viewModel: GraphViewModel
     @ObservedObject var selection = SelectionHandler()
 
     @State var portalPosition = CGPoint.zero
@@ -16,6 +16,8 @@ struct SurfaceView: View {
     @State var dragOffset2: CGSize = .zero
     @State var selectedNode: Node?
     @GestureState var dragInfo: DragInfo?
+
+    @State private var phase: CGFloat = 0
 
     struct DragInfo {
         var from: CGPoint
@@ -41,7 +43,14 @@ struct SurfaceView: View {
 
                 if let info = dragInfo {
                     Line(from: info.from, to: info.to)
-                        .stroke(Color.secondary, lineWidth: 1.8)
+                        .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
+                                                                    dash: [5, 10],
+                                                                    dashPhase: phase))
+                        .onAppear {
+                            withAnimation(Animation.linear.repeatForever(autoreverses: false)) {
+                                phase -= 15
+                            }
+                        }
                 }
 
                 if let nodes = viewModel.graph.topologicalSort() {
@@ -89,8 +98,8 @@ struct SurfaceView: View {
                     }
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .contentShape(Rectangle())
-//            .background(Color.orange)
             .onTapGesture {
                 withAnimation {
                     selection.deselectAllNodes()
@@ -99,8 +108,7 @@ struct SurfaceView: View {
             .gesture(
                 LongPressGesture().sequenced(before: DragGesture(minimumDistance: 0).onEnded { value in
                     viewModel.graph.addVertex(Node(position: value.location - CGVector(dx: portalPosition.x,
-                                                                                       dy: portalPosition.y),
-                                                   text: "Lorem ipsum"))
+                                                                                       dy: portalPosition.y)))
                     selection.objectWillChange.send()
                 }).exclusively(before:
                     DragGesture()
@@ -119,7 +127,7 @@ struct SurfaceView: View {
     }
 }
 
-extension SurfaceView {
+extension GraphView {
     func hitTest(point: CGPoint, parent: CGSize) -> Node? {
         for node in viewModel.graph.vertices {
             let endPoint = CGPoint(x: node.position.x + portalPosition.x - 60,

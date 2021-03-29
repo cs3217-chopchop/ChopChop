@@ -43,9 +43,10 @@ struct NodeView: View {
                             .onTapGesture {}
                     } else {
                         ScrollView(isSelected ? [.vertical] : []) {
-                            Text(viewModel.node.text)
+                            Text(viewModel.node.text.isEmpty ? "Add step details..." : viewModel.node.text)
                                 .lineLimit(isSelected ? nil : 1)
                                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                                .foregroundColor(viewModel.node.text.isEmpty ? .secondary : .primary)
                         }
                     }
 

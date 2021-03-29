@@ -2,7 +2,7 @@ import Combine
 import CoreGraphics
 import SwiftGraph
 
-final class SurfaceViewModel: ObservableObject {
+final class GraphViewModel: ObservableObject {
     var graph: UnweightedGraph<Node>
 
     init(graph: UnweightedGraph<Node>) {
