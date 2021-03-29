@@ -24,4 +24,8 @@ struct Edge<N: Node>: Hashable {
 
         return reversedEdge
     }
+
+    static func ~= (left: Edge<N>, right: Edge<N>) -> Bool {
+        left.source == right.source && left.destination == right.destination
+    }
 }

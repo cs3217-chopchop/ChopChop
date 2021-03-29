@@ -35,6 +35,11 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
         request(for: RecipeRecord.steps)
     }
 
+    static let stepGraph = hasOne(RecipeStepGraphRecord.self)
+    var stepGraph: QueryInterfaceRequest<RecipeStepGraphRecord> {
+        request(for: RecipeRecord.stepGraph)
+    }
+
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID
     }

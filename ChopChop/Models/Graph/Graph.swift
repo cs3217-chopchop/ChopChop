@@ -1,3 +1,26 @@
+/**
+ The `Graph` ADT consists of:
+ - objects conforming to `Node`
+ - zero or more `Edge`s joining the `Node`s
+ 
+ It can represent the following graph types with corresponding constraints:
+ - Undirected graph
+   + An undirected edge is represented by 2 directed edges
+ - Directed graph
+ - Simple graph
+ - Multigraph
+   + Edges from the same source to the same destination should have
+ different weight
+ - Unweighted graph
+   + Edges' weights are to set to 1.0
+ - Weighted graph
+
+ The representation invariants for every Graph g:
+ - g is either directed or undirected
+ - All nodes in g must have unique labels
+ - Multiple edges from the same source to the same destination must
+ not have the same weight
+ */
 class Graph<N: Node> {
     typealias E = Edge<N>
 
@@ -8,6 +31,20 @@ class Graph<N: Node> {
     init(isDirected: Bool) {
         self.isDirected = isDirected
         self.adjacencyList = [:]
+    }
+
+    convenience init?(isDirected: Bool, nodes: [N], edges: [E]) {
+        self.init(isDirected: isDirected)
+
+        for node in nodes {
+            self.addNode(node)
+        }
+
+        for edge in edges {
+            try? self.addEdge(edge)
+        }
+
+        assert(checkRepresentation())
     }
 
     // MARK: - Nodes
@@ -33,6 +70,8 @@ class Graph<N: Node> {
         let edgesToRemovedNode = edges.filter { $0.destination == removedNode }
 
         edgesToRemovedNode.forEach { removeEdge($0) }
+
+        assert(checkRepresentation())
     }
 
     func getNodesAdjacent(to sourceNode: N) -> [N] {
@@ -91,6 +130,8 @@ class Graph<N: Node> {
 
         edgesFromSourceNode.removeAll { $0 == removedEdge }
         adjacencyList[sourceNode] = edgesFromSourceNode
+
+        assert(checkRepresentation())
     }
 
     func addEdge(_ addedEdge: E) throws {
@@ -121,6 +162,18 @@ class Graph<N: Node> {
                 adjacencyList[destinationNode] = edgesFromDestinationNode
             }
         }
+
+        assert(checkRepresentation())
+    }
+
+    internal func checkRepresentation() -> Bool {
+        let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
+            edges.allSatisfy { $0.source == node }
+        }
+
+        let noIdenticalEdges = edges.count == Set(edges).count
+
+        return allEdgesInCorrectList && noIdenticalEdges
     }
 }
 

@@ -17,11 +17,20 @@ struct StorageManager {
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var stepRecords = recipe.steps.enumerated().map { index, step in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: step.content)
+        var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
+        var stepRecords = recipe.stepGraph.nodes.enumerated().map { index, node in
+            RecipeStepRecord(graphId: recipe.stepGraph.id, index: index + 1, content: node.label.content)
         }
+        var edgeRecords = recipe.stepGraph.edges.map { edge -> RecipeStepEdgeRecord? in
+            guard let sourceId = stepRecords.first(where: { $0.content == edge.source.label.content })?.id,
+                  let destinationId = stepRecords.first(where: { $0.content == edge.destination.label.content })?.id else {
+                return nil
+            }
 
-        try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
+            return RecipeStepEdgeRecord(graphId: recipe.stepGraph.id, sourceId: sourceId, destinationId: destinationId)
+        }.compactMap { $0 }
+
+        try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, graph: &graphRecord, steps: &stepRecords, edges: &edgeRecords)
 
         recipe.id = recipeRecord.id
     }

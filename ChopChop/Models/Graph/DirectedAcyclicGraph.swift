@@ -11,6 +11,20 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         super.init(isDirected: true)
     }
 
+    init(nodes: [N], edges: [E]) throws {
+        super.init(isDirected: true)
+
+        for node in nodes {
+            self.addNode(node)
+        }
+
+        for edge in edges {
+            try self.addEdge(edge)
+        }
+
+        assert(checkRepresentation())
+    }
+
     override func containsEdge(_ targetEdge: E) -> Bool {
         let sourceNode = targetEdge.source
         let destinationNode = targetEdge.destination
@@ -46,6 +60,8 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
             removeEdge(addedEdge)
             throw DirectedAcyclicGraphError.addedEdgeFormsCycle
         }
+
+        assert(checkRepresentation())
     }
 
     // MARK: - Cycles
@@ -157,6 +173,27 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
     func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
         let destinationNodes = Set(edges.map { $0.destination })
         return nodes.filter { !destinationNodes.contains($0) }
+    }
+
+    override internal func checkRepresentation() -> Bool {
+        let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
+            edges.allSatisfy { $0.source == node }
+        }
+
+        return allEdgesInCorrectList && isSimpleGraph() && !containsCycle()
+    }
+
+    private func isSimpleGraph() -> Bool {
+        var isSimpleGraph = true
+        let stableEdges = edges
+
+        for i in 0..<stableEdges.count {
+            for j in i + 1..<stableEdges.count {
+                isSimpleGraph = isSimpleGraph && !(stableEdges[i] ~= stableEdges[j])
+            }
+        }
+
+        return isSimpleGraph
     }
 }
 
