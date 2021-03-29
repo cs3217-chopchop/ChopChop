@@ -19,7 +19,7 @@ final class GraphViewModel: ObservableObject {
         _ = graph.addVertex(Node(position: value.location - portalPosition))
         self.objectWillChange.send()
     }
-    
+
     func onDragNode(_ value: DragGesture.Value, node: Node) -> NodeDragInfo {
         NodeDragInfo(id: node.id, offset: CGVector(dx: value.translation.width, dy: value.translation.height))
     }
@@ -28,13 +28,13 @@ final class GraphViewModel: ObservableObject {
         LineDragInfo(from: position + portalPosition, to: value.location)
     }
 
-    func onLongPressDragNodeEnd(_ value: DragGesture.Value, node: Node, parentSize: CGSize) {
-        if let targetNode = hitTest(point: value.location, parent: parentSize) {
+    func onLongPressDragNodeEnd(_ value: DragGesture.Value, node: Node) {
+        if let targetNode = hitTest(point: value.location) {
             graph.addEdge(from: node, to: targetNode, directed: true)
         }
     }
 
-    private func hitTest(point: CGPoint, parent: CGSize) -> Node? {
+    private func hitTest(point: CGPoint) -> Node? {
         for node in graph.vertices {
             let endPoint = node.position + portalPosition - CGVector(dx: NodeView.normalSize.width / 2,
                                                                      dy: NodeView.normalSize.height / 2)

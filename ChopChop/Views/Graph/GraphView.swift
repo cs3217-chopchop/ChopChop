@@ -8,9 +8,10 @@ struct GraphView: View {
     @GestureState var portalDragOffset = CGVector.zero
     @GestureState var nodeDragOffset: GraphViewModel.NodeDragInfo?
     @GestureState var lineDragInfo: GraphViewModel.LineDragInfo?
+    @GestureState var placeholderNodePosition: CGPoint?
 
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { _ in
             ZStack {
                 linesView
 
@@ -36,9 +37,7 @@ struct GraphView: View {
                                             state = viewModel.onLongPressDragNode(value, position: node.position)
                                         }
                                         .onEnded { value in
-                                            viewModel.onLongPressDragNodeEnd(value,
-                                                                             node: node,
-                                                                             parentSize: geometry.size)
+                                            viewModel.onLongPressDragNodeEnd(value, node: node)
                                         }
                                     )
                                     .exclusively(before: DragGesture()
@@ -53,6 +52,10 @@ struct GraphView: View {
                             )
                     }
                 }
+
+                if let position = placeholderNodePosition {
+                    placeholderNodeView(position: position)
+                }
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .contentShape(Rectangle())
@@ -63,7 +66,11 @@ struct GraphView: View {
             }
             .gesture(
                 LongPressGesture()
-                    .sequenced(before: DragGesture(minimumDistance: 0).onEnded(viewModel.onLongPressPortal))
+                    .sequenced(before: DragGesture(minimumDistance: 0)
+                        .updating($placeholderNodePosition) { value, state, _ in
+                            state = value.location
+                        }
+                        .onEnded(viewModel.onLongPressPortal))
                     .exclusively(before: DragGesture()
                         .updating($portalDragOffset) { value, state, _ in
                             state = CGVector(dx: value.translation.width, dy: value.translation.height)
@@ -108,6 +115,12 @@ struct GraphView: View {
                     viewModel.linePhase -= 20
                 }
             }
+    }
+
+    func placeholderNodeView(position: CGPoint) -> some View {
+        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: Node()), selection: selection)
+            .position(position + viewModel.portalPosition + portalDragOffset)
+            .opacity(0.4)
     }
 }
 
