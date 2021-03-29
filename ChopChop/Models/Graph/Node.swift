@@ -2,11 +2,12 @@ import CoreGraphics
 import Foundation
 
 final class Node: Identifiable, Codable {
-    private(set) var id = UUID()
+    let id: UUID
     var position: CGPoint
     var text: String
 
-    init(position: CGPoint, text: String) {
+    init(position: CGPoint = .zero, text: String = "") {
+        self.id = UUID()
         self.position = position
         self.text = text
     }

@@ -46,15 +46,16 @@ struct SurfaceView: View {
 
                 if let nodes = viewModel.graph.topologicalSort() {
                     ForEach(nodes) { node in
-                        NodeView(selection: selection, node: node, index: (nodes.firstIndex(of: node) ?? 0) + 1, removeNode: { node in
-                            viewModel.graph.removeVertex(node)
-                        })
+                        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node),
+                                 selection: selection)
                             .position(node.position + offset
                                         + (selectedNode == node
                                             ? CGVector(dx: dragOffset2.width, dy: dragOffset2.height)
                                             : .zero))
                             .onTapGesture {
-                                selection.toggleNode(node)
+                                withAnimation {
+                                    selection.toggleNode(node)
+                                }
                             }
                             .gesture(
                                 LongPressGesture()
@@ -89,9 +90,11 @@ struct SurfaceView: View {
                 }
             }
             .contentShape(Rectangle())
-            .background(Color.orange)
+//            .background(Color.orange)
             .onTapGesture {
-                selection.unselectAllNodes()
+                withAnimation {
+                    selection.unselectAllNodes()
+                }
             }
             .gesture(
                 LongPressGesture().sequenced(before: DragGesture(minimumDistance: 0).onEnded { value in
