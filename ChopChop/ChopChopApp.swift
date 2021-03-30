@@ -49,7 +49,7 @@ struct ChopChopApp: App {
 //                MainView(viewModel: MainViewModel())
 //            }
 //            .environmentObject(settings)
-            GraphView(viewModel: GraphViewModel(graph: graph))
+            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
                 .accentColor(.red)
         }
     }

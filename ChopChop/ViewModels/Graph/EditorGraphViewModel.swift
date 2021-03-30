@@ -1,7 +1,7 @@
 import SwiftGraph
 import SwiftUI
 
-final class GraphViewModel: ObservableObject {
+final class EditorGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
     @Published var linePhase = CGFloat.zero
 
@@ -49,7 +49,7 @@ final class GraphViewModel: ObservableObject {
     }
 }
 
-extension GraphViewModel {
+extension EditorGraphViewModel {
     struct NodeDragInfo {
         let id: UUID
         let offset: CGVector

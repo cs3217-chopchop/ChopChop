@@ -1,13 +1,13 @@
 import SwiftGraph
 import SwiftUI
 
-struct GraphView: View {
-    @ObservedObject var viewModel: GraphViewModel
+struct EditorGraphView: View {
+    @ObservedObject var viewModel: EditorGraphViewModel
     @ObservedObject var selection = SelectionHandler()
 
     @GestureState var portalDragOffset = CGVector.zero
-    @GestureState var nodeDragOffset: GraphViewModel.NodeDragInfo?
-    @GestureState var lineDragInfo: GraphViewModel.LineDragInfo?
+    @GestureState var nodeDragOffset: EditorGraphViewModel.NodeDragInfo?
+    @GestureState var lineDragInfo: EditorGraphViewModel.LineDragInfo?
     @GestureState var placeholderNodePosition: CGPoint?
 
     var body: some View {
@@ -73,7 +73,7 @@ struct GraphView: View {
         }
     }
 
-    func placeholderLineView(info: GraphViewModel.LineDragInfo) -> some View {
+    func placeholderLineView(info: EditorGraphViewModel.LineDragInfo) -> some View {
         Line(from: info.from, to: info.to)
             .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
                                                         dash: [10],
@@ -125,8 +125,8 @@ struct GraphView: View {
     }
 }
 
- struct GraphView_Previews: PreviewProvider {
+ struct EditorGraphView_Previews: PreviewProvider {
     static var previews: some View {
-        GraphView(viewModel: GraphViewModel(graph: UnweightedGraph()))
+        EditorGraphView(viewModel: EditorGraphViewModel(graph: UnweightedGraph()))
     }
  }
