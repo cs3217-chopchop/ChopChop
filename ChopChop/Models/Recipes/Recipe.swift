@@ -13,7 +13,7 @@ class Recipe: FetchableRecord, ObservableObject {
     private(set) var stepGraph: RecipeStepGraph
 
     init(name: String, servings: Double = 1, difficulty: Difficulty? = nil,
-         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = []) throws {
+         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -27,7 +27,7 @@ class Recipe: FetchableRecord, ObservableObject {
         self.difficulty = difficulty
         self.steps = steps
         self.ingredients = ingredients
-        self.stepGraph = RecipeStepGraph()
+        self.stepGraph = graph
         assert(checkRepresentation())
     }
 
@@ -153,9 +153,7 @@ class Recipe: FetchableRecord, ObservableObject {
             return try? RecipeIngredient(name: record.name, quantity: quantity)
         } ?? []
 
-        stepGraph = row.prefetchedRows["recipeStepGraph"]?.compactMap {
-            RecipeStepGraph(row: $0)
-        }.first ?? RecipeStepGraph()
+        stepGraph = row["recipeStepGraph"]
     }
 
 }

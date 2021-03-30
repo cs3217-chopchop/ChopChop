@@ -30,9 +30,15 @@ struct StorageManager {
             return RecipeStepEdgeRecord(graphId: recipe.stepGraph.id, sourceId: sourceId, destinationId: destinationId)
         }.compactMap { $0 }
 
-        try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, graph: &graphRecord, steps: &stepRecords, edges: &edgeRecords)
+        try appDatabase.saveRecipe(
+            &recipeRecord,
+            ingredients: &ingredientRecords,
+            graph: &graphRecord,
+            steps: &stepRecords,
+            edges: &edgeRecords)
 
         recipe.id = recipeRecord.id
+        recipe.stepGraph.id = graphRecord.id
     }
 
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {

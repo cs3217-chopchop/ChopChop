@@ -92,9 +92,11 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
+        var graph = RecipeStepGraphRecord()
         var steps: [RecipeStepRecord] = []
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
@@ -123,10 +125,12 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Salt", quantity: .volume(1.25, unit: .milliliter)),
             RecipeIngredientRecord(name: "Pepper", quantity: .volume(2.5, unit: .milliliter))
         ]
+        var graph = RecipeStepGraphRecord()
         var steps: [RecipeStepRecord] = []
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, steps: &steps)
-        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, steps: &steps)
+        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, graph: &graph, steps: &steps, edges: &edges)
+        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, graph: &graph, steps: &steps, edges: &edges)
 
         try dbWriter.read { db in
             try XCTAssertTrue(pancakeRecipe.exists(db))
@@ -153,9 +157,11 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
             RecipeIngredientRecord(name: "", quantity: .count(0))
         ]
+        var graph = RecipeStepGraphRecord()
         var steps: [RecipeStepRecord] = []
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges))
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
@@ -169,9 +175,11 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
+        var graph = RecipeStepGraphRecord()
         var steps: [RecipeStepRecord] = []
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges))
     }
 
     func testSaveRecipe_insertsValidSteps_success() throws {
@@ -198,8 +206,10 @@ class AppDatabaseTests: XCTestCase {
                 pancakes.
                 """)
         ]
+        var graph = RecipeStepGraphRecord()
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
@@ -235,8 +245,10 @@ class AppDatabaseTests: XCTestCase {
                 """),
             RecipeStepRecord(index: 7, content: "")
         ]
+        var graph = RecipeStepGraphRecord()
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges))
     }
 
     func testSaveRecipe_insertsDuplicateStepIndex_throwsError() throws {
@@ -263,8 +275,10 @@ class AppDatabaseTests: XCTestCase {
                 pancakes.
                 """)
         ]
+        var graph = RecipeStepGraphRecord()
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges))
     }
 
     func testSaveRecipe_insertsNonConsecutiveStepIndex_throwsError() throws {
@@ -291,8 +305,10 @@ class AppDatabaseTests: XCTestCase {
                 pancakes.
                 """)
         ]
+        var graph = RecipeStepGraphRecord()
+        var edges: [RecipeStepEdgeRecord] = []
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, steps: &steps))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges))
     }
 
     func testDeleteRecipes() throws {
@@ -327,8 +343,15 @@ class AppDatabaseTests: XCTestCase {
                 pancakes.
                 """)
         ]
+        var graph = RecipeStepGraphRecord()
+        var edges: [RecipeStepEdgeRecord] = []
 
         try dbWriter.write { db in
+            try graph.insert(db)
+
+            recipe1.graphId = graph.id
+            recipe2.graphId = graph.id
+
             try recipe1.insert(db)
             try recipe2.insert(db)
 
@@ -338,28 +361,46 @@ class AppDatabaseTests: XCTestCase {
             }
 
             for index in 0..<steps.count {
-                steps[index].recipeId = recipe1.id
+                steps[index].graphId = graph.id
                 try steps[index].insert(db)
+            }
+
+            edges.append(
+                contentsOf: [RecipeStepEdgeRecord(sourceId: steps[0].id, destinationId: steps[1].id),
+                             RecipeStepEdgeRecord(sourceId: steps[1].id, destinationId: steps[2].id),
+                             RecipeStepEdgeRecord(sourceId: steps[2].id, destinationId: steps[3].id),
+                             RecipeStepEdgeRecord(sourceId: steps[0].id, destinationId: steps[3].id)])
+
+            for index in 0..<edges.count {
+                edges[index].graphId = graph.id
+                try edges[index].insert(db)
             }
         }
 
-        guard let id = recipe1.id else {
+        guard let recipeId = recipe1.id, graph.id != nil else {
             XCTFail("Recipes should have a non-nil ID after insertion into database")
             return
         }
 
-        try appDatabase.deleteRecipes(ids: [id])
+        try appDatabase.deleteRecipes(ids: [recipeId])
 
         try dbWriter.read { db in
             try XCTAssertFalse(recipe1.exists(db))
 
-            // Deleting recipes should also delete their associated ingredients and steps
+            // Deleting recipes should also delete their associated ingredients and graph,
+            // which should also delete its associated steps and edges
             for ingredient in ingredients {
                 try XCTAssertFalse(ingredient.exists(db))
             }
 
+            try XCTAssertFalse(graph.exists(db))
+
             for step in steps {
                 try XCTAssertFalse(step.exists(db))
+            }
+
+            for edge in edges {
+                try XCTAssertFalse(edge.exists(db))
             }
         }
 
@@ -935,11 +976,15 @@ class AppDatabaseTests: XCTestCase {
                 pancakes.
                 """)
         ]
+        var graphRecord = RecipeStepGraphRecord()
+        var edgeRecords: [RecipeStepEdgeRecord] = []
 
         try dbWriter.write { db in
             try categoryRecord.insert(db)
+            try graphRecord.insert(db)
 
             recipeRecord.recipeCategoryId = categoryRecord.id
+            recipeRecord.graphId = graphRecord.id
 
             try recipeRecord.insert(db)
 
@@ -949,8 +994,19 @@ class AppDatabaseTests: XCTestCase {
             }
 
             for index in 0..<stepRecords.count {
-                stepRecords[index].recipeId = recipeRecord.id
+                stepRecords[index].graphId = graphRecord.id
                 try stepRecords[index].insert(db)
+            }
+
+            edgeRecords.append(
+                contentsOf: [RecipeStepEdgeRecord(sourceId: stepRecords[0].id, destinationId: stepRecords[1].id),
+                             RecipeStepEdgeRecord(sourceId: stepRecords[1].id, destinationId: stepRecords[2].id),
+                             RecipeStepEdgeRecord(sourceId: stepRecords[2].id, destinationId: stepRecords[3].id),
+                             RecipeStepEdgeRecord(sourceId: stepRecords[0].id, destinationId: stepRecords[3].id)])
+
+            for index in 0..<edgeRecords.count {
+                edgeRecords[index].graphId = graphRecord.id
+                try edgeRecords[index].insert(db)
             }
         }
 

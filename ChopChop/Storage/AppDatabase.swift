@@ -94,9 +94,11 @@ struct AppDatabase {
                     .references("recipeStepGraph", onDelete: .cascade)
                 t.column("sourceId", .integer)
                     .notNull()
+                    .indexed()
                     .references("recipeStep", onDelete: .cascade)
                 t.column("destinationId", .integer)
                     .notNull()
+                    .indexed()
                     .references("recipeStep", onDelete: .cascade)
                 t.uniqueKey(["graphId", "sourceId", "destinationId"])
             }
@@ -356,7 +358,7 @@ extension AppDatabase {
 extension AppDatabase {
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
-        var graph = RecipeStepGraphRecord(id: nil, recipeId: recipe.id)
+        var graph = RecipeStepGraphRecord(id: nil)
         var steps: [RecipeStepRecord] = []
         var edges: [RecipeStepEdgeRecord] = []
 
@@ -419,7 +421,7 @@ extension AppDatabase {
                 throw DatabaseError(message: "Recipe ingredients and graph belong to the wrong recipe.")
             }
 
-            // Delete all ingredients and graphs that are not in the arrays
+            // Delete all ingredients that are not in the array and existing different graphs
             try recipe.ingredients
                 .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
@@ -434,6 +436,7 @@ extension AppDatabase {
             }
 
             // Save recipe graph
+            graph.recipeId = recipe.id
             try saveRecipeStepGraph(&graph, steps: &steps, edges: &edges)
         }
     }
@@ -582,6 +585,7 @@ extension AppDatabase {
                 .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
                 .including(all: RecipeRecord.steps)
+                .including(required: RecipeRecord.stepGraph)
 
             return try Recipe.fetchOne(db, request)
         }

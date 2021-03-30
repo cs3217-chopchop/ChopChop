@@ -15,6 +15,16 @@ extension RecipeStepRecord: Codable, FetchableRecord, MutablePersistableRecord {
         static let content = Column(CodingKeys.content)
     }
 
+    static let outgoingEdges = hasMany(RecipeStepEdgeRecord.self)
+    var outgoingEdges: QueryInterfaceRequest<RecipeStepEdgeRecord> {
+        request(for: RecipeStepRecord.outgoingEdges)
+    }
+
+    static let incomingEdges = hasMany(RecipeStepEdgeRecord.self)
+    var incomingEdges: QueryInterfaceRequest<RecipeStepEdgeRecord> {
+        request(for: RecipeStepRecord.incomingEdges)
+    }
+
     static let databaseTableName = "recipeStep"
 
     mutating func didInsert(with rowID: Int64, for column: String?) {

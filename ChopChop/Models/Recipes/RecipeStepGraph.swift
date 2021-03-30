@@ -8,12 +8,12 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
     }
 
     required init(row: Row) {
-        let steps = row.prefetchedRows["recipeStepGraphSteps"]?.compactMap {
+        let steps = row.prefetchedRows["recipeSteps"]?.compactMap {
             try? RecipeStep(content: RecipeStepRecord(row: $0).content)
         } ?? []
         let nodes = steps.map { RecipeStepNode($0) }
 
-        let edges: [Edge<RecipeStepNode>] = row.prefetchedRows["recipeStepGraphEdges"]?.compactMap {
+        let edges: [Edge<RecipeStepNode>] = row.prefetchedRows["recipeStepEdges"]?.compactMap {
             let record = RecipeStepEdgeRecord(row: $0)
 
             guard let sourceId = record.sourceId,
