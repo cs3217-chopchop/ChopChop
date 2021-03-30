@@ -11,7 +11,7 @@ final class OnlineRecipe {
     private(set) var userId: String
     private(set) var ratings: [RecipeRating]
     private(set) var recipeDetails: Recipe
-    
+
     init(id: String?, userId: String, ratings: [RecipeRating], recipeDetails: Recipe) {
         self.id = id
         self.userId = userId

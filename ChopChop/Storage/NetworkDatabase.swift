@@ -13,7 +13,7 @@ protocol NetworkDatabase {
     func fetchOnlineRecipeByIds(onlineRecipeIds: [Int64]) -> [OnlineRecipe]
     func fetchOnlineRecipeByUser(userIds: [Int64]) -> [OnlineRecipe]
     func addOnlineRecipeRating(onlineRecipeId: Int64, rating: RecipeRating)
-    
+
     func createNewUser(username: String) -> Int64
     func addFollowee(userId: Int64)
 }

@@ -12,7 +12,7 @@ struct FirebaseDatabase {
     private let recipePath: String = "recipes"
     private let userPath: String = "users"
     private let db = Firestore.firestore()
-    
+
     func addRecipe(recipe: OnlineRecipeRecord) throws -> String {
         do {
             return try db.collection(recipePath).addDocument(from: recipe).documentID
@@ -51,7 +51,7 @@ struct FirebaseDatabase {
             throw FirebaseError.updateRecipeError(message: "Unable to update recipe: \(error.localizedDescription)")
         }
     }
-    
+
     func fetchOnlineRecipeById(onlineRecipeId: String) throws -> OnlineRecipeRecord? {
         var hasError = false
         var errorMessage = ""
@@ -115,12 +115,12 @@ struct FirebaseDatabase {
         db.collection(userPath).document(userId).updateData(["ratings": FieldValue.arrayRemove([ratingData])])
     }
     func createNewUser(username: String) -> String {
-        return db.collection(userPath).addDocument(data: ["name": username]).documentID
+        db.collection(userPath).addDocument(data: ["name": username]).documentID
     }
     func addFollowee(userId: String, followeeId: String) {
         db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayUnion([followeeId])])
     }
-    
+
     func removeFollowee(userId: String, followeeId: String) {
         db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayRemove([followeeId])])
     }

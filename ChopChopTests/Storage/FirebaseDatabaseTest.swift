@@ -11,7 +11,7 @@ import FirebaseFirestoreSwift
 @testable import ChopChop
 
 class FirebaseDatabaseTest: XCTestCase {
-    
+
     private let db = FirebaseDatabase()
 
     func testAddRecipe() throws {
@@ -35,12 +35,12 @@ class FirebaseDatabaseTest: XCTestCase {
             steps: steps,
             ratings: ratings
         )
-        
+
         let recipeId = try db.addRecipe(recipe: recipeRecord)
         print(recipeId)
         XCTAssertNotNil(recipeId)
     }
-    
+
     func testUpdateRecipe() throws {
         let steps = ["Change", "Second step", "Third step"]
         let ingredients = [

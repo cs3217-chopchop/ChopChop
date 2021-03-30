@@ -229,9 +229,9 @@ extension StorageManager {
     }
 }
 
-// MARK - Firebase operations
+// MARK: - Firebase operations
 extension StorageManager {
-    
+
     func publishRecipe(recipe: inout Recipe, userId: String) throws {
         var cuisine = ""
         if let categoryId = recipe.recipeCategoryId {
@@ -254,12 +254,12 @@ extension StorageManager {
         recipe.onlineId = onlineId
         try self.saveRecipe(&recipe)
     }
-    
+
     // this should only be called once when the app first launched
     func createUser(name: String) throws -> String {
-        return firebase.createNewUser(username: name)
+        firebase.createNewUser(username: name)
     }
-    
+
     func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
         var cuisine = ""
         if let categoryId = recipe.recipeCategoryId {
@@ -281,7 +281,7 @@ extension StorageManager {
         )
         try firebase.updateRecipe(recipe: recipeRecord)
     }
-    
+
 }
 
 enum StorageError: Error {
