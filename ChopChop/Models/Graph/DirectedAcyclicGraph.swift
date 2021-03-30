@@ -43,25 +43,37 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
             throw GraphError.repeatedEdge
         }
 
-        let sourceNode = addedEdge.source
-        let destinationNode = addedEdge.destination
-
-        guard containsNode(sourceNode) && containsNode(destinationNode) else {
-            try super.addEdge(addedEdge)
-            return
-        }
-
-        if var edgesFromSourceNode = adjacencyList[sourceNode] {
-            edgesFromSourceNode.append(addedEdge)
-            adjacencyList[sourceNode] = edgesFromSourceNode
-        }
-
-        guard !containsCycle() else {
-            removeEdge(addedEdge)
+        guard isValidEdge(addedEdge) else {
             throw DirectedAcyclicGraphError.addedEdgeFormsCycle
         }
 
+        try super.addEdge(addedEdge)
+
         assert(checkRepresentation())
+    }
+
+    func isValidEdge(_ addedEdge: E) -> Bool {
+        guard !containsEdge(addedEdge) else {
+            return false
+        }
+
+        let sourceNode = addedEdge.source
+        let destinationNode = addedEdge.destination
+
+        guard containsNode(sourceNode) && containsNode(destinationNode),
+              var edgesFromSourceNode = adjacencyList[sourceNode] else {
+            return true
+        }
+
+        edgesFromSourceNode.append(addedEdge)
+        adjacencyList[sourceNode] = edgesFromSourceNode
+
+        defer {
+            edgesFromSourceNode.removeAll { $0 == addedEdge }
+            adjacencyList[sourceNode] = edgesFromSourceNode
+        }
+
+        return !containsCycle()
     }
 
     // MARK: - Cycles
