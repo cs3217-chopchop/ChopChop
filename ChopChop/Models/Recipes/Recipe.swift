@@ -4,6 +4,7 @@ import GRDB
 /// Note there is no relationship between steps and ingredients after parsing stage
 class Recipe: FetchableRecord, ObservableObject {
     var id: Int64?
+    var onlineId: String?
     @Published private(set) var name: String
     @Published private(set) var servings: Double
     @Published var recipeCategoryId: Int64?

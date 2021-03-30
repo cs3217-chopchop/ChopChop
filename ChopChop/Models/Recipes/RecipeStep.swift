@@ -1,6 +1,6 @@
 import Foundation
 
-class RecipeStep {
+final class RecipeStep {
     var id: Int64?
     private(set) var content: String // can be empty
 
@@ -26,6 +26,12 @@ class RecipeStep {
         self.content = trimmedContent
     }
 
+}
+
+extension RecipeStep: Codable {
+    enum CodingKeys: String, CodingKey {
+        case content = "step"
+    }
 }
 
 extension RecipeStep: Equatable {

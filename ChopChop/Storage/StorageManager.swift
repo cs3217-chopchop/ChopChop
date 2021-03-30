@@ -4,8 +4,9 @@ import Combine
 
 struct StorageManager {
     let appDatabase: AppDatabase
+    let firebase = FirebaseDatabase()
 
-    init(_ appDatabase: AppDatabase = .shared) {
+    init(appDatabase: AppDatabase = .shared) {
         self.appDatabase = appDatabase
     }
 
@@ -226,6 +227,61 @@ extension StorageManager {
             throw StorageError.saveImageFailure
         }
     }
+}
+
+// MARK - Firebase operations
+extension StorageManager {
+    
+    func publishRecipe(recipe: inout Recipe, userId: String) throws {
+        var cuisine = ""
+        if let categoryId = recipe.recipeCategoryId {
+            cuisine = (try? (fetchRecipeCategory(id: categoryId)?.name) ?? "") ?? ""
+        }
+        let steps = recipe.steps.map({ $0.content })
+        let ingredients = recipe.ingredients.map({
+            OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
+        })
+        let recipeRecord = OnlineRecipeRecord(
+            name: recipe.name,
+            creator: userId,
+            servings: recipe.servings,
+            cuisine: cuisine,
+            difficulty: recipe.difficulty,
+            ingredients: ingredients,
+            steps: steps
+        )
+        let onlineId = try firebase.addRecipe(recipe: recipeRecord)
+        recipe.onlineId = onlineId
+        try self.saveRecipe(&recipe)
+    }
+    
+    // this should only be called once when the app first launched
+    func createUser(name: String) throws -> String {
+        return firebase.createNewUser(username: name)
+    }
+    
+    func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
+        var cuisine = ""
+        if let categoryId = recipe.recipeCategoryId {
+            cuisine = (try? (fetchRecipeCategory(id: categoryId)?.name) ?? "") ?? ""
+        }
+        let steps = recipe.steps.map({ $0.content })
+        let ingredients = recipe.ingredients.map({
+            OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
+        })
+        let recipeRecord = OnlineRecipeRecord(
+            id: recipe.onlineId,
+            name: recipe.name,
+            creator: userId,
+            servings: recipe.servings,
+            cuisine: cuisine,
+            difficulty: recipe.difficulty,
+            ingredients: ingredients,
+            steps: steps
+        )
+        try firebase.updateRecipe(recipe: recipeRecord)
+    }
+    
 }
 
 enum StorageError: Error {

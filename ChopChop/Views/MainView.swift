@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct MainView: View {
     @ObservedObject var viewModel: MainViewModel
@@ -13,6 +14,13 @@ struct MainView: View {
         RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",
                                                                   categoryIds: viewModel.recipeCategories
                                                                     .compactMap { $0.id } + [nil]))
+        Button("Press") {
+            click()
+        }
+    }
+    private func click() {
+        let db = FirebaseDatabase()
+        db.removeRecipeRating(onlineRecipeId: "4oD1x5S7aqusvV6EKf9Y", rating: RecipeRating(userId: "2", score: .excellent))
     }
 }
 
