@@ -11,74 +11,42 @@ struct GraphView: View {
     @GestureState var placeholderNodePosition: CGPoint?
 
     var body: some View {
-        GeometryReader { _ in
-            ZStack {
-                linesView
+        ZStack {
+            linesView
 
-                if let info = lineDragInfo {
-                    placeholderLineView(info: info)
-                }
-
-                // TODO: Figure out TextEditor bug
-                if let nodes = viewModel.graph.topologicalSort() {
-                    ForEach(nodes) { node in
-                        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node), selection: selection)
-                            .position(node.position + viewModel.portalPosition + portalDragOffset
-                                        + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
-                            .onTapGesture {
-                                withAnimation {
-                                    selection.toggleNode(node)
-                                }
-                            }
-                            .gesture(
-                                LongPressGesture()
-                                    .sequenced(before: DragGesture()
-                                        .updating($lineDragInfo) { value, state, _ in
-                                            state = viewModel.onLongPressDragNode(value, position: node.position)
-                                        }
-                                        .onEnded { value in
-                                            viewModel.onLongPressDragNodeEnd(value, node: node)
-                                        }
-                                    )
-                                    .exclusively(before: DragGesture()
-                                        .updating($nodeDragOffset) { value, state, _ in
-                                            state = viewModel.onDragNode(value, node: node)
-                                        }
-                                        .onEnded { value in
-                                            node.position += CGVector(dx: value.translation.width,
-                                                                      dy: value.translation.height)
-                                        }
-                                )
-                            )
-                    }
-                }
-
-                if let position = placeholderNodePosition {
-                    placeholderNodeView(position: position)
-                }
+            if let info = lineDragInfo {
+                placeholderLineView(info: info)
             }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation {
-                    selection.deselectAllNodes()
-                }
+
+            if let nodes = viewModel.graph.topologicalSort() {
+                nodesView(nodes: nodes)
             }
-            .gesture(
-                LongPressGesture()
-                    .sequenced(before: DragGesture(minimumDistance: 0)
-                        .updating($placeholderNodePosition) { value, state, _ in
-                            state = value.location
-                        }
-                        .onEnded(viewModel.onLongPressPortal))
-                    .exclusively(before: DragGesture()
-                        .updating($portalDragOffset) { value, state, _ in
-                            state = CGVector(dx: value.translation.width, dy: value.translation.height)
-                        }
-                        .onEnded(viewModel.onDragPortal)
-                    )
-            )
+
+            if let position = placeholderNodePosition {
+                placeholderNodeView(position: position)
+            }
         }
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation {
+                selection.deselectAllNodes()
+            }
+        }
+        .gesture(
+            LongPressGesture()
+                .sequenced(before: DragGesture(minimumDistance: 0)
+                    .updating($placeholderNodePosition) { value, state, _ in
+                        state = value.location
+                    }
+                    .onEnded(viewModel.onLongPressPortal))
+                .exclusively(before: DragGesture()
+                    .updating($portalDragOffset) { value, state, _ in
+                        state = CGVector(dx: value.translation.width, dy: value.translation.height)
+                    }
+                    .onEnded(viewModel.onDragPortal)
+                )
+        )
     }
 
     var linesView: some View {
@@ -115,6 +83,39 @@ struct GraphView: View {
                     viewModel.linePhase -= 20
                 }
             }
+    }
+
+    func nodesView(nodes: [Node]) -> some View {
+        ForEach(nodes) { node in
+            NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node), selection: selection)
+                .position(node.position + viewModel.portalPosition + portalDragOffset
+                            + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
+                .onTapGesture {
+                    withAnimation {
+                        selection.toggleNode(node)
+                    }
+                }
+                .gesture(
+                    LongPressGesture()
+                        .sequenced(before: DragGesture()
+                            .updating($lineDragInfo) { value, state, _ in
+                                state = viewModel.onLongPressDragNode(value, position: node.position)
+                            }
+                            .onEnded { value in
+                                viewModel.onLongPressDragNodeEnd(value, node: node)
+                            }
+                        )
+                        .exclusively(before: DragGesture()
+                            .updating($nodeDragOffset) { value, state, _ in
+                                state = viewModel.onDragNode(value, node: node)
+                            }
+                            .onEnded { value in
+                                node.position += CGVector(dx: value.translation.width,
+                                                          dy: value.translation.height)
+                            }
+                    )
+                )
+        }
     }
 
     func placeholderNodeView(position: CGPoint) -> some View {
