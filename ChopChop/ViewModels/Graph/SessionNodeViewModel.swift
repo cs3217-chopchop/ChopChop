@@ -1,8 +1,14 @@
-//
-//  SessionNodeViewModel.swift
-//  ChopChop
-//
-//  Created by Seow Alex on 30/3/21.
-//
+import Combine
+import SwiftGraph
 
-import Foundation
+final class SessionNodeViewModel: ObservableObject {
+    private var graph: UnweightedGraph<Node>
+    let node: Node
+    let index: Int?
+
+    init(graph: UnweightedGraph<Node>, node: Node) {
+        self.graph = graph
+        self.node = node
+        self.index = graph.topologicalSort()?.firstIndex(of: node)
+    }
+}

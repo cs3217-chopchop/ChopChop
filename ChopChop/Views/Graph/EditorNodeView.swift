@@ -42,8 +42,7 @@ struct EditorNodeView: View {
 
                     if isSelected {
                         detailView
-                            .transition(AnyTransition.scale
-                                            .combined(with: AnyTransition.move(edge: .top)))
+                            .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                     }
                 }
             }
