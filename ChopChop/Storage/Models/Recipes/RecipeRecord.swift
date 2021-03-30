@@ -29,12 +29,6 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
         request(for: RecipeRecord.ingredients)
     }
 
-    // Sorted by step index
-    static let steps = hasMany(RecipeStepRecord.self).order(RecipeStepRecord.Columns.index)
-    var steps: QueryInterfaceRequest<RecipeStepRecord> {
-        request(for: RecipeRecord.steps)
-    }
-
     static let stepGraph = hasOne(RecipeStepGraphRecord.self)
     var stepGraph: QueryInterfaceRequest<RecipeStepGraphRecord> {
         request(for: RecipeRecord.stepGraph)

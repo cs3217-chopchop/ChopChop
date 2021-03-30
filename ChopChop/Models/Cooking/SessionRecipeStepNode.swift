@@ -1,12 +1,12 @@
 import SwiftUI
 
 class SessionRecipeStepNode: Node, ObservableObject {
-    var label: RecipeStep
+    var label: SessionRecipeStep
     @Published var isCompletable: Bool = false
     @Published var isCompleted: Bool = false
 
     init(_ node: RecipeStepNode) {
-        self.label = node.label
+        self.label = SessionRecipeStep(step: node.label, actionTimeTracker: ActionTimeTracker())
     }
 }
 

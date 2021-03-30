@@ -177,6 +177,12 @@ class Graph<N: Node> {
     }
 }
 
+extension Graph: Equatable {
+    static func == (lhs: Graph<N>, rhs: Graph<N>) -> Bool {
+        Set(lhs.nodes) == Set(rhs.nodes) && Set(lhs.edges) == Set(rhs.edges)
+    }
+}
+
 enum GraphError: Error {
     case repeatedEdge
 }

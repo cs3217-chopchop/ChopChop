@@ -64,12 +64,12 @@ class SessionRecipeStepGraphTests: XCTestCase {
         }
 
         for node in graph.nodes {
-            XCTAssertTrue(recipeSteps.contains(node.label))
+            XCTAssertTrue(recipeSteps.contains(node.label.step))
         }
 
         for edge in graph.edges {
             XCTAssertTrue(recipeStepEdges.contains(where: {
-                $0.source.label == edge.source.label && $0.destination.label == edge.destination.label
+                $0.source.label == edge.source.label.step && $0.destination.label == edge.destination.label.step
             }))
         }
     }
@@ -140,7 +140,7 @@ class SessionRecipeStepGraphTests: XCTestCase {
         for node in graph.nodes {
             XCTAssertFalse(node.isCompleted)
 
-            if node.label == recipeSteps[0] {
+            if node.label.step == recipeSteps[0] {
                 XCTAssertTrue(node.isCompletable)
             } else {
                 XCTAssertFalse(node.isCompletable)
@@ -181,32 +181,50 @@ class SessionRecipeStepGraphTests: XCTestCase {
                 Drain the pasta and toss it with the sauce along with the parsley and parmesan if using.
             """)
         ]
-        let nodes = recipeSteps.map { SessionRecipeStepNode(RecipeStepNode($0)) }
+        let recipeStepNodes = recipeSteps.map { RecipeStepNode($0) }
 
-        let edges = [
-            Edge<SessionRecipeStepNode>(source: nodes[0], destination: nodes[1]),
-            Edge<SessionRecipeStepNode>(source: nodes[0], destination: nodes[8]),
-            Edge<SessionRecipeStepNode>(source: nodes[1], destination: nodes[2]),
-            Edge<SessionRecipeStepNode>(source: nodes[2], destination: nodes[3]),
-            Edge<SessionRecipeStepNode>(source: nodes[2], destination: nodes[4]),
-            Edge<SessionRecipeStepNode>(source: nodes[3], destination: nodes[5]),
-            Edge<SessionRecipeStepNode>(source: nodes[4], destination: nodes[5]),
-            Edge<SessionRecipeStepNode>(source: nodes[5], destination: nodes[6]),
-            Edge<SessionRecipeStepNode>(source: nodes[6], destination: nodes[7]),
-            Edge<SessionRecipeStepNode>(source: nodes[7], destination: nodes[8])
+        let recipeStepEdges = [
+            Edge<RecipeStepNode>(source: recipeStepNodes[0], destination: recipeStepNodes[1]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[0], destination: recipeStepNodes[8]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[1], destination: recipeStepNodes[2]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[2], destination: recipeStepNodes[3]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[2], destination: recipeStepNodes[4]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[3], destination: recipeStepNodes[5]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[4], destination: recipeStepNodes[5]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[5], destination: recipeStepNodes[6]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[6], destination: recipeStepNodes[7]),
+            Edge<RecipeStepNode>(source: recipeStepNodes[7], destination: recipeStepNodes[8])
         ].compactMap { $0 }
 
-        let graph = SessionRecipeStepGraph()
-
-        for node in nodes {
-            graph.addNode(node)
+        let recipeStepGraph = RecipeStepGraph()
+        for edge in recipeStepEdges {
+            try recipeStepGraph.addEdge(edge)
         }
 
-        for edge in edges {
-            try graph.addEdge(edge)
+        guard let graph = SessionRecipeStepGraph(graph: recipeStepGraph) else {
+            XCTFail("Graph initialisation failed")
+            return
         }
 
         graph.resetSteps()
+        let graphNodes = graph.nodes
+
+        let nodes = [
+            getSessionNode(0, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(1, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(2, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(3, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(4, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(5, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(6, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(7, steps: recipeSteps, nodes: graphNodes),
+            getSessionNode(8, steps: recipeSteps, nodes: graphNodes)
+        ].compactMap({ $0 })
+
+        guard nodes.count == recipeSteps.count else {
+            XCTFail("Graph initialisation failed")
+            return
+        }
 
         XCTAssertTrue(nodes[0].isCompletable)
 
@@ -235,5 +253,10 @@ class SessionRecipeStepGraphTests: XCTestCase {
         graph.completeStep(nodes[7])
 
         XCTAssertTrue(nodes[8].isCompletable)
+    }
+
+    private func getSessionNode(_ idx: Int, steps: [RecipeStep], nodes: [SessionRecipeStepNode]) -> SessionRecipeStepNode? {
+        let content = steps[idx].content
+        return nodes.first(where: { $0.label.step.content == content })
     }
 }

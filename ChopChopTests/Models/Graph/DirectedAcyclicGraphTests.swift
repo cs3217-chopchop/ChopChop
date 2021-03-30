@@ -150,17 +150,27 @@ extension DirectedAcyclicGraphTests {
     func testGetNodeLayers() throws {
         dag = try makeTestDAG()
 
-        let expectedResult = [
-            [IntNode(1)],
-            [IntNode(2), IntNode(6)],
-            [IntNode(5)],
-            [IntNode(4)],
-            [IntNode(3)],
-            [IntNode(7)]
+        let expectedResults = [
+            [
+                [IntNode(1)],
+                [IntNode(2), IntNode(6)],
+                [IntNode(5)],
+                [IntNode(4)],
+                [IntNode(3)],
+                [IntNode(7)]
+            ],
+            [
+                [IntNode(1)],
+                [IntNode(6), IntNode(2)],
+                [IntNode(5)],
+                [IntNode(4)],
+                [IntNode(3)],
+                [IntNode(7)]
+            ]
         ]
 
         let result = dag.getNodeLayers()
 
-        XCTAssertEqual(result, expectedResult, "IntNode layers should be computed correctly")
+        XCTAssertTrue(expectedResults.contains(result), "IntNode layers should be computed correctly")
     }
 }

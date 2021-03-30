@@ -18,16 +18,19 @@ struct StorageManager {
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
         var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
-        var stepRecords = recipe.stepGraph.nodes.enumerated().map { index, node in
-            RecipeStepRecord(graphId: recipe.stepGraph.id, index: index + 1, content: node.label.content)
+        var stepRecords = recipe.stepGraph.nodes.map { node in
+            RecipeStepRecord(graphId: recipe.stepGraph.id, content: node.label.content)
         }
-        var edgeRecords = recipe.stepGraph.edges.map { edge -> RecipeStepEdgeRecord? in
-            guard let sourceId = stepRecords.first(where: { $0.content == edge.source.label.content })?.id,
-                  let destinationId = stepRecords.first(where: { $0.content == edge.destination.label.content })?.id else {
+        var edgeRecords = recipe.stepGraph.edges.map { _ in
+            RecipeStepEdgeRecord(graphId: recipe.stepGraph.id)
+        }
+        var sourceAndDestinationRecords = recipe.stepGraph.edges.map { edge -> (source: RecipeStepRecord, destination: RecipeStepRecord)? in
+            guard let sourceRecord = stepRecords.first(where: { $0.content == edge.source.label.content }),
+                  let destinationRecord = stepRecords.first(where: { $0.content == edge.destination.label.content }) else {
                 return nil
             }
 
-            return RecipeStepEdgeRecord(graphId: recipe.stepGraph.id, sourceId: sourceId, destinationId: destinationId)
+            return (source: sourceRecord, destination: destinationRecord)
         }.compactMap { $0 }
 
         try appDatabase.saveRecipe(
@@ -35,7 +38,8 @@ struct StorageManager {
             ingredients: &ingredientRecords,
             graph: &graphRecord,
             steps: &stepRecords,
-            edges: &edgeRecords)
+            edges: &edgeRecords,
+            endPoints: sourceAndDestinationRecords)
 
         recipe.id = recipeRecord.id
         recipe.stepGraph.id = graphRecord.id

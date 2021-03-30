@@ -1,11 +1,19 @@
 class SessionRecipeStepGraph {
     private let graph: DirectedAcyclicGraph<SessionRecipeStepNode>
 
+    var nodes: [SessionRecipeStepNode] {
+        graph.nodes
+    }
+
+    var edges: [Edge<SessionRecipeStepNode>] {
+        graph.edges
+    }
+
     init?(graph: RecipeStepGraph) {
         let sessionNodes = graph.nodes.map { SessionRecipeStepNode($0) }
         let sessionEdges = graph.edges.map { edge -> Edge<SessionRecipeStepNode>? in
-            guard let sessionSourceNode = sessionNodes.first(where: { $0.label == edge.source.label }),
-                  let sessionDestinationNode = sessionNodes.first(where: { $0.label == edge.destination.label }),
+            guard let sessionSourceNode = sessionNodes.first(where: { $0.label.step == edge.source.label }),
+                  let sessionDestinationNode = sessionNodes.first(where: { $0.label.step == edge.destination.label }),
                   let sessionEdge = Edge<SessionRecipeStepNode>(source: sessionSourceNode, destination: sessionDestinationNode) else {
                 return nil
             }

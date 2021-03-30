@@ -76,12 +76,9 @@ struct AppDatabase {
                     .notNull()
                     .indexed()
                     .references("recipeStepGraph", onDelete: .cascade)
-                t.column("index", .integer)
-                    .notNull()
                 t.column("content", .text)
                     .notNull()
                     .check { $0 != "" }
-                t.uniqueKey(["graphId", "index"])
             }
         }
 
@@ -358,64 +355,30 @@ extension AppDatabase {
 extension AppDatabase {
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
-        var graph = RecipeStepGraphRecord(id: nil)
+        var graph = RecipeStepGraphRecord()
         var steps: [RecipeStepRecord] = []
         var edges: [RecipeStepEdgeRecord] = []
+        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
 
         try saveRecipe(
             &recipe,
             ingredients: &ingredients,
             graph: &graph,
             steps: &steps,
-            edges: &edges)
+            edges: &edges,
+            endPoints: endPoints)
     }
-
-//    func saveRecipe(_ recipe: inout RecipeRecord,
-//                    ingredients: inout [RecipeIngredientRecord],
-//                    steps: inout [RecipeStepRecord]) throws {
-//        try dbWriter.write { db in
-//            try recipe.save(db)
-//
-//            let recipeIds = ingredients.compactMap { $0.recipeId } + steps.compactMap { $0.recipeId }
-//
-//            guard recipeIds.allSatisfy({ $0 == recipe.id }) else {
-//                throw DatabaseError(message: "Recipe ingredients and steps belong to the wrong recipe.")
-//            }
-//
-//            guard steps.map({ $0.index }).allSatisfy({ (1...steps.count).contains($0) }) else {
-//                throw DatabaseError(message: "Recipe steps do not have consecutive indexes.")
-//            }
-//
-//            // Delete all ingredients and steps that are not in the arrays
-//            try recipe.ingredients
-//                .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
-//                .deleteAll(db)
-//            try recipe.steps
-//                .filter(!steps.compactMap { $0.id }.contains(RecipeStepRecord.Columns.id))
-//                .deleteAll(db)
-//
-//            // Save recipe ingredients and steps
-//            for index in ingredients.indices {
-//                ingredients[index].recipeId = recipe.id
-//                try ingredients[index].save(db)
-//            }
-//
-//            for index in steps.indices {
-//                steps[index].recipeId = recipe.id
-//                try steps[index].save(db)
-//            }
-//        }
-//    }
 
     func saveRecipe(_ recipe: inout RecipeRecord,
                     ingredients: inout [RecipeIngredientRecord],
                     graph: inout RecipeStepGraphRecord,
                     steps: inout [RecipeStepRecord],
-                    edges: inout [RecipeStepEdgeRecord]) throws {
+                    edges: inout [RecipeStepEdgeRecord],
+                    endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)]) throws {
         try dbWriter.write { db in
             try recipe.save(db)
 
-            let recipeIds = ingredients.compactMap { $0.recipeId } + [graph.recipeId]
+            let recipeIds = ingredients.compactMap { $0.recipeId }
 
             guard recipeIds.allSatisfy({ $0 == recipe.id }) else {
                 throw DatabaseError(message: "Recipe ingredients and graph belong to the wrong recipe.")
@@ -437,26 +400,12 @@ extension AppDatabase {
 
             // Save recipe graph
             graph.recipeId = recipe.id
-            try saveRecipeStepGraph(&graph, steps: &steps, edges: &edges)
-        }
-    }
-
-    private func saveRecipeStepGraph(_ graph: inout RecipeStepGraphRecord,
-                                     steps: inout [RecipeStepRecord],
-                                     edges: inout [RecipeStepEdgeRecord]) throws {
-        try dbWriter.write { db in
             try graph.save(db)
 
             let graphIds = steps.compactMap { $0.graphId } + edges.compactMap { $0.graphId }
 
             guard graphIds.allSatisfy({ $0 == graph.id }) else {
-                throw DatabaseError(message: "Steps and edges belong to the wrong graph.")
-            }
-
-            let stepsIds = steps.compactMap { $0.id }
-            guard edges.compactMap({ $0.sourceId }).allSatisfy({ stepsIds.contains($0) })
-                && edges.compactMap({ $0.destinationId }).allSatisfy({ stepsIds.contains($0) }) else {
-                throw DatabaseError(message: "Missing step")
+                throw DatabaseError(message: "Steps belong to the wrong graph.")
             }
 
             // Delete all steps and edges that are not in the graph
@@ -464,7 +413,7 @@ extension AppDatabase {
                 .filter(!steps.compactMap { $0.id }.contains(RecipeStepRecord.Columns.id))
                 .deleteAll(db)
             try graph.edges
-                .filter(!edges.compactMap { $0.id }.contains(RecipeStepEdgeRecord.Columns.id))
+                .filter(!edges.compactMap { $0.id }.contains(RecipeStepRecord.Columns.id))
                 .deleteAll(db)
 
             // Save steps and edges
@@ -473,8 +422,20 @@ extension AppDatabase {
                 try steps[index].save(db)
             }
 
+            edges = endPoints.map { source, destination -> RecipeStepEdgeRecord? in
+                guard let sourceStep = steps.first(where: { $0.content == source.content }),
+                      let destinationStep = steps.first(where: { $0.content == destination.content }) else {
+                    return nil
+                }
+
+                return RecipeStepEdgeRecord(graphId: graph.id, sourceId: sourceStep.id, destinationId: destinationStep.id)
+            }.compactMap({ $0 })
+
+            guard endPoints.count == edges.count else {
+                throw DatabaseError(message: "Missing source or destination step.")
+            }
+
             for index in edges.indices {
-                edges[index].graphId = graph.id
                 try edges[index].save(db)
             }
         }
@@ -584,7 +545,9 @@ extension AppDatabase {
             let request = RecipeRecord
                 .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
-                .including(required: RecipeRecord.stepGraph)
+                .including(required: RecipeRecord.stepGraph
+                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
         }
