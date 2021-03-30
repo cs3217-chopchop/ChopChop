@@ -87,7 +87,7 @@ struct GraphView: View {
 
     func nodesView(nodes: [Node]) -> some View {
         ForEach(nodes) { node in
-            NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: node), selection: selection)
+            EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
                 .position(node.position + viewModel.portalPosition + portalDragOffset
                             + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
                 .onTapGesture {
@@ -119,7 +119,7 @@ struct GraphView: View {
     }
 
     func placeholderNodeView(position: CGPoint) -> some View {
-        NodeView(viewModel: NodeViewModel(graph: viewModel.graph, node: Node()), selection: selection)
+        EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: Node()), selection: selection)
             .position(position)
             .opacity(0.4)
     }

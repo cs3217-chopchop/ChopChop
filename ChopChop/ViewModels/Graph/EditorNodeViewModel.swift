@@ -1,7 +1,7 @@
 import Combine
 import SwiftGraph
 
-final class NodeViewModel: ObservableObject {
+final class EditorNodeViewModel: ObservableObject {
     @Published var isEditing = false
     @Published var text = ""
 

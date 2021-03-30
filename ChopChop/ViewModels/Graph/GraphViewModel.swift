@@ -36,9 +36,9 @@ final class GraphViewModel: ObservableObject {
 
     private func hitTest(point: CGPoint) -> Node? {
         for node in graph.vertices {
-            let endPoint = node.position + portalPosition - CGVector(dx: NodeView.normalSize.width / 2,
-                                                                     dy: NodeView.normalSize.height / 2)
-            let rect = CGRect(origin: endPoint, size: NodeView.normalSize)
+            let endPoint = node.position + portalPosition - CGVector(dx: Node.normalSize.width / 2,
+                                                                     dy: Node.normalSize.height / 2)
+            let rect = CGRect(origin: endPoint, size: Node.normalSize)
 
             if rect.contains(point) {
                 return node

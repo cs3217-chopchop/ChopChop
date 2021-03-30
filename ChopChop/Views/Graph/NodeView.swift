@@ -1,22 +1,12 @@
-import SwiftGraph
 import SwiftUI
 
-struct NodeView: View {
-    static let normalSize = CGSize(width: 120, height: 84)
-    static let expandedSize = CGSize(width: 360, height: 240)
+struct NodeView<Content: View>: View {
+    let isSelected: Bool
+    let content: Content
 
-    @ObservedObject var viewModel: NodeViewModel
-    @ObservedObject var selection: SelectionHandler
-
-    var isSelected: Bool {
-        selection.isNodeSelected(viewModel.node)
-    }
-
-    init(viewModel: NodeViewModel, selection: SelectionHandler) {
-        self.viewModel = viewModel
-        self.selection = selection
-
-        UITextView.appearance().backgroundColor = .clear
+    init(isSelected: Bool = false, @ViewBuilder content: @escaping() -> Content) {
+        self.isSelected = isSelected
+        self.content = content()
     }
 
     var body: some View {
@@ -31,82 +21,17 @@ struct NodeView: View {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .stroke(Color.accentColor, lineWidth: 1.5)
             )
-            .overlay(
-                VStack {
-                    if viewModel.index != nil {
-                        if let index = viewModel.index {
-                            Text("Step \(index + 1)")
-                                .font(.headline)
-                        }
-
-                        if viewModel.isEditing {
-                            TextEditor(text: $viewModel.text)
-                                .background(Color.primary.opacity(0.1))
-                                .transition(.scale)
-                                // Prevent taps from propogating
-                                .onTapGesture {}
-                        } else {
-                            ScrollView(isSelected ? [.vertical] : []) {
-                                Text(viewModel.node.text.isEmpty ? "Add step details..." : viewModel.node.text)
-                                    .lineLimit(isSelected ? nil : 1)
-                                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                                    .foregroundColor(viewModel.node.text.isEmpty ? .secondary : .primary)
-                            }
-                        }
-
-                        if isSelected {
-                            detailView
-                                .transition(AnyTransition.scale
-                                                .combined(with: AnyTransition.move(edge: .top)))
-                        }
-                    }
-                }
-                .padding()
-            )
-            .frame(width: isSelected ? NodeView.expandedSize.width : NodeView.normalSize.width,
-                   height: isSelected ? NodeView.expandedSize.height : NodeView.normalSize.height)
+            .overlay(content)
+            .frame(width: isSelected ? Node.expandedSize.width : Node.normalSize.width,
+                   height: isSelected ? Node.expandedSize.height : Node.normalSize.height)
             .zIndex(isSelected ? 1 : 0)
-    }
-
-    var detailView: some View {
-        HStack {
-            if viewModel.isEditing {
-                Button(action: {
-                    viewModel.node.text = viewModel.text
-                    viewModel.isEditing = false
-                }) {
-                    Text("Save")
-                }
-                Spacer()
-                Button(action: {
-                    viewModel.text = viewModel.node.text
-                    viewModel.isEditing = false
-                }) {
-                    Text("Cancel")
-                }
-            } else {
-                Button(action: {
-                    viewModel.isEditing = true
-                }) {
-                    Image(systemName: "square.and.pencil")
-                }
-                Spacer()
-                Button(action: {
-                    viewModel.removeNode()
-                    selection.toggleNode(viewModel.node)
-                }) {
-                    Image(systemName: "trash")
-                }
-            }
-        }
-        .padding(.top, 6)
     }
 }
 
  struct NodeView_Previews: PreviewProvider {
     static var previews: some View {
-        NodeView(viewModel: NodeViewModel(graph: UnweightedGraph<Node>(),
-                                          node: Node()),
-                 selection: SelectionHandler())
+        NodeView {
+            EmptyView()
+        }
     }
  }
