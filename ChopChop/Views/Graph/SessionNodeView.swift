@@ -49,7 +49,10 @@ struct SessionNodeView: View {
     var detailView: some View {
         HStack {
             Button(action: {
-                isCompleted.toggle()
+                withAnimation {
+                    isCompleted.toggle()
+                    selection.deselectNode(viewModel.node)
+                }
             }) {
                 Image(systemName: isCompleted ? "checkmark.square" : "square")
             }
