@@ -132,7 +132,8 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         return nodeStack.reversed()
     }
 
-    private func topologicalSortHelper(_ currentIdx: Int, nodes: [N], visitedNodes: inout [Bool], nodeStack: inout [N]) {
+    private func topologicalSortHelper(_ currentIdx: Int, nodes: [N],
+                                       visitedNodes: inout [Bool], nodeStack: inout [N]) {
         let currentNode = nodes[currentIdx]
 
         // Mark current node as visited

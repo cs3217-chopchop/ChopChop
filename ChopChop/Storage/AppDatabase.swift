@@ -584,7 +584,6 @@ extension AppDatabase {
             let request = RecipeRecord
                 .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
-                .including(all: RecipeRecord.steps)
                 .including(required: RecipeRecord.stepGraph)
 
             return try Recipe.fetchOne(db, request)

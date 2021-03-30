@@ -1,4 +1,4 @@
-// swiftlint:disable type_body_length function_body_length file_length
+// swiftlint:disable type_body_length function_body_length file_length line_length
 import XCTest
 import GRDB
 @testable import ChopChop
@@ -347,11 +347,6 @@ class AppDatabaseTests: XCTestCase {
         var edges: [RecipeStepEdgeRecord] = []
 
         try dbWriter.write { db in
-            try graph.insert(db)
-
-            recipe1.graphId = graph.id
-            recipe2.graphId = graph.id
-
             try recipe1.insert(db)
             try recipe2.insert(db)
 
@@ -359,6 +354,9 @@ class AppDatabaseTests: XCTestCase {
                 ingredients[index].recipeId = recipe1.id
                 try ingredients[index].insert(db)
             }
+
+            graph.recipeId = recipe1.id
+            try graph.insert(db)
 
             for index in 0..<steps.count {
                 steps[index].graphId = graph.id
@@ -981,12 +979,13 @@ class AppDatabaseTests: XCTestCase {
 
         try dbWriter.write { db in
             try categoryRecord.insert(db)
-            try graphRecord.insert(db)
 
             recipeRecord.recipeCategoryId = categoryRecord.id
-            recipeRecord.graphId = graphRecord.id
 
             try recipeRecord.insert(db)
+
+            graphRecord.recipeId = recipeRecord.id
+            try graphRecord.insert(db)
 
             for index in 0..<ingredientRecords.count {
                 ingredientRecords[index].recipeId = recipeRecord.id

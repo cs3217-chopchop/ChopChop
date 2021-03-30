@@ -317,7 +317,8 @@ extension GraphTests {
 
         let expectedEdges = [testEdge, testEdge.reversed()]
 
-        XCTAssertEqual(Set(graph.edges), Set(expectedEdges), "All contained edges including reverse edges should be returned")
+        XCTAssertEqual(Set(graph.edges), Set(expectedEdges),
+                       "All contained edges including reverse edges should be returned")
     }
 
     func testEdges_emptyGraph_returnEmptyList() {
