@@ -132,12 +132,9 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Egg", quantity: .count(1)),
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
-        var graph = RecipeStepGraphRecord()
-        var steps: [RecipeStepRecord] = []
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
@@ -166,13 +163,10 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Salt", quantity: .volume(1.25, unit: .milliliter)),
             RecipeIngredientRecord(name: "Pepper", quantity: .volume(2.5, unit: .milliliter))
         ]
-        var graph = RecipeStepGraphRecord()
-        var steps: [RecipeStepRecord] = []
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
-        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
+        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, graph: &graph)
+        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, graph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(pancakeRecipe.exists(db))
@@ -199,12 +193,9 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
             RecipeIngredientRecord(name: "", quantity: .count(0))
         ]
-        var graph = RecipeStepGraphRecord()
-        var steps: [RecipeStepRecord] = []
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
@@ -218,213 +209,116 @@ class AppDatabaseTests: XCTestCase {
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon)),
             RecipeIngredientRecord(name: "Sugar", quantity: .volume(1, unit: .tablespoon))
         ]
-        var graph = RecipeStepGraphRecord()
-        var steps: [RecipeStepRecord] = []
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
     }
 
     func testSaveRecipe_insertsValidGraph_success() throws {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         var steps: [RecipeStepRecord] = []
-        var graph = RecipeStepGraphRecord()
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+
+        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
         try dbWriter.read { db in
-            try XCTAssertTrue(graph.exists(db))
+            try XCTAssertTrue(graphRecord.exists(db))
         }
     }
 
     func testSaveRecipe_insertsValidSteps_success() throws {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
-        var steps = [
-            RecipeStepRecord(content: """
+        let steps = [
+            try RecipeStep(content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
         ]
-        var graph = RecipeStepGraphRecord()
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
+        let nodes = steps.map { RecipeStepNode($0) }
+        var graph = try RecipeStepGraph(nodes: nodes, edges: [])
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+
+        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
 
-            for step in steps {
-                try XCTAssertTrue(step.exists(db))
+            for step in try graphRecord.steps.fetchAll(db) {
+                XCTAssertTrue(steps.contains(where: { $0.content == step.content }))
             }
         }
     }
 
-    func testSaveRecipe_insertsInvalidSteps_throwsError() throws {
+    func testSaveRecipe_insertsValidEdges_success() throws {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
-        var steps = [
-            RecipeStepRecord(content: """
+        let steps = [
+            try RecipeStep(content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Add milk and mix well until smooth.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            RecipeStepRecord(content: """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
-                pancakes.
-                """),
-            RecipeStepRecord(content: "")
-        ]
-        var graph = RecipeStepGraphRecord()
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = []
-
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints))
-    }
-
-    func testSaveRecipe_insertsValidEndPoints_success() throws {
-        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
-        var ingredients: [RecipeIngredientRecord] = []
-        var steps = [
-            RecipeStepRecord(content: """
-                In a large bowl, mix dry ingredients together until well-blended.
-                """),
-            RecipeStepRecord(content: """
-                Add milk and mix well until smooth.
-                """),
-            RecipeStepRecord(content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """),
-            RecipeStepRecord(content: """
-                Beat whites until stiff and then fold into batter gently.
-                """),
-            RecipeStepRecord(content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """),
-            RecipeStepRecord(content: """
+            try RecipeStep(content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
         ]
-        var graph = RecipeStepGraphRecord()
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = [
-            (source: RecipeStepRecord(content: """
-                In a large bowl, mix dry ingredients together until well-blended.
-                """),
-             destination: RecipeStepRecord(content: """
-                Add milk and mix well until smooth.
-                """)),
-            (source: RecipeStepRecord(content: """
-                Add milk and mix well until smooth.
-                """),
-             destination: RecipeStepRecord(content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """)),
-            (source: RecipeStepRecord(content: """
-                Add milk and mix well until smooth.
-                """),
-             destination: RecipeStepRecord(content: """
-                Beat whites until stiff and then fold into batter gently.
-                """)),
-            (source: RecipeStepRecord(content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """),
-             destination: RecipeStepRecord(content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """)),
-            (source: RecipeStepRecord(content: """
-                Beat whites until stiff and then fold into batter gently.
-                """),
-             destination: RecipeStepRecord(content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """)),
-            (source: RecipeStepRecord(content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """),
-             destination: RecipeStepRecord(content: """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
-                pancakes.
-                """))
-        ]
+        let nodes = steps.map { RecipeStepNode($0) }
+        let edges = [Edge<RecipeStepNode>(source: nodes[0], destination: nodes[1]),
+                     Edge<RecipeStepNode>(source: nodes[1], destination: nodes[2]),
+                     Edge<RecipeStepNode>(source: nodes[2], destination: nodes[3]),
+                     Edge<RecipeStepNode>(source: nodes[0], destination: nodes[3])].compactMap { $0 }
+        var graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+
+        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
 
-            for edge in edges {
-                try XCTAssertTrue(edge.exists(db))
+            for edge in try graphRecord.edges.fetchAll(db) {
+                let source = try edge.source.fetchOne(db)
+                let destination = try edge.destination.fetchOne(db)
+
+                XCTAssertTrue(
+                    edges.contains(
+                        where: {
+                            $0.source.label.content == source?.content
+                                && $0.destination.label.content == destination?.content
+                        }))
             }
         }
-    }
-
-    func testSaveRecipe_insertsInvalidEndPoints_throwsError() throws {
-        var recipe = RecipeRecord(name: "Pancakes", servings: 2)
-        var ingredients: [RecipeIngredientRecord] = []
-        var steps = [
-            RecipeStepRecord(content: """
-                In a large bowl, mix dry ingredients together until well-blended.
-                """),
-            RecipeStepRecord(content: """
-                Add milk and mix well until smooth.
-                """),
-            RecipeStepRecord(content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """),
-            RecipeStepRecord(content: """
-                Beat whites until stiff and then fold into batter gently.
-                """),
-            RecipeStepRecord(content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """),
-            RecipeStepRecord(content: """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
-                pancakes.
-                """)
-        ]
-        var graph = RecipeStepGraphRecord()
-        var edges: [RecipeStepEdgeRecord] = []
-        var endPoints: [(source: RecipeStepRecord, destination: RecipeStepRecord)] = [
-            (source: RecipeStepRecord(content: """
-                In a small bowl, mix dry ingredients together until well-blended.
-                """),
-             destination: RecipeStepRecord(content: """
-                Add water and mix well until smooth.
-                """))
-        ]
-
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph, steps: &steps, edges: &edges, endPoints: endPoints))
     }
 
     func testDeleteRecipes() throws {

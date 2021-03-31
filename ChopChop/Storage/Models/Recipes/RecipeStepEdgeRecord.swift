@@ -15,12 +15,15 @@ extension RecipeStepEdgeRecord: Codable, FetchableRecord, MutablePersistableReco
         static let destinationId = Column(CodingKeys.destinationId)
     }
 
-    static let source = hasOne(RecipeStepRecord.self)
+    static let sourceForeignKey = ForeignKey(["sourceId"])
+    static let destinationForeignKey = ForeignKey(["destinationId"])
+
+    static let source = belongsTo(RecipeStepRecord.self, using: sourceForeignKey)
     var source: QueryInterfaceRequest<RecipeStepRecord> {
         request(for: RecipeStepEdgeRecord.source)
     }
 
-    static let destination = hasOne(RecipeStepRecord.self)
+    static let destination = belongsTo(RecipeStepRecord.self, using: destinationForeignKey)
     var destination: QueryInterfaceRequest<RecipeStepRecord> {
         request(for: RecipeStepEdgeRecord.destination)
     }
