@@ -160,7 +160,7 @@ struct IngredientCollectionView: View {
                 Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
                     .resizable()
                     .scaledToFill()
-                    .frame(minWidth: 0, maxWidth: .infinity)
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                     .aspectRatio(1, contentMode: .fill)
                     .cornerRadius(10)
                     .clipped()

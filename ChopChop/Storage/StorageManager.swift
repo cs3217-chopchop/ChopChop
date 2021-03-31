@@ -110,6 +110,10 @@ struct StorageManager {
 
     // MARK: - Database Access: Publishers
 
+    func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
+        appDatabase.recipePublisher(id: id)
+    }
+
     func recipesPublisher(query: String,
                           categoryIds: [Int64?],
                           ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
@@ -130,15 +134,19 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Error> {
+        appDatabase.ingredientPublisher(id: id)
+    }
+
     func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher()
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
     func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
@@ -150,7 +158,7 @@ struct StorageManager {
                                          expiresBefore: expiresBefore,
                                          query: query,
                                          categoryIds: categoryIds)
-            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantity)) } }
+            .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
