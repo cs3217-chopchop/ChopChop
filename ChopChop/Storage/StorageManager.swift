@@ -17,32 +17,14 @@ struct StorageManager {
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
-        var stepRecords = recipe.stepGraph.nodes.map { node in
-            RecipeStepRecord(graphId: recipe.stepGraph.id, content: node.label.content)
-        }
-        var edgeRecords = recipe.stepGraph.edges.map { _ in
-            RecipeStepEdgeRecord(graphId: recipe.stepGraph.id)
-        }
-        var sourceAndDestinationRecords = recipe.stepGraph.edges.map { edge -> (source: RecipeStepRecord, destination: RecipeStepRecord)? in
-            guard let sourceRecord = stepRecords.first(where: { $0.content == edge.source.label.content }),
-                  let destinationRecord = stepRecords.first(where: { $0.content == edge.destination.label.content }) else {
-                return nil
-            }
-
-            return (source: sourceRecord, destination: destinationRecord)
-        }.compactMap { $0 }
+        var graph = recipe.stepGraph
 
         try appDatabase.saveRecipe(
             &recipeRecord,
             ingredients: &ingredientRecords,
-            graph: &graphRecord,
-            steps: &stepRecords,
-            edges: &edgeRecords,
-            endPoints: sourceAndDestinationRecords)
+            graph: &graph)
 
         recipe.id = recipeRecord.id
-        recipe.stepGraph.id = graphRecord.id
     }
 
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {

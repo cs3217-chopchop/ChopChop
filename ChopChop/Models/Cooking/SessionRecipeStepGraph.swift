@@ -23,7 +23,7 @@ class SessionRecipeStepGraph {
     }
 
     init?(graph: RecipeStepGraph) {
-        self.actionTimeTracker = ActionTimeTracker()
+        let actionTimeTracker = ActionTimeTracker()
 
         let sessionNodes = graph.nodes.map { SessionRecipeStepNode($0, actionTimeTracker: actionTimeTracker) }
         let sessionEdges = graph.edges.compactMap { edge -> Edge<SessionRecipeStepNode>? in
@@ -44,11 +44,11 @@ class SessionRecipeStepGraph {
             return nil
         }
 
+        self.actionTimeTracker = actionTimeTracker
         self.graph = sessionGraph
     }
 
     private func updateCompletableNodes() {
-        let completableNodes = getCompletableNodes()
         completableNodes.forEach { $0.isCompletable = true }
     }
 
