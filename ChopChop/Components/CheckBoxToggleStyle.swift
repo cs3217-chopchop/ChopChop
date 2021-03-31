@@ -1,3 +1,5 @@
+// swiftlint:disable:this file_name
+
 import SwiftUI
 
 // https://swiftwithmajid.com/2020/03/04/customizing-toggle-in-swiftui/

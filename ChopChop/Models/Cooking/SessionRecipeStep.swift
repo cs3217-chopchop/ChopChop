@@ -41,5 +41,14 @@ class SessionRecipeStep: Identifiable {
             }
         }
     }
+}
 
+extension SessionRecipeStep: Hashable {
+    static func == (lhs: SessionRecipeStep, rhs: SessionRecipeStep) -> Bool {
+        lhs.step == rhs.step
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(step)
+    }
 }
