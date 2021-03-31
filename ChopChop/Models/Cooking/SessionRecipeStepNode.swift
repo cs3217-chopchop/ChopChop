@@ -5,8 +5,8 @@ class SessionRecipeStepNode: Node, ObservableObject {
     @Published var isCompletable: Bool = false
     @Published var isCompleted: Bool = false
 
-    init(_ node: RecipeStepNode) {
-        self.label = SessionRecipeStep(step: node.label, actionTimeTracker: ActionTimeTracker())
+    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker) {
+        self.label = SessionRecipeStep(step: node.label, actionTimeTracker: actionTimeTracker)
     }
 }
 

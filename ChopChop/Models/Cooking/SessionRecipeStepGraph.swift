@@ -1,5 +1,6 @@
 class SessionRecipeStepGraph {
     private let graph: DirectedAcyclicGraph<SessionRecipeStepNode>
+    private let actionTimeTracker: ActionTimeTracker
 
     var nodes: [SessionRecipeStepNode] {
         graph.nodes
@@ -9,9 +10,23 @@ class SessionRecipeStepGraph {
         graph.edges
     }
 
+    var completableNodes: Set<SessionRecipeStepNode> {
+        let notCompletedDestinationNodes = Set(graph.edges
+            .filter { !$0.source.isCompleted }
+            .map { $0.destination })
+
+        return Set(
+            graph.nodes.filter { node in
+                !node.isCompleted && !notCompletedDestinationNodes.contains(node)
+            }
+        )
+    }
+
     init?(graph: RecipeStepGraph) {
-        let sessionNodes = graph.nodes.map { SessionRecipeStepNode($0) }
-        let sessionEdges = graph.edges.map { edge -> Edge<SessionRecipeStepNode>? in
+        self.actionTimeTracker = ActionTimeTracker()
+
+        let sessionNodes = graph.nodes.map { SessionRecipeStepNode($0, actionTimeTracker: actionTimeTracker) }
+        let sessionEdges = graph.edges.compactMap { edge -> Edge<SessionRecipeStepNode>? in
             guard let sessionSourceNode = sessionNodes.first(where: { $0.label.step == edge.source.label }),
                   let sessionDestinationNode = sessionNodes.first(where: { $0.label.step == edge.destination.label }),
                   let sessionEdge = Edge<SessionRecipeStepNode>(source: sessionSourceNode, destination: sessionDestinationNode) else {
@@ -19,7 +34,7 @@ class SessionRecipeStepGraph {
             }
 
             return sessionEdge
-        }.compactMap { $0 }
+        }
 
         guard sessionEdges.count == graph.edges.count else {
             return nil
@@ -30,18 +45,6 @@ class SessionRecipeStepGraph {
         }
 
         self.graph = sessionGraph
-    }
-
-    func getCompletableNodes() -> Set<SessionRecipeStepNode> {
-        let notCompletedDestinationNodes = Set(graph.edges
-            .filter { !$0.source.isCompleted }
-            .map { $0.destination })
-
-        return Set(
-            graph.nodes.filter { node in
-                !node.isCompleted && !notCompletedDestinationNodes.contains(node)
-            }
-        )
     }
 
     private func updateCompletableNodes() {
