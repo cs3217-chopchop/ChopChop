@@ -15,6 +15,16 @@ extension RecipeStepEdgeRecord: Codable, FetchableRecord, MutablePersistableReco
         static let destinationId = Column(CodingKeys.destinationId)
     }
 
+    static let source = hasOne(RecipeStepRecord.self)
+    var source: QueryInterfaceRequest<RecipeStepRecord> {
+        request(for: RecipeStepEdgeRecord.source)
+    }
+
+    static let destination = hasOne(RecipeStepRecord.self)
+    var destination: QueryInterfaceRequest<RecipeStepRecord> {
+        request(for: RecipeStepEdgeRecord.destination)
+    }
+
     static let databaseTableName = "recipeStepEdge"
 
     mutating func didInsert(with rowID: Int64, for column: String?) {

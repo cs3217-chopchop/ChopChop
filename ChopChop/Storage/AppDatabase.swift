@@ -378,7 +378,7 @@ extension AppDatabase {
         try dbWriter.write { db in
             try recipe.save(db)
 
-            let recipeIds = ingredients.compactMap { $0.recipeId } + ((graph.recipeId == nil) ? [] : [graph.recipeId])
+            let recipeIds = ingredients.compactMap { $0.recipeId } + [graph.recipeId].compactMap { $0 }
 
             guard recipeIds.allSatisfy({ $0 == recipe.id }) else {
                 throw DatabaseError(message: "Recipe ingredients and graph belong to the wrong recipe.")
