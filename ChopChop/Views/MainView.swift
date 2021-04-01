@@ -29,14 +29,13 @@ struct MainView: View {
         var firebase = FirebaseDatabase()
 
         do {
-//            let r = try OnlineRecipe(id: "QCIXZuYAIF3OYYWxhNi1",
-//                userId: "hello", name: "test", servings: 3.0,
-//                difficulty: .easy, cuisine: "asian", steps: ["first"],
-//                ingredients: [OnlineIngredientDetails(name: "fist", quantity: Quantity(.count, value: 5))],
-//                ratings: [RecipeRating(userId: "AZ1fSU6cm6EUiXZQMI1e", score: .adequate)])
-//            try storage.rateRecipe(recipeId: "ITs4kCUj2d3eoydNDbQQ", userId: "AZ1fSU6cm6EUiXZQMI1e", rating: .adequate)
-            try firebase.removeUserRecipeRating(
-                userId: "AZ1fSU6cm6EUiXZQMI1e", rating: UserRating(recipeOnlineId: "QCIXZuYAIF3OYYWxhNi1", score: .adequate))
+            let r = try OnlineRecipe(id: "QCIXZuYAIF3OYYWxhNi1",
+                userId: "hello", name: "This is downloaded from online", servings: 3.0,
+                difficulty: .easy, cuisine: "Japanese", steps: ["first"],
+                ingredients: [OnlineRecipeIngredient(name: "fist", quantity: Quantity(.count, value: 5))],
+                ratings: [RecipeRating(userId: "AZ1fSU6cm6EUiXZQMI1e", score: .adequate)])
+            try storage.downloadRecipe(recipe: r)
+
         } catch {
             print(error)
         }

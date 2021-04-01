@@ -5,7 +5,7 @@
 //  Created by Cao Wenjie on 1/4/21.
 //
 
-final class OnlineIngredientDetails {
+class OnlineRecipeIngredient {
     private(set) var name: String
     private(set) var quantity: Quantity
 
@@ -21,5 +21,8 @@ final class OnlineIngredientDetails {
     }
 }
 
-//extension OnlineIngredientDetails: Codable {
-//}
+extension OnlineRecipeIngredient {
+    func toRecipeIngredient() throws -> RecipeIngredient {
+        try RecipeIngredient(name: name, quantity: quantity)
+    }
+}

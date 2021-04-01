@@ -11,10 +11,10 @@ class OnlineRecipeDetails {
     private(set) var cuisine: String
     private(set) var difficulty: Difficulty?
     private(set) var steps: [String]
-    private(set) var ingredients: [OnlineIngredientDetails]
+    private(set) var ingredients: [OnlineRecipeIngredient]
 
     init(name: String, servings: Double, difficulty: Difficulty?, cuisine: String,
-         steps: [String], ingredients: [OnlineIngredientDetails]) throws {
+         steps: [String], ingredients: [OnlineRecipeIngredient]) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName

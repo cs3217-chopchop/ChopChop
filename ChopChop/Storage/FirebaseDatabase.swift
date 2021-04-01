@@ -281,14 +281,15 @@ struct FirebaseDatabase {
             .eraseToAnyPublisher()
     }
 
-//    func fetchOnlineRecipeOnceById(onlineRecipeId: String) -> OnlineRecipeRecord {
-//        return db.collection(recipePath).document(onlineRecipeId)
-//            .getDocument { document, error in
-//                if let document = document {
-//                    return document.data(as: OnlineRecipeRecord.self)
-//                }
-//            }
-//    }
+    func fetchOnlineRecipeOnceById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
+        return db.collection(recipePath).document(onlineRecipeId)
+            .getDocument(as: OnlineRecipeRecord.self)
+            .compactMap({
+                $0
+            })
+            .eraseToAnyPublisher()
+
+    }
 
     func fetchRecipeRatings(recipeId: String) -> AnyPublisher<[RatingRecord], Error> {
         db.collection(ratingPath).whereField("recipeId", isEqualTo: recipeId)

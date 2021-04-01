@@ -15,8 +15,8 @@ extension OnlineIngredientRecord: Codable {
 }
 
 extension OnlineIngredientRecord {
-    func toIngredientDetails() throws -> OnlineIngredientDetails {
-        try OnlineIngredientDetails(name: name, quantity: quantity.toQuantity())
+    func toIngredientDetails() throws -> OnlineRecipeIngredient {
+        try OnlineRecipeIngredient(name: name, quantity: quantity.toQuantity())
     }
 }
 

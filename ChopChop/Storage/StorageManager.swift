@@ -108,6 +108,10 @@ struct StorageManager {
         try appDatabase.fetchRecipeCategory(id: id)
     }
 
+    func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategoryByName(name: name)
+    }
+
     // MARK: - Database Access: Publishers
 
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
@@ -283,19 +287,17 @@ extension StorageManager {
         try firebase.updateRecipeDetails(recipe: recipeRecord)
     }
 
-    func removeRecipe(recipe: OnlineRecipe) throws {
-//        guard let id = recipe.id else {
-//            fatalError("Online recipe has no id.")
-//        }
+    func removeRecipeFromOnline(recipe: OnlineRecipe) throws {
 
         try firebase.removeRecipe(recipeId: recipe.id)
-//        for rating in recipe.ratings {
-//            firebase.removeRating(ratingId: rating.ratingId)
-//        }
         for rating in recipe.ratings {
             firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipe.id, score: rating.score))
         }
     }
+
+//    func removeRecipeFromLocal(recipeId: String) throws {
+//
+//    }
 
     func addFollowee(userId: String, followeeId: String) {
         firebase.addFollowee(userId: userId, followeeId: followeeId)
@@ -336,11 +338,7 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
-    //testing
-//    func fetchAllUsers(user: [String]) -> AnyPublisher<[User], Error> {
-//        firebase.fetchUsers(userId: user)
-//    }
-    func fetchAllPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
+    func fetchAllSelfPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchOnlineRecipeIdByUsers(userIds: [userId])
             .map({
                 $0.compactMap({
@@ -376,18 +374,19 @@ extension StorageManager {
     func fetchAllUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
         firebase.fetchUserRating(userId: userId)
     }
-    // currently recipe cuisine is lost
-//    func downloadRecipe(recipeId: String) throws {
-//        let fetchedRecipe = firebase.fetchOnlineRecipeOnceById(onlineRecipeId: recipeId)
-//        var recipe = try Recipe(
-//            name: fetchedRecipe.name,
-//            servings: fetchedRecipe.servings,
-//            difficulty: fetchedRecipe.difficulty,
-//            steps: fetchedRecipe.steps.map({ try RecipeStep(content: $0) }),
-//            ingredients: fetchedRecipe.ingredients.map({ try $0.toRecipeIngredient() })
-//        )
-//        try self.saveRecipe(&recipe)
-//    }
+    func downloadRecipe(recipe: OnlineRecipe) throws {
+        let cuisineId = try self.fetchRecipeCategoryByName(name: recipe.cuisine)?.id
+        var localRecipe = try Recipe(
+            name: recipe.name,
+            onlineId: recipe.id,
+            servings: recipe.servings,
+            recipeCategoryId: cuisineId,
+            difficulty: recipe.difficulty,
+            steps: try recipe.steps.map({ try RecipeStep(content: $0) }),
+            ingredients: try recipe.ingredients.map({ try $0.toRecipeIngredient() })
+        )
+        try self.saveRecipe(&localRecipe)
+    }
 }
 
 enum StorageError: Error {

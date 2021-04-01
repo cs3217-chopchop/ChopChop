@@ -17,7 +17,7 @@ final class MainViewModel: ObservableObject {
             .sink { [weak self] categories in
                 self?.recipeCategories = categories
             }
-        storage.fetchAllPublishedRecipes(userId: "12345")
+        storage.fetchAllSelfPublishedRecipes(userId: "12345")
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
