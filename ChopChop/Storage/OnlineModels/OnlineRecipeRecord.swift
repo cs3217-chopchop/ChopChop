@@ -12,11 +12,33 @@ struct OnlineRecipeRecord {
     var creator: String
     var servings: Double
     var cuisine: String
-    var difficulty: Difficulty?
+    @ExplicitNull var difficulty: Difficulty?
     var ingredients: [OnlineIngredientRecord]
     var steps: [String]
     var ratings: [RecipeRating] = []
+
+    func toOnlineRecipe() throws -> OnlineRecipe {
+        guard let id = id else {
+            throw OnlineRecipeRecordError.missingId
+        }
+        return try OnlineRecipe(
+            id: id,
+            userId: creator,
+            name: name,
+            servings: servings,
+            difficulty: difficulty,
+            cuisine: cuisine,
+            steps: steps,
+            ingredients: ingredients.compactMap({ try? $0.toIngredientDetails() }),
+            ratings: ratings
+        )
+    }
+
 }
 
 extension OnlineRecipeRecord: Codable {
+}
+
+enum OnlineRecipeRecordError: Error {
+    case missingId
 }

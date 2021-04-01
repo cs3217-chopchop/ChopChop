@@ -6,16 +6,52 @@
 //
 import FirebaseFirestoreSwift
 
-final class OnlineRecipe {
-    @DocumentID private(set) var id: String?
+//class OnlineRecipe {
+//    @DocumentID private(set) var id: String?
+//    private(set) var userId: String
+//    private(set) var ratings: [RecipeRating]
+//    private(set) var recipeDetails: OnlineRecipeDetails
+//
+//    init(id: String?, userId: String, ratings: [RecipeRating], recipeDetails: OnlineRecipeDetails) {
+//        self.id = id
+//        self.userId = userId
+//        self.ratings = ratings
+//        self.recipeDetails = recipeDetails
+//    }
+//}
+final class OnlineRecipe: Identifiable {
+    private(set) var id: String
     private(set) var userId: String
-    private(set) var ratings: [RecipeRating]
-    private(set) var recipeDetails: Recipe
 
-    init(id: String?, userId: String, ratings: [RecipeRating], recipeDetails: Recipe) {
+    private(set) var name: String
+    private(set) var servings: Double
+    private(set) var cuisine: String
+    private(set) var difficulty: Difficulty?
+    private(set) var steps: [String]
+    private(set) var ingredients: [OnlineIngredientDetails]
+    private(set) var ratings: [RecipeRating]
+
+    init(id: String, userId: String, name: String, servings: Double, difficulty: Difficulty?, cuisine: String,
+         steps: [String], ingredients: [OnlineIngredientDetails], ratings: [RecipeRating]) throws {
         self.id = id
         self.userId = userId
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw RecipeError.invalidName
+        }
+        self.name = trimmedName
+
+        guard servings > 0 else {
+            throw RecipeError.invalidServings
+        }
+        self.servings = servings
+        self.cuisine = cuisine
+        self.difficulty = difficulty
+        self.steps = steps
+        self.ingredients = ingredients
         self.ratings = ratings
-        self.recipeDetails = recipeDetails
     }
 }
+
+//extension OnlineRecipe: Codable {
+//}

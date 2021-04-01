@@ -257,7 +257,8 @@ extension StorageManager {
 
     // this should only be called once when the app first launched
     func createUser(name: String) throws -> String {
-        firebase.createNewUser(username: name)
+        let user = User(name: name)
+        return try firebase.addUser(user: user)
     }
 
     func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
@@ -279,9 +280,114 @@ extension StorageManager {
             ingredients: ingredients,
             steps: steps
         )
-        try firebase.updateRecipe(recipe: recipeRecord)
+        try firebase.updateRecipeDetails(recipe: recipeRecord)
     }
 
+    func removeRecipe(recipe: OnlineRecipe) throws {
+//        guard let id = recipe.id else {
+//            fatalError("Online recipe has no id.")
+//        }
+
+        try firebase.removeRecipe(recipeId: recipe.id)
+//        for rating in recipe.ratings {
+//            firebase.removeRating(ratingId: rating.ratingId)
+//        }
+        for rating in recipe.ratings {
+            firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipe.id, score: rating.score))
+        }
+    }
+
+    func addFollowee(userId: String, followeeId: String) {
+        firebase.addFollowee(userId: userId, followeeId: followeeId)
+    }
+
+    func removeFollowee(userId: String, followeeId: String) {
+        firebase.removeFollowee(userId: userId, followeeId: followeeId)
+    }
+
+    func rateRecipe(recipeId: String, userId: String, rating: RatingScore) throws {
+        firebase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
+        firebase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating))
+//        let ratingRecord = RatingRecord(userId: recipeId, recipeId: userId, rating: rating)
+//        try firebase.addRating(rating: ratingRecord)
+    }
+
+//    func unrateRecipe(ratingId: String) {
+//        firebase.removeRating(ratingId: ratingId)
+//    }
+    func unrateRecipe(recipeId: String, rating: RecipeRating) {
+        firebase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating)
+        firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipeId, score: rating.score))
+    }
+
+//    func rerateRecipe(ratingId: String, newRating: RatingScore) {
+//        firebase.updateRating(ratingId: ratingId, rating: newRating)
+//    }
+    func rerateRecipe(recipeId: String, newRating: RecipeRating) {
+        firebase.updateRecipeRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
+        firebase.updateUserRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
+    }
+
+    func fetchAllFriends(userId: String) -> AnyPublisher<[User], Error> {
+        firebase.fetchFriendsId(userId: userId)
+            .flatMap({ followees in
+                firebase.fetchUsers(userId: followees)
+            })
+            .eraseToAnyPublisher()
+    }
+
+    //testing
+//    func fetchAllUsers(user: [String]) -> AnyPublisher<[User], Error> {
+//        firebase.fetchUsers(userId: user)
+//    }
+    func fetchAllPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
+        firebase.fetchOnlineRecipeIdByUsers(userIds: [userId])
+            .map({
+                $0.compactMap({
+                    try? $0.toOnlineRecipe()
+                })
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func fetchAllRecipes() -> AnyPublisher<[OnlineRecipe], Error> {
+        firebase.fetchAllRecipes()
+            .map({
+                $0.compactMap({
+                    try? $0.toOnlineRecipe()
+                })
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func fetchAllUsers() -> AnyPublisher<[User], Error> {
+        firebase.fetchAllUsers()
+    }
+
+    func fetchAllFolloweeRecipes(followees: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
+        firebase.fetchOnlineRecipeIdByUsers(userIds: followees)
+            .map({
+                $0.compactMap({
+                    try? $0.toOnlineRecipe()
+                })
+            })
+            .eraseToAnyPublisher()
+    }
+    func fetchAllUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
+        firebase.fetchUserRating(userId: userId)
+    }
+    // currently recipe cuisine is lost
+//    func downloadRecipe(recipeId: String) throws {
+//        let fetchedRecipe = firebase.fetchOnlineRecipeOnceById(onlineRecipeId: recipeId)
+//        var recipe = try Recipe(
+//            name: fetchedRecipe.name,
+//            servings: fetchedRecipe.servings,
+//            difficulty: fetchedRecipe.difficulty,
+//            steps: fetchedRecipe.steps.map({ try RecipeStep(content: $0) }),
+//            ingredients: fetchedRecipe.ingredients.map({ try $0.toRecipeIngredient() })
+//        )
+//        try self.saveRecipe(&recipe)
+//    }
 }
 
 enum StorageError: Error {
