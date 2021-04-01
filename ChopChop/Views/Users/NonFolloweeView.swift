@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct NotCurrentFolloweeView: View {
-    @ObservedObject var viewModel: NotCurrentFolloweeViewModel
+struct NonFolloweeView: View {
+    @ObservedObject var viewModel: NonFolloweeViewModel
 
     var body: some View {
         HStack {
@@ -9,7 +9,7 @@ struct NotCurrentFolloweeView: View {
             Button(action: {
                 viewModel.onAdd()
             }) {
-                Text("Submit") // TODO deleteicon
+                Image(systemName: "plus")
             }
         }
     }
@@ -18,6 +18,6 @@ struct NotCurrentFolloweeView: View {
 struct NotCurrentFolloweeView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        NotCurrentFolloweeView(viewModel: NotCurrentFolloweeViewModel(user: try! User(id: "Bob", name: "Bob")))
+        NonFolloweeView(viewModel: NonFolloweeViewModel(user: try! User(id: "Bob", name: "Bob")))
     }
 }

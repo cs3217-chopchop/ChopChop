@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct CurrentFolloweeView: View {
-    @ObservedObject var viewModel: CurrentFolloweeViewModel
+struct FolloweeView: View {
+    @ObservedObject var viewModel: FolloweeViewModel
 
     var body: some View {
         HStack {
@@ -9,7 +9,7 @@ struct CurrentFolloweeView: View {
             Button(action: {
                 viewModel.onDelete()
             }) {
-                Text("Submit") // TODO deleteicon
+                Image(systemName: "trash")
             }
         }
     }
@@ -18,6 +18,6 @@ struct CurrentFolloweeView: View {
 struct CurrentFolloweeView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        CurrentFolloweeView(viewModel: CurrentFolloweeViewModel(user: try! User(id: "Bob", name: "Bob")))
+        FolloweeView(viewModel: FolloweeViewModel(user: try! User(id: "Bob", name: "Bob")))
     }
 }

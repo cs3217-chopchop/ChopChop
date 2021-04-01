@@ -1,5 +1,8 @@
 // import FirebaseFirestoreSwift
 
+let USER_ID = UserDefaults.standard.string(forKey: "userId")
+
+
 class User {
 //    @DocumentID private(set) var id: String?
     private(set) var id: String?
@@ -18,6 +21,10 @@ class User {
         self.name = trimmedName
         self.followees = followees
     }
+}
+
+extension User: Codable {
+
 }
 
 enum UserError: Error {

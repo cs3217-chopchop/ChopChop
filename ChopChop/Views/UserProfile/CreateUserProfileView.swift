@@ -9,10 +9,12 @@ struct CreateUserProfileView: View {
 //            .frame(width: 100, height: 50, alignment: .center)
 //            .border(Color.primary, width: 1)
             .multilineTextAlignment(.center)
+        Text(viewModel.errorMessage)
+            .foregroundColor(.red)
         Button(action: {
             viewModel.onClick()
         }) {
-            Text("Submit")
+            Text("Create Account")
         }
     }
 }
