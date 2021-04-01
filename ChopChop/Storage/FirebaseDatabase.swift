@@ -284,48 +284,47 @@ struct FirebaseDatabase {
     func fetchOnlineRecipeOnceById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
         return db.collection(recipePath).document(onlineRecipeId)
             .getDocument(as: OnlineRecipeRecord.self)
-            .compactMap({
+            .compactMap {
                 $0
-            })
-            .eraseToAnyPublisher()
-
-    }
-
-    func fetchRecipeRatings(recipeId: String) -> AnyPublisher<[RatingRecord], Error> {
-        db.collection(ratingPath).whereField("recipeId", isEqualTo: recipeId)
-            .publisher()
-            .map({
-                $0.documents.compactMap({ document in
-                    try? document.data(as: RatingRecord.self)
-                })
-            })
+            }
             .eraseToAnyPublisher()
     }
 
-    func fetchRecipeById(recipeId: String) -> AnyPublisher<RecipeRecord?, Error> {
-        db.collection(recipePath).document(recipeId)
-            .combine
-            .snapshotPublisher()
-            .compactMap({
-                try? $0.data(as: RecipeRecord.self)
-            })
-            .mapError({
-                FirebaseError.fetchRecipeError(message: $0.localizedDescription)
-            })
-            .eraseToAnyPublisher()
-    }
+//    func fetchRecipeRatings(recipeId: String) -> AnyPublisher<[RatingRecord], Error> {
+//        db.collection(ratingPath).whereField("recipeId", isEqualTo: recipeId)
+//            .publisher()
+//            .map({
+//                $0.documents.compactMap({ document in
+//                    try? document.data(as: RatingRecord.self)
+//                })
+//            })
+//            .eraseToAnyPublisher()
+//    }
 
-    func fetchRecipeByUser(creatorId: String) -> AnyPublisher<[RecipeRecord], Error> {
-        db.collection(recipePath).whereField("creatorId", isEqualTo: creatorId)
-            .combine
-            .snapshotPublisher()
-            .map({
-                $0.documents.compactMap({
-                    try? $0.data(as: RecipeRecord.self)
-                })
-            })
-            .eraseToAnyPublisher()
-    }
+//    func fetchRecipeById(recipeId: String) -> AnyPublisher<RecipeRecord?, Error> {
+//        db.collection(recipePath).document(recipeId)
+//            .combine
+//            .snapshotPublisher()
+//            .compactMap({
+//                try? $0.data(as: RecipeRecord.self)
+//            })
+//            .mapError({
+//                FirebaseError.fetchRecipeError(message: $0.localizedDescription)
+//            })
+//            .eraseToAnyPublisher()
+//    }
+//
+//    func fetchRecipeByUser(creatorId: String) -> AnyPublisher<[RecipeRecord], Error> {
+//        db.collection(recipePath).whereField("creatorId", isEqualTo: creatorId)
+//            .combine
+//            .snapshotPublisher()
+//            .map({
+//                $0.documents.compactMap({
+//                    try? $0.data(as: RecipeRecord.self)
+//                })
+//            })
+//            .eraseToAnyPublisher()
+//    }
 
 //    func fetchUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
 //        
@@ -395,6 +394,14 @@ struct FirebaseDatabase {
         if hasError {
             throw FirebaseError.removeUserError(message: errorMessage)
         }
+    }
+    func fetchUserById(userId: String) throws -> AnyPublisher<User, Error> {
+        db.collection(userPath).document(userId)
+            .publisher()
+            .compactMap({
+                try? $0.data(as: User.self)
+            })
+            .eraseToAnyPublisher()
     }
     func addFollowee(userId: String, followeeId: String) {
         // swiftlint:disable implicit_return

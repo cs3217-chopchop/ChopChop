@@ -288,16 +288,23 @@ extension StorageManager {
     }
 
     func removeRecipeFromOnline(recipe: OnlineRecipe) throws {
-
         try firebase.removeRecipe(recipeId: recipe.id)
         for rating in recipe.ratings {
             firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipe.id, score: rating.score))
         }
     }
 
-//    func removeRecipeFromLocal(recipeId: String) throws {
-//
-//    }
+    func fetchOnlineRecipeById(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
+        firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
+            .compactMap({
+                try? $0.toOnlineRecipe()
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func fetchUserById(userId: String) throws -> AnyPublisher<User, Error> {
+        try firebase.fetchUserById(userId: userId)
+    }
 
     func addFollowee(userId: String, followeeId: String) {
         firebase.addFollowee(userId: userId, followeeId: followeeId)

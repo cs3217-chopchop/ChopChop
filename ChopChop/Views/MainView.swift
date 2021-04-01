@@ -15,9 +15,9 @@ struct MainView: View {
         RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",
                                                                   categoryIds: viewModel.recipeCategories
                                                                     .compactMap { $0.id } + [nil]))
-//        ForEach(viewModel.recipes) { user in
-//            Text(user.name)
-//        }
+////        ForEach(viewModel.recipes) { user in
+////            Text(user?.name ?? "hel)
+////        }
 //        Text(viewModel.recipes?.name ?? "hello")
         Button("Press") {
             click()
@@ -29,12 +29,12 @@ struct MainView: View {
         var firebase = FirebaseDatabase()
 
         do {
-            let r = try OnlineRecipe(id: "QCIXZuYAIF3OYYWxhNi1",
-                userId: "hello", name: "This is downloaded from online", servings: 3.0,
-                difficulty: .easy, cuisine: "Japanese", steps: ["first"],
-                ingredients: [OnlineRecipeIngredient(name: "fist", quantity: Quantity(.count, value: 5))],
-                ratings: [RecipeRating(userId: "AZ1fSU6cm6EUiXZQMI1e", score: .adequate)])
-            try storage.downloadRecipe(recipe: r)
+//            let r = try OnlineRecipe(id: "ITs4kCUj2d3eoydNDbQQ",
+//                userId: "hello", name: "This is downloaded from online", servings: 3.0,
+//                difficulty: .easy, cuisine: "Japanese", steps: ["first"],
+//                ingredients: [OnlineRecipeIngredient(name: "fist", quantity: Quantity(.count, value: 5))],
+//                ratings: [RecipeRating(userId: "AZ1fSU6cm6EUiXZQMI1e", score: .great)])
+            try storage.removeRecipeFromLocal(recipeId: "grrsE5SgRjIX9yf6NEvv")
 
         } catch {
             print(error)
