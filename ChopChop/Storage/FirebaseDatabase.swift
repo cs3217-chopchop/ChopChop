@@ -1,9 +1,3 @@
-//
-//  FirebaseDatabase.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 27/3/21.
-//
 import Firebase
 import Combine
 import CombineFirebase

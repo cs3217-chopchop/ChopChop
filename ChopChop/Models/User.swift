@@ -1,9 +1,3 @@
-//
-//  User.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 1/4/21.
-//
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 

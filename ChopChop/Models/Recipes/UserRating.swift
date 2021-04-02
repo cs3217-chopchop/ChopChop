@@ -1,10 +1,3 @@
-//
-//  UserRating.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 29/3/21.
-//
-
 import FirebaseFirestoreSwift
 
 final class UserRating {

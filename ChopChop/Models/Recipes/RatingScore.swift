@@ -1,9 +1,3 @@
-//
-//  RatingScore.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 27/3/21.
-//
 import FirebaseFirestoreSwift
 
 enum RatingScore: Int {

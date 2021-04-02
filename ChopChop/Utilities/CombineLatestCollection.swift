@@ -1,10 +1,3 @@
-//
-//  CombineLatestCollection.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 1/4/21.
-//
-
 //https://github.com/CombineHarvesters/FoundationCombine
 
 import Combine
@@ -21,13 +14,6 @@ extension Collection where Element: Publisher {
 
 /// A `Publisher` that combines an array of publishers to provide an output of
 /// an array of their respective outputs.
-///
-/// Changes will be sent if any of the publishers' values changes.
-///
-/// When any publisher fails, that will cause the failure of this publisher.
-///
-/// When all publishers complete successfully, that will cause the successful
-/// completion of this publisher.
 public struct CombineLatestCollection<Publishers>
     where
     Publishers: Collection,
@@ -102,7 +88,9 @@ extension CombineLatestCollection.Subscription: Combine.Subscription {
 
                 completions += 1
 
-                guard completions == publishers.count else { return }
+                guard completions == publishers.count else {
+                    return
+                }
                 subscriber.receive(completion: completion)
                 hasCompleted = true
 
@@ -111,14 +99,18 @@ extension CombineLatestCollection.Subscription: Combine.Subscription {
                 lock.lock()
                 defer { lock.unlock() }
 
-                guard !hasCompleted else { return }
+                guard !hasCompleted else {
+                    return
+                }
 
                 values[index] = value
 
                 // Get non-optional array of values and make sure we
                 // have a full array of values.
                 let current = values.compactMap { $0 }
-                guard current.count == publishers.count else { return }
+                guard current.count == publishers.count else {
+                    return
+                }
                 _ = subscriber.receive(current)
             })
         }
