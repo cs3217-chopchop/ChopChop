@@ -4,7 +4,7 @@ import GRDB
 /// Note there is no relationship between steps and ingredients after parsing stage
 class Recipe: FetchableRecord, ObservableObject {
     var id: Int64?
-    var onlineId: String?
+    @Published var onlineId: String?
     @Published private(set) var name: String
     @Published private(set) var servings: Double
     @Published var recipeCategoryId: Int64?
@@ -137,6 +137,7 @@ class Recipe: FetchableRecord, ObservableObject {
 
     required init(row: Row) {
         id = row[RecipeRecord.Columns.id]
+        onlineId = row[RecipeRecord.Columns.onlineId]
         recipeCategoryId = row[RecipeRecord.Columns.recipeCategoryId]
         name = row[RecipeRecord.Columns.name]
         servings = row[RecipeRecord.Columns.servings]

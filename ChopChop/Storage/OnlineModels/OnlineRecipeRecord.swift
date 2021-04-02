@@ -29,11 +29,14 @@ struct OnlineRecipeRecord {
             difficulty: difficulty,
             cuisine: cuisine,
             steps: steps,
-            ingredients: ingredients.compactMap({ try? $0.toIngredientDetails() }),
+            ingredients: ingredients.compactMap({ try? $0.toRecipeIngredient() }),
             ratings: ratings
         )
     }
 
+}
+
+extension OnlineRecipeRecord: Equatable {
 }
 
 extension OnlineRecipeRecord: Codable {

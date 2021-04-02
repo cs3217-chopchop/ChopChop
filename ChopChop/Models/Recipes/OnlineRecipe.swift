@@ -28,11 +28,11 @@ class OnlineRecipe: Identifiable {
     private(set) var cuisine: String?
     private(set) var difficulty: Difficulty?
     private(set) var steps: [String]
-    private(set) var ingredients: [OnlineRecipeIngredient]
+    private(set) var ingredients: [RecipeIngredient]
     private(set) var ratings: [RecipeRating]
 
     init(id: String, userId: String, name: String, servings: Double, difficulty: Difficulty?, cuisine: String?,
-         steps: [String], ingredients: [OnlineRecipeIngredient], ratings: [RecipeRating]) throws {
+         steps: [String], ingredients: [RecipeIngredient], ratings: [RecipeRating]) throws {
         self.id = id
         self.userId = userId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -61,8 +61,7 @@ extension OnlineRecipe {
             servings: servings,
             difficulty: difficulty,
             steps: try steps.map({ try RecipeStep(content: $0) }),
-            ingredients: try ingredients.map({
-                try $0.toRecipeIngredient()
-            }))
+            ingredients: ingredients
+        )
     }
 }

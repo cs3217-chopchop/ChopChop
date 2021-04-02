@@ -37,3 +37,6 @@ extension RecipeRating {
         ["userId": userId, "score": score.rawValue]
     }
 }
+
+extension RecipeRating: Equatable {
+}

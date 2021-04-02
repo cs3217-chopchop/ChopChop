@@ -14,7 +14,7 @@ class StorageManagerTests: XCTestCase {
 
         let dbWriter = DatabaseQueue()
         let appDatabase = try AppDatabase(dbWriter)
-        storageManager = StorageManager(appDatabase)
+        storageManager = StorageManager(appDatabase: appDatabase)
     }
 
     func testSaveRecipe() throws {

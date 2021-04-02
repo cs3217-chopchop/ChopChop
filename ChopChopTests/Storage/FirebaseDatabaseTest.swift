@@ -12,7 +12,8 @@ import FirebaseFirestoreSwift
 
 class FirebaseDatabaseTest: XCTestCase {
 
-    private let db = FirebaseDatabase()
+    private let firebase = FirebaseDatabase()
+    private let db = Firestore.firestore()
 
     func testAddRecipe() throws {
         let steps = ["First step", "Second step", "Third step"]
@@ -36,9 +37,34 @@ class FirebaseDatabaseTest: XCTestCase {
             ratings: ratings
         )
 
-        let recipeId = try db.addRecipe(recipe: recipeRecord)
-        print(recipeId)
-        XCTAssertNotNil(recipeId)
+        let recipeRecord2 = OnlineRecipeRecord(
+            name: "Testing Recipe",
+            creator: "12345",
+            servings: 1,
+            cuisine: "American",
+            difficulty: Difficulty.easy,
+            ingredients: ingredients,
+            steps: steps,
+            ratings: ratings
+        )
+
+        let recipeId = try firebase.addRecipe(recipe: recipeRecord)
+        let testAdd = self.expectation(description: "Saving recipe")
+        db.collection("recipe").document(recipeId).getDocument { document, _  in
+            guard let documentObtained = document else {
+                XCTFail("Document not found")
+                return
+            }
+
+            let data = try? documentObtained.data(as: OnlineRecipeRecord.self)
+            guard let recipe = data else {
+                XCTFail("recipe data invalid")
+                return
+            }
+            XCTAssertEqual(recipe, recipeRecord2)
+            testAdd.fulfill()
+        }
+        self.waitForExpectations(timeout: 15, handler: nil)
     }
 
     func testUpdateRecipe() throws {
@@ -63,7 +89,7 @@ class FirebaseDatabaseTest: XCTestCase {
             steps: steps,
             ratings: ratings
         )
-        try db.updateRecipe(recipe: recipeRecord)
+        try firebase.updateRecipeDetails(recipe: recipeRecord)
         XCTAssertTrue(true)
     }
 

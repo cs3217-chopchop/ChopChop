@@ -100,6 +100,10 @@ struct StorageManager {
         try appDatabase.fetchRecipe(id: id)
     }
 
+    func fetchRecipeByOnlineId(onlineId: String) throws -> Recipe? {
+        try appDatabase.fetchRecipeByOnlineId(onlineId: onlineId)
+    }
+
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try appDatabase.fetchIngredient(id: id)
     }
@@ -260,15 +264,14 @@ extension StorageManager {
     }
 
     // this should only be called once when the app first launched
-    func createUser(name: String) throws -> String {
-        let user = User(name: name)
-        return try firebase.addUser(user: user)
+    func createUser(user: User) throws -> String {
+        try firebase.addUser(user: user)
     }
 
     func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
-        var cuisine = ""
+        var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
-            cuisine = (try? (fetchRecipeCategory(id: categoryId)?.name) ?? "") ?? ""
+            cuisine = try? fetchRecipeCategory(id: categoryId)?.name
         }
         let steps = recipe.steps.map({ $0.content })
         let ingredients = recipe.ingredients.map({
@@ -290,8 +293,17 @@ extension StorageManager {
     func removeRecipeFromOnline(recipe: OnlineRecipe) throws {
         try firebase.removeRecipe(recipeId: recipe.id)
         for rating in recipe.ratings {
-            firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipe.id, score: rating.score))
+            firebase.removeUserRecipeRating(
+                userId: rating.userId,
+                rating: UserRating(recipeOnlineId: recipe.id, score: rating.score)
+            )
         }
+        let fetchedRecipe = try self.fetchRecipeByOnlineId(onlineId: recipe.id)
+        guard var localRecipe = fetchedRecipe else {
+            return
+        }
+        localRecipe.onlineId = nil
+        try self.saveRecipe(&localRecipe)
     }
 
     func fetchOnlineRecipeById(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
@@ -317,43 +329,38 @@ extension StorageManager {
     func rateRecipe(recipeId: String, userId: String, rating: RatingScore) throws {
         firebase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
         firebase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating))
-//        let ratingRecord = RatingRecord(userId: recipeId, recipeId: userId, rating: rating)
-//        try firebase.addRating(rating: ratingRecord)
     }
 
-//    func unrateRecipe(ratingId: String) {
-//        firebase.removeRating(ratingId: ratingId)
-//    }
     func unrateRecipe(recipeId: String, rating: RecipeRating) {
         firebase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating)
-        firebase.removeUserRecipeRating(userId: rating.userId, rating: UserRating(recipeOnlineId: recipeId, score: rating.score))
+        firebase.removeUserRecipeRating(
+            userId: rating.userId,
+            rating: UserRating(recipeOnlineId: recipeId, score: rating.score)
+        )
     }
 
-//    func rerateRecipe(ratingId: String, newRating: RatingScore) {
-//        firebase.updateRating(ratingId: ratingId, rating: newRating)
-//    }
     func rerateRecipe(recipeId: String, newRating: RecipeRating) {
         firebase.updateRecipeRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
         firebase.updateUserRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
     }
 
-    func fetchAllFriends(userId: String) -> AnyPublisher<[User], Error> {
-        firebase.fetchFriendsId(userId: userId)
+    func fetchAllFollowees(userId: String) -> AnyPublisher<[User], Error> {
+        firebase.fetchFolloweesId(userId: userId)
             .flatMap({ followees in
                 firebase.fetchUsers(userId: followees)
             })
             .eraseToAnyPublisher()
     }
 
-    func fetchAllSelfPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
-        firebase.fetchOnlineRecipeIdByUsers(userIds: [userId])
-            .map({
-                $0.compactMap({
-                    try? $0.toOnlineRecipe()
-                })
-            })
-            .eraseToAnyPublisher()
-    }
+//    func fetchAllSelfPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
+//        firebase.fetchOnlineRecipeIdByUsers(userIds: [userId])
+//            .map({
+//                $0.compactMap({
+//                    try? $0.toOnlineRecipe()
+//                })
+//            })
+//            .eraseToAnyPublisher()
+//    }
 
     func fetchAllRecipes() -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchAllRecipes()
@@ -369,8 +376,8 @@ extension StorageManager {
         firebase.fetchAllUsers()
     }
 
-    func fetchAllFolloweeRecipes(followees: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
-        firebase.fetchOnlineRecipeIdByUsers(userIds: followees)
+    func fetchAllRecipesByUsers(userIds: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
+        firebase.fetchOnlineRecipeIdByUsers(userIds: userIds)
             .map({
                 $0.compactMap({
                     try? $0.toOnlineRecipe()
@@ -381,19 +388,19 @@ extension StorageManager {
     func fetchAllUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
         firebase.fetchUserRating(userId: userId)
     }
-    func downloadRecipe(recipe: OnlineRecipe) throws {
+    func downloadRecipe(newName: String, recipe: OnlineRecipe) throws {
         var cuisineId: Int64?
         if let cuisine = recipe.cuisine {
             cuisineId = try self.fetchRecipeCategoryByName(name: cuisine)?.id
         }
         var localRecipe = try Recipe(
-            name: recipe.name,
+            name: newName,
             onlineId: recipe.id,
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,
             steps: try recipe.steps.map({ try RecipeStep(content: $0) }),
-            ingredients: try recipe.ingredients.map({ try $0.toRecipeIngredient() })
+            ingredients: recipe.ingredients
         )
         try self.saveRecipe(&localRecipe)
     }
