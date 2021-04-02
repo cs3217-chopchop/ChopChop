@@ -2,7 +2,6 @@
 
 let USER_ID = UserDefaults.standard.string(forKey: "userId")
 
-
 class User {
 //    @DocumentID private(set) var id: String?
     private(set) var id: String?

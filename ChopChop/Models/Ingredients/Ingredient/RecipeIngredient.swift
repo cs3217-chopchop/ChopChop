@@ -61,6 +61,10 @@ extension RecipeIngredient: CustomStringConvertible {
 
 }
 
+extension RecipeIngredient: Hashable {
+
+}
+
 extension RecipeIngredient: NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         guard let copy = try? RecipeIngredient(name: name, quantity: quantity) else {

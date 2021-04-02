@@ -20,6 +20,11 @@ struct RecipeView: View {
 
                 recipeDetails
             }
+            Button(action: {
+                viewModel.publish()
+            }) {
+                Image(systemName: "paperplane")
+            }
         }
         .background(
             NavigationLink(

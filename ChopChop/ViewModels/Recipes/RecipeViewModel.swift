@@ -97,4 +97,8 @@ class RecipeViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+    func publish() {
+        storageManager.saveOnlineRecipe(recipe: &recipe, userId: USER_ID)
+    }
+
 }

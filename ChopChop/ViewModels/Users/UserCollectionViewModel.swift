@@ -30,7 +30,7 @@ final class UserCollectionViewModel: ObservableObject {
         self?.followeeViewModels = []
         self?.nonFolloweeViewModels = []
         for user in users {
-            if (followees.contains{$0 == user}) {
+            if (followees.contains { $0 == user }) {
                 followeeViewModels.append(FolloweeViewModel(user: user))
             } else {
                 nonFolloweeViewModels.append(NonFolloweeViewModel(user: user))
