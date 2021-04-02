@@ -38,21 +38,23 @@ struct IngredientDetailView: View {
     }
 
     var ingredientBanner: some View {
-        ZStack(alignment: .bottomLeading) {
+        var bannerOverlay: some View {
+            Rectangle()
+                .foregroundColor(.clear)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .clear, .black]),
+                        startPoint: .top,
+                        endPoint: .bottom))
+        }
+
+        return ZStack(alignment: .bottomLeading) {
             Image(uiImage: viewModel.ingredientImage)
                 .resizable()
                 .scaledToFill()
                 .frame(height: 300)
                 .clipped()
-                .overlay(
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.clear, .clear, .black]),
-                                startPoint: .top,
-                                endPoint: .bottom))
-                )
+                .overlay(bannerOverlay)
             VStack(alignment: .leading) {
                 Text(viewModel.ingredientName)
                     .font(.largeTitle)
@@ -94,7 +96,7 @@ struct IngredientDetailView: View {
 
 struct IngredientDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try
+        // swiftlint:disable force_try closure_body_length
         Group {
             IngredientDetailView(
                 viewModel: IngredientViewModel(

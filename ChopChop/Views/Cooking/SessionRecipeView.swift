@@ -5,24 +5,7 @@ struct SessionRecipeView: View {
 
     var body: some View {
         ScrollView {
-            ZStack(alignment: .bottomLeading) {
-                Image(uiImage: viewModel.image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 300)
-                    .clipped()
-                    .overlay(
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]),
-                                                       startPoint: .top,
-                                                       endPoint: .bottom))
-                    )
-                Text(viewModel.name)
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-                    .padding()
-            }
+            recipeBanner
             Text("Details")
                 .font(.title2)
                 .bold()
@@ -40,21 +23,35 @@ struct SessionRecipeView: View {
             steps
 
             Spacer()
-            Button(action: {
-                viewModel.toggleShowComplete()
-            }) {
-                Text("  ✔ Complete cooking  ")
-                    .foregroundColor(viewModel.completeSessionRecipeViewModel.isSuccess ? .gray : .black)
-                    .background(viewModel.completeSessionRecipeViewModel.isSuccess ? Color.white : Color.green)
-                    .font(.title2)
-                    .clipShape(Capsule())
-                    .padding()
-            }.disabled(viewModel.completeSessionRecipeViewModel.isSuccess)
+            completeCookingButton
         }
         // https://stackoverflow.com/questions/57103800/swiftui-support-multiple-modals
         .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
             CompleteSessionRecipeView(viewModel: viewModel.completeSessionRecipeViewModel)
         })
+    }
+
+    var recipeBanner: some View {
+        var bannerOverlay: some View {
+            Rectangle()
+                .foregroundColor(.clear)
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]),
+                                           startPoint: .top,
+                                           endPoint: .bottom))
+        }
+
+        return ZStack(alignment: .bottomLeading) {
+            Image(uiImage: viewModel.image)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 300)
+                .clipped()
+                .overlay(bannerOverlay)
+            Text(viewModel.name)
+                .font(.largeTitle)
+                .foregroundColor(.white)
+                .padding()
+        }
     }
 
     var ingredients: some View {
@@ -79,6 +76,18 @@ struct SessionRecipeView: View {
                 }
             }
         }.padding([.horizontal], 100)
+    }
+
+    var completeCookingButton: some View {
+        Button(action: viewModel.toggleShowComplete) {
+            Text("  ✔ Complete cooking  ")
+                .foregroundColor(viewModel.completeSessionRecipeViewModel.isSuccess ? .gray : .black)
+                .background(viewModel.completeSessionRecipeViewModel.isSuccess ? Color.white : Color.green)
+                .font(.title2)
+                .clipShape(Capsule())
+                .padding()
+        }
+        .disabled(viewModel.completeSessionRecipeViewModel.isSuccess)
     }
 }
 

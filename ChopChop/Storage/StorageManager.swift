@@ -17,11 +17,12 @@ struct StorageManager {
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var stepRecords = recipe.steps.enumerated().map { index, step in
-            RecipeStepRecord(recipeId: recipe.id, index: index + 1, content: step.content)
-        }
+        var graph = recipe.stepGraph
 
-        try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, steps: &stepRecords)
+        try appDatabase.saveRecipe(
+            &recipeRecord,
+            ingredients: &ingredientRecords,
+            graph: &graph)
 
         recipe.id = recipeRecord.id
     }

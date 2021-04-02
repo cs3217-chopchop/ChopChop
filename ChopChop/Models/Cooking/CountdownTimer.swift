@@ -38,7 +38,7 @@ class CountdownTimer {
         }
         remainingTime = defaultTime
         isRunning = true
-        timer.merge(with: Just(Date()))
+        _ = timer.merge(with: Just(Date()))
         isStart = true
     }
 

@@ -1,4 +1,4 @@
-// swiftlint:disable file_length
+// swiftlint:disable file_length function_body_length
 
 import Combine
 import Foundation
@@ -61,20 +61,45 @@ struct AppDatabase {
             }
         }
 
-        migrator.registerMigration("CreateRecipeStep") { db in
-            try db.create(table: "recipeStep") { t in
+        migrator.registerMigration("CreateRecipeStepGraph") { db in
+            try db.create(table: "recipeStepGraph") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("recipeId", .integer)
                     .notNull()
-                    .indexed()
+                    .unique()
                     .references("recipe", onDelete: .cascade)
-                t.column("index", .integer)
+            }
+        }
+
+        migrator.registerMigration("CreateRecipeStep") { db in
+            try db.create(table: "recipeStep") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("graphId", .integer)
                     .notNull()
-                    .check { $0 > 0 }
+                    .indexed()
+                    .references("recipeStepGraph", onDelete: .cascade)
                 t.column("content", .text)
                     .notNull()
                     .check { $0 != "" }
-                t.uniqueKey(["recipeId", "index"])
+            }
+        }
+
+        migrator.registerMigration("CreateRecipeStepEdge") { db in
+            try db.create(table: "recipeStepEdge") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("graphId", .integer)
+                    .notNull()
+                    .indexed()
+                    .references("recipeStepGraph", onDelete: .cascade)
+                t.column("sourceId", .integer)
+                    .notNull()
+                    .indexed()
+                    .references("recipeStep", onDelete: .cascade)
+                t.column("destinationId", .integer)
+                    .notNull()
+                    .indexed()
+                    .references("recipeStep", onDelete: .cascade)
+                t.uniqueKey(["graphId", "sourceId", "destinationId"])
             }
         }
 
@@ -135,117 +160,117 @@ extension AppDatabase {
     func createPreloadedRecipesIfEmpty() throws {
         try dbWriter.write { db in
             if try RecipeRecord.fetchCount(db) == 0 && RecipeCategoryRecord.fetchCount(db) == 0 {
-                try createPreloadedRecipes(db)
+//                try createPreloadedRecipes(db)
             }
         }
     }
 
-    private func createPreloadedRecipes(_ db: Database) throws {
-        var categories = [
-            RecipeCategoryRecord(name: "Japanese"),
-            RecipeCategoryRecord(name: "Italian"),
-            RecipeCategoryRecord(name: "American"),
-            RecipeCategoryRecord(name: "A Really Really Really Really Really Really Really Really Really Long Category")
-        ]
-
-        for index in categories.indices {
-            try categories[index].save(db)
-        }
-
-        var recipes = [
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[1].id,
-                         name: "Carbonara",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id,
-                         name: "Scrambled Eggs",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
-                         servings: Double(Int.random(in: 1...5)))
-        ]
-
-        for index in recipes.indices {
-            try recipes[index].save(db)
-        }
-
-        var ingredients = [
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Flour", quantity: .mass(200, unit: .gram)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Butter", quantity: .count(1)),
-            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
-            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pork Chop", quantity: .mass(100, unit: .ounce)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Egg", quantity: .count(3)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Salt", quantity: .count(0)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pepper", quantity: .count(0)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Oil", quantity: .volume(10, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Onion", quantity: .count(3)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Rice", quantity: .count(3))
-        ]
-
-        for index in ingredients.indices {
-            try ingredients[index].save(db)
-        }
-
-        var steps = [
-            // pancakes
-            RecipeStepRecord(recipeId: recipes[0].id, index: 1, content: """
-                In a large bowl, mix dry ingredients together until well-blended.
-                """),
-            RecipeStepRecord(recipeId: recipes[0].id, index: 2, content: """
-                Add milk and mix well until smooth.
-                """),
-            RecipeStepRecord(recipeId: recipes[0].id, index: 3, content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """),
-            RecipeStepRecord(recipeId: recipes[0].id, index: 4, content: """
-                Beat whites until stiff and then fold into batter gently.
-                """),
-            RecipeStepRecord(recipeId: recipes[0].id, index: 5, content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """),
-            RecipeStepRecord(recipeId: recipes[0].id, index: 6, content: """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
-                pancakes.
-                """),
-            // katusdon
-            RecipeStepRecord(recipeId: recipes[5].id, index: 1, content: """
-                Gather the ingredients.
-                """),
-            RecipeStepRecord(recipeId: recipes[5].id, index: 2, content: """
-                Season the pounded pork chops with salt and pepper.
-                """),
-            RecipeStepRecord(recipeId: recipes[5].id, index: 3, content: """
-                In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
-                """),
-            RecipeStepRecord(recipeId: recipes[5].id, index: 4, content: """
-                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
-                """),
-            RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
-                Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
-                Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
-                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
-                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
-                """),
-            RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
-                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
-                Simmer for a few minutes on medium heat. \
-                Serve by placing 1 serving of steamed rice in a large rice bowl. \
-                Repeat to make 3 more servings.
-                """)
-        ]
-
-        for index in steps.indices {
-            try steps[index].save(db)
-        }
-    }
+//    private func createPreloadedRecipes(_ db: Database) throws {
+//        var categories = [
+//            RecipeCategoryRecord(name: "Japanese"),
+//            RecipeCategoryRecord(name: "Italian"),
+//            RecipeCategoryRecord(name: "American"),
+//            RecipeCategoryRecord(name: "A Really Really Really Really Really Really Really Really Really Long Category")
+//        ]
+//
+//        for index in categories.indices {
+//            try categories[index].save(db)
+//        }
+//
+//        var recipes = [
+//            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
+//            RecipeRecord(recipeCategoryId: categories[1].id,
+//                         name: "Carbonara",
+//                         servings: Double(Int.random(in: 1...5)),
+//                         difficulty: Difficulty.allCases.randomElement()),
+//            RecipeRecord(recipeCategoryId: categories[2].id,
+//                         name: "Scrambled Eggs",
+//                         servings: Double(Int.random(in: 1...5)),
+//                         difficulty: Difficulty.allCases.randomElement()),
+//            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
+//            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
+//            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
+//            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
+//                         servings: Double(Int.random(in: 1...5)))
+//        ]
+//
+//        for index in recipes.indices {
+//            try recipes[index].save(db)
+//        }
+//
+//        var ingredients = [
+//            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
+//            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Flour", quantity: .mass(200, unit: .gram)),
+//            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Butter", quantity: .count(1)),
+//            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
+//            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
+//            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
+//            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pork Chop", quantity: .mass(100, unit: .ounce)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Egg", quantity: .count(3)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Salt", quantity: .count(0)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pepper", quantity: .count(0)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Oil", quantity: .volume(10, unit: .milliliter)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Onion", quantity: .count(3)),
+//            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Rice", quantity: .count(3))
+//        ]
+//
+//        for index in ingredients.indices {
+//            try ingredients[index].save(db)
+//        }
+//
+//        var steps = [
+//            // pancakes
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 1, content: """
+//                In a large bowl, mix dry ingredients together until well-blended.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 2, content: """
+//                Add milk and mix well until smooth.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 3, content: """
+//                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 4, content: """
+//                Beat whites until stiff and then fold into batter gently.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 5, content: """
+//                Pour ladles of the mixture into a non-stick pan, one at a time.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[0].id, index: 6, content: """
+//                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
+//                pancakes.
+//                """),
+//            // katusdon
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 1, content: """
+//                Gather the ingredients.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 2, content: """
+//                Season the pounded pork chops with salt and pepper.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 3, content: """
+//                In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 4, content: """
+//                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 5, content: """
+//                Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
+//                Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
+//                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
+//                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
+//                """),
+//            RecipeStepRecord(recipeId: recipes[5].id, index: 6, content: """
+//                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
+//                Simmer for a few minutes on medium heat. \
+//                Serve by placing 1 serving of steamed rice in a large rice bowl. \
+//                Repeat to make 3 more servings.
+//                """)
+//        ]
+//
+//        for index in steps.indices {
+//            try steps[index].save(db)
+//        }
+//    }
 }
 
 // MARK: - Database: Preloaded Ingredients
@@ -332,44 +357,58 @@ extension AppDatabase {
 extension AppDatabase {
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
-        var steps: [RecipeStepRecord] = []
+        var graph = RecipeStepGraph()
 
-        try saveRecipe(&recipe, ingredients: &ingredients, steps: &steps)
+        try saveRecipe(
+            &recipe,
+            ingredients: &ingredients,
+            graph: &graph)
     }
 
-    func saveRecipe(_ recipe: inout RecipeRecord,
-                    ingredients: inout [RecipeIngredientRecord],
-                    steps: inout [RecipeStepRecord]) throws {
+    func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord], graph: inout RecipeStepGraph) throws {
         try dbWriter.write { db in
             try recipe.save(db)
 
-            let recipeIds = ingredients.compactMap { $0.recipeId } + steps.compactMap { $0.recipeId }
+            let recipeIds = ingredients.compactMap { $0.recipeId }
 
             guard recipeIds.allSatisfy({ $0 == recipe.id }) else {
-                throw DatabaseError(message: "Recipe ingredients and steps belong to the wrong recipe.")
+                throw DatabaseError(message: "Recipe ingredients belong to the wrong recipe.")
             }
 
-            guard steps.map({ $0.index }).allSatisfy({ (1...steps.count).contains($0) }) else {
-                throw DatabaseError(message: "Recipe steps do not have consecutive indexes.")
-            }
-
-            // Delete all ingredients and steps that are not in the arrays
+            // Delete all ingredients that are not in the array and existing different graphs
             try recipe.ingredients
                 .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
-            try recipe.steps
-                .filter(!steps.compactMap { $0.id }.contains(RecipeStepRecord.Columns.id))
+            try recipe.stepGraph
+                .filter(RecipeStepGraphRecord.Columns.id != graph.id)
                 .deleteAll(db)
 
-            // Save recipe ingredients and steps
+            // Save recipe ingredients
             for index in ingredients.indices {
                 ingredients[index].recipeId = recipe.id
                 try ingredients[index].save(db)
             }
 
-            for index in steps.indices {
-                steps[index].recipeId = recipe.id
-                try steps[index].save(db)
+            var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
+            try graphRecord.save(db)
+            graph.id = graphRecord.id
+
+            // Delete all steps and edges
+            try graphRecord.steps.deleteAll(db)
+            try graphRecord.edges.deleteAll(db)
+
+            for node in graph.nodes {
+                let step = node.label
+                var stepRecord = RecipeStepRecord(graphId: graph.id, content: step.content)
+                try stepRecord.save(db)
+                step.id = stepRecord.id
+            }
+
+            for edge in graph.edges {
+                let sourceId = edge.source.label.id
+                let destinationId = edge.destination.label.id
+                var edgeRecord = RecipeStepEdgeRecord(graphId: graph.id, sourceId: sourceId, destinationId: destinationId)
+                try edgeRecord.save(db)
             }
         }
     }
@@ -478,7 +517,9 @@ extension AppDatabase {
             let request = RecipeRecord
                 .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
-                .including(all: RecipeRecord.steps)
+                .including(required: RecipeRecord.stepGraph
+                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
         }
@@ -512,7 +553,9 @@ extension AppDatabase {
                 let request = RecipeRecord
                     .filter(key: id)
                     .including(all: RecipeRecord.ingredients)
-                    .including(all: RecipeRecord.steps)
+                    .including(required: RecipeRecord.stepGraph
+                        .including(all: RecipeStepGraphRecord.steps)
+                        .including(all: RecipeStepGraphRecord.edges))
 
                 return try Recipe.fetchOne(db, request)
             })

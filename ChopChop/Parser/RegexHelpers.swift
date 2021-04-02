@@ -1,3 +1,5 @@
+// swiftlint:disable:this file_name
+
 import Foundation
 
 //https://www.hackingwithswift.com/articles/108/how-to-use-regular-expressions-in-swift

@@ -69,6 +69,8 @@ extension UIImage.Orientation {
             return "leftM"
         case .rightMirrored:
             return "rightM"
+        @unknown default:
+            return ""
         }
     }
 }
