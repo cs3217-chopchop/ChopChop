@@ -64,7 +64,8 @@ struct FirebaseDatabase {
         db.collection(recipePath)
             .publisher()
             .map({
-                $0.documents.compactMap({
+                $0.documents
+                    .compactMap({
                     try? $0.data(as: OnlineRecipeRecord.self)
                 })
             })
@@ -207,11 +208,13 @@ struct FirebaseDatabase {
 
     func addUserRecipeRating(userId: String, rating: UserRating) {
         // swiftlint:disable implicit_return
-        return db.collection(userPath).document(userId).updateData(["ratings": FieldValue.arrayUnion([rating.toDict()])])
+        return db.collection(userPath).document(userId)
+            .updateData(["ratings": FieldValue.arrayUnion([rating.toDict()])])
     }
     func removeUserRecipeRating(userId: String, rating: UserRating) {
         // swiftlint:disable implicit_return
-        return db.collection(userPath).document(userId).updateData(["ratings": FieldValue.arrayRemove([rating.toDict()])])
+        return db.collection(userPath).document(userId)
+            .updateData(["ratings": FieldValue.arrayRemove([rating.toDict()])])
     }
 
     func addUser(user: User) throws -> String {

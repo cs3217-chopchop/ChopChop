@@ -4,21 +4,9 @@
 //
 //  Created by Cao Wenjie on 27/3/21.
 //
+import Foundation
 import FirebaseFirestoreSwift
 
-//class OnlineRecipe {
-//    @DocumentID private(set) var id: String?
-//    private(set) var userId: String
-//    private(set) var ratings: [RecipeRating]
-//    private(set) var recipeDetails: OnlineRecipeDetails
-//
-//    init(id: String?, userId: String, ratings: [RecipeRating], recipeDetails: OnlineRecipeDetails) {
-//        self.id = id
-//        self.userId = userId
-//        self.ratings = ratings
-//        self.recipeDetails = recipeDetails
-//    }
-//}
 class OnlineRecipe: Identifiable {
     private(set) var id: String
     private(set) var userId: String
@@ -30,9 +18,10 @@ class OnlineRecipe: Identifiable {
     private(set) var steps: [String]
     private(set) var ingredients: [RecipeIngredient]
     private(set) var ratings: [RecipeRating]
+    private(set) var created: Date
 
     init(id: String, userId: String, name: String, servings: Double, difficulty: Difficulty?, cuisine: String?,
-         steps: [String], ingredients: [RecipeIngredient], ratings: [RecipeRating]) throws {
+         steps: [String], ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
         self.id = id
         self.userId = userId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -50,6 +39,7 @@ class OnlineRecipe: Identifiable {
         self.steps = steps
         self.ingredients = ingredients
         self.ratings = ratings
+        self.created = created
     }
 }
 

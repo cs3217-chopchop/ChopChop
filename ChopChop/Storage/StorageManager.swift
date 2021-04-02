@@ -240,6 +240,7 @@ extension StorageManager {
 // MARK: - Firebase operations
 extension StorageManager {
 
+    // publish your local recipe online
     func publishRecipe(recipe: inout Recipe, userId: String) throws {
         var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
@@ -268,6 +269,7 @@ extension StorageManager {
         try firebase.addUser(user: user)
     }
 
+    // update details of published recipe (note that ratings cant be updated here)
     func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
         var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
@@ -290,6 +292,7 @@ extension StorageManager {
         try firebase.updateRecipeDetails(recipe: recipeRecord)
     }
 
+    // unpublish a recipe through the online interface
     func removeRecipeFromOnline(recipe: OnlineRecipe) throws {
         try firebase.removeRecipe(recipeId: recipe.id)
         for rating in recipe.ratings {
@@ -306,6 +309,7 @@ extension StorageManager {
         try self.saveRecipe(&localRecipe)
     }
 
+    // fetch the details of a single recipe
     func fetchOnlineRecipeById(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
             .compactMap({
@@ -314,23 +318,28 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
+    // fetch the details of a single user
     func fetchUserById(userId: String) throws -> AnyPublisher<User, Error> {
         try firebase.fetchUserById(userId: userId)
     }
 
+    // follow someone
     func addFollowee(userId: String, followeeId: String) {
         firebase.addFollowee(userId: userId, followeeId: followeeId)
     }
 
+    // unfollow someone
     func removeFollowee(userId: String, followeeId: String) {
         firebase.removeFollowee(userId: userId, followeeId: followeeId)
     }
 
+    // rate a recipe
     func rateRecipe(recipeId: String, userId: String, rating: RatingScore) throws {
         firebase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
         firebase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating))
     }
 
+    // remove rating of a recipe you rated
     func unrateRecipe(recipeId: String, rating: RecipeRating) {
         firebase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating)
         firebase.removeUserRecipeRating(
@@ -339,11 +348,13 @@ extension StorageManager {
         )
     }
 
+    // change the rating of a recipe you have rated before
     func rerateRecipe(recipeId: String, newRating: RecipeRating) {
         firebase.updateRecipeRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
         firebase.updateUserRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
     }
 
+    // fetch user details of all your followees
     func fetchAllFollowees(userId: String) -> AnyPublisher<[User], Error> {
         firebase.fetchFolloweesId(userId: userId)
             .flatMap({ followees in
@@ -352,42 +363,49 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
-//    func fetchAllSelfPublishedRecipes(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
-//        firebase.fetchOnlineRecipeIdByUsers(userIds: [userId])
-//            .map({
-//                $0.compactMap({
-//                    try? $0.toOnlineRecipe()
-//                })
-//            })
-//            .eraseToAnyPublisher()
-//    }
-
+    // fetch all recipes published by everyone
     func fetchAllRecipes() -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchAllRecipes()
             .map({
                 $0.compactMap({
                     try? $0.toOnlineRecipe()
                 })
+                .sorted(by: { $0.created > $1.created })
             })
             .eraseToAnyPublisher()
     }
 
+    // Fetch details of all users in the system
     func fetchAllUsers() -> AnyPublisher<[User], Error> {
         firebase.fetchAllUsers()
     }
 
+    // Can be used to fetch all your own recipes or recipes of several selected users
     func fetchAllRecipesByUsers(userIds: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchOnlineRecipeIdByUsers(userIds: userIds)
             .map({
                 $0.compactMap({
                     try? $0.toOnlineRecipe()
                 })
+                .sorted(by: { $0.created > $1.created })
             })
             .eraseToAnyPublisher()
     }
+
+    func fetchAllFolloweesRecipe(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
+        firebase.fetchFolloweesId(userId: userId)
+            .flatMap({
+                self.fetchAllRecipesByUsers(userIds: $0)
+            })
+            .eraseToAnyPublisher()
+    }
+
+    // Fetch all the recipe ratings that a particular user has given
     func fetchAllUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
         firebase.fetchUserRating(userId: userId)
     }
+
+    // download an online recipe to local
     func downloadRecipe(newName: String, recipe: OnlineRecipe) throws {
         var cuisineId: Int64?
         if let cuisine = recipe.cuisine {
