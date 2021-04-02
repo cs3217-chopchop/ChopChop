@@ -4,43 +4,46 @@ import SwiftUI
 @main
 struct ChopChopApp: App {
     @StateObject var settings = UserSettings()
-    let graph: UnweightedGraph<Node2> = {
-        let vertices = [
-            Node2(position: CGPoint(x: 500, y: 100), text: """
+    let graph: RecipeStepGraph = {
+        let nodes = [
+            try? RecipeStep(content: """
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            Node2(position: CGPoint(x: 500, y: 200), text: "Add milk and mix well until smooth."),
-            Node2(position: CGPoint(x: 400, y: 300), text: """
+            try? RecipeStep(content: "Add milk and mix well until smooth."),
+            try? RecipeStep(content: """
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            Node2(position: CGPoint(x: 600, y: 300), text: "Beat whites until stiff and then fold into batter gently."),
-            Node2(position: CGPoint(x: 400, y: 400), text: """
+            try? RecipeStep(content: "Beat whites until stiff and then fold into batter gently."),
+            try? RecipeStep(content: """
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            Node2(position: CGPoint(x: 600, y: 400), text: """
+            try? RecipeStep(content: """
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """),
-            Node2(position: CGPoint(x: 500, y: 500), text: """
+            try? RecipeStep(content: """
                 ad fasd fas dfas dkfamsdo fiasmd oiamdov iamdfvoi dmfoiv dmsfovi mdsfoiv mdsofiv msdfoivmsdfovi \
                 padofim sdpofimasp oifmdp jfmsdpfvjsdpfvoj msdfpvomsd fpvokmdscpoask dm[oismdc[asokdcma s[odkcm as[ckm \
                 [odifm [asoidmfpdfms fdo ismdfpv odsifmvpsodi fmvsdokf vmdp sofmv pdosfivm sdofivm sdpfoivm sdfpo \
                 psodfim vsdpfoiv mdspfokv mfpo imdsfpov imsdfpo imvsdfpoi msvpdofvm pdsofimv spdofimv spdfomv
                 """),
-            Node2(position: CGPoint(x: 500, y: 600), text: "H")
-        ]
+            try? RecipeStep(content: "H"),
+            try? RecipeStep(content: "Test")
+        ].compactMap { $0 }.map { RecipeStepNode($0) }
+        let edges = [
+            Edge(source: nodes[0], destination: nodes[1]),
+            Edge(source: nodes[1], destination: nodes[2]),
+            Edge(source: nodes[1], destination: nodes[3]),
+            Edge(source: nodes[2], destination: nodes[4]),
+            Edge(source: nodes[3], destination: nodes[5]),
+            Edge(source: nodes[4], destination: nodes[6]),
+            Edge(source: nodes[5], destination: nodes[6]),
+            Edge(source: nodes[6], destination: nodes[7]),
+            Edge(source: nodes[3], destination: nodes[8]),
+            Edge(source: nodes[8], destination: nodes[7])
+        ].compactMap { $0 }
 
-        let graph = UnweightedGraph(vertices: vertices)
-        graph.addEdge(fromIndex: 0, toIndex: 1, directed: true)
-        graph.addEdge(fromIndex: 1, toIndex: 2, directed: true)
-        graph.addEdge(fromIndex: 1, toIndex: 3, directed: true)
-        graph.addEdge(fromIndex: 2, toIndex: 4, directed: true)
-        graph.addEdge(fromIndex: 3, toIndex: 5, directed: true)
-        graph.addEdge(fromIndex: 4, toIndex: 6, directed: true)
-        graph.addEdge(fromIndex: 5, toIndex: 6, directed: true)
-        graph.addEdge(fromIndex: 6, toIndex: 7, directed: true)
-
-        return graph
+        return (try? RecipeStepGraph(nodes: nodes, edges: edges)) ?? RecipeStepGraph()
     }()
 
     var body: some Scene {
@@ -49,7 +52,7 @@ struct ChopChopApp: App {
 //                MainView(viewModel: MainViewModel())
 //            }
 //            .environmentObject(settings)
-            SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
+            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
                 .accentColor(.red)
         }
     }

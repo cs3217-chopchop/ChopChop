@@ -1,9 +1,9 @@
 import SwiftUI
 
-class SessionRecipeStepNode: Node, ObservableObject {
+final class SessionRecipeStepNode: Node, ObservableObject {
     var label: SessionRecipeStep
-    @Published var isCompletable: Bool = false
-    @Published var isCompleted: Bool = false
+    @Published var isCompletable = false
+    @Published var isCompleted = false
 
     init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker) {
         self.label = SessionRecipeStep(step: node.label, actionTimeTracker: actionTimeTracker)
@@ -12,10 +12,10 @@ class SessionRecipeStepNode: Node, ObservableObject {
 
 extension SessionRecipeStepNode: Hashable {
     static func == (lhs: SessionRecipeStepNode, rhs: SessionRecipeStepNode) -> Bool {
-        lhs.label == rhs.label
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(label)
+        hasher.combine(ObjectIdentifier(self))
     }
 }

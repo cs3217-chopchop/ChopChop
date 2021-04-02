@@ -18,9 +18,7 @@ struct EditorGraphView: View {
                 placeholderLineView(info: info)
             }
 
-            if let nodes = viewModel.graph.topologicalSort() {
-                nodesView(nodes: nodes)
-            }
+            nodesView(nodes: viewModel.graph.getTopologicallySortedNodes())
 
             if let position = placeholderNodePosition {
                 placeholderNodeView(position: position)
@@ -50,19 +48,19 @@ struct EditorGraphView: View {
     }
 
     var linesView: some View {
-        ForEach(viewModel.graph.edgeList(), id: \.self) { edge in
+        ForEach(viewModel.graph.edges, id: \.self) { edge in
             if let offset = nodeDragOffset {
-                Line(from: viewModel.graph.vertexAtIndex(edge.u).position
+                Line(from: (edge.source.position ?? .zero)
                         + viewModel.portalPosition + portalDragOffset
-                        + (viewModel.graph.vertexAtIndex(edge.u).id == offset.id ? offset.offset : .zero),
-                     to: viewModel.graph.vertexAtIndex(edge.v).position
+                        + (edge.source.id == offset.id ? offset.offset : .zero),
+                     to: (edge.destination.position ?? .zero)
                         + viewModel.portalPosition + portalDragOffset
-                        + (viewModel.graph.vertexAtIndex(edge.v).id == offset.id ? offset.offset : .zero))
+                        + (edge.destination.id == offset.id ? offset.offset : .zero))
                     .stroke(Color.primary, lineWidth: 1.8)
             } else {
-                Line(from: viewModel.graph.vertexAtIndex(edge.u).position
+                Line(from: (edge.source.position ?? .zero)
                         + viewModel.portalPosition + portalDragOffset,
-                     to: viewModel.graph.vertexAtIndex(edge.v).position
+                     to: (edge.destination.position ?? .zero)
                         + viewModel.portalPosition + portalDragOffset)
                     .stroke(Color.primary, lineWidth: 1.8)
                     .onLongPressGesture {
@@ -85,10 +83,10 @@ struct EditorGraphView: View {
             }
     }
 
-    func nodesView(nodes: [Node2]) -> some View {
+    func nodesView(nodes: [RecipeStepNode]) -> some View {
         ForEach(nodes) { node in
             EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
-                .position(node.position + viewModel.portalPosition + portalDragOffset
+                .position((node.position ?? .zero) + viewModel.portalPosition + portalDragOffset
                             + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
                 .onTapGesture {
                     withAnimation {
@@ -99,7 +97,11 @@ struct EditorGraphView: View {
                     LongPressGesture()
                         .sequenced(before: DragGesture()
                             .updating($lineDragInfo) { value, state, _ in
-                                state = viewModel.onLongPressDragNode(value, position: node.position)
+                                guard let position = node.position else {
+                                    return
+                                }
+
+                                state = viewModel.onLongPressDragNode(value, position: position)
                             }
                             .onEnded { value in
                                 viewModel.onLongPressDragNodeEnd(value, node: node)
@@ -110,8 +112,12 @@ struct EditorGraphView: View {
                                 state = viewModel.onDragNode(value, node: node)
                             }
                             .onEnded { value in
-                                node.position += CGVector(dx: value.translation.width,
-                                                          dy: value.translation.height)
+                                guard let position = node.position else {
+                                    return
+                                }
+
+                                node.position = position + CGVector(dx: value.translation.width,
+                                                                    dy: value.translation.height)
                             }
                     )
                 )
@@ -119,14 +125,20 @@ struct EditorGraphView: View {
     }
 
     func placeholderNodeView(position: CGPoint) -> some View {
-        EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: Node2()), selection: selection)
+        guard let step = try? RecipeStep(content: "Add step details...") else {
+            return AnyView(EmptyView())
+        }
+
+        return AnyView(EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph,
+                                                                     node: RecipeStepNode(step)),
+                       selection: selection)
             .position(position)
-            .opacity(0.4)
+            .opacity(0.4))
     }
 }
 
  struct EditorGraphView_Previews: PreviewProvider {
     static var previews: some View {
-        EditorGraphView(viewModel: EditorGraphViewModel(graph: UnweightedGraph()))
+        EditorGraphView(viewModel: EditorGraphViewModel(graph: RecipeStepGraph()))
     }
  }

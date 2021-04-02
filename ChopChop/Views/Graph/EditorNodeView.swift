@@ -33,10 +33,12 @@ struct EditorNodeView: View {
                             .onTapGesture {}
                     } else {
                         ScrollView(isSelected ? [.vertical] : []) {
-                            Text(viewModel.node.text.isEmpty ? "Add step details..." : viewModel.node.text)
+                            Text(viewModel.node.label.content.isEmpty
+                                    ? "Add step details..."
+                                    : viewModel.node.label.content)
                                 .lineLimit(isSelected ? nil : 1)
                                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                                .foregroundColor(viewModel.node.text.isEmpty ? .secondary : .primary)
+                                .foregroundColor(viewModel.node.label.content.isEmpty ? .secondary : .primary)
                         }
                     }
 
@@ -48,20 +50,20 @@ struct EditorNodeView: View {
             }
             .padding()
         }
+        .alert(isPresented: $viewModel.alertIsPresented) {
+            Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
+        }
     }
 
     var detailView: some View {
         HStack {
             if viewModel.isEditing {
-                Button(action: {
-                    viewModel.node.text = viewModel.text
-                    viewModel.isEditing = false
-                }) {
+                Button(action: viewModel.saveAction) {
                     Text("Save")
                 }
                 Spacer()
                 Button(action: {
-                    viewModel.text = viewModel.node.text
+                    viewModel.text = viewModel.node.label.content
                     viewModel.isEditing = false
                 }) {
                     Text("Cancel")
@@ -85,10 +87,10 @@ struct EditorNodeView: View {
     }
 }
 
- struct EditorNodeView_Previews: PreviewProvider {
-    static var previews: some View {
-        EditorNodeView(viewModel: EditorNodeViewModel(graph: UnweightedGraph<Node2>(),
-                                                      node: Node2()),
-                       selection: SelectionHandler())
-    }
- }
+// struct EditorNodeView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        EditorNodeView(viewModel: EditorNodeViewModel(graph: UnweightedGraph<Node2>(),
+//                                                      node: Node2()),
+//                       selection: SelectionHandler())
+//    }
+// }
