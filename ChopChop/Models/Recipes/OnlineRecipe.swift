@@ -38,14 +38,25 @@ class OnlineRecipe: Identifiable {
 }
 
 extension OnlineRecipe {
-    func toRecipe() throws -> Recipe {
-        try Recipe(
-            name: name,
-            onlineId: id,
-            servings: servings,
-            difficulty: difficulty,
-            steps: try steps.map({ try RecipeStep(content: $0) }),
-            ingredients: ingredients
+    convenience init(from record: OnlineRecipeRecord) throws {
+        guard let id = record.id else {
+            throw OnlineRecipeRecordError.missingId
+        }
+
+        guard let createdDate = record.created else {
+            throw OnlineRecipeRecordError.missingCreatedDate
+        }
+        try self.init(
+            id: id,
+            userId: record.creator,
+            name: record.name,
+            servings: record.servings,
+            difficulty: record.difficulty,
+            cuisine: record.cuisine,
+            steps: record.steps,
+            ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
+            ratings: record.ratings,
+            created: createdDate
         )
     }
 }

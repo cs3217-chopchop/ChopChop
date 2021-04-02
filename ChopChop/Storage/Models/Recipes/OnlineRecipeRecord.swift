@@ -13,28 +13,6 @@ struct OnlineRecipeRecord {
     var ratings: [RecipeRating] = []
     @ServerTimestamp var created: Date?
 
-    func toOnlineRecipe() throws -> OnlineRecipe {
-        guard let id = id else {
-            throw OnlineRecipeRecordError.missingId
-        }
-
-        guard let createdDate = created else {
-            throw OnlineRecipeRecordError.missingCreatedDate
-        }
-        return try OnlineRecipe(
-            id: id,
-            userId: creator,
-            name: name,
-            servings: servings,
-            difficulty: difficulty,
-            cuisine: cuisine,
-            steps: steps,
-            ingredients: ingredients.compactMap({ try? $0.toRecipeIngredient() }),
-            ratings: ratings,
-            created: createdDate
-        )
-    }
-
 }
 
 extension OnlineRecipeRecord: Equatable {

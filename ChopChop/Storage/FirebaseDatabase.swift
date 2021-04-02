@@ -30,7 +30,7 @@ struct FirebaseDatabase {
             "difficulty": recipe.difficulty?.rawValue,
             "cuisine": recipe.cuisine,
             "steps": recipe.steps,
-            "ingredients": recipe.ingredients.map({ $0.toDict() })
+            "ingredients": recipe.ingredients.map({ $0.asDict })
         ], merge: true)
     }
 
@@ -138,7 +138,7 @@ struct FirebaseDatabase {
                 }
             }
 
-            transaction.updateData(["ratings": newRatingList.map({ $0.toDict() })], forDocument: docRef)
+            transaction.updateData(["ratings": newRatingList.map({ $0.asDict })], forDocument: docRef)
             return nil
         })
     }
@@ -166,7 +166,7 @@ struct FirebaseDatabase {
                 }
             }
 
-            transaction.updateData(["ratings": newRatingList.map({ $0.toDict() })], forDocument: docRef)
+            transaction.updateData(["ratings": newRatingList.map({ $0.asDict })], forDocument: docRef)
             return nil
         })
     }
@@ -191,23 +191,23 @@ struct FirebaseDatabase {
     func addRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
         // swiftlint:disable implicit_return
         return db.collection(recipePath).document(onlineRecipeId)
-            .updateData(["ratings": FieldValue.arrayUnion([rating.toDict()])])
+            .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
     }
     func removeRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
         // swiftlint:disable implicit_return
         return db.collection(recipePath).document(onlineRecipeId)
-            .updateData(["ratings": FieldValue.arrayRemove([rating.toDict()])])
+            .updateData(["ratings": FieldValue.arrayRemove([rating.asDict])])
     }
 
     func addUserRecipeRating(userId: String, rating: UserRating) {
         // swiftlint:disable implicit_return
         return db.collection(userPath).document(userId)
-            .updateData(["ratings": FieldValue.arrayUnion([rating.toDict()])])
+            .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
     }
     func removeUserRecipeRating(userId: String, rating: UserRating) {
         // swiftlint:disable implicit_return
         return db.collection(userPath).document(userId)
-            .updateData(["ratings": FieldValue.arrayRemove([rating.toDict()])])
+            .updateData(["ratings": FieldValue.arrayRemove([rating.asDict])])
     }
 
     func addUser(user: User) throws -> String {

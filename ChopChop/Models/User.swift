@@ -4,14 +4,10 @@ import FirebaseFirestoreSwift
 final class User: Identifiable {
     @DocumentID private(set) var id: String?
     private(set) var name: String
-    private(set) var followees: [String] = []
-    private(set) var ratings: [UserRating] = []
+    private(set) var followees: [String]
+    private(set) var ratings: [UserRating]
 
-    init(name: String) {
-        self.name = name
-    }
-
-    init(id: String?, name: String, followees: [String], ratings: [UserRating]) throws {
+    init(id: String? = nil, name: String, followees: [String] = [], ratings: [UserRating] = []) throws {
         self.id = id
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 

@@ -313,7 +313,7 @@ extension StorageManager {
     func onlineRecipeByIdPublisher(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
             .compactMap({
-                try? $0.toOnlineRecipe()
+                try? OnlineRecipe(from: $0)
             })
             .eraseToAnyPublisher()
     }
@@ -368,7 +368,7 @@ extension StorageManager {
         firebase.fetchAllRecipes()
             .map({
                 $0.compactMap({
-                    try? $0.toOnlineRecipe()
+                    try? OnlineRecipe(from: $0)
                 })
                 .sorted(by: { $0.created > $1.created })
             })
@@ -385,7 +385,7 @@ extension StorageManager {
         firebase.fetchOnlineRecipeIdByUsers(userIds: userIds)
             .map({
                 $0.compactMap({
-                    try? $0.toOnlineRecipe()
+                    try? OnlineRecipe(from: $0)
                 })
                 .sorted(by: { $0.created > $1.created })
             })

@@ -56,20 +56,7 @@ extension QuantityRecord: Codable {
 }
 
 extension QuantityRecord {
-    func toQuantity() throws -> Quantity {
-        switch self {
-        case let .count(value):
-            return try Quantity(.count, value: value)
-        case let .mass(value, unit):
-            return try Quantity(.mass(unit), value: value)
-        case let .volume(value, unit):
-            return try Quantity(.volume(unit), value: value)
-        }
-    }
-}
-
-extension QuantityRecord {
-    func toDict() -> [String: Any] {
+    var asDict: [String: Any] {
         switch self {
         case let .count(value):
             return ["count": value]

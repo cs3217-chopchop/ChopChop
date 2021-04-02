@@ -15,7 +15,7 @@ extension UserRating: Codable {
 }
 
 extension UserRating {
-    func toDict() -> [String: Any] {
+    var asDict: [String: Any] {
         ["recipeId": recipeId, "score": score.rawValue]
     }
 }
