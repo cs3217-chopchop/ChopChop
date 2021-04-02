@@ -11,7 +11,7 @@ struct OnlineRecipeRecord {
     var name: String
     var creator: String
     var servings: Double
-    var cuisine: String
+    @ExplicitNull var cuisine: String?
     @ExplicitNull var difficulty: Difficulty?
     var ingredients: [OnlineIngredientRecord]
     var steps: [String]

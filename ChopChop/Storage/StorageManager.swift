@@ -237,9 +237,9 @@ extension StorageManager {
 extension StorageManager {
 
     func publishRecipe(recipe: inout Recipe, userId: String) throws {
-        var cuisine = ""
+        var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
-            cuisine = (try? (fetchRecipeCategory(id: categoryId)?.name) ?? "") ?? ""
+            cuisine = try? fetchRecipeCategory(id: categoryId)?.name
         }
         let steps = recipe.steps.map({ $0.content })
         let ingredients = recipe.ingredients.map({
@@ -382,7 +382,10 @@ extension StorageManager {
         firebase.fetchUserRating(userId: userId)
     }
     func downloadRecipe(recipe: OnlineRecipe) throws {
-        let cuisineId = try self.fetchRecipeCategoryByName(name: recipe.cuisine)?.id
+        var cuisineId: Int64?
+        if let cuisine = recipe.cuisine {
+            cuisineId = try self.fetchRecipeCategoryByName(name: cuisine)?.id
+        }
         var localRecipe = try Recipe(
             name: recipe.name,
             onlineId: recipe.id,

@@ -25,13 +25,13 @@ class OnlineRecipe: Identifiable {
 
     private(set) var name: String
     private(set) var servings: Double
-    private(set) var cuisine: String
+    private(set) var cuisine: String?
     private(set) var difficulty: Difficulty?
     private(set) var steps: [String]
     private(set) var ingredients: [OnlineRecipeIngredient]
     private(set) var ratings: [RecipeRating]
 
-    init(id: String, userId: String, name: String, servings: Double, difficulty: Difficulty?, cuisine: String,
+    init(id: String, userId: String, name: String, servings: Double, difficulty: Difficulty?, cuisine: String?,
          steps: [String], ingredients: [OnlineRecipeIngredient], ratings: [RecipeRating]) throws {
         self.id = id
         self.userId = userId
