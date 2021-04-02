@@ -30,8 +30,8 @@ struct NodeView<Content: View>: View {
                     )
             )
             .overlay(content)
-            .frame(width: isSelected ? Node.expandedSize.width : Node.normalSize.width,
-                   height: isSelected ? Node.expandedSize.height : Node.normalSize.height)
+            .frame(width: isSelected ? Node2.expandedSize.width : Node2.normalSize.width,
+                   height: isSelected ? Node2.expandedSize.height : Node2.normalSize.height)
             .zIndex(isSelected ? 1 : 0)
     }
 }

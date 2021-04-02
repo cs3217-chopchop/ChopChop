@@ -4,9 +4,9 @@ import SwiftUI
 final class SessionGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
 
-    var graph: UnweightedGraph<Node>
+    var graph: UnweightedGraph<Node2>
 
-    init(graph: UnweightedGraph<Node>) {
+    init(graph: UnweightedGraph<Node2>) {
         self.graph = graph
     }
 

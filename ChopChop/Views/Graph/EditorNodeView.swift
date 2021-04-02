@@ -87,8 +87,8 @@ struct EditorNodeView: View {
 
  struct EditorNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        EditorNodeView(viewModel: EditorNodeViewModel(graph: UnweightedGraph<Node>(),
-                                                      node: Node()),
+        EditorNodeView(viewModel: EditorNodeViewModel(graph: UnweightedGraph<Node2>(),
+                                                      node: Node2()),
                        selection: SelectionHandler())
     }
  }

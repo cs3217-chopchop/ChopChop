@@ -85,7 +85,7 @@ struct EditorGraphView: View {
             }
     }
 
-    func nodesView(nodes: [Node]) -> some View {
+    func nodesView(nodes: [Node2]) -> some View {
         ForEach(nodes) { node in
             EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
                 .position(node.position + viewModel.portalPosition + portalDragOffset
@@ -119,7 +119,7 @@ struct EditorGraphView: View {
     }
 
     func placeholderNodeView(position: CGPoint) -> some View {
-        EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: Node()), selection: selection)
+        EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: Node2()), selection: selection)
             .position(position)
             .opacity(0.4)
     }

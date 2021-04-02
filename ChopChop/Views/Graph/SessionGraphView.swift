@@ -41,7 +41,7 @@ struct SessionGraphView: View {
         }
     }
 
-    func nodesView(nodes: [Node]) -> some View {
+    func nodesView(nodes: [Node2]) -> some View {
         ForEach(nodes) { node in
             SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
                 .position(node.position + viewModel.portalPosition + portalDragOffset)

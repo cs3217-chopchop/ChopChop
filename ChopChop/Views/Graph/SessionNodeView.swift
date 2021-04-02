@@ -64,8 +64,8 @@ struct SessionNodeView: View {
 
  struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionNodeView(viewModel: SessionNodeViewModel(graph: UnweightedGraph<Node>(),
-                                                        node: Node()),
+        SessionNodeView(viewModel: SessionNodeViewModel(graph: UnweightedGraph<Node2>(),
+                                                        node: Node2()),
                         selection: SelectionHandler())
     }
  }
