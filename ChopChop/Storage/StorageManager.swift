@@ -310,7 +310,7 @@ extension StorageManager {
     }
 
     // fetch the details of a single recipe
-    func fetchOnlineRecipeById(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
+    func onlineRecipeByIdPublisher(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
             .compactMap({
                 try? $0.toOnlineRecipe()
@@ -319,7 +319,7 @@ extension StorageManager {
     }
 
     // fetch the details of a single user
-    func fetchUserById(userId: String) throws -> AnyPublisher<User, Error> {
+    func userByIdPublisher(userId: String) throws -> AnyPublisher<User, Error> {
         try firebase.fetchUserById(userId: userId)
     }
 
@@ -355,7 +355,7 @@ extension StorageManager {
     }
 
     // fetch user details of all your followees
-    func fetchAllFollowees(userId: String) -> AnyPublisher<[User], Error> {
+    func allFolloweesPublisher(userId: String) -> AnyPublisher<[User], Error> {
         firebase.fetchFolloweesId(userId: userId)
             .flatMap({ followees in
                 firebase.fetchUsers(userId: followees)
@@ -364,7 +364,7 @@ extension StorageManager {
     }
 
     // fetch all recipes published by everyone
-    func fetchAllRecipes() -> AnyPublisher<[OnlineRecipe], Error> {
+    func allRecipesPublisher() -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchAllRecipes()
             .map({
                 $0.compactMap({
@@ -376,12 +376,12 @@ extension StorageManager {
     }
 
     // Fetch details of all users in the system
-    func fetchAllUsers() -> AnyPublisher<[User], Error> {
+    func allUsersPublisher() -> AnyPublisher<[User], Error> {
         firebase.fetchAllUsers()
     }
 
     // Can be used to fetch all your own recipes or recipes of several selected users
-    func fetchAllRecipesByUsers(userIds: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
+    func allRecipesByUsersPublisher(userIds: [String]) -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchOnlineRecipeIdByUsers(userIds: userIds)
             .map({
                 $0.compactMap({
@@ -392,16 +392,16 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func fetchAllFolloweesRecipe(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
+    func allFolloweesRecipePublisher(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
         firebase.fetchFolloweesId(userId: userId)
             .flatMap({
-                self.fetchAllRecipesByUsers(userIds: $0)
+                self.allRecipesByUsersPublisher(userIds: $0)
             })
             .eraseToAnyPublisher()
     }
 
     // Fetch all the recipe ratings that a particular user has given
-    func fetchAllUserRatings(userId: String) -> AnyPublisher<[UserRating], Error> {
+    func allUserRatingsPublisher(userId: String) -> AnyPublisher<[UserRating], Error> {
         firebase.fetchUserRating(userId: userId)
     }
 
