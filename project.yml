@@ -12,6 +12,9 @@ packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
     from: 7.9.1
+  CombineFirebase:
+    url: https://github.com/rever-ai/CombineFirebase
+    branch: 02bc159531795b98bf7ff83dfe8c794cf805945e
 targets:
   ChopChop:
     type: application
@@ -21,8 +24,7 @@ targets:
       - package: GRDB
       - package: Firebase
         product: FirebaseFirestore
-      - package: Firebase
-        product: FirebaseFirestoreSwift-Beta
+      - package: CombineFirebase
     preBuildScripts:
       - script: |
           if which swiftlint >/dev/null; then
