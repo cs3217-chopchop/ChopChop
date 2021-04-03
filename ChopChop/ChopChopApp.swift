@@ -8,10 +8,14 @@ struct ChopChopApp: App {
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                MainView(viewModel: MainViewModel())
+            if USER_ID == nil {
+                CreateUserProfileView(viewModel: CreateUserProfileViewModel())
+            } else {
+                NavigationView {
+                    MainView(viewModel: MainViewModel())
+                }
+                .environmentObject(settings)
             }
-            .environmentObject(settings)
         }
     }
 }

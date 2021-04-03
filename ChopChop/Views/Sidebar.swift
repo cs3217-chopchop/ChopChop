@@ -9,6 +9,8 @@ import SwiftUI
             cookingSection
             recipesSection
             ingredientsSection
+            recipeFeedSection
+            usersSection
         }
         .listStyle(SidebarListStyle())
         .toolbar {
@@ -174,6 +176,52 @@ import SwiftUI
             }
         }
     }
+
+    var usersSection: some View {
+        NavigationLink(
+            destination: UserCollectionView(viewModel: UserCollectionViewModel())
+        ) {
+            Text("Users")
+                .font(.title3)
+                .bold()
+        }
+    }
+
+    var recipeFeedSection: some View {
+        Section(header: Text("Recipe Feed")) {
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: viewModel.userIds))
+                    .navigationTitle("All Recipes")
+            ) {
+                Label("All Recipes", systemImage: "tray.2")
+            }
+
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: viewModel.followeeIds))
+                    .navigationTitle("Recipes from followees")
+            ) {
+                Label {
+                    Text("Followees")
+                } icon: {
+                    Image(systemName: "folder")
+                        .navigationTitle("Recipes from followees")
+                }
+            }
+
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: [USER_ID].compactMap { $0 }))
+                    .navigationTitle("My Published Recipes")
+            ) {
+                Label {
+                    Text("My Published Recipes")
+                } icon: {
+                    Image(systemName: "folder")
+                }
+            }
+
+        }
+    }
+
  }
 
  struct Sidebar_Previews: PreviewProvider {

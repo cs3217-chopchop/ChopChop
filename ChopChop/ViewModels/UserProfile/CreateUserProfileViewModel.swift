@@ -2,7 +2,8 @@ import Combine
 import Foundation
 import UIKit
 
-// only displayed on first login ( check if local db has user name )
+var USER_ID = UserDefaults.standard.string(forKey: "userId")
+
 final class CreateUserProfileViewModel: ObservableObject {
 
     @Published var name: String = ""
@@ -15,16 +16,19 @@ final class CreateUserProfileViewModel: ObservableObject {
     func onClick() {
         guard USER_ID == nil else {
             assertionFailure()
+            return
         }
 
         guard let newUser = try? User(name: name) else {
             errorMessage = "Empty name not accepted"
             return
         }
-        guard let userId = try storageManager.createUser(user: newUser) else {
+        guard let userId = try? storageManager.createUser(user: newUser) else {
             assertionFailure()
+            return
         }
         UserDefaults.standard.set(userId, forKey: "userId")
+        USER_ID = userId
     }
 
 }

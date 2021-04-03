@@ -270,7 +270,7 @@ extension StorageManager {
     }
 
     // update details of published recipe (note that ratings cant be updated here)
-    func updateOnlineRecipe(recipe: Recipe, userId: String) throws {
+    func updateOnlineRecipe(recipe: Recipe, userId: String) {
         var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
             cuisine = try? fetchRecipeCategory(id: categoryId)?.name
@@ -289,7 +289,7 @@ extension StorageManager {
             ingredients: ingredients,
             steps: steps
         )
-        try firebase.updateRecipeDetails(recipe: recipeRecord)
+        firebase.updateRecipeDetails(recipe: recipeRecord)
     }
 
     // unpublish a recipe through the online interface
@@ -319,8 +319,9 @@ extension StorageManager {
     }
 
     // fetch the details of a single user
-    func userByIdPublisher(userId: String) throws -> AnyPublisher<User, Error> {
-        try firebase.fetchUserById(userId: userId)
+    func userByIdPublisher(userId: String) -> AnyPublisher<User, Error> {
+        firebase.fetchUserById(userId: userId)
+            .eraseToAnyPublisher()
     }
 
     // follow someone
@@ -334,7 +335,7 @@ extension StorageManager {
     }
 
     // rate a recipe
-    func rateRecipe(recipeId: String, userId: String, rating: RatingScore) throws {
+    func rateRecipe(recipeId: String, userId: String, rating: RatingScore) {
         firebase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
         firebase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating))
     }

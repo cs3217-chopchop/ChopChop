@@ -4,10 +4,9 @@ struct CreateUserProfileView: View {
     @ObservedObject var viewModel: CreateUserProfileViewModel
 
     var body: some View {
-        TextField(viewModel.name, text: $viewModel.name)
-//            .foregroundColor(viewModel.errorMsg.isEmpty ? .primary : .red)
-//            .frame(width: 100, height: 50, alignment: .center)
-//            .border(Color.primary, width: 1)
+        TextField("Name", text: $viewModel.name)
+            .frame(width: 200, height: 100, alignment: .center)
+            .border(Color.primary, width: 1)
             .multilineTextAlignment(.center)
         Text(viewModel.errorMessage)
             .foregroundColor(.red)

@@ -17,6 +17,12 @@ final class SidebarViewModel: ObservableObject {
     private var recipeCategoriesCancellable: AnyCancellable?
     private var ingredientCategoriesCancellable: AnyCancellable?
 
+    // to pass into OnlineRecipeCollectionViewModel
+    @Published private(set) var followeeIds: [String] = []
+    @Published private(set) var userIds: [String] = []
+    private var followeesCancellable: AnyCancellable?
+    private var usersCancellable: AnyCancellable?
+
     init() {
         recipeCategoriesCancellable = recipeCategoriesPublisher()
             .sink { [weak self] categories in
@@ -26,6 +32,16 @@ final class SidebarViewModel: ObservableObject {
         ingredientCategoriesCancellable = ingredientCategoriesPublisher()
             .sink { [weak self] categories in
                 self?.ingredientCategories = categories
+            }
+
+        followeesCancellable = followeesPublisher()
+            .sink { [weak self] followees in
+                self?.followeeIds = followees.compactMap { $0.id }
+            }
+
+        usersCancellable = allUsersPublisher()
+            .sink { [weak self] users in
+                self?.userIds = users.compactMap { $0.id }.filter { $0 != USER_ID }
             }
     }
 
@@ -99,6 +115,26 @@ final class SidebarViewModel: ObservableObject {
         storageManager.ingredientCategoriesPublisher()
             .catch { _ in
                 Just<[IngredientCategory]>([])
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func followeesPublisher() -> AnyPublisher<[User], Never> {
+        guard let USER_ID = USER_ID else {
+            fatalError()
+        }
+
+        return storageManager.allFolloweesPublisher(userId: USER_ID)
+            .catch { _ in
+                Just<[User]>([])
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func allUsersPublisher() -> AnyPublisher<[User], Never> {
+        storageManager.allUsersPublisher()
+            .catch { _ in
+                Just<[User]>([])
             }
             .eraseToAnyPublisher()
     }

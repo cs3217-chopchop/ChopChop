@@ -9,7 +9,12 @@ final class NonFolloweeViewModel: ObservableObject, Identifiable {
     }
 
     func onAdd() {
-        storageManager.addFollowee(userId: USER_ID, followeeId: user.id)
+        guard let USER_ID = USER_ID, let nonFolloweeId = user.id  else {
+            assertionFailure()
+            return
+        }
+
+        storageManager.addFollowee(userId: USER_ID, followeeId: nonFolloweeId)
     }
 
 }

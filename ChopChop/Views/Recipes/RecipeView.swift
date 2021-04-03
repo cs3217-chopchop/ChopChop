@@ -23,7 +23,7 @@ struct RecipeView: View {
             Button(action: {
                 viewModel.publish()
             }) {
-                Image(systemName: "paperplane")
+                Label(viewModel.isPublished ? "Publish changes": "Publish", systemImage: "paperplane")
             }
         }
         .background(
@@ -91,11 +91,12 @@ struct RecipeView: View {
                 Text("Cuisine: ")
                 Text(viewModel.recipeCategory.isEmpty ? "Unspecified" : viewModel.recipeCategory)
             }
+            Text("Time taken: \(viewModel.totalTimeTaken)")
         }.font(.body)
     }
 
     var ingredient: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .center) {
             ForEach(viewModel.ingredients, id: \.self) { ingredient in
                 Text(ingredient.description)
             }

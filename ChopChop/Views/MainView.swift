@@ -11,14 +11,10 @@ struct MainView: View {
     }
 
     var body: some View {
-        if USER_ID == nil {
-            CreateUserProfileView(viewModel: CreateUserProfileViewModel())
-        } else {
-            Sidebar(viewModel: SidebarViewModel(), editMode: $editMode)
-            RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",
-                                                                      categoryIds: viewModel.recipeCategories
-                                                                        .compactMap { $0.id } + [nil]))
-        }
+        Sidebar(viewModel: SidebarViewModel(), editMode: $editMode)
+        RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",
+                                                                  categoryIds: viewModel.recipeCategories
+                                                                    .compactMap { $0.id } + [nil]))
     }
 }
 

@@ -24,10 +24,8 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {
-        storageManager.onlineRecipePublisher(recipe.id)
-            .catch { _ in
-                Just<OnlineRecipe>()
-            }
+        storageManager.onlineRecipeByIdPublisher(recipeId: recipe.id)
+            .assertNoFailure()
             .eraseToAnyPublisher()
     }
 

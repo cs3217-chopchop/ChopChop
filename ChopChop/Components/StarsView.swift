@@ -6,6 +6,14 @@ struct StarsView: View {
     var maxRating: Int
     var onTap: (Int) -> Void
 
+    static func defaultFunc(_ input: Int) {}
+
+    init(rating: Double, maxRating: Int, onTap: @escaping (Int) -> Void = defaultFunc) {
+        self.rating = rating
+        self.maxRating = maxRating
+        self.onTap = onTap
+    }
+
     var body: some View {
         let stars = HStack(spacing: 0) {
             ForEach(0..<maxRating) { idx in
@@ -20,15 +28,41 @@ struct StarsView: View {
 
         stars.overlay(
             GeometryReader { g in
+                let starWidth = g.size.width / CGFloat(maxRating)
                 let width = CGFloat(rating) / CGFloat(maxRating) * g.size.width
                 ZStack(alignment: .leading) {
-                    Rectangle()
-                        .frame(width: width)
-                        .foregroundColor(.yellow)
+                    HStack(spacing: 0) {
+                        ForEach(0..<maxRating) { idx in
+                            let width = CGFloat(Double(idx) + 1 < rating
+                                ? 1
+                                : (Double(idx) < rating
+                                    ? rating - Double(idx)
+                                    : 0))
+                            Rectangle()
+                                .frame(width: width * starWidth)
+                                .foregroundColor(.yellow)
+                                .onTapGesture {
+                                    onTap(idx)
+                                }
+                        }
+                    }
                 }
             }
             .mask(stars)
         )
         .foregroundColor(.gray)
+
+//        stars.overlay(
+//            GeometryReader { g in
+//                let width = CGFloat(rating) / CGFloat(maxRating) * g.size.width
+//                ZStack(alignment: .leading) {
+//                    Rectangle()
+//                        .frame(width: width)
+//                        .foregroundColor(.yellow)
+//                }
+//            }
+//            .mask(stars)
+//        )
+//        .foregroundColor(.gray)
     }
 }

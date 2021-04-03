@@ -6,6 +6,7 @@ struct FolloweeView: View {
     var body: some View {
         HStack {
             Text(viewModel.user.name)
+            Spacer()
             Button(action: {
                 viewModel.onDelete()
             }) {

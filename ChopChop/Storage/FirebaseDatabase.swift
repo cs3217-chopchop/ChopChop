@@ -18,7 +18,7 @@ struct FirebaseDatabase {
         // swiftlint:disable implicit_return
         return db.collection(recipePath).document(recipeId).delete()
     }
-    func updateRecipeDetails(recipe: OnlineRecipeRecord) throws {
+    func updateRecipeDetails(recipe: OnlineRecipeRecord) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -216,7 +216,7 @@ struct FirebaseDatabase {
     func removeUser(userId: String) throws {
         return db.collection(userPath).document(userId).delete()
     }
-    func fetchUserById(userId: String) throws -> AnyPublisher<User, Error> {
+    func fetchUserById(userId: String) -> AnyPublisher<User, Error> {
         db.collection(userPath).document(userId)
             .publisher()
             .compactMap({

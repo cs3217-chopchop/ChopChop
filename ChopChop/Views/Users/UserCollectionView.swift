@@ -4,13 +4,15 @@ struct UserCollectionView: View {
     @ObservedObject var viewModel: UserCollectionViewModel
 
     var body: some View {
-        Text("Current followees")
-        ForEach(viewModel.followeeViewModels) { followee in
-            FolloweeView(viewModel: followee)
+        Section(header: Text("Current followees")) {
+            List(viewModel.followeeViewModels) { followee in
+                FolloweeView(viewModel: followee)
+            }
         }
-        Text("Add followees")
-        ForEach(viewModel.nonFolloweeViewModels) { notCurrentFollowee in
-            NonFolloweeView(viewModel: notCurrentFollowee)
+        Section(header: Text("Add followees")) {
+            List(viewModel.nonFolloweeViewModels) { notCurrentFollowee in
+                NonFolloweeView(viewModel: notCurrentFollowee)
+            }
         }
     }
 }

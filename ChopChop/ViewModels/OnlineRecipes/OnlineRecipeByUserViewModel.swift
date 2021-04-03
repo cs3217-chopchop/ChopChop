@@ -2,15 +2,21 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    var creatorName: String
+    @Published var creatorName = "No name"
 
     @Published var saveAs = ""
     @Published var isDownload = false
     @Published var errorMessage = ""
 
+    private var creatorCancellable: AnyCancellable?
+
     override init(recipe: OnlineRecipe) {
         super.init(recipe: recipe)
-        creatorName = storageManager.fetchUserById(userId: recipe.userId).name
+
+        creatorCancellable = creatorPublisher()
+            .sink { [weak self] user in
+                self?.creatorName = user.name
+            }
     }
 
     var ownRating: RecipeRating? {
@@ -18,23 +24,41 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     }
 
     func tapRating(_ ratingValue: Int) {
-        guard ownRating != nil else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: USER_ID, rating: RatingScore(rawValue: ratingValue))
+        guard let USER_ID = USER_ID else {
+            assertionFailure()
             return
         }
-        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: USER_ID, score: RatingScore(rawValue: ratingValue)))
+
+        guard let rating = try? RatingScore(rawValue: ratingValue + 1) else {
+            assertionFailure()
+            return
+        }
+
+        guard ownRating != nil else {
+            storageManager.rateRecipe(recipeId: recipe.id, userId: USER_ID, rating: rating)
+            return
+        }
+        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: USER_ID, score: rating))
     }
 
     func downloadRecipe() {
         do {
-            // take in saveAs
-            try storageManager.downloadRecipe(recipe: recipe)
+            try storageManager.downloadRecipe(newName: saveAs, recipe: recipe)
             isDownload = false
             errorMessage = ""
         } catch {
             errorMessage = "Invalid name"
-
         }
+    }
+
+    func toggleIsDownload() {
+        isDownload.toggle()
+    }
+
+    private func creatorPublisher() -> AnyPublisher<User, Never> {
+        storageManager.userByIdPublisher(userId: recipe.userId)
+            .assertNoFailure()
+            .eraseToAnyPublisher()
     }
 
 }

@@ -23,3 +23,9 @@ extension RatingScore: CustomStringConvertible {
 
 extension RatingScore: Codable {
 }
+
+extension RatingScore: CaseIterable {
+    static var max: Int {
+        RatingScore.allCases.map { $0.rawValue }.max() ?? 0
+    }
+}

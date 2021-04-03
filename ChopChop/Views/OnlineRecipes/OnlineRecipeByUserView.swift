@@ -5,36 +5,38 @@ struct OnlineRecipeByUserView: View {
 
     var body: some View {
         VStack {
-            Text(viewModel.creatorName)
+            Text("Created by: \(viewModel.creatorName)")
             OnlineRecipeView(viewModel: viewModel)
-            ratings
-            downloadButton
-        }.background(EmptyView().sheet(isPresented: $viewModel.isDownload) {
+
+            HStack {
+                Text("Own rating:")
+                StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0), maxRating: RatingScore.max, onTap: viewModel.tapRating)
+            }.frame(width: 230, height: 50, alignment: .center)
+
+            Button(action: {
+                viewModel.toggleIsDownload()
+            }) {
+                Label("Download", systemImage: "square.and.arrow.down")
+            }
+
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 40)
+                .stroke(Color.primary, lineWidth: 4)
+        )
+        .padding([.vertical], 50)
+        .padding([.horizontal], 100)
+        .background(EmptyView().sheet(isPresented: $viewModel.isDownload) {
             // get new recipe name from user
-            TextField("Save as", text: $viewModel.saveAs)
-            Text(viewModel.errorMessage)
-                .foregroundColor(.red)
+            DownloadModal(viewModel: viewModel)
         })
     }
 
-    var ratings: some View {
-        HStack {
-            Text("Own rating")
-            StarsView(rating: viewModel.ownRating?.score.rawValue ?? 0, maxRating: RatingScore.excellent.rawValue, onTap: viewModel.tapRating)
-        }
-    }
-
-    var downloadButton: some View {
-        Button(action: {
-            viewModel.isDownload = true
-        }) {
-            Image(systemName: "square.and.arrow.down")
-        }
-    }
 }
 
 struct OnlineRecipeByUserView_Previews: PreviewProvider {
+    // swiftlint:disable force_try line_length
     static var previews: some View {
-        OnlineRecipeByUserView()
+        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], ingredients: [], ratings: [], created: Date())))
     }
 }

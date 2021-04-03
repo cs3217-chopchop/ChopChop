@@ -27,10 +27,13 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var errorMessage = ""
     @Published private(set) var steps = [String]()
     @Published private(set) var ingredients = [String]()
+    @Published private(set) var isPublished = false
+    let totalTimeTaken: String
 
     init(recipe: Recipe) {
         self.recipe = recipe
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
+        totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
 
         bindName()
         bindServing()
@@ -38,6 +41,7 @@ class RecipeViewModel: ObservableObject {
         bindDifficulty()
         bindSteps()
         bindInstructions()
+        bindPublished()
     }
 
     private func bindName() {
@@ -97,8 +101,26 @@ class RecipeViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+    private func bindPublished() {
+        recipe.$onlineId
+            .sink { [weak self] onlineId in
+                print(onlineId)
+                self?.isPublished = onlineId != nil
+            }
+            .store(in: &cancellables)
+    }
+
     func publish() {
-        storageManager.saveOnlineRecipe(recipe: &recipe, userId: USER_ID)
+        guard let USER_ID = USER_ID else {
+            assertionFailure()
+            return
+        }
+
+        guard isPublished else {
+            try? storageManager.publishRecipe(recipe: &recipe, userId: USER_ID)
+            return
+        }
+        storageManager.updateOnlineRecipe(recipe: recipe, userId: USER_ID)
     }
 
 }
