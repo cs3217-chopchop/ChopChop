@@ -48,6 +48,13 @@ class RecipeIngredient: Identifiable {
 
 }
 
+extension RecipeIngredient {
+
+    convenience init(from record: OnlineIngredientRecord) throws {
+        try self.init(name: record.name, quantity: Quantity(from: record.quantity))
+    }
+}
+
 extension RecipeIngredient: Equatable {
     static func == (lhs: RecipeIngredient, rhs: RecipeIngredient) -> Bool {
         lhs.quantity == rhs.quantity && lhs.name == rhs.name

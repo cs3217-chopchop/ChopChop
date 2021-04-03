@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import Combine
 
 struct MainView: View {
     @ObservedObject var viewModel: MainViewModel

@@ -9,6 +9,12 @@ packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: 5.6.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: 7.9.1
+  CombineFirebase:
+    url: https://github.com/rever-ai/CombineFirebase
+    branch: 02bc159531795b98bf7ff83dfe8c794cf805945e
 targets:
   ChopChop:
     type: application
@@ -16,6 +22,9 @@ targets:
     sources: ChopChop
     dependencies:
       - package: GRDB
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: CombineFirebase
     preBuildScripts:
       - script: |
           if which swiftlint >/dev/null; then

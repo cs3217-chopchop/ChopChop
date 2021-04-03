@@ -1,10 +1,3 @@
-//
-//  UnitsMapping.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 17/3/21.
-//
-
 struct QuantityParser {
     static let volumeWordMap: [String: VolumeUnit] = [
         "tablespoon": .tablespoon,

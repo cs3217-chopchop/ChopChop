@@ -29,6 +29,8 @@ struct AppDatabase {
         migrator.registerMigration("CreateRecipe") { db in
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
+                t.column("onlineId", .text)
+                    .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
                     .indexed()
                     .references("recipeCategory", onDelete: .setNull)
@@ -484,10 +486,29 @@ extension AppDatabase {
         }
     }
 
+    func fetchRecipeByOnlineId(onlineId: String) throws -> Recipe? {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(RecipeRecord.Columns.onlineId == onlineId)
+                .including(all: RecipeRecord.ingredients)
+                .including(all: RecipeRecord.steps)
+
+            return try Recipe.fetchOne(db, request)
+        }
+    }
+
     func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
         try dbWriter.read { db in
             let request = RecipeCategoryRecord
                 .filter(key: id)
+            return try RecipeCategory.fetchOne(db, request)
+        }
+    }
+
+    func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
+        try dbWriter.read { db in
+            let request = RecipeCategoryRecord
+                .filter(key: ["name": name])
             return try RecipeCategory.fetchOne(db, request)
         }
     }

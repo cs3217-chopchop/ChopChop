@@ -1,9 +1,3 @@
-//
-//  Parser.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 14/3/21.
-//
 import Foundation
 import NaturalLanguage
 
