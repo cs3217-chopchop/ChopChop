@@ -30,8 +30,8 @@ struct NodeView<Content: View>: View {
                     )
             )
             .overlay(content)
-            .frame(width: isSelected ? Node2.expandedSize.width : Node2.normalSize.width,
-                   height: isSelected ? Node2.expandedSize.height : Node2.normalSize.height)
+            .frame(width: isSelected ? RecipeStepNode.expandedSize.width : RecipeStepNode.normalSize.width,
+                   height: isSelected ? RecipeStepNode.expandedSize.height : RecipeStepNode.normalSize.height)
             .zIndex(isSelected ? 1 : 0)
     }
 }
