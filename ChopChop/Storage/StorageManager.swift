@@ -313,7 +313,9 @@ extension StorageManager {
             )
         }
         firebaseStorage.deleteImage(name: recipe.id)
-        let fetchedRecipe = try self.fetchRecipeByOnlineId(onlineId: recipe.id)
+
+        // might alr have deleted local recipe
+        let fetchedRecipe = try? self.fetchRecipeByOnlineId(onlineId: recipe.id)
         guard var localRecipe = fetchedRecipe else {
             return
         }

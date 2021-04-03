@@ -27,7 +27,6 @@ class OnlineRecipeViewModel: ObservableObject {
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
-                // get name from followee list. otherwise get any name
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return
                 }
@@ -100,7 +99,7 @@ class OnlineRecipeViewModel: ObservableObject {
             assertionFailure()
             return nil
         }
-        if let raterId = (recipe.ratings.first(where: { _ in followeeIds.contains(USER_ID) }))?.userId {
+        if let raterId = (recipe.ratings.first(where: { recipeRating in followeeIds.contains(recipeRating.userId) }))?.userId {
             // return 1 of followees
             return raterId
         }
@@ -108,7 +107,7 @@ class OnlineRecipeViewModel: ObservableObject {
             // return any rater thats not ownself
             return raterId
         }
-        if recipe.ratings.contains(where: { recipeRating in recipeRating.userId == USER_ID }) {
+        if (recipe.ratings.contains{$0.userId == USER_ID}) {
             return USER_ID
         }
         return nil

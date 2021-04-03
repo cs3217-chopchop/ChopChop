@@ -4,7 +4,11 @@ import Combine
 class OnlineRecipeBySelfViewModel: OnlineRecipeViewModel {
 
     func onDelete() {
-        try? storageManager.removeRecipeFromOnline(recipe: recipe)
+        do {
+            try storageManager.removeRecipeFromOnline(recipe: recipe)
+        } catch {
+            assertionFailure("Could not remove recipe from online")
+        }
     }
 
 }

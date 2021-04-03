@@ -31,7 +31,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             return
         }
 
-        guard let rating = try? RatingScore(rawValue: ratingValue + 1) else {
+        guard let rating = RatingScore(rawValue: ratingValue + 1) else {
             assertionFailure()
             return
         }
@@ -45,6 +45,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
 
     func removeRating() {
         guard let ownRating = ownRating else {
+            assertionFailure()
             return
         }
 

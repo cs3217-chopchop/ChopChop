@@ -5,7 +5,7 @@ struct DownloadRecipeView: View {
 
     var body: some View {
         Text("Save as")
-        TextField("New Recipe Name", text: $viewModel.saveAs)
+        TextField("New Recipe Name", text: $viewModel.recipeNameToSave)
             .frame(width: 400, height: 50, alignment: .center)
             .border(Color.primary, width: 1)
             .multilineTextAlignment(.center)

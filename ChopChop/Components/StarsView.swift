@@ -4,11 +4,9 @@ import SwiftUI
 struct StarsView: View {
     var rating: Double
     var maxRating: Int
-    var onTap: (Int) -> Void
+    var onTap: ((Int) -> Void)?
 
-    static func defaultFunc(_ input: Int) {}
-
-    init(rating: Double, maxRating: Int, onTap: @escaping (Int) -> Void = defaultFunc) {
+    init(rating: Double, maxRating: Int, onTap: ((Int) -> Void)? = nil) {
         self.rating = rating
         self.maxRating = maxRating
         self.onTap = onTap
@@ -21,7 +19,9 @@ struct StarsView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .onTapGesture {
-                        onTap(idx)
+                        if let onTap = onTap {
+                            onTap(idx)
+                        }
                     }
             }
         }
@@ -42,7 +42,9 @@ struct StarsView: View {
                                 .frame(width: width * starWidth)
                                 .foregroundColor(.yellow)
                                 .onTapGesture {
-                                    onTap(idx)
+                                    if let onTap = onTap {
+                                        onTap(idx)
+                                    }
                                 }
                         }
                     }

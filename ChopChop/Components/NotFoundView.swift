@@ -8,7 +8,7 @@ struct NotFoundView: View {
             Spacer()
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
-            Text("No \(entityName) found")
+            Text("No \(entityName) Found")
             Spacer()
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)

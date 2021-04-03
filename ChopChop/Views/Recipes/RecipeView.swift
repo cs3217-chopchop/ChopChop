@@ -10,7 +10,6 @@ struct RecipeView: View {
                 } else {
                     recipeBanner
                 }
-
                 recipeDetails
             }
             Button(action: {

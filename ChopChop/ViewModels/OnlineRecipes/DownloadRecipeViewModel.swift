@@ -2,7 +2,7 @@ import Foundation
 
 class DownloadRecipeViewModel: ObservableObject {
 
-    @Published var saveAs = ""
+    @Published var recipeNameToSave = ""
     @Published var recipeToDownload: OnlineRecipe?
     @Published var isShow = false
     @Published var errorMessage = ""
@@ -11,7 +11,7 @@ class DownloadRecipeViewModel: ObservableObject {
     func setRecipe(recipe: OnlineRecipe) {
         recipeToDownload = recipe
         isShow = true
-        saveAs = ""
+        recipeNameToSave = ""
         errorMessage = ""
     }
 
@@ -21,9 +21,10 @@ class DownloadRecipeViewModel: ObservableObject {
                 assertionFailure()
                 return
             }
-            try storageManager.downloadRecipe(newName: saveAs, recipe: recipe)
+            try storageManager.downloadRecipe(newName: recipeNameToSave, recipe: recipe)
             recipeToDownload = nil
             isShow = false
+            recipeNameToSave = ""
             errorMessage = ""
         } catch {
             errorMessage = "Invalid name"

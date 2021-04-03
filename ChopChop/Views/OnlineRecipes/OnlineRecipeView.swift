@@ -49,7 +49,6 @@ struct OnlineRecipeView: View {
                 Text("Cuisine: ")
                 Text(viewModel.recipe.cuisine ?? "Unspecified")
             }
-//            Text("Time taken: \(viewModel.totalTimeTaken)")
         }.font(.body)
     }
 
