@@ -7,15 +7,13 @@ struct OnlineRecipeView: View {
         VStack {
             Text(viewModel.recipe.name)
                 .font(.largeTitle)
+                .padding()
                 .foregroundColor(.white)
                 .background(Color.blue)
                 .clipShape(Capsule())
             recipeDetails
             Divider()
-            HStack {
-                Text("Average rating: ")
-                StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
-            }.frame(width: 250, height: 50, alignment: .center)
+            averageRating
         }
 
     }
@@ -63,6 +61,14 @@ struct OnlineRecipeView: View {
                 Text("Step \(idx + 1): \(viewModel.recipe.steps[idx])")
             }
         }.font(.body)
+    }
+
+    var averageRating: some View {
+        HStack {
+            Text("Average rating: ")
+            StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
+            Text(viewModel.ratingDetails)
+        }.frame(width: 400, height: 50, alignment: .center)
     }
 
 }

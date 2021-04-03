@@ -8,8 +8,8 @@ struct ChopChopApp: App {
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     var body: some Scene {
         WindowGroup {
-            if USER_ID == nil {
-                CreateUserProfileView(viewModel: CreateUserProfileViewModel())
+            if settings.userId == nil {
+                CreateUserProfileView(viewModel: CreateUserProfileViewModel(settings: settings))
             } else {
                 NavigationView {
                     MainView(viewModel: MainViewModel())

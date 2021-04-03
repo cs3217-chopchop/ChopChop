@@ -2,15 +2,17 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    @Published var creatorName = "No name"
-
-    @Published var saveAs = ""
-    @Published var isDownload = false
-    @Published var errorMessage = ""
+    // https://stackoverflow.com/questions/57615920/published-property-wrapper-not-working-on-subclass-of-observableobject
+    @Published var creatorName = "No name" {
+        willSet { self.objectWillChange.send() }
+    }
 
     private var creatorCancellable: AnyCancellable?
+    private var downloadRecipeViewModel: DownloadRecipeViewModel
 
-    override init(recipe: OnlineRecipe) {
+    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel) {
+        self.downloadRecipeViewModel = downloadRecipeViewModel
+
         super.init(recipe: recipe)
 
         creatorCancellable = creatorPublisher()
@@ -41,18 +43,16 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: USER_ID, score: rating))
     }
 
-    func downloadRecipe() {
-        do {
-            try storageManager.downloadRecipe(newName: saveAs, recipe: recipe)
-            isDownload = false
-            errorMessage = ""
-        } catch {
-            errorMessage = "Invalid name"
+    func removeRating() {
+        guard let ownRating = ownRating else {
+            return
         }
+
+        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
     }
 
-    func toggleIsDownload() {
-        isDownload.toggle()
+    func setRecipe() {
+        downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
     private func creatorPublisher() -> AnyPublisher<User, Never> {

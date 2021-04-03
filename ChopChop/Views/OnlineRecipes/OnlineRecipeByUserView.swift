@@ -13,11 +13,19 @@ struct OnlineRecipeByUserView: View {
                 StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0), maxRating: RatingScore.max, onTap: viewModel.tapRating)
             }.frame(width: 230, height: 50, alignment: .center)
 
+            if viewModel.ownRating != nil {
+                Button(action: {
+                    viewModel.removeRating()
+                }) {
+                    Text("Remove rating")
+                }
+            }
+
             Button(action: {
-                viewModel.toggleIsDownload()
+                viewModel.setRecipe()
             }) {
                 Label("Download", systemImage: "square.and.arrow.down")
-            }
+            }.padding()
 
         }
         .overlay(
@@ -26,10 +34,6 @@ struct OnlineRecipeByUserView: View {
         )
         .padding([.vertical], 50)
         .padding([.horizontal], 100)
-        .background(EmptyView().sheet(isPresented: $viewModel.isDownload) {
-            // get new recipe name from user
-            DownloadModal(viewModel: viewModel)
-        })
     }
 
 }
@@ -37,6 +41,6 @@ struct OnlineRecipeByUserView: View {
 struct OnlineRecipeByUserView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
     static var previews: some View {
-        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], ingredients: [], ratings: [], created: Date())))
+        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel()))
     }
 }

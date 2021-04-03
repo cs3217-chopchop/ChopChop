@@ -37,7 +37,7 @@ struct IngredientCollectionView: View {
             }
 
             if viewModel.ingredients.isEmpty {
-                notFoundView
+                NotFoundView(entityName: "Ingredients")
             } else {
                 switch settings.viewType {
                 case .list:
@@ -87,16 +87,6 @@ struct IngredientCollectionView: View {
             .fixedSize()
         }
         .padding([.leading, .trailing])
-    }
-
-    var notFoundView: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "text.badge.xmark")
-                .font(.system(size: 60))
-            Text("No ingredients found")
-        }
-        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-        .foregroundColor(.secondary)
     }
 
     var listView: some View {

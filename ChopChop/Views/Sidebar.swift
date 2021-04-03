@@ -200,23 +200,14 @@ import SwiftUI
                 destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: viewModel.followeeIds))
                     .navigationTitle("Recipes from followees")
             ) {
-                Label {
-                    Text("Followees")
-                } icon: {
-                    Image(systemName: "folder")
-                        .navigationTitle("Recipes from followees")
-                }
+                Label("Recipes from followees", systemImage: "folder")
             }
 
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: [USER_ID].compactMap { $0 }))
                     .navigationTitle("My Published Recipes")
             ) {
-                Label {
-                    Text("My Published Recipes")
-                } icon: {
-                    Image(systemName: "folder")
-                }
+                Label("My Published Recipes", systemImage: "folder")
             }
 
         }

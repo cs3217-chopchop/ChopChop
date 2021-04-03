@@ -13,7 +13,7 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
+        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
@@ -414,7 +414,8 @@ extension StorageManager {
         }
         var localRecipe = try Recipe(
             name: newName,
-            onlineId: recipe.id,
+            // if original creator, create a link to online recipe. otherwise nil
+            onlineId: recipe.userId == USER_ID ? recipe.userId : nil,
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,

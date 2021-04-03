@@ -104,7 +104,6 @@ class RecipeViewModel: ObservableObject {
     private func bindPublished() {
         recipe.$onlineId
             .sink { [weak self] onlineId in
-                print(onlineId)
                 self?.isPublished = onlineId != nil
             }
             .store(in: &cancellables)

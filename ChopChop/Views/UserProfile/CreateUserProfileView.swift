@@ -4,8 +4,11 @@ struct CreateUserProfileView: View {
     @ObservedObject var viewModel: CreateUserProfileViewModel
 
     var body: some View {
+        Text("Welcome to chopchop!")
+            .font(.largeTitle)
+            .padding()
         TextField("Name", text: $viewModel.name)
-            .frame(width: 200, height: 100, alignment: .center)
+            .frame(width: 400, height: 50, alignment: .center)
             .border(Color.primary, width: 1)
             .multilineTextAlignment(.center)
         Text(viewModel.errorMessage)
@@ -20,6 +23,6 @@ struct CreateUserProfileView: View {
 
 struct UserProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        CreateUserProfileView(viewModel: CreateUserProfileViewModel())
+        CreateUserProfileView(viewModel: CreateUserProfileViewModel(settings: UserSettings()))
     }
 }

@@ -51,18 +51,5 @@ struct StarsView: View {
             .mask(stars)
         )
         .foregroundColor(.gray)
-
-//        stars.overlay(
-//            GeometryReader { g in
-//                let width = CGFloat(rating) / CGFloat(maxRating) * g.size.width
-//                ZStack(alignment: .leading) {
-//                    Rectangle()
-//                        .frame(width: width)
-//                        .foregroundColor(.yellow)
-//                }
-//            }
-//            .mask(stars)
-//        )
-//        .foregroundColor(.gray)
     }
 }

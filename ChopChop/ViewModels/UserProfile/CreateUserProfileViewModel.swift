@@ -2,15 +2,15 @@ import Combine
 import Foundation
 import UIKit
 
-var USER_ID = UserDefaults.standard.string(forKey: "userId")
-
 final class CreateUserProfileViewModel: ObservableObject {
+    private var settings: UserSettings
 
     @Published var name: String = ""
     private let storageManager = StorageManager()
     @Published var errorMessage = ""
 
-    init() {
+    init(settings: UserSettings) {
+        self.settings = settings
     }
 
     func onClick() {
@@ -29,6 +29,7 @@ final class CreateUserProfileViewModel: ObservableObject {
         }
         UserDefaults.standard.set(userId, forKey: "userId")
         USER_ID = userId
+        settings.userId = userId
     }
 
 }

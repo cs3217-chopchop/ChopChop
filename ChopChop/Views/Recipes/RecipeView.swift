@@ -1,10 +1,3 @@
-//
-//  RecipeView.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 21/3/21.
-//
-
 import SwiftUI
 
 struct RecipeView: View {
