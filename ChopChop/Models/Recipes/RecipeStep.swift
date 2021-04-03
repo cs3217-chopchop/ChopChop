@@ -11,11 +11,12 @@ class RecipeStep {
     }
 
     // TODO: Remove content check
-    init(content: String) throws {
+    init(content: String, id: Int64? = nil) throws {
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedContent.isEmpty else {
             throw RecipeStepError.invalidContent
         }
+        self.id = id
         self.content = trimmedContent
     }
 

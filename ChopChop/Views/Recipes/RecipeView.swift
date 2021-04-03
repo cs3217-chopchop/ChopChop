@@ -99,8 +99,20 @@ struct RecipeView: View {
 
     var instruction: some View {
         VStack(alignment: .leading) {
-            ForEach(0..<viewModel.steps.count, id: \.self) { idx in
-                Text("Step \(idx + 1): \(viewModel.steps[idx])")
+            ForEach(0..<viewModel.stepGraph.nodes.count, id: \.self) { idx in
+                HStack {
+                    Text("Step \(idx + 1):")
+                        .bold()
+                    Text(viewModel.stepGraph.getTopologicallySortedNodes()[idx].label.content)
+                }
+            }
+            HStack {
+                Spacer()
+                NavigationLink(destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph))) {
+                    Label("Detailed instruction view", systemImage: "rectangle.expand.vertical")
+                }
+                .padding()
+                Spacer()
             }
         }.font(.body)
     }

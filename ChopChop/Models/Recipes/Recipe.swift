@@ -10,7 +10,7 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var difficulty: Difficulty?
     @Published private(set) var steps: [RecipeStep]
     @Published private(set) var ingredients: [RecipeIngredient]
-    private(set) var stepGraph: RecipeStepGraph
+    @Published private(set) var stepGraph: RecipeStepGraph
 
     init(name: String, servings: Double = 1, difficulty: Difficulty? = nil, steps: [RecipeStep] = [],
          ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {

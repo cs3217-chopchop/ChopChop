@@ -27,7 +27,7 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
         }
 
         let steps = stepRecords?.compactMap {
-            try? RecipeStep(content: $0.content)
+            try? RecipeStep(content: $0.content, id: $0.id)
         } ?? []
 
         let nodes = steps.map { RecipeStepNode($0) }
@@ -35,19 +35,12 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
         let edges: [Edge<RecipeStepNode>] = row.prefetchedRows["recipeStepEdges"]?.compactMap {
             let record = RecipeStepEdgeRecord(row: $0)
 
-            guard let sourceId = record.sourceId,
-                  let destinationId = record.destinationId else {
+            guard let sourceNode = nodes.first(where: { $0.label.id == record.sourceId }),
+                  let destinationNode = nodes.first(where: { $0.label.id == record.destinationId }) else {
                 return nil
             }
 
-            guard let sourceRecord = stepRecords?.first(where: { $0.id == sourceId }),
-                  let destinationRecord = stepRecords?.first(where: { $0.id == destinationId }),
-                  let sourceStep = try? RecipeStep(content: sourceRecord.content),
-                  let destinationStep = try? RecipeStep(content: destinationRecord.content) else {
-                return nil
-            }
-
-            return Edge<RecipeStepNode>(source: RecipeStepNode(sourceStep), destination: RecipeStepNode(destinationStep))
+            return Edge<RecipeStepNode>(source: sourceNode, destination: destinationNode)
         } ?? []
 
         super.init()
