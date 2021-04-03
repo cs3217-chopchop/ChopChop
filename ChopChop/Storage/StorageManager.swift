@@ -296,6 +296,11 @@ extension StorageManager {
             steps: steps
         )
         firebase.updateRecipeDetails(recipe: recipeRecord)
+        let image = self.fetchRecipeImage(name: recipe.name)
+        guard let fetchedImage = image, let onlineId = recipe.onlineId else {
+            return
+        }
+        firebaseStorage.uploadImage(image: fetchedImage, name: onlineId)
     }
 
     // unpublish a recipe through the online interface
