@@ -32,6 +32,7 @@ class RecipeFormViewModel: ObservableObject {
     @Published var ingredients = [RecipeIngredientRowViewModel]()
     @Published var ingredientParsingString = ""
     @Published var instructionParsingString = ""
+    @Published var stepGraph = RecipeStepGraph()
 
     init(recipe: Recipe) {
         existingRecipe = recipe
@@ -47,6 +48,7 @@ class RecipeFormViewModel: ObservableObject {
                 ingredientName: $0.name
             )
         })
+        stepGraph = recipe.stepGraph
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
         fetchCategories()
         isEdit = true
@@ -167,7 +169,8 @@ class RecipeFormViewModel: ObservableObject {
             servings: servingSize,
             difficulty: recipeDifficulty,
             steps: recipeStep,
-            ingredients: recipeIngredient
+            ingredients: recipeIngredient,
+            graph: stepGraph
         )
         newRecipe.id = recipeId
         newRecipe.recipeCategoryId = recipeCategoryId

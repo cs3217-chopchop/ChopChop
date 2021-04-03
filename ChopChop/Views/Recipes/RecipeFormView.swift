@@ -46,7 +46,6 @@ struct RecipeFormView: View {
 
     var instructionSection: some View {
         Section(header: Text("Instructions")) {
-            steps
             addStepButton
         }
     }
@@ -163,24 +162,8 @@ struct RecipeFormView: View {
     }
 
     var addStepButton: some View {
-        Button("Add new step") {
-            viewModel.steps.append("")
-        }
-    }
-
-    var steps: some View {
-        List {
-            ForEach(0..<viewModel.steps.count, id: \.self) { index in
-                HStack {
-                    Text("Step \(index + 1)")
-                    TextField("Description", text: $viewModel.steps[index])
-                    Button("Delete") {
-                        viewModel.steps.remove(at: index)
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                }
-            }
-            .onMove(perform: moveSteps)
+        NavigationLink(destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph))) {
+            Text("Edit Instructions")
         }
     }
 
