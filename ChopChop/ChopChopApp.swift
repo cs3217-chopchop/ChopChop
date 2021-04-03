@@ -55,12 +55,12 @@ struct ChopChopApp: App {
 //                MainView(viewModel: MainViewModel())
 //            }
 //            .environmentObject(settings)
-//            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
-//                .accentColor(.red)
-            if let graph = sessionGraph {
-                SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
-                    .accentColor(.red)
-            }
+            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
+                .accentColor(.red)
+//            if let graph = sessionGraph {
+//                SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
+//                    .accentColor(.red)
+//            }
         }
     }
 }
