@@ -166,11 +166,6 @@ struct RecipeFormView: View {
             Text("Edit Instructions")
         }
     }
-
-    private func moveSteps(source: IndexSet, destination: Int) {
-        viewModel.steps.move(fromOffsets: source, toOffset: destination)
-    }
-
 }
 
 struct RecipeFormView_Previews: PreviewProvider {
