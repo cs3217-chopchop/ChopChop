@@ -51,12 +51,12 @@ struct ChopChopApp: App {
 
     var body: some Scene {
         WindowGroup {
-//            NavigationView {
-//                MainView(viewModel: MainViewModel())
-//            }
-//            .environmentObject(settings)
-            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
-                .accentColor(.red)
+            NavigationView {
+                MainView(viewModel: MainViewModel())
+            }
+            .environmentObject(settings)
+//            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
+//                .accentColor(.red)
 //            if let graph = sessionGraph {
 //                SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
 //                    .accentColor(.red)
