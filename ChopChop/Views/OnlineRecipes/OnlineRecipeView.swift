@@ -5,8 +5,14 @@ struct OnlineRecipeView: View {
 
     var body: some View {
         VStack {
+            Image(uiImage: viewModel.image)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 200)
+                .clipped()
             Text(viewModel.recipe.name)
                 .font(.largeTitle)
+                .bold()
                 .padding()
                 .foregroundColor(.white)
                 .background(Color.blue)

@@ -7,10 +7,13 @@ class OnlineRecipeViewModel: ObservableObject {
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
+    private var imageCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
+
+    @Published private(set) var image = UIImage()
 
     init(recipe: OnlineRecipe) {
         self.recipe = recipe
@@ -33,6 +36,11 @@ class OnlineRecipeViewModel: ObservableObject {
                     .sink { [weak self] user in
                         self?.firstRater = (USER_ID == firstRaterId ? "You" : user.name)
                     }
+            }
+
+        imageCancellable = imagePublisher()
+            .sink { [weak self] image in
+                self?.image = image
             }
     }
 
@@ -79,12 +87,20 @@ class OnlineRecipeViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
+    private func imagePublisher() -> AnyPublisher<UIImage, Never> {
+        storageManager.onlineRecipeImagePublisher(recipeId: recipe.id)
+            .catch { _ in
+                Just<UIImage>(UIImage())
+            }
+            .eraseToAnyPublisher()
+    }
+
     private func getRaterId(recipe: OnlineRecipe) -> String? {
         guard let USER_ID = USER_ID else {
             assertionFailure()
             return nil
         }
-        if let raterId = (recipe.ratings.first(where: { recipeRating in followeeIds.contains(USER_ID) }))?.userId {
+        if let raterId = (recipe.ratings.first(where: { _ in followeeIds.contains(USER_ID) }))?.userId {
             // return 1 of followees
             return raterId
         }
