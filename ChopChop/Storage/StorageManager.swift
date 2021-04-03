@@ -5,6 +5,7 @@ import Combine
 struct StorageManager {
     let appDatabase: AppDatabase
     let firebase = FirebaseDatabase()
+    let firebaseStorage = FirebaseCloudStorage()
 
     init(appDatabase: AppDatabase = .shared) {
         self.appDatabase = appDatabase
@@ -262,6 +263,16 @@ extension StorageManager {
         let onlineId = try firebase.addRecipe(recipe: recipeRecord)
         recipe.onlineId = onlineId
         try self.saveRecipe(&recipe)
+        let recipeImage = self.fetchRecipeImage(name: recipe.name)
+        guard let fetchedRecipeImage = recipeImage else {
+            return
+        }
+        firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId) { downloadURL in
+            guard let downloadURL = downloadURL else {
+                return
+            }
+            firebase.updateRecipeImageURL(url: downloadURL, recipeId: onlineId)
+        }
     }
 
     // this should only be called once when the app first launched

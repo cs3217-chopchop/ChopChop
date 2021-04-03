@@ -24,6 +24,8 @@ targets:
       - package: GRDB
       - package: Firebase
         product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseStorage
       - package: CombineFirebase
     preBuildScripts:
       - script: |
