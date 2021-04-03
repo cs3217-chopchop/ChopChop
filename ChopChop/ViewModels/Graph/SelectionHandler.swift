@@ -1,22 +1,22 @@
 import Combine
 import Foundation
 
-final class SelectionHandler: ObservableObject {
+final class SelectionHandler<T: Node>: ObservableObject {
     @Published private(set) var selectedNodeIds: [UUID] = []
 
-    func isNodeSelected(_ node: RecipeStepNode) -> Bool {
+    func isNodeSelected(_ node: T) -> Bool {
         selectedNodeIds.contains(node.id)
     }
 
-    func selectNode(_ node: RecipeStepNode) {
+    func selectNode(_ node: T) {
         selectedNodeIds = [node.id]
     }
 
-    func deselectNode(_ node: RecipeStepNode) {
+    func deselectNode(_ node: T) {
         selectedNodeIds.removeAll(where: { $0 == node.id })
     }
 
-    func toggleNode(_ node: RecipeStepNode) {
+    func toggleNode(_ node: T) {
         selectedNodeIds.contains(node.id) ? deselectNode(node) : selectNode(node)
     }
 

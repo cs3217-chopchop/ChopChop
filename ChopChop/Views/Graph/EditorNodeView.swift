@@ -3,13 +3,13 @@ import SwiftUI
 
 struct EditorNodeView: View {
     @ObservedObject var viewModel: EditorNodeViewModel
-    @ObservedObject var selection: SelectionHandler
+    @ObservedObject var selection: SelectionHandler<RecipeStepNode>
 
     var isSelected: Bool {
         selection.isNodeSelected(viewModel.node)
     }
 
-    init(viewModel: EditorNodeViewModel, selection: SelectionHandler) {
+    init(viewModel: EditorNodeViewModel, selection: SelectionHandler<RecipeStepNode>) {
         self.viewModel = viewModel
         self.selection = selection
 

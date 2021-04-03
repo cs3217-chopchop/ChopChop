@@ -2,13 +2,13 @@ import Combine
 import SwiftGraph
 
 final class SessionNodeViewModel: ObservableObject {
-    private var graph: UnweightedGraph<Node2>
-    let node: Node2
+    var graph: SessionRecipeStepGraph
+    let node: SessionRecipeStepNode
     let index: Int?
 
-    init(graph: UnweightedGraph<Node2>, node: Node2) {
+    init(graph: SessionRecipeStepGraph, node: SessionRecipeStepNode) {
         self.graph = graph
         self.node = node
-        self.index = graph.topologicalSort()?.firstIndex(of: node)
+        self.index = graph.getTopologicallySortedNodes().firstIndex(of: node)
     }
 }

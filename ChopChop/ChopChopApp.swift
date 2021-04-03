@@ -45,6 +45,9 @@ struct ChopChopApp: App {
 
         return (try? RecipeStepGraph(nodes: nodes, edges: edges)) ?? RecipeStepGraph()
     }()
+    var sessionGraph: SessionRecipeStepGraph? {
+        SessionRecipeStepGraph(graph: graph)
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -52,8 +55,12 @@ struct ChopChopApp: App {
 //                MainView(viewModel: MainViewModel())
 //            }
 //            .environmentObject(settings)
-            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
-                .accentColor(.red)
+//            EditorGraphView(viewModel: EditorGraphViewModel(graph: graph))
+//                .accentColor(.red)
+            if let graph = sessionGraph {
+                SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
+                    .accentColor(.red)
+            }
         }
     }
 }

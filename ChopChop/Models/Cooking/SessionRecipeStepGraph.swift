@@ -46,6 +46,16 @@ class SessionRecipeStepGraph {
 
         self.actionTimeTracker = actionTimeTracker
         self.graph = sessionGraph
+
+        updateCompletableNodes()
+    }
+
+    func getTopologicallySortedNodes() -> [SessionRecipeStepNode] {
+        graph.getTopologicallySortedNodes()
+    }
+
+    func getNodeLayers() -> [[SessionRecipeStepNode]] {
+        graph.getNodeLayers()
     }
 
     private func updateCompletableNodes() {

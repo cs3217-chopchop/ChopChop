@@ -1,12 +1,15 @@
 import SwiftUI
 
 final class SessionRecipeStepNode: Node, ObservableObject {
+    let id = UUID()
     var label: SessionRecipeStep
+    var position: CGPoint?
     @Published var isCompletable = false
     @Published var isCompleted = false
 
-    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker) {
+    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker, position: CGPoint? = nil) {
         self.label = SessionRecipeStep(step: node.label, actionTimeTracker: actionTimeTracker)
+        self.position = position
     }
 }
 

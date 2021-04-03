@@ -10,6 +10,7 @@ class RecipeStep {
         RecipeStepParser.parseTimeTaken(step: content)
     }
 
+    // TODO: Remove content check
     init(content: String) throws {
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedContent.isEmpty else {
