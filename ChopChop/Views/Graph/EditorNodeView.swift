@@ -87,10 +87,12 @@ struct EditorNodeView: View {
     }
 }
 
-// struct EditorNodeView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        EditorNodeView(viewModel: EditorNodeViewModel(graph: UnweightedGraph<Node2>(),
-//                                                      node: Node2()),
-//                       selection: SelectionHandler())
-//    }
-// }
+struct EditorNodeView_Previews: PreviewProvider {
+    static var previews: some View {
+        if let step = try? RecipeStep(content: "#") {
+            EditorNodeView(viewModel: EditorNodeViewModel(graph: RecipeStepGraph(),
+                                                          node: RecipeStepNode(step)),
+                           selection: SelectionHandler())
+        }
+    }
+}

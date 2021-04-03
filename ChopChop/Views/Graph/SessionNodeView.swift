@@ -17,23 +17,19 @@ import SwiftUI
     }
 
     var body: some View {
-        NodeView(isSelected: isSelected, isFaded: viewModel.node.isCompleted || !viewModel.node.isCompletable) {
+        NodeView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
                 if viewModel.index != nil {
                     if let index = viewModel.index {
                         Text("Step \(index + 1)")
                             .font(.headline)
-                            .foregroundColor(viewModel.node.isCompleted || !viewModel.node.isCompletable
-                                                ? .secondary
-                                                : .primary)
+                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
                             .strikethrough(viewModel.node.isCompleted)
                     }
 
                     ScrollView(isSelected ? [.vertical] : []) {
                         Text(viewModel.node.label.step.content)
-                            .foregroundColor(viewModel.node.isCompleted || !viewModel.node.isCompletable
-                                                ? .secondary
-                                                : .primary)
+                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
                             .strikethrough(viewModel.node.isCompleted)
                             .lineLimit(isSelected ? nil : 1)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
@@ -57,18 +53,35 @@ import SwiftUI
                     selection.deselectNode(viewModel.node)
                 }
             }) {
-                Image(systemName: viewModel.node.isCompleted ? "checkmark.square" : "square")
+                Image(systemName: viewModel.node.isCompleted
+                        ? "checkmark.square"
+                        : viewModel.node.isCompletable
+                            ? "square"
+                            : "square.slash")
             }
+            .disabled(!viewModel.node.isCompletable)
+
+            if !viewModel.node.isCompletable {
+                Text("Previous step has not been completed")
+                    .foregroundColor(.secondary)
+                    .font(.caption)
+            }
+
             Spacer()
         }
         .padding(.top, 6)
     }
  }
 
-// struct SessionNodeView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SessionNodeView(viewModel: SessionNodeViewModel(graph: UnweightedGraph<Node2>(),
-//                                                        node: Node2()),
-//                        selection: SelectionHandler())
-//    }
-// }
+struct SessionNodeView_Previews: PreviewProvider {
+    static var previews: some View {
+        if let step = try? RecipeStepNode(RecipeStep(content: "#")),
+           let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
+            SessionNodeView(viewModel:
+                                SessionNodeViewModel(graph: graph,
+                                                     node: SessionRecipeStepNode(step,
+                                                                                 actionTimeTracker: ActionTimeTracker())),
+                            selection: SelectionHandler())
+        }
+    }
+}

@@ -52,8 +52,10 @@ import SwiftUI
     }
  }
 
-// struct SessionGraphView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SessionGraphView(viewModel: SessionGraphViewModel(graph: UnweightedGraph()))
-//    }
-// }
+struct SessionGraphView_Previews: PreviewProvider {
+    static var previews: some View {
+        if let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
+            SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
+        }
+    }
+}
