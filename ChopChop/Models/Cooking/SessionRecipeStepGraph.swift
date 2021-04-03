@@ -10,18 +10,6 @@ class SessionRecipeStepGraph {
         graph.edges
     }
 
-    var completableNodes: Set<SessionRecipeStepNode> {
-        let notCompletedDestinationNodes = Set(graph.edges
-            .filter { !$0.source.isCompleted }
-            .map { $0.destination })
-
-        return Set(
-            graph.nodes.filter { node in
-                !node.isCompleted && !notCompletedDestinationNodes.contains(node)
-            }
-        )
-    }
-
     init?(graph: RecipeStepGraph) {
         let actionTimeTracker = ActionTimeTracker()
 
@@ -59,7 +47,12 @@ class SessionRecipeStepGraph {
     }
 
     private func updateCompletableNodes() {
-        completableNodes.forEach { $0.isCompletable = true }
+        for node in graph.getTopologicallySortedNodes() {
+            let sourcesAreCompleted = edges.filter({ $0.destination == node }).allSatisfy({ $0.source.isCompleted })
+
+            node.isCompletable = sourcesAreCompleted
+            node.isCompleted = sourcesAreCompleted ? node.isCompleted : false
+        }
     }
 
     func resetSteps() {
@@ -71,8 +64,8 @@ class SessionRecipeStepGraph {
         updateCompletableNodes()
     }
 
-    func completeStep(_ node: SessionRecipeStepNode) {
-        node.isCompleted = true
+    func toggleStep(_ node: SessionRecipeStepNode) {
+        node.isCompleted.toggle()
         updateCompletableNodes()
     }
 }

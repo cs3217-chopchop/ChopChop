@@ -49,7 +49,7 @@ import SwiftUI
         HStack {
             Button(action: {
                 withAnimation {
-                    viewModel.graph.completeStep(viewModel.node)
+                    viewModel.graph.toggleStep(viewModel.node)
                     selection.deselectNode(viewModel.node)
                 }
             }) {
