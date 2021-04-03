@@ -5,6 +5,7 @@ import XCTest
 
 class EdgeTests: XCTestCase {
     struct TestNode: Node {
+        let id = UUID()
         var label: String
 
         init(_ label: String) {

@@ -1030,12 +1030,14 @@ class AppDatabaseTests: XCTestCase {
             guard let sourceRecord = stepRecords.first(where: { $0.id == edgeRecord.sourceId }),
                   let destinationRecord = stepRecords.first(where: { $0.id == edgeRecord.destinationId }),
                   let sourceStep = try? RecipeStep(content: sourceRecord.content),
-                  let destinationStep = try? RecipeStep(content: destinationRecord.content) else {
+                  let destinationStep = try? RecipeStep(content: destinationRecord.content),
+                  let sourceNode = nodes.first(where: { $0.label == sourceStep }),
+                  let destinationNode = nodes.first(where: { $0.label == destinationStep }) else {
                 return nil
             }
 
-            return Edge<RecipeStepNode>(source: RecipeStepNode(sourceStep),
-                                        destination: RecipeStepNode(destinationStep))
+            return Edge<RecipeStepNode>(source: sourceNode,
+                                        destination: destinationNode)
         }.compactMap({ $0 })
         let graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
@@ -1055,9 +1057,9 @@ class AppDatabaseTests: XCTestCase {
 
         let fetchedRecipe = try appDatabase.fetchRecipe(id: id)
 
-        try XCTAssertEqual(fetchedRecipe, recipe)
+        XCTAssertEqual(fetchedRecipe, recipe)
         let fetchedGraph = fetchedRecipe?.stepGraph
-        try XCTAssertEqual(fetchedGraph, recipe.stepGraph)
+        XCTAssertEqual(fetchedGraph, recipe.stepGraph)
     }
 
     func testFetchIngredient() throws {

@@ -10,6 +10,18 @@ class SessionRecipeStepGraph {
         graph.edges
     }
 
+    var completableNodes: Set<SessionRecipeStepNode> {
+        let notCompletedDestinationNodes = Set(graph.edges
+            .filter { !$0.source.isCompleted }
+            .map { $0.destination })
+
+        return Set(
+            graph.nodes.filter { node in
+                !notCompletedDestinationNodes.contains(node)
+            }
+        )
+    }
+
     init?(graph: RecipeStepGraph) {
         let actionTimeTracker = ActionTimeTracker()
 

@@ -3,6 +3,7 @@ import XCTest
 
 class GraphTests: XCTestCase {
     struct IntNode: Node {
+        let id = UUID()
         var label: Int
 
         init(_ label: Int) {

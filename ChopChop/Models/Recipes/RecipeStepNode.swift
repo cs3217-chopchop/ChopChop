@@ -14,7 +14,7 @@ final class RecipeStepNode: Node {
 
 extension RecipeStepNode: Equatable {
     static func == (lhs: RecipeStepNode, rhs: RecipeStepNode) -> Bool {
-        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+        lhs.label == rhs.label
     }
 }
 
