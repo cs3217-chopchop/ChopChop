@@ -100,7 +100,7 @@ struct RecipeView: View {
     var instruction: some View {
         VStack(alignment: .leading) {
             ForEach(0..<viewModel.stepGraph.nodes.count, id: \.self) { idx in
-                HStack {
+                HStack(alignment: .top) {
                     Text("Step \(idx + 1):")
                         .bold()
                     Text(viewModel.stepGraph.getTopologicallySortedNodes()[idx].label.content)

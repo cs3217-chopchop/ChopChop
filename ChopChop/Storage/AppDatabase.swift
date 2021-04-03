@@ -247,25 +247,25 @@ extension AppDatabase {
                 pancakes.
                 """),
             // katusdon
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 Gather the ingredients.
                 """),
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 Season the pounded pork chops with salt and pepper.
                 """),
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
                 """),
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
                 """),
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
                 Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
                 Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
                 Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
                 """),
-            RecipeStepRecord(graphId: graphs[1].id, content: """
+            RecipeStepRecord(graphId: graphs[5].id, content: """
                 To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
                 Simmer for a few minutes on medium heat. \
                 Serve by placing 1 serving of steamed rice in a large rice bowl. \
