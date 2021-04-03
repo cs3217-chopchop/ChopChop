@@ -12,10 +12,12 @@ final class EditorNodeViewModel: ObservableObject {
     private var graph: RecipeStepGraph
     let node: RecipeStepNode
     let index: Int?
+    let isEditable: Bool
 
-    init(graph: RecipeStepGraph, node: RecipeStepNode) {
+    init(graph: RecipeStepGraph, node: RecipeStepNode, isEditable: Bool = true) {
         self.graph = graph
         self.node = node
+        self.isEditable = isEditable
 
         self.text = node.label.content
         self.index = graph.getTopologicallySortedNodes().firstIndex(of: node)

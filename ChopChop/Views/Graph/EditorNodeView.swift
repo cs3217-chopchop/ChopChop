@@ -42,7 +42,7 @@ struct EditorNodeView: View {
                         }
                     }
 
-                    if isSelected {
+                    if isSelected && viewModel.isEditable {
                         detailView
                             .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                     }

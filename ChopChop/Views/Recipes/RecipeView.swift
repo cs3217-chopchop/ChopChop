@@ -108,7 +108,8 @@ struct RecipeView: View {
             }
             HStack {
                 Spacer()
-                NavigationLink(destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph))) {
+                NavigationLink(destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph,
+                                                                                            isEditable: false))) {
                     Label("Detailed instruction view", systemImage: "rectangle.expand.vertical")
                 }
                 .padding()

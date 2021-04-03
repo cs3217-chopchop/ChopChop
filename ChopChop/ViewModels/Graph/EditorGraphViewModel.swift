@@ -6,8 +6,9 @@ final class EditorGraphViewModel: ObservableObject {
     @Published var linePhase = CGFloat.zero
 
     var graph: RecipeStepGraph
+    let isEditable: Bool
 
-    init(graph: RecipeStepGraph) {
+    init(graph: RecipeStepGraph, isEditable: Bool = true) {
         let maxCount = graph.getNodeLayers().reduce(into: 0) { $0 = max($0, $1.count) }
 
         for (layerIndex, layer) in graph.getNodeLayers().enumerated() {
@@ -21,6 +22,7 @@ final class EditorGraphViewModel: ObservableObject {
         }
 
         self.graph = graph
+        self.isEditable = isEditable
     }
 
     func onDragPortal(_ value: DragGesture.Value) {
@@ -28,7 +30,7 @@ final class EditorGraphViewModel: ObservableObject {
     }
 
     func onLongPressPortal(_ value: DragGesture.Value) {
-        guard let step = try? RecipeStep(content: "Add step details...") else {
+        guard let step = try? RecipeStep(content: "Add step details..."), isEditable else {
             return
         }
 
@@ -46,7 +48,8 @@ final class EditorGraphViewModel: ObservableObject {
 
     func onLongPressDragNodeEnd(_ value: DragGesture.Value, node: RecipeStepNode) {
         if let targetNode = hitTest(point: value.location),
-           let edge = Edge(source: node, destination: targetNode) {
+           let edge = Edge(source: node, destination: targetNode),
+           isEditable {
             try? graph.addEdge(edge)
         }
     }

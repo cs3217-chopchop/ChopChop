@@ -14,13 +14,13 @@ struct EditorGraphView: View {
         ZStack {
             linesView
 
-            if let info = lineDragInfo {
+            if let info = lineDragInfo, viewModel.isEditable {
                 placeholderLineView(info: info)
             }
 
             nodesView(nodes: viewModel.graph.getTopologicallySortedNodes())
 
-            if let position = placeholderNodePosition {
+            if let position = placeholderNodePosition, viewModel.isEditable {
                 placeholderNodeView(position: position)
             }
         }
@@ -87,7 +87,10 @@ struct EditorGraphView: View {
 
     func nodesView(nodes: [RecipeStepNode]) -> some View {
         ForEach(nodes) { node in
-            EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
+            EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph,
+                                                          node: node,
+                                                          isEditable: viewModel.isEditable),
+                           selection: selection)
                 .position((node.position ?? .zero) + viewModel.portalPosition + portalDragOffset
                             + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
                 .onTapGesture {
