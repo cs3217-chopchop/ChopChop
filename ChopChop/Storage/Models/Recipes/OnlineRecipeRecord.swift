@@ -11,7 +11,6 @@ struct OnlineRecipeRecord {
     var ingredients: [OnlineIngredientRecord]
     var steps: [String]
     var ratings: [RecipeRating] = []
-    @ExplicitNull var imageURL: String?
     @ServerTimestamp var created: Date?
 
 }

@@ -267,12 +267,7 @@ extension StorageManager {
         guard let fetchedRecipeImage = recipeImage else {
             return
         }
-        firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId) { downloadURL in
-            guard let downloadURL = downloadURL else {
-                return
-            }
-            firebase.updateRecipeImageURL(url: downloadURL, recipeId: onlineId)
-        }
+        firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId)
     }
 
     // this should only be called once when the app first launched
@@ -312,6 +307,7 @@ extension StorageManager {
                 rating: UserRating(recipeOnlineId: recipe.id, score: rating.score)
             )
         }
+        firebaseStorage.deleteImage(name: recipe.id)
         let fetchedRecipe = try self.fetchRecipeByOnlineId(onlineId: recipe.id)
         guard var localRecipe = fetchedRecipe else {
             return
@@ -433,6 +429,24 @@ extension StorageManager {
             ingredients: recipe.ingredients
         )
         try self.saveRecipe(&localRecipe)
+        firebaseStorage.downloadImage(name: recipe.id) { data in
+            guard let fetchedData = data else {
+                return
+            }
+            let image = UIImage(data: fetchedData)
+            guard let fetchedImage = image else {
+                return
+            }
+            try? self.saveRecipeImage(fetchedImage, name: newName)
+        }
+    }
+
+    func onlineRecipeImagePublisher(recipeId: String) -> AnyPublisher<UIImage, Error> {
+        firebaseStorage.fetchImage(name: recipeId)
+            .compactMap({
+                UIImage(data: $0)
+            })
+            .eraseToAnyPublisher()
     }
 }
 

@@ -34,11 +34,6 @@ struct FirebaseDatabase {
         ], merge: true)
     }
 
-    func updateRecipeImageURL(url: String, recipeId: String) {
-        return db.collection(recipePath).document(recipeId)
-            .updateData(["imageURL": url])
-    }
-
     func fetchOnlineRecipeIdByUsers(userIds: [String]) -> AnyPublisher<[OnlineRecipeRecord], Error> {
         userIds.map({
             db.collection(recipePath).whereField("creator", isEqualTo: $0)
