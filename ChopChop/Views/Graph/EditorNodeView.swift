@@ -1,4 +1,3 @@
-import SwiftGraph
 import SwiftUI
 
 struct EditorNodeView: View {

@@ -1,4 +1,3 @@
-import SwiftGraph
 import SwiftUI
 
 final class EditorGraphViewModel: ObservableObject {

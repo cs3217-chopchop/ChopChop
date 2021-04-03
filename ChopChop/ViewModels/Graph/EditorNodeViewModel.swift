@@ -1,5 +1,4 @@
 import Combine
-import SwiftGraph
 
 final class EditorNodeViewModel: ObservableObject {
     @Published var isEditing = false

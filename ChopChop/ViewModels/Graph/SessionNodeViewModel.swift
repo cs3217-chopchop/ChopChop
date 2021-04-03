@@ -1,5 +1,4 @@
 import Combine
-import SwiftGraph
 
 final class SessionNodeViewModel: ObservableObject {
     var graph: SessionRecipeStepGraph
