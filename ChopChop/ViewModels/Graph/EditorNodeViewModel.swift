@@ -19,7 +19,7 @@ final class EditorNodeViewModel: ObservableObject {
         self.isEditable = isEditable
 
         self.text = node.label.content
-        self.index = graph.getTopologicallySortedNodes().firstIndex(of: node)
+        self.index = graph.topologicallySortedNodes.firstIndex(of: node)
     }
 
     func saveAction() {

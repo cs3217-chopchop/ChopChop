@@ -10,7 +10,7 @@ import SwiftUI
         ZStack {
             linesView
 
-            nodesView(nodes: viewModel.graph.getTopologicallySortedNodes())
+            nodesView(nodes: viewModel.graph.topologicallySortedNodes)
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         .contentShape(Rectangle())

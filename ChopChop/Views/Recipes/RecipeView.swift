@@ -103,7 +103,7 @@ struct RecipeView: View {
                 HStack(alignment: .top) {
                     Text("Step \(idx + 1):")
                         .bold()
-                    Text(viewModel.stepGraph.getTopologicallySortedNodes()[idx].label.content)
+                    Text(viewModel.stepGraph.topologicallySortedNodes[idx].label.content)
                 }
             }
             HStack {

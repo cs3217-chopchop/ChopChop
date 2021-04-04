@@ -22,6 +22,11 @@ class SessionRecipeStepGraph {
         )
     }
 
+    init() {
+        graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
+        actionTimeTracker = ActionTimeTracker()
+    }
+
     init?(graph: RecipeStepGraph) {
         let actionTimeTracker = ActionTimeTracker()
 
@@ -50,16 +55,16 @@ class SessionRecipeStepGraph {
         updateCompletableNodes()
     }
 
-    func getTopologicallySortedNodes() -> [SessionRecipeStepNode] {
-        graph.getTopologicallySortedNodes()
+    var topologicallySortedNodes: [SessionRecipeStepNode] {
+        graph.topologicallySortedNodes
     }
 
-    func getNodeLayers() -> [[SessionRecipeStepNode]] {
-        graph.getNodeLayers()
+    var nodeLayers: [[SessionRecipeStepNode]] {
+        graph.nodeLayers
     }
 
     private func updateCompletableNodes() {
-        for node in graph.getTopologicallySortedNodes() {
+        for node in graph.topologicallySortedNodes {
             let sourcesAreCompleted = edges.filter({ $0.destination == node }).allSatisfy({ $0.source.isCompleted })
 
             node.isCompletable = sourcesAreCompleted

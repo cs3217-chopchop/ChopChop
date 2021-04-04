@@ -17,7 +17,7 @@ struct EditorGraphView: View {
                 placeholderLineView(info: info)
             }
 
-            nodesView(nodes: viewModel.graph.getTopologicallySortedNodes())
+            nodesView(nodes: viewModel.graph.topologicallySortedNodes)
 
             if let position = placeholderNodePosition, viewModel.isEditable {
                 placeholderNodeView(position: position)
