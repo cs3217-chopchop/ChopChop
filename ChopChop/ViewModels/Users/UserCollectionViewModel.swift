@@ -3,39 +3,30 @@ import Foundation
 import UIKit
 
 final class UserCollectionViewModel: ObservableObject {
-    @Published private(set) var followeeViewModels: [FolloweeViewModel] = []
-    @Published private(set) var nonFolloweeViewModels: [NonFolloweeViewModel] = []
-
     private let storageManager = StorageManager()
     private var usersCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
-    private var users: [User] = []
-    private var followees: [User] = []
+    @Published private(set) var users: [User] = []
+    @Published private(set) var followees: [User] = []
 
-    init() {
+    private let settings: UserSettings
+
+    init(settings: UserSettings) {
+        self.settings = settings
+
         usersCancellable = usersPublisher()
             .sink { [weak self] users in
-                self?.users = users.filter { $0.id != USER_ID } // exclude self
-                self?.updateViewModels()
+                self?.users = users.filter { $0.id != settings.userId } // exclude self
             }
 
         followeesCancellable = followeesPublisher()
             .sink { [weak self] followees in
                 self?.followees = followees
-                self?.updateViewModels()
             }
     }
 
-    private func updateViewModels() {
-        self.followeeViewModels = []
-        self.nonFolloweeViewModels = []
-        for user in users {
-            if (followees.contains { $0.id == user.id }) {
-                followeeViewModels.append(FolloweeViewModel(user: user))
-            } else {
-                nonFolloweeViewModels.append(NonFolloweeViewModel(user: user))
-            }
-        }
+    var nonFollowees: [User] {
+        users.filter { user in !followees.contains(where: { followee in followee.id == user.id }) }
     }
 
     private func usersPublisher() -> AnyPublisher<[User], Never> {
@@ -47,7 +38,7 @@ final class UserCollectionViewModel: ObservableObject {
     }
 
     private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             assertionFailure()
             return usersPublisher()
         }

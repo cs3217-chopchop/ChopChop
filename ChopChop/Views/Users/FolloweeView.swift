@@ -19,6 +19,6 @@ struct FolloweeView: View {
 struct CurrentFolloweeView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        FolloweeView(viewModel: FolloweeViewModel(user: try! User(id: "Bob", name: "Bob")))
+        FolloweeView(viewModel: FolloweeViewModel(user: try! User(id: "Bob", name: "Bob"), settings: UserSettings()))
     }
 }

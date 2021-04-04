@@ -92,7 +92,7 @@ struct RecipeCollectionView: View {
             NavigationLink(
                 destination: RecipeView(
                     viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe)
+                        recipe: fetchedRecipe, settings: settings)
                 )
             ) {
                 HStack(alignment: .top) {
@@ -120,7 +120,7 @@ struct RecipeCollectionView: View {
             NavigationLink(
                 destination: RecipeView(
                     viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe)
+                        recipe: fetchedRecipe, settings: settings)
                 )
             ) {
                 GridTileImage(recipe: recipe)

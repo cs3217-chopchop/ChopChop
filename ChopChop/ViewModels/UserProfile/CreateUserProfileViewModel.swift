@@ -14,7 +14,7 @@ final class CreateUserProfileViewModel: ObservableObject {
     }
 
     func onClick() {
-        guard USER_ID == nil else {
+        guard settings.userId == nil else {
             assertionFailure()
             return
         }
@@ -28,7 +28,6 @@ final class CreateUserProfileViewModel: ObservableObject {
             return
         }
         UserDefaults.standard.set(userId, forKey: "userId")
-        USER_ID = userId
         settings.userId = userId
     }
 

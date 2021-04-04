@@ -8,12 +8,12 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     }
 
     private var creatorCancellable: AnyCancellable?
-    private var downloadRecipeViewModel: DownloadRecipeViewModel
+    @Published var downloadRecipeViewModel: DownloadRecipeViewModel
 
-    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel) {
+    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         self.downloadRecipeViewModel = downloadRecipeViewModel
 
-        super.init(recipe: recipe)
+        super.init(recipe: recipe, settings: settings)
 
         creatorCancellable = creatorPublisher()
             .sink { [weak self] user in
@@ -22,11 +22,11 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     }
 
     var ownRating: RecipeRating? {
-        recipe.ratings.first(where: { $0.userId == USER_ID })
+        recipe.ratings.first(where: { $0.userId == settings.userId })
     }
 
     func tapRating(_ ratingValue: Int) {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             assertionFailure()
             return
         }

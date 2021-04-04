@@ -18,12 +18,15 @@ final class SidebarViewModel: ObservableObject {
     private var ingredientCategoriesCancellable: AnyCancellable?
 
     // to pass into OnlineRecipeCollectionViewModel
-    private(set) var followeeIds: [String] = []
-    private(set) var userIds: [String] = []
+    @Published private(set) var followeeIds: [String] = []
+    @Published private(set) var userIds: [String] = []
     private var followeesCancellable: AnyCancellable?
     private var usersCancellable: AnyCancellable?
 
-    init() {
+    private let settings: UserSettings
+
+    init(settings: UserSettings) {
+        self.settings = settings
         recipeCategoriesCancellable = recipeCategoriesPublisher()
             .sink { [weak self] categories in
                 self?.recipeCategories = categories
@@ -41,7 +44,7 @@ final class SidebarViewModel: ObservableObject {
 
         usersCancellable = allUsersPublisher()
             .sink { [weak self] users in
-                self?.userIds = users.compactMap { $0.id }.filter { $0 != USER_ID }
+                self?.userIds = users.compactMap { $0.id }.filter { $0 != self?.settings.userId }
             }
     }
 
@@ -120,7 +123,7 @@ final class SidebarViewModel: ObservableObject {
     }
 
     private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             fatalError()
         }
 

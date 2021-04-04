@@ -72,8 +72,9 @@ struct OnlineRecipeView: View {
         HStack {
             Text("Average rating: ")
             StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
+                .frame(width: 200, height: 40, alignment: .center)
             Text(viewModel.ratingDetails)
-        }.frame(width: 400, height: 50, alignment: .center)
+        }.padding()
     }
 
 }
@@ -81,7 +82,6 @@ struct OnlineRecipeView: View {
 struct OnlineRecipeView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
     static var previews: some View {
-        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [],
-            stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date())))
+        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), settings: UserSettings()))
     }
 }

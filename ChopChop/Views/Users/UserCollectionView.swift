@@ -2,23 +2,24 @@ import SwiftUI
 
 struct UserCollectionView: View {
     @ObservedObject var viewModel: UserCollectionViewModel
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
         Section(header: Text("Current followees").font(.title2)) {
-            if viewModel.followeeViewModels.isEmpty {
+            if viewModel.followees.isEmpty {
                 NotFoundView(entityName: "Followees")
             } else {
-                List(viewModel.followeeViewModels) { followee in
-                    FolloweeView(viewModel: followee)
+                List(viewModel.followees) { followee in
+                    FolloweeView(viewModel: FolloweeViewModel(user: followee, settings: settings))
                 }
             }
         }
         Section(header: Text("Add followees").font(.title2)) {
-            if viewModel.nonFolloweeViewModels.isEmpty {
+            if viewModel.nonFollowees.isEmpty {
                 NotFoundView(entityName: "Other Users")
             } else {
-                List(viewModel.nonFolloweeViewModels) { notCurrentFollowee in
-                    NonFolloweeView(viewModel: notCurrentFollowee)
+                List(viewModel.nonFollowees) { notCurrentFollowee in
+                    NonFolloweeView(viewModel: NonFolloweeViewModel(user: notCurrentFollowee, settings: settings))
                 }
             }
         }
@@ -27,6 +28,6 @@ struct UserCollectionView: View {
 
 struct FolloweeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        UserCollectionView(viewModel: UserCollectionViewModel())
+        UserCollectionView(viewModel: UserCollectionViewModel(settings: UserSettings()))
     }
 }
