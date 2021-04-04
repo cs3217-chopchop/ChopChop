@@ -441,10 +441,16 @@ extension StorageManager {
         if let cuisine = recipe.cuisine {
             cuisineId = try self.fetchRecipeCategoryByName(name: cuisine)?.id
         }
+
+        // must be both original owner and not have any local recipes currently connected to this online recipe
+        // in order to establish a connection to this online recipe after download
+        let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
+        let isRecipeAlreadyConnected = (try? fetchRecipeByOnlineId(onlineId: recipe.id)) == nil
+        let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
+
         var localRecipe = try Recipe(
             name: newName,
-            // if original creator, create a link to online recipe. otherwise nil
-            onlineId: recipe.userId == UserDefaults.standard.string(forKey: "userId") ? recipe.id : nil,
+            onlineId: newOnlineId,
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,

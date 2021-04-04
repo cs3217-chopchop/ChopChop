@@ -8,12 +8,9 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     }
 
     private var creatorCancellable: AnyCancellable?
-    @Published var downloadRecipeViewModel: DownloadRecipeViewModel
 
-    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
-        self.downloadRecipeViewModel = downloadRecipeViewModel
-
-        super.init(recipe: recipe, settings: settings)
+    override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
+        super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
 
         creatorCancellable = creatorPublisher()
             .sink { [weak self] user in
@@ -50,10 +47,6 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         }
 
         storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
-    }
-
-    func setRecipe() {
-        downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
     private func creatorPublisher() -> AnyPublisher<User, Never> {

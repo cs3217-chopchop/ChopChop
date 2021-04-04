@@ -23,12 +23,6 @@ struct OnlineRecipeByUserView: View {
                 }
             }
 
-            Button(action: {
-                viewModel.setRecipe()
-            }) {
-                Label("Download", systemImage: "square.and.arrow.down")
-            }.padding()
-
         }
         .overlay(
             RoundedRectangle(cornerRadius: 40)

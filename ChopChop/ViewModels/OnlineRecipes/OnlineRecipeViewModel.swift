@@ -17,8 +17,11 @@ class OnlineRecipeViewModel: ObservableObject {
 
     let settings: UserSettings
 
-    init(recipe: OnlineRecipe, settings: UserSettings) {
+    @Published var downloadRecipeViewModel: DownloadRecipeViewModel
+
+    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         self.recipe = recipe
+        self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
 
         followeesCancellable = followeesPublisher()
@@ -63,6 +66,10 @@ class OnlineRecipeViewModel: ObservableObject {
             return "(from " + firstRater + " and " + String(ratingsCount - 1)
                 + (ratingsCount == 2 ? " other)" : " others)")
         }
+    }
+
+    func setRecipe() {
+        downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
     private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {
