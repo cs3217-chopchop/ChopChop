@@ -14,23 +14,7 @@ struct IngredientCollectionView: View {
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
-            HStack {
-                NavigationLink(
-                    destination: IngredientFormView(
-                        viewModel: IngredientFormViewModel(
-                            addToCategory: viewModel.categoryId))) {
-                    Image(systemName: "plus")
-                }
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        viewModel.filterByExpiryDate.toggle()
-                    }
-                }) {
-                    Text("Filter by expiry date")
-                }
-            }
-            .padding([.leading, .trailing])
+            toolbar
 
             if viewModel.filterByExpiryDate {
                 expiryDatePicker
@@ -66,6 +50,26 @@ struct IngredientCollectionView: View {
             viewModel.expiryDateStart = .today
             viewModel.expiryDateEnd = .today
         }
+    }
+
+    var toolbar: some View {
+        HStack {
+            NavigationLink(
+                destination: IngredientFormView(
+                    viewModel: IngredientFormViewModel(
+                        addToCategory: viewModel.categoryId))) {
+                Image(systemName: "plus")
+            }
+            Spacer()
+            Button(action: {
+                withAnimation {
+                    viewModel.filterByExpiryDate.toggle()
+                }
+            }) {
+                Text("Filter by expiry date")
+            }
+        }
+        .padding([.leading, .trailing])
     }
 
     var expiryDatePicker: some View {
@@ -150,32 +154,7 @@ struct IngredientCollectionView: View {
                     .aspectRatio(1, contentMode: .fill)
                     .cornerRadius(10)
                     .clipped()
-                    .overlay(
-                        ZStack(alignment: .bottomLeading) {
-                            Rectangle()
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(stops: [
-                                            .init(color: .clear, location: 0),
-                                            .init(color: .black, location: 0.5)
-                                        ]),
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .cornerRadius(10)
-                                .opacity(0.8)
-                            VStack(alignment: .leading) {
-                                Text(ingredient.name)
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                Text("Quantity: \(ingredient.totalQuantityDescription)")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                            .padding()
-                        }
-                    )
+                    .overlay(gridOverlay(ingredient))
                     .padding([.leading, .trailing], 8)
             }
             .contextMenu {
@@ -189,6 +168,33 @@ struct IngredientCollectionView: View {
                     Label("Delete Ingredient", systemImage: "trash")
                 }
             }
+        }
+    }
+
+    private func gridOverlay(_ ingredient: Ingredient) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: .clear, location: 0),
+                            .init(color: .black, location: 0.5)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(10)
+                .opacity(0.8)
+            VStack(alignment: .leading) {
+                Text(ingredient.name)
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                Text("Quantity: \(ingredient.totalQuantityDescription)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .padding()
         }
     }
 

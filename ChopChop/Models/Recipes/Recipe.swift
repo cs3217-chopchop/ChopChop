@@ -11,10 +11,12 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var difficulty: Difficulty?
     @Published private(set) var steps: [RecipeStep]
     @Published private(set) var ingredients: [RecipeIngredient]
+    private(set) var stepGraph: RecipeStepGraph
 
     init(name: String, onlineId: String? = nil, servings: Double = 1, recipeCategoryId: Int64? = nil, difficulty: Difficulty? = nil,
-         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = []) throws {
+    steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {
         self.onlineId = onlineId
+
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -29,6 +31,7 @@ class Recipe: FetchableRecord, ObservableObject {
         self.difficulty = difficulty
         self.steps = steps
         self.ingredients = ingredients
+        self.stepGraph = graph
         assert(checkRepresentation())
     }
 
@@ -40,6 +43,7 @@ class Recipe: FetchableRecord, ObservableObject {
         difficulty = newRecipe.difficulty
         steps = newRecipe.steps
         ingredients = newRecipe.ingredients
+        stepGraph = newRecipe.stepGraph
         assert(checkRepresentation())
     }
 
@@ -142,9 +146,7 @@ class Recipe: FetchableRecord, ObservableObject {
         name = row[RecipeRecord.Columns.name]
         servings = row[RecipeRecord.Columns.servings]
         difficulty = row[RecipeRecord.Columns.difficulty]
-        steps = row.prefetchedRows["recipeSteps"]?.compactMap {
-            try? RecipeStep(content: RecipeStepRecord(row: $0).content)
-        } ?? []
+        steps = []
         ingredients = row.prefetchedRows["recipeIngredients"]?.compactMap {
             let record = RecipeIngredientRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
@@ -153,6 +155,9 @@ class Recipe: FetchableRecord, ObservableObject {
 
             return try? RecipeIngredient(name: record.name, quantity: quantity)
         } ?? []
+
+        let graph = row["recipeStepGraph"]
+        stepGraph = row["recipeStepGraph"]
     }
 
 }

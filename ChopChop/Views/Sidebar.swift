@@ -102,77 +102,90 @@ import SwiftUI
 
     var recipesSection: some View {
         Section(header: Text("Recipes")) {
-            NavigationLink(
-                destination: RecipeCollectionView(viewModel:
-                                                    RecipeCollectionViewModel(
-                                                        title: "All Recipes",
-                                                        categoryIds: viewModel.recipeCategories
-                                                            .compactMap { $0.id } + [nil]))
-            ) {
-                Label("All Recipes", systemImage: "tray.2")
-            }
+            allRecipesTab
 
             ForEach(viewModel.recipeCategories) { category in
-                NavigationLink(
-                    destination: RecipeCollectionView(viewModel:
-                                                        RecipeCollectionViewModel(
-                                                            title: category.name,
-                                                            categoryIds: [category.id].compactMap { $0 }))
-                ) {
-                    Label {
-                        Text(category.name)
-                            .lineLimit(1)
-                    } icon: {
-                        Image(systemName: "folder")
-                    }
-                }
+                recipeCategoryTab(category)
             }
             .onDelete(perform: viewModel.deleteRecipeCategories)
             .deleteDisabled(!editMode.isEditing)
 
-            NavigationLink(
-                destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
-            ) {
-                Label("Uncategorised", systemImage: "questionmark.folder")
+            uncategorisedRecipesTab
+        }
+    }
+
+    private var allRecipesTab: some View {
+        NavigationLink(
+            destination: RecipeCollectionView(
+                viewModel: RecipeCollectionViewModel(
+                    title: "All Recipes",
+                    categoryIds: viewModel.recipeCategories.compactMap { $0.id } + [nil]))
+        ) {
+            Label("All Recipes", systemImage: "tray.2")
+        }
+    }
+
+    private func recipeCategoryTab(_ category: RecipeCategory) -> some View {
+        NavigationLink(
+            destination: RecipeCollectionView(
+                viewModel: RecipeCollectionViewModel(
+                    title: category.name,
+                    categoryIds: [category.id].compactMap { $0 }))
+        ) {
+            Label {
+                Text(category.name)
+                    .lineLimit(1)
+            } icon: {
+                Image(systemName: "folder")
             }
+        }
+    }
+
+    private var uncategorisedRecipesTab: some View {
+        NavigationLink(
+            destination: RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "Uncategorised"))
+        ) {
+            Label("Uncategorised", systemImage: "questionmark.folder")
         }
     }
 
     var ingredientsSection: some View {
         Section(header: Text("Ingredients")) {
-            NavigationLink(
-                destination: IngredientCollectionView(viewModel:
-                                                    IngredientCollectionViewModel(
-                                                        title: "All Ingredients",
-                                                        categoryIds: viewModel.ingredientCategories
-                                                            .compactMap { $0.id } + [nil]))
-            ) {
-                Label("All Ingredients", systemImage: "tray.2")
-            }
+            allIngredientsTab
 
             ForEach(viewModel.ingredientCategories) { category in
-                NavigationLink(
-                    destination: IngredientCollectionView(viewModel:
-                                                        IngredientCollectionViewModel(
-                                                            title: category.name,
-                                                            categoryIds: [category.id].compactMap { $0 }))
-                ) {
-                    Label {
-                        Text(category.name)
-                            .lineLimit(1)
-                    } icon: {
-                        Image(systemName: "folder")
-                    }
-
-                }
+                ingredientCategoryTab(category)
             }
             .onDelete(perform: viewModel.deleteIngredientCategories)
             .deleteDisabled(!editMode.isEditing)
 
-            NavigationLink(
-                destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
-            ) {
-                Label("Uncategorised", systemImage: "questionmark.folder")
+            uncategorisedIngredientsTab
+        }
+    }
+
+    private var allIngredientsTab: some View {
+        NavigationLink(
+            destination: IngredientCollectionView(
+                viewModel: IngredientCollectionViewModel(
+                    title: "All Ingredients",
+                    categoryIds: viewModel.ingredientCategories.compactMap { $0.id } + [nil]))
+        ) {
+            Label("All Ingredients", systemImage: "tray.2")
+        }
+    }
+
+    private func ingredientCategoryTab(_ category: IngredientCategory) -> some View {
+        NavigationLink(
+            destination: IngredientCollectionView(
+                viewModel: IngredientCollectionViewModel(
+                    title: category.name,
+                    categoryIds: [category.id].compactMap { $0 }))
+        ) {
+            Label {
+                Text(category.name)
+                    .lineLimit(1)
+            } icon: {
+                Image(systemName: "folder")
             }
         }
     }
@@ -213,6 +226,13 @@ import SwiftUI
         }
     }
 
+    private var uncategorisedIngredientsTab: some View {
+        NavigationLink(
+            destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
+        ) {
+            Label("Uncategorised", systemImage: "questionmark.folder")
+        }
+    }
  }
 
  struct Sidebar_Previews: PreviewProvider {
