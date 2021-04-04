@@ -15,8 +15,11 @@ class OnlineRecipeViewModel: ObservableObject {
 
     @Published private(set) var image = UIImage()
 
-    init(recipe: OnlineRecipe) {
+    let settings: UserSettings
+
+    init(recipe: OnlineRecipe, settings: UserSettings) {
         self.recipe = recipe
+        self.settings = settings
 
         followeesCancellable = followeesPublisher()
             .sink { [weak self] followees in
@@ -33,7 +36,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
                 self?.firstRaterCancellable = self?.firstRaterPublisher(firstRaterId: firstRaterId)
                     .sink { [weak self] user in
-                        self?.firstRater = (USER_ID == firstRaterId ? "You" : user.name)
+                        self?.firstRater = (settings.userId == firstRaterId ? "You" : user.name)
                     }
             }
 
@@ -75,7 +78,7 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             fatalError()
         }
 
@@ -95,7 +98,7 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func getRaterId(recipe: OnlineRecipe) -> String? {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             assertionFailure()
             return nil
         }

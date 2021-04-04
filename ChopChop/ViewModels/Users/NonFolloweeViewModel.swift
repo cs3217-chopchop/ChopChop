@@ -4,12 +4,15 @@ final class NonFolloweeViewModel: ObservableObject, Identifiable {
     @Published var user: User
     private let storageManager = StorageManager()
 
-    init(user: User) {
+    private let settings: UserSettings
+
+    init(user: User, settings: UserSettings) {
         self.user = user
+        self.settings = settings
     }
 
     func onAdd() {
-        guard let USER_ID = USER_ID, let nonFolloweeId = user.id  else {
+        guard let USER_ID = settings.userId, let nonFolloweeId = user.id  else {
             assertionFailure()
             return
         }

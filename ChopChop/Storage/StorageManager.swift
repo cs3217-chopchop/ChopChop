@@ -429,7 +429,7 @@ extension StorageManager {
         var localRecipe = try Recipe(
             name: newName,
             // if original creator, create a link to online recipe. otherwise nil
-            onlineId: recipe.userId == USER_ID ? recipe.id : nil,
+            onlineId: recipe.userId == UserDefaults.standard.string(forKey: "userId") ? recipe.id : nil,
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,

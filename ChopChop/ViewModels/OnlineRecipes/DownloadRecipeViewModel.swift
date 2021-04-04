@@ -4,7 +4,11 @@ class DownloadRecipeViewModel: ObservableObject {
 
     @Published var recipeNameToSave = ""
     @Published var recipeToDownload: OnlineRecipe?
-    @Published var isShow = false
+    @Published var isShow = false {
+        didSet {
+            print("gonna show")
+        }
+    }
     @Published var errorMessage = ""
     private let storageManager = StorageManager()
 

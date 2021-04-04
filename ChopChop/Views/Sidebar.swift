@@ -3,6 +3,7 @@ import SwiftUI
  struct Sidebar: View {
     @ObservedObject var viewModel: SidebarViewModel
     @Binding var editMode: EditMode
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
         List {
@@ -179,7 +180,7 @@ import SwiftUI
 
     var usersSection: some View {
         NavigationLink(
-            destination: UserCollectionView(viewModel: UserCollectionViewModel())
+            destination: UserCollectionView(viewModel: UserCollectionViewModel(settings: settings))
         ) {
             Text("Users")
                 .font(.title3)
@@ -204,7 +205,7 @@ import SwiftUI
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: [USER_ID].compactMap { $0 }))
+                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: [settings.userId].compactMap { $0 }))
                     .navigationTitle("My Published Recipes")
             ) {
                 Label("My Published Recipes", systemImage: "folder")
@@ -217,6 +218,6 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(viewModel: SidebarViewModel(), editMode: .constant(EditMode.inactive))
+        Sidebar(viewModel: SidebarViewModel(settings: UserSettings()), editMode: .constant(EditMode.inactive))
     }
  }

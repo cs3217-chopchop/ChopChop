@@ -8,7 +8,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var recipesCancellable: AnyCancellable?
 
-    let downloadRecipeViewModel = DownloadRecipeViewModel()
+    @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
 
     init(userIds: [String]) {
         self.userIds = userIds

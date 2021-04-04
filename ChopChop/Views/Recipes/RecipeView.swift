@@ -124,6 +124,6 @@ struct RecipeView: View {
 struct RecipeView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        RecipeView(viewModel: RecipeViewModel(recipe: try! Recipe(name: "Test")))
+        RecipeView(viewModel: RecipeViewModel(recipe: try! Recipe(name: "Test"), settings: UserSettings()))
     }
 }

@@ -10,7 +10,8 @@ struct OnlineRecipeByUserView: View {
 
             HStack {
                 Text("Own rating:")
-                StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0), maxRating: RatingScore.max, onTap: viewModel.tapRating)
+                StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
+                          maxRating: RatingScore.max, onTap: viewModel.tapRating)
             }.frame(width: 230, height: 50, alignment: .center)
 
             if viewModel.ownRating != nil {
@@ -41,6 +42,6 @@ struct OnlineRecipeByUserView: View {
 struct OnlineRecipeByUserView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
     static var previews: some View {
-        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel()))
+        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct OnlineRecipeCollectionView: View {
     @ObservedObject var viewModel: OnlineRecipeCollectionViewModel
     @ObservedObject var downloadRecipeViewModel: DownloadRecipeViewModel
+    @EnvironmentObject var settings: UserSettings
 
     init(viewModel: OnlineRecipeCollectionViewModel) {
         self.viewModel = viewModel
@@ -14,15 +15,15 @@ struct OnlineRecipeCollectionView: View {
             NotFoundView(entityName: "Recipes")
         } else {
             ScrollView {
-                if viewModel.userIds == [USER_ID] {
+                if viewModel.userIds == [settings.userId] {
                     ForEach(viewModel.recipes) { recipe in
-                        OnlineRecipeBySelfView(viewModel: OnlineRecipeBySelfViewModel(recipe: recipe))
+                        OnlineRecipeBySelfView(viewModel: OnlineRecipeBySelfViewModel(recipe: recipe, settings: settings))
                     }
                 } else {
                     ForEach(viewModel.recipes) { recipe in
                         OnlineRecipeByUserView(viewModel:
                                                 OnlineRecipeByUserViewModel(recipe: recipe,
-                                                                            downloadRecipeViewModel: downloadRecipeViewModel))
+                                                                            downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
                     }
                 }
             }.sheet(isPresented: $downloadRecipeViewModel.isShow) {

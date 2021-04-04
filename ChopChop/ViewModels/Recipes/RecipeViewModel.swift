@@ -1,10 +1,3 @@
-//
-//  RecipeViewModel.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 21/3/21.
-//
-
 import SwiftUI
 import Combine
 
@@ -30,8 +23,11 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var isPublished = false
     let totalTimeTaken: String
 
-    init(recipe: Recipe) {
+    private let settings: UserSettings
+
+    init(recipe: Recipe, settings: UserSettings) {
         self.recipe = recipe
+        self.settings = settings
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
         totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
 
@@ -110,7 +106,7 @@ class RecipeViewModel: ObservableObject {
     }
 
     func publish() {
-        guard let USER_ID = USER_ID else {
+        guard let USER_ID = settings.userId else {
             assertionFailure()
             return
         }
