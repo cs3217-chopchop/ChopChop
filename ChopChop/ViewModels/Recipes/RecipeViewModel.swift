@@ -106,16 +106,16 @@ class RecipeViewModel: ObservableObject {
     }
 
     func publish() {
-        guard let USER_ID = settings.userId else {
+        guard let userId = settings.userId else {
             assertionFailure()
             return
         }
 
         guard isPublished else {
-            try? storageManager.publishRecipe(recipe: &recipe, userId: USER_ID)
+            try? storageManager.publishRecipe(recipe: &recipe, userId: userId)
             return
         }
-        storageManager.updateOnlineRecipe(recipe: recipe, userId: USER_ID)
+        storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
     }
 
 }

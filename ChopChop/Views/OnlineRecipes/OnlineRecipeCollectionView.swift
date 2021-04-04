@@ -17,15 +17,15 @@ struct OnlineRecipeCollectionView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     ForEach(viewModel.recipes) { recipe in
-                            if viewModel.userIds == [settings.userId] {
+                        if recipe.userId == settings.userId {
                                 OnlineRecipeBySelfView(viewModel: OnlineRecipeBySelfViewModel(recipe: recipe, settings: settings))
-                            } else {
-                                OnlineRecipeByUserView(viewModel:
-                                                        OnlineRecipeByUserViewModel(recipe: recipe,
+                        } else {
+                            OnlineRecipeByUserView(viewModel:
+                                                    OnlineRecipeByUserViewModel(recipe: recipe,
 
-                                                                                    downloadRecipeViewModel: downloadRecipeViewModel,
-                                                                                    settings: settings))
-                            }
+                                                                                downloadRecipeViewModel: downloadRecipeViewModel,
+                                                                                settings: settings))
+                        }
                     }
                 }
             }.background(EmptyView().sheet(isPresented: $downloadRecipeViewModel.isShow) {
@@ -38,6 +38,6 @@ struct OnlineRecipeCollectionView: View {
 
 struct OnlineRecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: []))
+        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher: StorageManager().allRecipesPublisher()))
     }
 }
