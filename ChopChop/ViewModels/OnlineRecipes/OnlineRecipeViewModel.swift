@@ -107,7 +107,7 @@ class OnlineRecipeViewModel: ObservableObject {
             // return any rater thats not ownself
             return raterId
         }
-        if (recipe.ratings.contains{$0.userId == USER_ID}) {
+        if (recipe.ratings.contains { $0.userId == USER_ID }) {
             return USER_ID
         }
         return nil

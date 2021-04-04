@@ -4,12 +4,10 @@ struct NotFoundView: View {
     let entityName: String
 
     var body: some View {
-        VStack(spacing: 10) {
-            Spacer()
+        VStack(alignment: .center, spacing: 10) {
             Image(systemName: "text.badge.xmark")
                 .font(.system(size: 60))
             Text("No \(entityName) Found")
-            Spacer()
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         .foregroundColor(.secondary)
