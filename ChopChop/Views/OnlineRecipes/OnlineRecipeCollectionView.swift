@@ -19,14 +19,12 @@ struct OnlineRecipeCollectionView: View {
                     ForEach(viewModel.recipes) { recipe in
                         if recipe.userId == settings.userId {
                             OnlineRecipeBySelfView(viewModel:
-                                                    OnlineRecipeBySelfViewModel(recipe: recipe,
-                                                                                downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                                OnlineRecipeBySelfViewModel(recipe: recipe,
+                                downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
                         } else {
                             OnlineRecipeByUserView(viewModel:
-                                                    OnlineRecipeByUserViewModel(recipe: recipe,
-
-                                                                                downloadRecipeViewModel: downloadRecipeViewModel,
-                                                                                settings: settings))
+                                OnlineRecipeByUserViewModel(recipe: recipe,
+                                downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
                         }
                     }
                 }
@@ -40,6 +38,7 @@ struct OnlineRecipeCollectionView: View {
 
 struct OnlineRecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher: StorageManager().allRecipesPublisher()))
+        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher:
+                                                                                StorageManager().allRecipesPublisher()))
     }
 }

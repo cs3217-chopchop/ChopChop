@@ -2,7 +2,6 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    // https://stackoverflow.com/questions/57615920/published-property-wrapper-not-working-on-subclass-of-observableobject
     @Published var creatorName = "No name" {
         willSet { self.objectWillChange.send() }
     }
@@ -23,7 +22,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     }
 
     func tapRating(_ ratingValue: Int) {
-        guard let USER_ID = settings.userId else {
+        guard let userId = settings.userId else {
             assertionFailure()
             return
         }
@@ -34,10 +33,10 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         }
 
         guard ownRating != nil else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: USER_ID, rating: rating)
+            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating)
             return
         }
-        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: USER_ID, score: rating))
+        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: userId, score: rating))
     }
 
     func removeRating() {

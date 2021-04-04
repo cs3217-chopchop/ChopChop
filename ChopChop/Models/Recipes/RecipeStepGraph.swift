@@ -47,7 +47,8 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
                 return nil
             }
 
-            return Edge<RecipeStepNode>(source: RecipeStepNode(sourceStep), destination: RecipeStepNode(destinationStep))
+            return Edge<RecipeStepNode>(source: RecipeStepNode(sourceStep),
+                                        destination: RecipeStepNode(destinationStep))
         } ?? []
 
         super.init()

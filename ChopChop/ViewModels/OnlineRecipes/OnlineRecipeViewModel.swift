@@ -85,11 +85,11 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = settings.userId else {
-            fatalError()
+        guard let userId = settings.userId else {
+            fatalError("No user id stored")
         }
 
-        return storageManager.allFolloweesPublisher(userId: USER_ID)
+        return storageManager.allFolloweesPublisher(userId: userId)
             .catch { _ in
                 Just<[User]>([])
             }
@@ -105,20 +105,20 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func getRaterId(recipe: OnlineRecipe) -> String? {
-        guard let USER_ID = settings.userId else {
+        guard let userId = settings.userId else {
             assertionFailure()
             return nil
         }
-        if let raterId = (recipe.ratings.first(where: { recipeRating in followeeIds.contains(recipeRating.userId) }))?.userId {
+        if let raterId = (recipe.ratings.first{followeeIds.contains($0.userId)})?.userId {
             // return 1 of followees
             return raterId
         }
-        if let raterId = (recipe.ratings.first(where: { recipeRating in recipeRating.userId != USER_ID }))?.userId {
+        if let raterId = (recipe.ratings.first{$0.userId != userId})?.userId {
             // return any rater thats not ownself
             return raterId
         }
-        if (recipe.ratings.contains { $0.userId == USER_ID }) {
-            return USER_ID
+        if (recipe.ratings.contains { $0.userId == userId }) {
+            return userId
         }
         return nil
     }

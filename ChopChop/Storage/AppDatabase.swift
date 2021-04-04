@@ -367,7 +367,8 @@ extension AppDatabase {
             graph: &graph)
     }
 
-    func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord], graph: inout RecipeStepGraph) throws {
+    func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
+                    graph: inout RecipeStepGraph) throws {
         try dbWriter.write { db in
             try recipe.save(db)
 

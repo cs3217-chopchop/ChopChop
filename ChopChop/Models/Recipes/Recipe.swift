@@ -13,8 +13,11 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var ingredients: [RecipeIngredient]
     private(set) var stepGraph: RecipeStepGraph
 
-    init(name: String, onlineId: String? = nil, servings: Double = 1, recipeCategoryId: Int64? = nil, difficulty: Difficulty? = nil,
-    steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = [], stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
+    init(name: String, onlineId: String? = nil,
+         servings: Double = 1, recipeCategoryId: Int64? = nil,
+         difficulty: Difficulty? = nil,
+         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = [],
+         stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
         self.onlineId = onlineId
 
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -12,12 +12,12 @@ final class FolloweeViewModel: ObservableObject, Identifiable {
     }
 
     func onDelete() {
-        guard let USER_ID = settings.userId, let followeeID = user.id else {
+        guard let userId = settings.userId, let followeeID = user.id else {
             assertionFailure()
             return
         }
 
-        storageManager.removeFollowee(userId: USER_ID, followeeId: followeeID)
+        storageManager.removeFollowee(userId: userId, followeeId: followeeID)
     }
 
 }

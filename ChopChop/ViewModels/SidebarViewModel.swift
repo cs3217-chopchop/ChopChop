@@ -113,14 +113,14 @@ final class SidebarViewModel: ObservableObject {
 
     var followeesRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
         guard let userId = settings.userId else {
-            fatalError()
+            fatalError("No user id stored")
         }
         return storageManager.allFolloweesRecipePublisher(userId: userId)
     }
 
     var ownRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
         guard let userId = settings.userId else {
-            fatalError()
+            fatalError("No user id stored")
         }
         return storageManager.allRecipesByUsersPublisher(userIds: [userId])
     }
