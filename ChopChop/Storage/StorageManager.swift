@@ -248,9 +248,15 @@ extension StorageManager {
         if let categoryId = recipe.recipeCategoryId {
             cuisine = try? fetchRecipeCategory(id: categoryId)?.name
         }
-        let steps = recipe.steps.map({ $0.content })
         let ingredients = recipe.ingredients.map({
             OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
+        })
+        let stepGraph = recipe.stepGraph
+        let nodes = stepGraph.nodes.map({
+            $0.label.content
+        })
+        let edgeRecords = stepGraph.edges.map({
+            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
         })
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
@@ -259,7 +265,8 @@ extension StorageManager {
             cuisine: cuisine,
             difficulty: recipe.difficulty,
             ingredients: ingredients,
-            steps: steps
+            steps: nodes,
+            stepEdges: edgeRecords
         )
         let onlineId = try firebase.addRecipe(recipe: recipeRecord)
         recipe.onlineId = onlineId
@@ -282,9 +289,15 @@ extension StorageManager {
         if let categoryId = recipe.recipeCategoryId {
             cuisine = try? fetchRecipeCategory(id: categoryId)?.name
         }
-        let steps = recipe.steps.map({ $0.content })
         let ingredients = recipe.ingredients.map({
             OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
+        })
+        let stepGraph = recipe.stepGraph
+        let nodes = stepGraph.nodes.map({
+            $0.label.content
+        })
+        let edgeRecords = stepGraph.edges.map({
+            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
         })
         let recipeRecord = OnlineRecipeRecord(
             id: recipe.onlineId,
@@ -294,7 +307,8 @@ extension StorageManager {
             cuisine: cuisine,
             difficulty: recipe.difficulty,
             ingredients: ingredients,
-            steps: steps
+            steps: nodes,
+            stepEdges: edgeRecords
         )
         firebase.updateRecipeDetails(recipe: recipeRecord)
         let image = self.fetchRecipeImage(name: recipe.name)
@@ -434,8 +448,8 @@ extension StorageManager {
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,
-            steps: try recipe.steps.map({ try RecipeStep(content: $0) }),
-            ingredients: recipe.ingredients
+            ingredients: recipe.ingredients,
+            stepGraph: recipe.stepGraph
         )
         try self.saveRecipe(&localRecipe)
         firebaseStorage.downloadImage(name: recipe.id) { data in
