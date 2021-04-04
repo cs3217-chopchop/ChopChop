@@ -5,9 +5,9 @@ import UIKit
 final class UserCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var usersCancellable: AnyCancellable?
-    private var followeesCancellable: AnyCancellable?
-    @Published private(set) var users: [User] = []
+    @Published private(set) var nonFollowees: [User] = []
     @Published private(set) var followees: [User] = []
+    private var currentUser: User?
 
     private let settings: UserSettings
 
@@ -16,17 +16,10 @@ final class UserCollectionViewModel: ObservableObject {
 
         usersCancellable = usersPublisher()
             .sink { [weak self] users in
-                self?.users = users.filter { $0.id != settings.userId } // exclude self
+                self?.currentUser = users.first { $0.id == settings.userId }
+                self?.followees = users.filter { self?.isFollowee(user: $0) ?? false }
+                self?.nonFollowees = users.filter { self?.isNonFollowee(user: $0) ?? false } // exclude self
             }
-
-        followeesCancellable = followeesPublisher()
-            .sink { [weak self] followees in
-                self?.followees = followees
-            }
-    }
-
-    var nonFollowees: [User] {
-        users.filter { user in !followees.contains(where: { followee in followee.id == user.id }) }
     }
 
     private func usersPublisher() -> AnyPublisher<[User], Never> {
@@ -37,17 +30,14 @@ final class UserCollectionViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = settings.userId else {
-            assertionFailure()
-            return usersPublisher()
-        }
+    private func isNonFollowee(user: User) -> Bool {
+        !(currentUser?.followees.contains(where: { followee in followee == user.id }) ?? false) &&
+            user.id != settings.userId
+    }
 
-        return storageManager.allFolloweesPublisher(userId: USER_ID)
-            .catch { _ in
-                Just<[User]>([])
-            }
-            .eraseToAnyPublisher()
+    private func isFollowee(user: User) -> Bool {
+        (currentUser?.followees.contains(where: { followee in followee == user.id }) ?? false) &&
+            user.id != settings.userId
     }
 
 }

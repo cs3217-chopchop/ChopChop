@@ -204,21 +204,24 @@ import SwiftUI
     var recipeFeedSection: some View {
         Section(header: Text("Recipe Feed")) {
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: viewModel.userIds))
+                destination: OnlineRecipeCollectionView(viewModel:
+                                                            OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher))
                     .navigationTitle("All Recipes")
             ) {
                 Label("All Recipes", systemImage: "tray.2")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: viewModel.followeeIds))
+                destination: OnlineRecipeCollectionView(viewModel:
+                                                            OnlineRecipeCollectionViewModel(publisher:
+                                                                                                viewModel.followeesRecipePublisher))
                     .navigationTitle("Recipes from followees")
             ) {
                 Label("Recipes from followees", systemImage: "folder")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(userIds: [settings.userId].compactMap { $0 }))
+                destination: OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.ownRecipePublisher))
                     .navigationTitle("My Published Recipes")
             ) {
                 Label("My Published Recipes", systemImage: "folder")

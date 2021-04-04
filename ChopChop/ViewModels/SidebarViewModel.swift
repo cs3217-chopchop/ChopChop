@@ -17,12 +17,6 @@ final class SidebarViewModel: ObservableObject {
     private var recipeCategoriesCancellable: AnyCancellable?
     private var ingredientCategoriesCancellable: AnyCancellable?
 
-    // to pass into OnlineRecipeCollectionViewModel
-    @Published private(set) var followeeIds: [String] = []
-    @Published private(set) var userIds: [String] = []
-    private var followeesCancellable: AnyCancellable?
-    private var usersCancellable: AnyCancellable?
-
     private let settings: UserSettings
 
     init(settings: UserSettings) {
@@ -35,16 +29,6 @@ final class SidebarViewModel: ObservableObject {
         ingredientCategoriesCancellable = ingredientCategoriesPublisher()
             .sink { [weak self] categories in
                 self?.ingredientCategories = categories
-            }
-
-        followeesCancellable = followeesPublisher()
-            .sink { [weak self] followees in
-                self?.followeeIds = followees.compactMap { $0.id }
-            }
-
-        usersCancellable = allUsersPublisher()
-            .sink { [weak self] users in
-                self?.userIds = users.compactMap { $0.id }.filter { $0 != self?.settings.userId }
             }
     }
 
@@ -122,25 +106,25 @@ final class SidebarViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func followeesPublisher() -> AnyPublisher<[User], Never> {
-        guard let USER_ID = settings.userId else {
+    // retrieve publishers from StorageManager
+    var allRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        storageManager.allRecipesPublisher()
+    }
+
+    var followeesRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        guard let userId = settings.userId else {
             fatalError()
         }
-
-        return storageManager.allFolloweesPublisher(userId: USER_ID)
-            .catch { _ in
-                Just<[User]>([])
-            }
-            .eraseToAnyPublisher()
+        return storageManager.allFolloweesRecipePublisher(userId: userId)
     }
 
-    private func allUsersPublisher() -> AnyPublisher<[User], Never> {
-        storageManager.allUsersPublisher()
-            .catch { _ in
-                Just<[User]>([])
-            }
-            .eraseToAnyPublisher()
+    var ownRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        guard let userId = settings.userId else {
+            fatalError()
+        }
+        return storageManager.allRecipesByUsersPublisher(userIds: [userId])
     }
+
 }
 
 extension SidebarViewModel {
