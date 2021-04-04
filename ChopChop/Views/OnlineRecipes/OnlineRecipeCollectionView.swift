@@ -15,20 +15,22 @@ struct OnlineRecipeCollectionView: View {
             NotFoundView(entityName: "Recipes")
         } else {
             ScrollView {
-                if viewModel.userIds == [settings.userId] {
+                VStack(spacing: 20) {
                     ForEach(viewModel.recipes) { recipe in
-                        OnlineRecipeBySelfView(viewModel: OnlineRecipeBySelfViewModel(recipe: recipe, settings: settings))
-                    }
-                } else {
-                    ForEach(viewModel.recipes) { recipe in
-                        OnlineRecipeByUserView(viewModel:
-                                                OnlineRecipeByUserViewModel(recipe: recipe,
-                                                                            downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                            if viewModel.userIds == [settings.userId] {
+                                OnlineRecipeBySelfView(viewModel: OnlineRecipeBySelfViewModel(recipe: recipe, settings: settings))
+                            } else {
+                                OnlineRecipeByUserView(viewModel:
+                                                        OnlineRecipeByUserViewModel(recipe: recipe,
+
+                                                                                    downloadRecipeViewModel: downloadRecipeViewModel,
+                                                                                    settings: settings))
+                            }
                     }
                 }
-            }.sheet(isPresented: $downloadRecipeViewModel.isShow) {
+            }.background(EmptyView().sheet(isPresented: $downloadRecipeViewModel.isShow) {
                 DownloadRecipeView(viewModel: downloadRecipeViewModel)
-            }
+            })
         }
 
     }

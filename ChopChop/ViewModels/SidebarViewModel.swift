@@ -18,8 +18,8 @@ final class SidebarViewModel: ObservableObject {
     private var ingredientCategoriesCancellable: AnyCancellable?
 
     // to pass into OnlineRecipeCollectionViewModel
-    private(set) var followeeIds: [String] = []
-    private(set) var userIds: [String] = []
+    @Published private(set) var followeeIds: [String] = []
+    @Published private(set) var userIds: [String] = []
     private var followeesCancellable: AnyCancellable?
     private var usersCancellable: AnyCancellable?
 

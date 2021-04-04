@@ -72,8 +72,9 @@ struct OnlineRecipeView: View {
         HStack {
             Text("Average rating: ")
             StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
+                .frame(width: 200, height: 40, alignment: .center)
             Text(viewModel.ratingDetails)
-        }.frame(width: 400, height: 50, alignment: .center)
+        }.padding()
     }
 
 }

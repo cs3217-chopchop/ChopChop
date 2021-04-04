@@ -12,7 +12,8 @@ struct OnlineRecipeByUserView: View {
                 Text("Own rating:")
                 StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
                           maxRating: RatingScore.max, onTap: viewModel.tapRating)
-            }.frame(width: 230, height: 50, alignment: .center)
+                    .frame(width: 200, height: 40, alignment: .center)
+            }
 
             if viewModel.ownRating != nil {
                 Button(action: {

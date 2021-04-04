@@ -13,7 +13,7 @@ class OnlineRecipeViewModel: ObservableObject {
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
 
-    @Published private(set) var image = UIImage()
+    @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
     let settings: UserSettings
 
@@ -92,7 +92,7 @@ class OnlineRecipeViewModel: ObservableObject {
     private func imagePublisher() -> AnyPublisher<UIImage, Never> {
         storageManager.onlineRecipeImagePublisher(recipeId: recipe.id)
             .catch { _ in
-                Just<UIImage>(UIImage())
+                Just<UIImage>(UIImage(imageLiteralResourceName: "recipe"))
             }
             .eraseToAnyPublisher()
     }

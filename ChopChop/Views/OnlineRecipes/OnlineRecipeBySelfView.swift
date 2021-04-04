@@ -7,12 +7,11 @@ struct OnlineRecipeBySelfView: View {
         VStack {
             HStack {
                 Spacer()
-                Label("Delete from Online", systemImage: "trash")
-                    .foregroundColor(.blue)
-                    .onTapGesture {
-                        viewModel.onDelete()
-                    }
-                    .padding()
+                Button(action: {
+                    viewModel.onDelete()
+                }) {
+                    Label("Unpublish", systemImage: "trash")
+                }.padding()
             }.padding()
             OnlineRecipeView(viewModel: viewModel)
         }
