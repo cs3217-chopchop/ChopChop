@@ -12,36 +12,24 @@ import SwiftUI
 
             nodesView(nodes: viewModel.graph.topologicallySortedNodes)
 
-//            if viewModel.showTimerPanel {
-//                Rectangle()
-//                    .fill(Color(UIColor.systemBackground))
-//                    .overlay(Divider(), alignment: .bottom)
-//                    .overlay(
-//                        ScrollView(.horizontal) {
-//                            HStack {
-//                                TileView(normalSize: CGSize(width: 160, height: 134)) {
-//                                    VStack {
-//                                        Text("Step 1")
-//                                            .font(.headline)
-//                                        Text("ola")
-//                                    }
-//                                }
-//                                TileView(normalSize: CGSize(width: 160, height: 134)) {
-//                                    VStack {
-//                                        Text("Step 2")
-//                                            .font(.headline)
-//                                        Text("ola")
-//                                    }
-//                                }
-//                            }
-//                            .padding()
-//                        }
-//                        .background(Color.orange)
-//                    )
-//                    .frame(height: 160)
-//                    .transition(AnyTransition.move(edge: .top))
-//                    .zIndex(1)
-//            }
+            if viewModel.showTimerPanel {
+                Rectangle()
+                    .fill(Color(UIColor.systemBackground))
+                    .overlay(Divider(), alignment: .bottom)
+                    .overlay(
+                        ScrollView(.horizontal) {
+                            HStack {
+                                ForEach(viewModel.graph.topologicallySortedNodes) { node in
+                                    TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.graph, node: node))
+                                }
+                            }
+                            .padding()
+                        }
+                    )
+                    .frame(height: 160)
+                    .transition(AnyTransition.move(edge: .top))
+                    .zIndex(1)
+            }
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         .contentShape(Rectangle())
@@ -59,17 +47,17 @@ import SwiftUI
                 }
                 .onEnded(viewModel.onDragPortal)
         )
-//        .toolbar {
-//            Button(action: {
-//                withAnimation {
-//                    viewModel.showTimerPanel.toggle()
-//                }
-//            }) {
-//                HStack {
-//                    Image(systemName: "timer")
-//                }
-//            }
-//        }
+        .toolbar {
+            Button(action: {
+                withAnimation {
+                    viewModel.showTimerPanel.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "timer")
+                }
+            }
+        }
     }
 
     var linesView: some View {

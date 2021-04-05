@@ -18,33 +18,31 @@ struct EditorNodeView: View {
     var body: some View {
         TileView(isSelected: isSelected) {
             VStack {
-                if viewModel.index != nil {
-                    if let index = viewModel.index {
-                        Text("Step \(index + 1)")
-                            .font(.headline)
-                    }
+                if let index = viewModel.index {
+                    Text("Step \(index + 1)")
+                        .font(.headline)
+                }
 
-                    if viewModel.isEditing {
-                        TextEditor(text: $viewModel.text)
-                            .background(Color.primary.opacity(0.1))
-                            .transition(.scale)
-                            // Prevent taps from propogating
-                            .onTapGesture {}
-                    } else {
-                        ScrollView(isSelected ? [.vertical] : []) {
-                            Text(viewModel.node.label.content.isEmpty
-                                    ? "Add step details..."
-                                    : viewModel.node.label.content)
-                                .lineLimit(isSelected ? nil : 1)
-                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                                .foregroundColor(viewModel.node.label.content.isEmpty ? .secondary : .primary)
-                        }
+                if viewModel.isEditing {
+                    TextEditor(text: $viewModel.text)
+                        .background(Color.primary.opacity(0.1))
+                        .transition(.scale)
+                        // Prevent taps from propogating
+                        .onTapGesture {}
+                } else {
+                    ScrollView(isSelected ? [.vertical] : []) {
+                        Text(viewModel.node.label.content.isEmpty
+                                ? "Add step details..."
+                                : viewModel.node.label.content)
+                            .lineLimit(isSelected ? nil : 1)
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                            .foregroundColor(viewModel.node.label.content.isEmpty ? .secondary : .primary)
                     }
+                }
 
-                    if isSelected && viewModel.isEditable {
-                        detailView
-                            .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
-                    }
+                if isSelected && viewModel.isEditable {
+                    detailView
+                        .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                 }
             }
             .padding()

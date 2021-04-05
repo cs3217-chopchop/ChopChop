@@ -18,46 +18,32 @@ import SwiftUI
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
-                if viewModel.index != nil {
-                    if let index = viewModel.index {
-                        Text("Step \(index + 1)")
-                            .font(.headline)
-                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
-                            .strikethrough(viewModel.node.isCompleted)
-                    }
+                if let index = viewModel.index {
+                    Text("Step \(index + 1)")
+                        .font(.headline)
+                        .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
+                        .strikethrough(viewModel.node.isCompleted)
+                }
 
-                    ScrollView(isSelected ? [.vertical] : []) {
-                        VStack {
-//                        Text(viewModel.node.label.step.content)
-//                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
-//                            .strikethrough(viewModel.node.isCompleted)
-//                            .lineLimit(isSelected ? nil : 1)
-//                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                            viewModel.textWithTimers.reduce(Text(""), {
-                                $0 + Text("\($1.0)")
-                                    .foregroundColor(viewModel.node.isCompleted
-                                                        ? .secondary
-                                                        : $1.1 == nil
-                                                            ? .primary
-                                                            : .blue)
-                            })
-                            .strikethrough(viewModel.node.isCompleted)
-                            .lineLimit(isSelected ? nil : 1)
-                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-
-                            if isSelected {
-                                ForEach(viewModel.textWithTimers.compactMap({ $0.1 }), id: \.self) { timer in
-                                    CountdownTimerView(viewModel: CountdownTimerViewModel(countdownTimer: timer))
-                                        .padding()
-                                }
-                            }
-                        }
+                ScrollView(isSelected ? [.vertical] : []) {
+                    VStack {
+                        viewModel.textWithTimers.reduce(Text(""), {
+                            $0 + Text($1.0)
+                                .foregroundColor(viewModel.node.isCompleted
+                                                    ? .secondary
+                                                    : $1.1 == nil
+                                                        ? .primary
+                                                        : .blue)
+                        })
+                        .strikethrough(viewModel.node.isCompleted)
+                        .lineLimit(isSelected ? nil : 1)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                     }
+                }
 
-                    if isSelected {
-                        detailView
-                            .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
-                    }
+                if isSelected {
+                    detailView
+                        .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                 }
             }
             .padding()
