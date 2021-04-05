@@ -16,7 +16,7 @@ import SwiftUI
     }
 
     var body: some View {
-        NodeView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
+        TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
                 if viewModel.index != nil {
                     if let index = viewModel.index {
@@ -27,11 +27,31 @@ import SwiftUI
                     }
 
                     ScrollView(isSelected ? [.vertical] : []) {
-                        Text(viewModel.node.label.step.content)
-                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
+                        VStack {
+//                        Text(viewModel.node.label.step.content)
+//                            .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
+//                            .strikethrough(viewModel.node.isCompleted)
+//                            .lineLimit(isSelected ? nil : 1)
+//                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                            viewModel.textWithTimers.reduce(Text(""), {
+                                $0 + Text("\($1.0)")
+                                    .foregroundColor(viewModel.node.isCompleted
+                                                        ? .secondary
+                                                        : $1.1 == nil
+                                                            ? .primary
+                                                            : .blue)
+                            })
                             .strikethrough(viewModel.node.isCompleted)
                             .lineLimit(isSelected ? nil : 1)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+
+                            if isSelected {
+                                ForEach(viewModel.textWithTimers.compactMap({ $0.1 }), id: \.self) { timer in
+                                    CountdownTimerView(viewModel: CountdownTimerViewModel(countdownTimer: timer))
+                                        .padding()
+                                }
+                            }
+                        }
                     }
 
                     if isSelected {

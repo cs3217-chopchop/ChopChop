@@ -2,6 +2,7 @@ import SwiftUI
 
 final class SessionGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
+    @Published var showTimerPanel = false
 
     var graph: SessionRecipeStepGraph
 

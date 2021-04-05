@@ -1,13 +1,18 @@
 import SwiftUI
 
-struct NodeView<Content: View>: View {
+struct TileView<Content: View>: View {
     let isSelected: Bool
     let isFaded: Bool
+    let normalSize: CGSize
+    let expandedSize: CGSize
     let content: Content
 
-    init(isSelected: Bool = false, isFaded: Bool = false, @ViewBuilder content: @escaping() -> Content) {
+    init(isSelected: Bool = false, isFaded: Bool = false, normalSize: CGSize = RecipeStepNode.normalSize,
+         expandedSize: CGSize = RecipeStepNode.expandedSize, @ViewBuilder content: @escaping() -> Content) {
         self.isSelected = isSelected
         self.isFaded = isFaded
+        self.normalSize = normalSize
+        self.expandedSize = expandedSize
         self.content = content()
     }
 
@@ -30,15 +35,15 @@ struct NodeView<Content: View>: View {
                     )
             )
             .overlay(content)
-            .frame(width: isSelected ? RecipeStepNode.expandedSize.width : RecipeStepNode.normalSize.width,
-                   height: isSelected ? RecipeStepNode.expandedSize.height : RecipeStepNode.normalSize.height)
+            .frame(width: isSelected ? expandedSize.width : normalSize.width,
+                   height: isSelected ? expandedSize.height : normalSize.height)
             .zIndex(isSelected ? 1 : 0)
     }
 }
 
  struct NodeView_Previews: PreviewProvider {
     static var previews: some View {
-        NodeView {
+        TileView {
             EmptyView()
         }
     }

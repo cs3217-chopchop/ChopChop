@@ -16,7 +16,7 @@ struct EditorNodeView: View {
     }
 
     var body: some View {
-        NodeView(isSelected: isSelected) {
+        TileView(isSelected: isSelected) {
             VStack {
                 if viewModel.index != nil {
                     if let index = viewModel.index {

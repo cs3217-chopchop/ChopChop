@@ -77,6 +77,16 @@ class CountdownTimer {
 
 }
 
+extension CountdownTimer: Equatable, Hashable {
+    static func == (lhs: CountdownTimer, rhs: CountdownTimer) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
 enum CountdownTimerError: Error {
     case invalidTiming
 }

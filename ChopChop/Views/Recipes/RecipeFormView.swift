@@ -46,7 +46,7 @@ struct RecipeFormView: View {
 
     var instructionSection: some View {
         Section(header: Text("Instructions")) {
-            addStepButton
+            editStepGraphButton
         }
     }
 
@@ -161,7 +161,7 @@ struct RecipeFormView: View {
         }
     }
 
-    var addStepButton: some View {
+    var editStepGraphButton: some View {
         NavigationLink(destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph))) {
             Text("Edit Instructions")
         }
