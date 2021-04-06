@@ -50,25 +50,17 @@ struct EditorGraphView: View {
 
     var linesView: some View {
         ForEach(viewModel.graph.edges, id: \.self) { edge in
-            if let offset = nodeDragOffset {
-                Line(from: (edge.source.position ?? .zero)
-                        + viewModel.portalPosition + portalDragOffset
-                        + (edge.source.id == offset.id ? offset.offset : .zero),
-                     to: (edge.destination.position ?? .zero)
-                        + viewModel.portalPosition + portalDragOffset
-                        + (edge.destination.id == offset.id ? offset.offset : .zero))
-                    .stroke(Color.primary, lineWidth: 1.8)
-            } else {
-                Line(from: (edge.source.position ?? .zero)
-                        + viewModel.portalPosition + portalDragOffset,
-                     to: (edge.destination.position ?? .zero)
-                        + viewModel.portalPosition + portalDragOffset)
-                    .stroke(Color.primary, lineWidth: 1.8)
-                    .onLongPressGesture {
-                        viewModel.graph.removeEdge(edge)
-                        viewModel.objectWillChange.send()
-                    }
-            }
+            Line(from: (edge.source.position ?? .zero)
+                    + viewModel.portalPosition + portalDragOffset
+                    + (edge.source.id == nodeDragOffset?.id ? nodeDragOffset?.offset ?? .zero : .zero),
+                 to: (edge.destination.position ?? .zero)
+                    + viewModel.portalPosition + portalDragOffset
+                    + (edge.destination.id == nodeDragOffset?.id ? nodeDragOffset?.offset ?? .zero : .zero))
+                .stroke(Color.primary, lineWidth: 1.8)
+                .onLongPressGesture {
+                    viewModel.graph.removeEdge(edge)
+                    viewModel.objectWillChange.send()
+                }
         }
     }
 
