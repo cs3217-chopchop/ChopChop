@@ -456,7 +456,7 @@ extension StorageManager {
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,
             ingredients: recipe.ingredients,
-            stepGraph: recipe.stepGraph
+            graph: recipe.stepGraph
         )
         try self.saveRecipe(&localRecipe)
         firebaseStorage.downloadImage(name: recipe.id) { data in

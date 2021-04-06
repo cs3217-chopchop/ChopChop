@@ -18,8 +18,8 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var difficulty: Difficulty?
     @Published var image: UIImage
     @Published private(set) var errorMessage = ""
-    @Published private(set) var steps = [String]()
     @Published private(set) var ingredients = [String]()
+    @Published private(set) var stepGraph = RecipeStepGraph()
     @Published private(set) var isPublished = false
     let totalTimeTaken: String
 
@@ -35,9 +35,10 @@ class RecipeViewModel: ObservableObject {
         bindServing()
         bindRecipeCategory()
         bindDifficulty()
-        bindSteps()
         bindInstructions()
         bindPublished()
+        bindStepGraph()
+
     }
 
     private func bindName() {
@@ -65,11 +66,10 @@ class RecipeViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func bindSteps() {
-        recipe.$steps
-            .sink { [weak self] steps in
-                self?.steps = steps.map({ $0.content })
-
+    private func bindStepGraph() {
+        recipe.$stepGraph
+            .sink { [weak self] stepGraph in
+                self?.stepGraph = stepGraph
             }
             .store(in: &cancellables)
     }

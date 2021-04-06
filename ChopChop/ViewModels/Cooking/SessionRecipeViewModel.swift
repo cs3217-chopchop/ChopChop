@@ -5,14 +5,13 @@ class SessionRecipeViewModel: ObservableObject {
     @Published var servings: Double
     @Published var difficulty: Difficulty?
     @Published var ingredients: [RecipeIngredient]
-    @Published var steps: [SessionRecipeStepViewModel]
+    @Published var stepGraph: SessionRecipeStepGraph
     @Published var totalTimeTaken: String
     @Published var recipeCategory: String
     let sessionRecipe: SessionRecipe
     @Published var isShowComplete = false {
         didSet {
             if !isShowComplete && completeSessionRecipeViewModel.isSuccess {
-                steps.forEach { $0.isDisabled = true }
                 sessionRecipe.updateCompleted()
             }
         }
@@ -32,7 +31,7 @@ class SessionRecipeViewModel: ObservableObject {
         ingredients = recipe.ingredients
         totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
         sessionRecipe = SessionRecipe(recipe: recipe)
-        steps = sessionRecipe.sessionSteps.map { SessionRecipeStepViewModel(sessionRecipeStep: $0) }
+        stepGraph = SessionRecipeStepGraph(graph: recipe.stepGraph) ?? SessionRecipeStepGraph()
         completeSessionRecipeViewModel = CompleteSessionRecipeViewModel(recipe: sessionRecipe.recipe)
         image = storageManager.fetchIngredientImage(name: recipe.name) ?? UIImage(imageLiteralResourceName: "recipe")
 

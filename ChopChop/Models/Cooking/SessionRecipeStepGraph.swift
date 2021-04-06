@@ -17,9 +17,14 @@ class SessionRecipeStepGraph {
 
         return Set(
             graph.nodes.filter { node in
-                !node.isCompleted && !notCompletedDestinationNodes.contains(node)
+                !notCompletedDestinationNodes.contains(node)
             }
         )
+    }
+
+    init() {
+        graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
+        actionTimeTracker = ActionTimeTracker()
     }
 
     init?(graph: RecipeStepGraph) {
@@ -48,10 +53,25 @@ class SessionRecipeStepGraph {
 
         self.actionTimeTracker = actionTimeTracker
         self.graph = sessionGraph
+
+        updateCompletableNodes()
+    }
+
+    var topologicallySortedNodes: [SessionRecipeStepNode] {
+        graph.topologicallySortedNodes
+    }
+
+    var nodeLayers: [[SessionRecipeStepNode]] {
+        graph.nodeLayers
     }
 
     private func updateCompletableNodes() {
-        completableNodes.forEach { $0.isCompletable = true }
+        for node in graph.topologicallySortedNodes {
+            let sourcesAreCompleted = edges.filter({ $0.destination == node }).allSatisfy({ $0.source.isCompleted })
+
+            node.isCompletable = sourcesAreCompleted
+            node.isCompleted = sourcesAreCompleted ? node.isCompleted : false
+        }
     }
 
     func resetSteps() {
@@ -63,8 +83,8 @@ class SessionRecipeStepGraph {
         updateCompletableNodes()
     }
 
-    func completeStep(_ node: SessionRecipeStepNode) {
-        node.isCompleted = true
+    func toggleStep(_ node: SessionRecipeStepNode) {
+        node.isCompleted.toggle()
         updateCompletableNodes()
     }
 }

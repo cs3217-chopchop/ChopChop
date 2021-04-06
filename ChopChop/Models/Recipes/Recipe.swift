@@ -9,17 +9,13 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var servings: Double
     @Published var recipeCategoryId: Int64?
     @Published private(set) var difficulty: Difficulty?
-    @Published private(set) var steps: [RecipeStep]
     @Published private(set) var ingredients: [RecipeIngredient]
-    private(set) var stepGraph: RecipeStepGraph
+    @Published private(set) var stepGraph: RecipeStepGraph
 
-    init(name: String, onlineId: String? = nil,
-         servings: Double = 1, recipeCategoryId: Int64? = nil,
-         difficulty: Difficulty? = nil,
-         steps: [RecipeStep] = [], ingredients: [RecipeIngredient] = [],
-         stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
+    init(name: String, onlineId: String? = nil, servings: Double = 1,
+         recipeCategoryId: Int64? = nil, difficulty: Difficulty? = nil,
+         ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {
         self.onlineId = onlineId
-
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -32,9 +28,8 @@ class Recipe: FetchableRecord, ObservableObject {
         self.servings = servings
         self.recipeCategoryId = recipeCategoryId
         self.difficulty = difficulty
-        self.steps = steps
         self.ingredients = ingredients
-        self.stepGraph = stepGraph
+        self.stepGraph = graph
         assert(checkRepresentation())
     }
 
@@ -44,42 +39,8 @@ class Recipe: FetchableRecord, ObservableObject {
         servings = newRecipe.servings
         recipeCategoryId = newRecipe.recipeCategoryId
         difficulty = newRecipe.difficulty
-        steps = newRecipe.steps
         ingredients = newRecipe.ingredients
         stepGraph = newRecipe.stepGraph
-        assert(checkRepresentation())
-    }
-
-    // step related functions
-    func addStep(content: String) throws {
-        assert(checkRepresentation())
-        steps.append(try RecipeStep(content: content))
-        assert(checkRepresentation())
-    }
-
-    func removeStep(_ removedStep: RecipeStep) {
-        assert(checkRepresentation())
-        guard (steps.contains { $0 == removedStep }) else {
-            return
-        }
-
-        steps.removeAll { $0 == removedStep }
-        assert(checkRepresentation())
-    }
-
-    func reorderStep(idx1: Int, idx2: Int) throws {
-        assert(checkRepresentation())
-        guard idx1 >= 0 && idx1 < steps.count && idx2 >= 0 && idx2 < steps.count else {
-            throw RecipeError.invalidReorderSteps
-        }
-
-        guard idx1 != idx2 else {
-            return
-        }
-
-        let temp = steps[idx1]
-        steps[idx1] = steps[idx2]
-        steps[idx2] = temp
         assert(checkRepresentation())
     }
 
@@ -128,7 +89,7 @@ class Recipe: FetchableRecord, ObservableObject {
 
     /// Returns total time taken to complete the recipe in seconds, computed from time taken for each step
     var totalTimeTaken: Int {
-        steps.map({ $0.timeTaken }).reduce(0, +)
+        stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 
     private func checkRepresentation() -> Bool {
@@ -149,7 +110,6 @@ class Recipe: FetchableRecord, ObservableObject {
         name = row[RecipeRecord.Columns.name]
         servings = row[RecipeRecord.Columns.servings]
         difficulty = row[RecipeRecord.Columns.difficulty]
-        steps = []
         ingredients = row.prefetchedRows["recipeIngredients"]?.compactMap {
             let record = RecipeIngredientRecord(row: $0)
             guard let quantity = try? Quantity(from: record.quantity) else {
@@ -172,8 +132,8 @@ extension Recipe: Equatable {
 }
 
 extension Recipe: NSCopying {
+    // TODO: Properly copy step graph
     func copy(with zone: NSZone? = nil) -> Any {
-        let newSteps = steps.compactMap { $0.copy() as? RecipeStep }
         let newIngredients = ingredients.compactMap { $0.copy() as? RecipeIngredient }
 
         do {
@@ -181,8 +141,8 @@ extension Recipe: NSCopying {
                 name: name,
                 servings: servings,
                 difficulty: difficulty,
-                steps: newSteps,
-                ingredients: newIngredients)
+                ingredients: newIngredients,
+                graph: stepGraph)
             copy.id = id
             copy.recipeCategoryId = recipeCategoryId
             return copy

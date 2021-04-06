@@ -228,29 +228,29 @@ class SessionRecipeStepGraphTests: XCTestCase {
 
         XCTAssertTrue(nodes[0].isCompletable)
 
-        graph.completeStep(nodes[0])
+        graph.toggleStep(nodes[0])
 
         XCTAssertTrue(nodes[0].isCompleted)
         XCTAssertTrue(nodes[1].isCompletable)
         XCTAssertFalse(nodes[8].isCompletable)
 
-        graph.completeStep(nodes[1])
-        graph.completeStep(nodes[2])
+        graph.toggleStep(nodes[1])
+        graph.toggleStep(nodes[2])
 
         XCTAssertTrue(nodes[3].isCompletable)
         XCTAssertTrue(nodes[4].isCompletable)
 
-        graph.completeStep(nodes[3])
+        graph.toggleStep(nodes[3])
 
         XCTAssertFalse(nodes[5].isCompletable)
 
-        graph.completeStep(nodes[4])
+        graph.toggleStep(nodes[4])
 
         XCTAssertTrue(nodes[5].isCompletable)
 
-        graph.completeStep(nodes[5])
-        graph.completeStep(nodes[6])
-        graph.completeStep(nodes[7])
+        graph.toggleStep(nodes[5])
+        graph.toggleStep(nodes[6])
+        graph.toggleStep(nodes[7])
 
         XCTAssertTrue(nodes[8].isCompletable)
     }
@@ -335,7 +335,7 @@ class SessionRecipeStepGraphTests: XCTestCase {
 
         nodes[0].isCompleted = true
 
-        XCTAssertEqual(graph.completableNodes, Set([nodes[1]]))
+        XCTAssertEqual(graph.completableNodes, Set([nodes[0], nodes[1]]))
     }
 
     private func getSessionNode(_ idx: Int, steps: [RecipeStep], nodes: [SessionRecipeStepNode]) -> SessionRecipeStepNode? {
