@@ -4,10 +4,9 @@ import XCTest
 @testable import ChopChop
 
 class RecipeTests: XCTestCase {
-
-    static func generateSteps() -> [RecipeStep] {
+    static func generateStepGraph() -> RecipeStepGraph {
         do {
-            return [
+            let nodes = [
                 try RecipeStep(content: "In a large bowl, mix dry ingredients together until well-blended."),
                 try RecipeStep(content: "Add milk and mix well until smooth.") ,
                 try RecipeStep(content: """
@@ -20,10 +19,16 @@ class RecipeTests: XCTestCase {
                 Cook for 30s until the edges are dry and bubbles appear on surface. Flip; cook for 1 to 2 minutes. \
                 Yields 12 to 14 pancakes.
                 """)
-            ]
+            ].map { RecipeStepNode($0) }
+
+            let edges = (0..<(nodes.count - 1)).compactMap {
+                Edge(source: nodes[$0], destination: nodes[$0 + 1])
+            }
+
+            return try RecipeStepGraph(nodes: nodes, edges: edges)
         } catch {
             XCTFail("Could not generate sample recipe steps")
-            return []
+            return RecipeStepGraph()
         }
     }
 
@@ -47,22 +52,22 @@ class RecipeTests: XCTestCase {
     static func generateSampleRecipe() -> Recipe {
         do {
             return try Recipe(name: "Pancakes", servings: 3, difficulty: Difficulty.easy,
-                              steps: RecipeTests.generateSteps(), ingredients: RecipeTests.generateIngredients())
+                              ingredients: RecipeTests.generateIngredients(), graph: RecipeTests.generateStepGraph())
         } catch {
             fatalError("Could not generate sample recipe")
         }
     }
 
     func testConstruct() throws {
+        let graph = RecipeTests.generateStepGraph()
         let recipe = try Recipe(name: "Pancakes",
-                                steps: RecipeTests.generateSteps(),
-                                ingredients: RecipeTests.generateIngredients()
-                            )
+                                ingredients: RecipeTests.generateIngredients(),
+                                graph: graph)
 
         XCTAssertEqual(recipe.name, "Pancakes")
         XCTAssertEqual(recipe.servings, 1)
         XCTAssertNil(recipe.difficulty)
-        XCTAssertEqual(recipe.steps, RecipeTests.generateSteps())
+        XCTAssertEqual(recipe.stepGraph, graph)
         XCTAssertEqual(recipe.ingredients, RecipeTests.generateIngredients())
     }
 
@@ -71,68 +76,22 @@ class RecipeTests: XCTestCase {
         XCTAssertThrowsError(try Recipe(name: "Recipe", servings: -2))
     }
 
-    func testAddStep() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        try recipe.addStep(content: "Wait some more")
-        XCTAssertEqual(recipe.steps.last, try RecipeStep(content: "Wait some more"))
-    }
-
     func testUpdateRecipe() throws {
         let newRecipe = RecipeTests.generateSampleRecipe()
         let recipeToUpdate = try Recipe(
             name: "Pizza",
             servings: 4,
             difficulty: Difficulty.hard,
-            steps: RecipeTests.generateSteps(),
-            ingredients: RecipeTests.generateIngredients()
+            ingredients: RecipeTests.generateIngredients(),
+            graph: RecipeTests.generateStepGraph()
         )
         newRecipe.updateRecipe(recipeToUpdate)
         XCTAssertEqual(newRecipe.name, recipeToUpdate.name)
         XCTAssertEqual(newRecipe.servings, recipeToUpdate.servings)
         XCTAssertEqual(newRecipe.difficulty, recipeToUpdate.difficulty)
         XCTAssertEqual(newRecipe.recipeCategoryId, newRecipe.recipeCategoryId)
-        XCTAssertEqual(newRecipe.steps, recipeToUpdate.steps)
+        XCTAssertEqual(newRecipe.stepGraph, recipeToUpdate.stepGraph)
         XCTAssertEqual(newRecipe.ingredients, recipeToUpdate.ingredients)
-    }
-
-    func testAddStep_empty() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.addStep(content: "       "))
-    }
-
-    func testRemoveStep() {
-        let recipe = RecipeTests.generateSampleRecipe()
-        guard let lastStep = recipe.steps.last else {
-            XCTFail("There are no steps")
-            return
-        }
-        recipe.removeStep(lastStep)
-
-        var steps = RecipeTests.generateSteps()
-        steps.removeLast()
-        XCTAssertEqual(recipe.steps, steps)
-    }
-
-    func testRemoveStep_nonExistent() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        recipe.removeStep(try RecipeStep(content: "Wait some more"))
-
-        XCTAssertEqual(recipe.steps, RecipeTests.generateSteps())
-    }
-
-    func testReorderStep() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        let firstStep = recipe.steps[0]
-        let secondStep = recipe.steps[1]
-        try recipe.reorderStep(idx1: 0, idx2: 1)
-        XCTAssertEqual(firstStep, recipe.steps[1])
-        XCTAssertEqual(secondStep, recipe.steps[0])
-    }
-
-    func testReorderStep_fail() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: -1))
-        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: 10))
     }
 
     func testAddIngredient_existingIngredient() throws {
@@ -181,16 +140,6 @@ class RecipeTests: XCTestCase {
         XCTAssertFalse(recipe.ingredients.contains { $0.name == "Flour" })
     }
 
-    //    [
-    //        try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
-    //        try RecipeIngredient(name: "Baking Powder",
-    //                             quantity: try Quantity(from: .volume(7.5, unit: .milliliter))),
-    //        try RecipeIngredient(name: "Salt", quantity: try Quantity(from: .volume(0.312_5, unit: .milliliter))),
-    //        try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(250, unit: .milliliter))),
-    //        try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
-    //        try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
-    //    ]
-
     func testUpdateIngredient_changeNameToAnotherIngredient() throws {
         let recipe = RecipeTests.generateSampleRecipe()
         guard let firstIngredient = recipe.ingredients.first else {
@@ -225,5 +174,4 @@ class RecipeTests: XCTestCase {
                                                          name: "CauliFlour", quantity: try Quantity(from: .mass(240, unit: .gram))))
 
     }
-
 }

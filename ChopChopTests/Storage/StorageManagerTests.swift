@@ -18,27 +18,26 @@ class StorageManagerTests: XCTestCase {
     }
 
     func testSaveRecipe() throws {
+        let nodes = [
+            try RecipeStep(content: "In a large bowl, mix dry ingredients together until well-blended."),
+            try RecipeStep(content: "Add milk and mix well until smooth.") ,
+            try RecipeStep(content: """
+            Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix \
+            well.
+            """) ,
+            try RecipeStep(content: "Beat whites until stiff and then fold into batter gently") ,
+            try RecipeStep(content: "Pour ladles of the mixture into a non-stick pan, one at a time."),
+            try RecipeStep(content: """
+            Cook for 30s until the edges are dry and bubbles appear on surface. Flip; cook for 1 to 2 minutes. \
+            Yields 12 to 14 pancakes.
+            """)
+        ].map { RecipeStepNode($0) }
+
+        let edges = (0..<(nodes.count - 1)).compactMap {
+            Edge(source: nodes[$0], destination: nodes[$0 + 1])
+        }
+
         var recipe = try Recipe(name: "Pancakes",
-                                steps: [
-                                    try RecipeStep(content: """
-                                        In a large bowl, mix dry ingredients together until well-blended.
-                                        """),
-                                    try RecipeStep(content: "Add milk and mix well until smooth.") ,
-                                    try RecipeStep(content: """
-                                        Separate the egg, placing the whites in a medium bowl and the yolks in the \
-                                        batter. Mix well.
-                                        """) ,
-                                    try RecipeStep(content: """
-                                        Beat whites until stiff and then fold into batter gently.
-                                        """) ,
-                                    try RecipeStep(content: """
-                                        Pour ladles of the mixture into a non-stick pan, one at a time.
-                                        """),
-                                    try RecipeStep(content: """
-                                        Cook until the edges are dry and bubbles appear on surface. Flip; cook until \
-                                        golden. Yields 12 to 14 pancakes.
-                                        """)
-                                ],
                                 ingredients: [
                                     try RecipeIngredient(name: "Flour", quantity: try Quantity(from: .mass(120, unit: .gram))),
                                     try RecipeIngredient(name: "Baking Powder",
@@ -47,7 +46,8 @@ class StorageManagerTests: XCTestCase {
                                     try RecipeIngredient(name: "Milk", quantity: try Quantity(from: .volume(250, unit: .milliliter))),
                                     try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
                                     try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
-                                ]
+                                ],
+                                graph: try RecipeStepGraph(nodes: nodes, edges: edges)
                             )
 
         try storageManager.saveRecipe(&recipe)
