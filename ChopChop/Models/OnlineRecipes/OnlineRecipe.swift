@@ -9,14 +9,13 @@ class OnlineRecipe: Identifiable {
     private(set) var servings: Double
     private(set) var cuisine: String?
     private(set) var difficulty: Difficulty?
-    private(set) var steps: [String]
     private(set) var stepGraph: RecipeStepGraph
     private(set) var ingredients: [RecipeIngredient]
     private(set) var ratings: [RecipeRating]
     private(set) var created: Date
 
     init(id: String, userId: String, name: String, servings: Double,
-         difficulty: Difficulty?, cuisine: String?, steps: [String], stepGraph: RecipeStepGraph,
+         difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
         self.id = id
         self.userId = userId
@@ -32,7 +31,6 @@ class OnlineRecipe: Identifiable {
         self.servings = servings
         self.cuisine = cuisine
         self.difficulty = difficulty
-        self.steps = steps
         self.stepGraph = stepGraph
         self.ingredients = ingredients
         self.ratings = ratings
@@ -92,7 +90,6 @@ extension OnlineRecipe {
             servings: record.servings,
             difficulty: record.difficulty,
             cuisine: record.cuisine,
-            steps: record.steps,
             stepGraph: stepGraph,
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,

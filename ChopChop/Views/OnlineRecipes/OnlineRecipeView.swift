@@ -66,9 +66,11 @@ struct OnlineRecipeView: View {
     }
 
     var instruction: some View {
-        VStack(alignment: .leading) {
-            ForEach(0..<viewModel.recipe.steps.count, id: \.self) { idx in
-                Text("Step \(idx + 1): \(viewModel.recipe.steps[idx])")
+        ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
+            HStack(alignment: .top) {
+                Text("Step \(idx + 1):")
+                    .bold()
+                Text(viewModel.recipe.stepGraph.topologicallySortedNodes[idx].label.content)
             }
         }.font(.body)
     }
@@ -87,6 +89,6 @@ struct OnlineRecipeView: View {
 struct OnlineRecipeView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
     static var previews: some View {
-        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", steps: [], stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
+        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
     }
 }

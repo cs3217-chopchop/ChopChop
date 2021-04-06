@@ -6,7 +6,7 @@ import XCTest
 class OnlineRecipeTests: XCTestCase {
 
     func testConstruct() throws {
-        let onlineRecipe = try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.easy, cuisine: nil, steps: [], stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date())
+        let onlineRecipe = try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.easy, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date())
 
         XCTAssertEqual(onlineRecipe.id, "1")
         XCTAssertEqual(onlineRecipe.userId, "1")
@@ -14,16 +14,15 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.difficulty, Difficulty.easy)
         XCTAssertNil(onlineRecipe.cuisine)
-        XCTAssertTrue(onlineRecipe.steps.isEmpty)
         XCTAssertEqual(onlineRecipe.stepGraph, RecipeStepGraph())
         XCTAssertTrue(onlineRecipe.ingredients.isEmpty)
         XCTAssertTrue(onlineRecipe.ratings.isEmpty)
     }
 
     func testConstruct_fail() throws {
-        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "        ", servings: 2, difficulty: nil, cuisine: nil, steps: [], stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
+        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "        ", servings: 2, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
 
-        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 0, difficulty: nil, cuisine: nil, steps: [], stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
+        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 0, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
     }
 
     func testConstruct_allFieldsFilled_success() throws {
@@ -50,7 +49,6 @@ class OnlineRecipeTests: XCTestCase {
             servings: 2,
             difficulty: .medium,
             cuisine: "Chinese",
-            steps: steps,
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
@@ -63,7 +61,6 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.difficulty, .medium)
         XCTAssertEqual(onlineRecipe.cuisine, "Chinese")
-        XCTAssertEqual(onlineRecipe.steps, steps)
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
@@ -94,7 +91,6 @@ class OnlineRecipeTests: XCTestCase {
             servings: 2,
             difficulty: nil,
             cuisine: nil,
-            steps: steps,
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
@@ -107,7 +103,6 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertNil(onlineRecipe.difficulty)
         XCTAssertNil(onlineRecipe.cuisine)
-        XCTAssertEqual(onlineRecipe.steps, steps)
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
@@ -139,7 +134,6 @@ class OnlineRecipeTests: XCTestCase {
             servings: 2,
             difficulty: .medium,
             cuisine: "Chinese",
-            steps: steps,
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
@@ -172,7 +166,6 @@ class OnlineRecipeTests: XCTestCase {
             servings: -1,
             difficulty: .medium,
             cuisine: "Chinese",
-            steps: steps,
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
@@ -229,7 +222,6 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.difficulty, .medium)
         XCTAssertEqual(onlineRecipe.cuisine, "Chinese")
-        XCTAssertEqual(onlineRecipe.steps, steps)
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
@@ -243,7 +235,6 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.name, "Pancakes")
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.ingredients, [try RecipeIngredient(name: "Butter", quantity: Quantity(.count, value: 2))])
-        XCTAssertEqual(onlineRecipe.steps, ["Cook the pancakes", "Make the pancakes"])
 
         let node1 = RecipeStepNode(try RecipeStep(content: "Cook the pancakes"))
         let node2 = RecipeStepNode(try RecipeStep(content: "Make the pancakes"))
