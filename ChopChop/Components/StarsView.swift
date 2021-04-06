@@ -29,7 +29,6 @@ struct StarsView: View {
         stars.overlay(
             GeometryReader { g in
                 let starWidth = g.size.width / CGFloat(maxRating)
-                let width = CGFloat(rating) / CGFloat(maxRating) * g.size.width
                 ZStack(alignment: .leading) {
                     HStack(spacing: 0) {
                         ForEach(0..<maxRating) { idx in

@@ -30,6 +30,7 @@ struct AppDatabase {
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("onlineId", .text)
+                    .unique()
                     .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
                     .indexed()

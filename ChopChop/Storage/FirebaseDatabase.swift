@@ -189,18 +189,16 @@ struct FirebaseDatabase {
     }
 
     func addRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
-        // swiftlint:disable implicit_return
+
         return db.collection(recipePath).document(onlineRecipeId)
             .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
     }
     func removeRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
-        // swiftlint:disable implicit_return
         return db.collection(recipePath).document(onlineRecipeId)
             .updateData(["ratings": FieldValue.arrayRemove([rating.asDict])])
     }
 
     func addUserRecipeRating(userId: String, rating: UserRating) {
-        // swiftlint:disable implicit_return
         return db.collection(userPath).document(userId)
             .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
     }
@@ -225,12 +223,10 @@ struct FirebaseDatabase {
             .eraseToAnyPublisher()
     }
     func addFollowee(userId: String, followeeId: String) {
-        // swiftlint:disable implicit_return
         return db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayUnion([followeeId])])
     }
 
     func removeFollowee(userId: String, followeeId: String) {
-        // swiftlint:disable implicit_return
         return db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayRemove([followeeId])])
     }
 }

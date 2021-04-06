@@ -109,11 +109,11 @@ class OnlineRecipeViewModel: ObservableObject {
             assertionFailure()
             return nil
         }
-        if let raterId = (recipe.ratings.first{followeeIds.contains($0.userId)})?.userId {
+        if let raterId = (recipe.ratings.first { followeeIds.contains($0.userId) })?.userId {
             // return 1 of followees
             return raterId
         }
-        if let raterId = (recipe.ratings.first{$0.userId != userId})?.userId {
+        if let raterId = (recipe.ratings.first { $0.userId != userId })?.userId {
             // return any rater thats not ownself
             return raterId
         }

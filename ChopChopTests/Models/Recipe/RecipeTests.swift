@@ -44,6 +44,31 @@ class RecipeTests: XCTestCase {
         }
     }
 
+    static func generateGraph(steps: [RecipeStep]) -> RecipeStepGraph {
+        do {
+            var node: RecipeStepNode?
+            var nodes: [RecipeStepNode] = []
+            var edges: [Edge<RecipeStepNode>] = []
+            for step in steps {
+                let newNode = RecipeStepNode(step)
+                nodes.append(newNode)
+                guard let existingNode = node else {
+                    node = newNode
+                    continue
+                }
+                guard let edge = Edge(source: existingNode, destination: newNode) else {
+                    XCTFail("Could not generate sample graph")
+                    continue
+                }
+                edges.append(edge)
+                node = newNode
+            }
+            return try RecipeStepGraph(nodes: nodes, edges: edges)
+        } catch {
+            fatalError("Could not generate sample graph")
+        }
+    }
+
     static func generateSampleRecipe() -> Recipe {
         do {
             return try Recipe(name: "Pancakes", servings: 3, difficulty: Difficulty.easy,
@@ -54,9 +79,12 @@ class RecipeTests: XCTestCase {
     }
 
     func testConstruct() throws {
+        let steps = RecipeTests.generateSteps()
+        let graph = RecipeTests.generateGraph(steps: steps)
         let recipe = try Recipe(name: "Pancakes",
-                                steps: RecipeTests.generateSteps(),
-                                ingredients: RecipeTests.generateIngredients()
+                                steps: steps,
+                                ingredients: RecipeTests.generateIngredients(),
+                                stepGraph: graph
                             )
 
         XCTAssertEqual(recipe.name, "Pancakes")
@@ -64,6 +92,7 @@ class RecipeTests: XCTestCase {
         XCTAssertNil(recipe.difficulty)
         XCTAssertEqual(recipe.steps, RecipeTests.generateSteps())
         XCTAssertEqual(recipe.ingredients, RecipeTests.generateIngredients())
+        XCTAssertEqual(recipe.stepGraph, graph)
     }
 
     func testConstruct_fail() throws {
