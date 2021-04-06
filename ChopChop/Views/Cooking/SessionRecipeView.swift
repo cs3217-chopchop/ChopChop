@@ -70,10 +70,13 @@ struct SessionRecipeView: View {
             Text("Steps")
                 .font(.title2)
                 .bold()
-            VStack(alignment: .leading) {
-                ForEach(viewModel.steps) { step in
-                    SessionRecipeStepView(viewModel: step)
+            HStack {
+                Spacer()
+                NavigationLink(destination: SessionGraphView(viewModel:
+                                                                SessionGraphViewModel(graph: viewModel.stepGraph))) {
+                    Label("View steps", systemImage: "rectangle.expand.vertical")
                 }
+                Spacer()
             }
         }.padding([.horizontal], 100)
     }

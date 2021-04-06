@@ -28,10 +28,11 @@ class RecipeFormViewModel: ObservableObject {
     @Published var allRecipeCategories = [RecipeCategory]()
     @Published var recipeCategory = ""
     @Published var difficulty: String = ""
-    @Published var steps = [String]()
     @Published var ingredients = [RecipeIngredientRowViewModel]()
     @Published var ingredientParsingString = ""
     @Published var instructionParsingString = ""
+    // TODO: Deep copy recipe step graph
+    @Published var stepGraph = RecipeStepGraph()
 
     init(recipe: Recipe) {
         existingRecipe = recipe
@@ -39,7 +40,6 @@ class RecipeFormViewModel: ObservableObject {
         recipeName = recipe.name
         serving = recipe.servings.description
         difficulty = recipe.difficulty?.description ?? ""
-        steps = recipe.steps.map({ $0.content })
         ingredients = recipe.ingredients.map({
             RecipeIngredientRowViewModel(
                 amount: $0.quantity.value.description,
@@ -47,6 +47,7 @@ class RecipeFormViewModel: ObservableObject {
                 ingredientName: $0.name
             )
         })
+        stepGraph = recipe.stepGraph
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
         fetchCategories()
         isEdit = true
@@ -89,7 +90,27 @@ class RecipeFormViewModel: ObservableObject {
             })
         let parsedSteps = RecipeParser.parseInstructions(instructions: instructionParsingString)
         ingredients.append(contentsOf: parsedIngredients)
-        steps.append(contentsOf: parsedSteps)
+
+        let nodes = parsedSteps.compactMap { content -> RecipeStepNode? in
+            guard let step = try? RecipeStep(content: content) else {
+                return nil
+            }
+
+            return RecipeStepNode(step)
+        }
+
+        var edges: [Edge<RecipeStepNode>] = []
+
+        for index in nodes.indices.dropLast() {
+            guard let edge = Edge(source: nodes[index], destination: nodes[index + 1]) else {
+                continue
+            }
+
+            edges.append(edge)
+        }
+
+        stepGraph = (try? RecipeStepGraph(nodes: nodes, edges: edges)) ?? RecipeStepGraph()
+
         instructionParsingString = ""
         ingredientParsingString = ""
     }
@@ -155,7 +176,6 @@ class RecipeFormViewModel: ObservableObject {
             throw RecipeFormError.invalidServing
         }
 
-        let recipeStep = try steps.map({ try RecipeStep(content: $0) })
         let recipeIngredient = try ingredients.map({
             try $0.convertToIngredient()
         })
@@ -166,8 +186,8 @@ class RecipeFormViewModel: ObservableObject {
             name: recipeName,
             servings: servingSize,
             difficulty: recipeDifficulty,
-            steps: recipeStep,
-            ingredients: recipeIngredient
+            ingredients: recipeIngredient,
+            graph: stepGraph
         )
         newRecipe.id = recipeId
         newRecipe.recipeCategoryId = recipeCategoryId

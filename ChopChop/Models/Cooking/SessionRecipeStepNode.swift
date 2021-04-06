@@ -1,21 +1,26 @@
-import SwiftUI
+import Combine
+import CoreGraphics
+import Foundation
 
-class SessionRecipeStepNode: Node, ObservableObject {
+final class SessionRecipeStepNode: Node, ObservableObject {
+    let id = UUID()
     var label: SessionRecipeStep
-    @Published var isCompletable: Bool = false
-    @Published var isCompleted: Bool = false
+    var position: CGPoint?
+    @Published var isCompletable = false
+    @Published var isCompleted = false
 
-    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker) {
+    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker, position: CGPoint? = nil) {
         self.label = SessionRecipeStep(step: node.label, actionTimeTracker: actionTimeTracker)
+        self.position = position
     }
 }
 
 extension SessionRecipeStepNode: Hashable {
     static func == (lhs: SessionRecipeStepNode, rhs: SessionRecipeStepNode) -> Bool {
-        lhs.label == rhs.label
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(label)
+        hasher.combine(ObjectIdentifier(self))
     }
 }

@@ -4,6 +4,7 @@ import XCTest
 
 class DirectedAcyclicGraphTests: XCTestCase {
     struct IntNode: Node {
+        let id = UUID()
         var label: Int
 
         init(_ label: Int) {
@@ -26,16 +27,18 @@ class DirectedAcyclicGraphTests: XCTestCase {
     }
 
     func makeTestDAG() throws -> DirectedAcyclicGraph<IntNode> {
-        try makeDAGWithEdges(
-            Edge(source: IntNode(1), destination: IntNode(2)),
-            Edge(source: IntNode(1), destination: IntNode(6)),
-            Edge(source: IntNode(1), destination: IntNode(7)),
-            Edge(source: IntNode(2), destination: IntNode(3)),
-            Edge(source: IntNode(2), destination: IntNode(5)),
-            Edge(source: IntNode(3), destination: IntNode(7)),
-            Edge(source: IntNode(4), destination: IntNode(3)),
-            Edge(source: IntNode(5), destination: IntNode(4)),
-            Edge(source: IntNode(6), destination: IntNode(4))
+        let nodes = (1...7).map { IntNode($0) }
+
+        return try makeDAGWithEdges(
+            Edge(source: nodes[0], destination: nodes[1]),
+            Edge(source: nodes[0], destination: nodes[5]),
+            Edge(source: nodes[0], destination: nodes[6]),
+            Edge(source: nodes[1], destination: nodes[2]),
+            Edge(source: nodes[1], destination: nodes[4]),
+            Edge(source: nodes[2], destination: nodes[6]),
+            Edge(source: nodes[3], destination: nodes[2]),
+            Edge(source: nodes[4], destination: nodes[3]),
+            Edge(source: nodes[5], destination: nodes[3])
         )
     }
 
@@ -55,11 +58,13 @@ class DirectedAcyclicGraphTests: XCTestCase {
 // MARK: - containsEdge
 extension DirectedAcyclicGraphTests {
     func testContainsEdge_existingEdgeSameNodesDifferentWeight_returnTrue() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 1.0))
+        let nodes = (1...2).map { IntNode($0) }
+
+        let existingEdge = try XCTUnwrap(Edge(source: nodes[0], destination: nodes[1], weight: 1.0))
 
         try dag.addEdge(existingEdge)
 
-        let testEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 2.0))
+        let testEdge = try XCTUnwrap(Edge(source: nodes[0], destination: nodes[1], weight: 2.0))
 
         XCTAssertTrue(dag.containsEdge(testEdge), "Graph should contain edge with same nodes but different weight")
     }
@@ -78,26 +83,30 @@ extension DirectedAcyclicGraphTests {
     }
 
     func testAddEdge_existingEdge_throwsError() throws {
-        let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 1.0))
+        let nodes = (1...2).map { IntNode($0) }
+
+        let existingEdge = try XCTUnwrap(Edge(source: nodes[0], destination: nodes[1], weight: 1.0))
 
         try dag.addEdge(existingEdge)
 
         XCTAssertThrowsError(try dag.addEdge(existingEdge))
 
-        let sameNodesEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2), weight: 2.0))
+        let sameNodesEdge = try XCTUnwrap(Edge(source: nodes[0], destination: nodes[1], weight: 2.0))
 
         XCTAssertThrowsError(try dag.addEdge(sameNodesEdge))
     }
 
     func testAddEdge_formsCycle_throwsError() throws {
-        let existingEdge1 = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
-        let existingEdge2 = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(3)))
+        let nodes = (1...3).map { IntNode($0) }
+
+        let existingEdge1 = try XCTUnwrap(Edge(source: nodes[0], destination: nodes[1]))
+        let existingEdge2 = try XCTUnwrap(Edge(source: nodes[1], destination: nodes[2]))
 
         try dag.addEdge(existingEdge1)
         try dag.addEdge(existingEdge2)
 
-        let invalidEdge1 = try XCTUnwrap(Edge(source: IntNode(2), destination: IntNode(1)))
-        let invalidEdge2 = try XCTUnwrap(Edge(source: IntNode(3), destination: IntNode(1)))
+        let invalidEdge1 = try XCTUnwrap(Edge(source: nodes[1], destination: nodes[0]))
+        let invalidEdge2 = try XCTUnwrap(Edge(source: nodes[2], destination: nodes[0]))
 
         XCTAssertThrowsError(try dag.addEdge(invalidEdge1))
         XCTAssertThrowsError(try dag.addEdge(invalidEdge2))
@@ -108,34 +117,35 @@ extension DirectedAcyclicGraphTests {
 extension DirectedAcyclicGraphTests {
     func testGetTopologicallySortedNodes() throws {
         dag = try makeTestDAG()
+        let nodes = dag.nodes.sorted(by: { $0.label < $1.label })
 
         let expectedResults = [
             [
-                IntNode(1),
-                IntNode(2),
-                IntNode(5),
-                IntNode(6),
-                IntNode(4),
-                IntNode(3),
-                IntNode(7)
+                nodes[0],
+                nodes[1],
+                nodes[4],
+                nodes[5],
+                nodes[3],
+                nodes[2],
+                nodes[6]
             ],
             [
-                IntNode(1),
-                IntNode(2),
-                IntNode(6),
-                IntNode(5),
-                IntNode(4),
-                IntNode(3),
-                IntNode(7)
+                nodes[0],
+                nodes[1],
+                nodes[5],
+                nodes[4],
+                nodes[3],
+                nodes[2],
+                nodes[6]
             ],
             [
-                IntNode(1),
-                IntNode(6),
-                IntNode(2),
-                IntNode(5),
-                IntNode(4),
-                IntNode(3),
-                IntNode(7)
+                nodes[0],
+                nodes[5],
+                nodes[1],
+                nodes[4],
+                nodes[3],
+                nodes[2],
+                nodes[6]
             ]
         ]
 
@@ -149,23 +159,24 @@ extension DirectedAcyclicGraphTests {
 extension DirectedAcyclicGraphTests {
     func testGetNodeLayers() throws {
         dag = try makeTestDAG()
+        let nodes = dag.nodes.sorted(by: { $0.label < $1.label })
 
         let expectedResults = [
             [
-                [IntNode(1)],
-                [IntNode(2), IntNode(6)],
-                [IntNode(5)],
-                [IntNode(4)],
-                [IntNode(3)],
-                [IntNode(7)]
+                [nodes[0]],
+                [nodes[1], nodes[5]],
+                [nodes[4]],
+                [nodes[3]],
+                [nodes[2]],
+                [nodes[6]]
             ],
             [
-                [IntNode(1)],
-                [IntNode(6), IntNode(2)],
-                [IntNode(5)],
-                [IntNode(4)],
-                [IntNode(3)],
-                [IntNode(7)]
+                [nodes[0]],
+                [nodes[5], nodes[1]],
+                [nodes[4]],
+                [nodes[3]],
+                [nodes[2]],
+                [nodes[6]]
             ]
         ]
 

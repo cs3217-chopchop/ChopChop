@@ -129,7 +129,7 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
     }
 
     // MARK: - Topological Sort
-    func getTopologicallySortedNodes() -> [N] {
+    var topologicallySortedNodes: [N] {
         let stableNodes = nodes
         let n = stableNodes.count
 
@@ -166,7 +166,7 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
     }
 
     // MARK: - Layers
-    func getNodeLayers() -> [[N]] {
+    var nodeLayers: [[N]] {
         var nodeLayers: [[N]] = []
 
         var currentNodes = Set(nodes)
