@@ -59,10 +59,22 @@ extension OnlineRecipe {
 
         var stepGraphEdges = [Edge<RecipeStepNode>]()
         record.stepEdges.forEach {
-            guard let sourceStep = try? RecipeStep(content: $0.sourceStep),
-                  let destinationStep = try? RecipeStep(content: $0.destinationStep) else {
+            var source: RecipeStep?
+            var destination: RecipeStep?
+            for node in stepGraphNodes {
+                if source == nil && node.label.content == $0.sourceStep {
+                    source = node.label
+                } else if destination == nil && node.label.content == $0.destinationStep {
+                    destination = node.label
+                }
+                if source != nil && destination != nil {
+                    break
+                }
+            }
+            guard let sourceStep = source, let destinationStep = destination else {
                 return
             }
+
             let stepNodeSource = RecipeStepNode(sourceStep)
             let stepNodeDestination = RecipeStepNode(destinationStep)
             guard let edge = Edge<RecipeStepNode>(source: stepNodeSource, destination: stepNodeDestination) else {

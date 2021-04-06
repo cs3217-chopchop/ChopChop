@@ -1043,7 +1043,7 @@ class AppDatabaseTests: XCTestCase {
             name: recipeRecord.name,
             ingredients: ingredientRecords
                 .compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) },
-            graph: graph)
+            stepGraph: graph)
 
         recipe.id = recipeRecord.id
         recipe.recipeCategoryId = categoryRecord.id
