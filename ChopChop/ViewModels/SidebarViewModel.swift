@@ -17,7 +17,10 @@ final class SidebarViewModel: ObservableObject {
     private var recipeCategoriesCancellable: AnyCancellable?
     private var ingredientCategoriesCancellable: AnyCancellable?
 
-    init() {
+    private let settings: UserSettings
+
+    init(settings: UserSettings) {
+        self.settings = settings
         recipeCategoriesCancellable = recipeCategoriesPublisher()
             .sink { [weak self] categories in
                 self?.recipeCategories = categories
@@ -102,6 +105,26 @@ final class SidebarViewModel: ObservableObject {
             }
             .eraseToAnyPublisher()
     }
+
+    // retrieve publishers from StorageManager
+    var allRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        storageManager.allRecipesPublisher()
+    }
+
+    var followeesRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        guard let userId = settings.userId else {
+            fatalError("No user id stored")
+        }
+        return storageManager.allFolloweesRecipePublisher(userId: userId)
+    }
+
+    var ownRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+        guard let userId = settings.userId else {
+            fatalError("No user id stored")
+        }
+        return storageManager.allRecipesByUsersPublisher(userIds: [userId])
+    }
+
 }
 
 extension SidebarViewModel {

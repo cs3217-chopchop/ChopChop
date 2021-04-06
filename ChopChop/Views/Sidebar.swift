@@ -3,12 +3,15 @@ import SwiftUI
  struct Sidebar: View {
     @ObservedObject var viewModel: SidebarViewModel
     @Binding var editMode: EditMode
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
         List {
             cookingSection
             recipesSection
             ingredientsSection
+            recipeFeedSection
+            usersSection
         }
         .listStyle(SidebarListStyle())
         .toolbar {
@@ -188,6 +191,46 @@ import SwiftUI
         }
     }
 
+    var usersSection: some View {
+        NavigationLink(
+            destination: UserCollectionView(viewModel: UserCollectionViewModel(settings: settings))
+        ) {
+            Text("Users")
+                .font(.title3)
+                .bold()
+        }
+    }
+
+    var recipeFeedSection: some View {
+        Section(header: Text("Recipe Feed")) {
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel:
+                                OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher))
+                    .navigationTitle("All Recipes")
+            ) {
+                Label("All Recipes", systemImage: "tray.2")
+            }
+
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel:
+                                OnlineRecipeCollectionViewModel(publisher:
+                                                                    viewModel.followeesRecipePublisher))
+                    .navigationTitle("Recipes from followees")
+            ) {
+                Label("Recipes from followees", systemImage: "folder")
+            }
+
+            NavigationLink(
+                destination: OnlineRecipeCollectionView(viewModel:
+                                OnlineRecipeCollectionViewModel(publisher: viewModel.ownRecipePublisher))
+                    .navigationTitle("My Published Recipes")
+            ) {
+                Label("My Published Recipes", systemImage: "folder")
+            }
+
+        }
+    }
+
     private var uncategorisedIngredientsTab: some View {
         NavigationLink(
             destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
@@ -199,6 +242,6 @@ import SwiftUI
 
  struct Sidebar_Previews: PreviewProvider {
     static var previews: some View {
-        Sidebar(viewModel: SidebarViewModel(), editMode: .constant(EditMode.inactive))
+        Sidebar(viewModel: SidebarViewModel(settings: UserSettings()), editMode: .constant(EditMode.inactive))
     }
  }

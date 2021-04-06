@@ -1,10 +1,3 @@
-//
-//  RecipeView.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 21/3/21.
-//
-
 import SwiftUI
 
 struct RecipeView: View {
@@ -17,8 +10,12 @@ struct RecipeView: View {
                 } else {
                     recipeBanner
                 }
-
                 recipeDetails
+            }
+            Button(action: {
+                viewModel.publish()
+            }) {
+                Label(viewModel.isPublished ? "Publish changes": "Publish", systemImage: "paperplane")
             }
         }
         .background(
@@ -86,11 +83,12 @@ struct RecipeView: View {
                 Text("Cuisine: ")
                 Text(viewModel.recipeCategory.isEmpty ? "Unspecified" : viewModel.recipeCategory)
             }
+            Text("Time taken: \(viewModel.totalTimeTaken)")
         }.font(.body)
     }
 
     var ingredient: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .center) {
             ForEach(viewModel.ingredients, id: \.self) { ingredient in
                 Text(ingredient.description)
             }
@@ -139,6 +137,6 @@ struct RecipeView: View {
 struct RecipeView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
-        RecipeView(viewModel: RecipeViewModel(recipe: try! Recipe(name: "Test")))
+        RecipeView(viewModel: RecipeViewModel(recipe: try! Recipe(name: "Test"), settings: UserSettings()))
     }
 }

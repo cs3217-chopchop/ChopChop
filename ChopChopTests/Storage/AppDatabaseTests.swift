@@ -32,7 +32,7 @@ class AppDatabaseTests: XCTestCase {
             let columns = try db.columns(in: "recipe")
             let columnNames = Set(columns.map { $0.name })
 
-            XCTAssertEqual(columnNames, ["id", "recipeCategoryId", "name", "servings", "difficulty"])
+            XCTAssertEqual(columnNames, ["id", "recipeCategoryId", "name", "servings", "difficulty", "onlineId"])
         }
     }
 
@@ -319,6 +319,14 @@ class AppDatabaseTests: XCTestCase {
                         }))
             }
         }
+    }
+
+    func testSaveRecipe_insertsDuplicateOnlineId_throwsError() throws {
+        var recipe1 = RecipeRecord(onlineId: "1", name: "Pancakes", servings: 2)
+        var recipe2 = RecipeRecord(onlineId: "1", name: "Fluffy Pancakes", servings: 1)
+
+        try appDatabase.saveRecipe(&recipe1)
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe2))
     }
 
     func testDeleteRecipes() throws {
@@ -1045,7 +1053,7 @@ class AppDatabaseTests: XCTestCase {
             name: recipeRecord.name,
             ingredients: ingredientRecords
                 .compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) },
-            graph: graph)
+            stepGraph: graph)
 
         recipe.id = recipeRecord.id
         recipe.recipeCategoryId = categoryRecord.id
@@ -1102,5 +1110,31 @@ class AppDatabaseTests: XCTestCase {
         }
 
         try XCTAssertEqual(appDatabase.fetchIngredient(id: id), ingredient)
+    }
+
+    func testFetchRecipeCategoryByName() throws {
+        var categoryRecord = RecipeCategoryRecord(name: "American")
+
+        try dbWriter.write { db in
+            try categoryRecord.insert(db)
+        }
+
+        let recipeCategory = try RecipeCategory(name: "American")
+        let fetchedRecipeCategory = try appDatabase.fetchRecipeCategoryByName(name: "American")
+
+        XCTAssertEqual(fetchedRecipeCategory?.name, recipeCategory.name)
+    }
+
+    func testFetchRecipeByOnlineId(onlineId: String) throws {
+        var recipeRecord = RecipeRecord(onlineId: "1", name: "Pancakes", servings: 1)
+
+        try dbWriter.write { db in
+            try recipeRecord.insert(db)
+        }
+
+        let recipe = try Recipe(name: "Pancakes", onlineId: "1", servings: 1)
+        let fetchedRecipe = try appDatabase.fetchRecipeByOnlineId(onlineId: "1")
+
+        XCTAssertEqual(recipe, fetchedRecipe)
     }
 }

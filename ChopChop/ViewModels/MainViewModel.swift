@@ -7,8 +7,6 @@ final class MainViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var recipeCategoriesCancellable: AnyCancellable?
 
-    var currentCookingSession: SessionRecipe?
-
     init() {
         recipeCategoriesCancellable = recipeCategoriesPublisher()
             .sink { [weak self] categories in

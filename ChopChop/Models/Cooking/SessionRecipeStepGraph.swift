@@ -34,7 +34,8 @@ class SessionRecipeStepGraph {
         let sessionEdges = graph.edges.compactMap { edge -> Edge<SessionRecipeStepNode>? in
             guard let sessionSourceNode = sessionNodes.first(where: { $0.label.step == edge.source.label }),
                   let sessionDestinationNode = sessionNodes.first(where: { $0.label.step == edge.destination.label }),
-                  let sessionEdge = Edge<SessionRecipeStepNode>(source: sessionSourceNode, destination: sessionDestinationNode) else {
+                  let sessionEdge = Edge<SessionRecipeStepNode>(source: sessionSourceNode,
+                                                                destination: sessionDestinationNode) else {
                 return nil
             }
 
@@ -45,7 +46,8 @@ class SessionRecipeStepGraph {
             return nil
         }
 
-        guard let sessionGraph = try? DirectedAcyclicGraph<SessionRecipeStepNode>(nodes: sessionNodes, edges: sessionEdges) else {
+        guard let sessionGraph = try?
+                DirectedAcyclicGraph<SessionRecipeStepNode>(nodes: sessionNodes, edges: sessionEdges) else {
             return nil
         }
 

@@ -1,3 +1,5 @@
+import FirebaseFirestoreSwift
+
 enum QuantityRecord: Equatable {
     case count(Double)
     case mass(Double, unit: MassUnit)
@@ -49,6 +51,19 @@ extension QuantityRecord: Codable {
         case let .volume(value, unit):
             try container.encode(value, forKey: .volume)
             try container.encode(unit, forKey: .unit)
+        }
+    }
+}
+
+extension QuantityRecord {
+    var asDict: [String: Any] {
+        switch self {
+        case let .count(value):
+            return ["count": value]
+        case let .mass(value, unit):
+            return ["unit": unit.rawValue, "mass": value]
+        case let .volume(value, unit: unit):
+            return ["unit": unit.rawValue, "volume": value]
         }
     }
 }

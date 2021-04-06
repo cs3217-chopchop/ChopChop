@@ -25,7 +25,6 @@ struct SessionRecipeView: View {
             Spacer()
             completeCookingButton
         }
-        // https://stackoverflow.com/questions/57103800/swiftui-support-multiple-modals
         .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
             CompleteSessionRecipeView(viewModel: viewModel.completeSessionRecipeViewModel)
         })

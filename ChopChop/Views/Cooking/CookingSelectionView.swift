@@ -4,18 +4,15 @@ struct CookingSelectionView: View {
     @ObservedObject var viewModel: CookingSelectionViewModel
 
     var body: some View {
-        if let sessionRecipe = viewModel.sessionRecipeViewModel {
-            SessionRecipeView(viewModel: sessionRecipe)
-        } else {
-            VStack {
-                SearchBar(text: $viewModel.query, placeholder: "Search recipes to Cook...")
-                listView
-            }
-            .navigationTitle(Text("Cooking"))
-            .onAppear {
-                viewModel.query = ""
-            }
+        VStack {
+            SearchBar(text: $viewModel.query, placeholder: "Search recipes to Cook...")
+            listView
         }
+        .navigationTitle(Text("Cooking"))
+        .onAppear {
+            viewModel.query = ""
+        }
+
     }
 
     var listView: some View {

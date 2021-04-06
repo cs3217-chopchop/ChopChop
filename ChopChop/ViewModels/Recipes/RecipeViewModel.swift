@@ -1,10 +1,3 @@
-//
-//  RecipeViewModel.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 21/3/21.
-//
-
 import SwiftUI
 import Combine
 
@@ -27,17 +20,25 @@ class RecipeViewModel: ObservableObject {
     @Published private(set) var errorMessage = ""
     @Published private(set) var ingredients = [String]()
     @Published private(set) var stepGraph = RecipeStepGraph()
+    @Published private(set) var isPublished = false
+    let totalTimeTaken: String
 
-    init(recipe: Recipe) {
+    private let settings: UserSettings
+
+    init(recipe: Recipe, settings: UserSettings) {
         self.recipe = recipe
+        self.settings = settings
         image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
+        totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
 
         bindName()
         bindServing()
         bindRecipeCategory()
         bindDifficulty()
         bindInstructions()
+        bindPublished()
         bindStepGraph()
+
     }
 
     private func bindName() {
@@ -94,6 +95,27 @@ class RecipeViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func bindPublished() {
+        recipe.$onlineId
+            .sink { [weak self] onlineId in
+                self?.isPublished = onlineId != nil
+            }
+            .store(in: &cancellables)
+    }
+
+    func publish() {
+        guard let userId = settings.userId else {
+            assertionFailure()
+            return
+        }
+
+        guard isPublished else {
+            try? storageManager.publishRecipe(recipe: &recipe, userId: userId)
+            return
+        }
+        storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
     }
 
 }

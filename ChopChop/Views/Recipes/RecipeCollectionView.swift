@@ -25,7 +25,7 @@ struct RecipeCollectionView: View {
             .padding([.leading, .trailing])
 
             if viewModel.recipes.isEmpty {
-                notFoundView
+                NotFoundView(entityName: "Recipes")
             } else {
                 switch settings.viewType {
                 case .list:
@@ -52,16 +52,6 @@ struct RecipeCollectionView: View {
             viewModel.query = ""
             viewModel.selectedIngredients.removeAll()
         }
-    }
-
-    var notFoundView: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "text.badge.xmark")
-                .font(.system(size: 60))
-            Text("No recipes found")
-        }
-        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-        .foregroundColor(.secondary)
     }
 
     var listView: some View {
@@ -102,7 +92,7 @@ struct RecipeCollectionView: View {
             NavigationLink(
                 destination: RecipeView(
                     viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe)
+                        recipe: fetchedRecipe, settings: settings)
                 )
             ) {
                 HStack(alignment: .top) {
@@ -130,7 +120,7 @@ struct RecipeCollectionView: View {
             NavigationLink(
                 destination: RecipeView(
                     viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe)
+                        recipe: fetchedRecipe, settings: settings)
                 )
             ) {
                 GridTileImage(recipe: recipe)
