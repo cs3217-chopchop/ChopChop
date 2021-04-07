@@ -165,29 +165,6 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         return adjacentNodes.compactMap { nodes.firstIndex(of: $0) }
     }
 
-    // MARK: - Layers
-    var nodeLayers: [[N]] {
-        var nodeLayers: [[N]] = []
-
-        var currentNodes = Set(nodes)
-        var currentEdges = Set(edges)
-        var currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
-
-        while !currentLayer.isEmpty {
-            nodeLayers.append(Array(currentLayer))
-            currentNodes.subtract(currentLayer)
-            currentEdges = currentEdges.filter { !currentLayer.contains($0.source) }
-            currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
-        }
-
-        return nodeLayers
-    }
-
-    func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
-        let destinationNodes = Set(edges.map { $0.destination })
-        return nodes.filter { !destinationNodes.contains($0) }
-    }
-
     override internal func checkRepresentation() -> Bool {
         let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
             edges.allSatisfy { $0.source == node }
@@ -208,6 +185,27 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
 
         return isSimpleGraph
     }
+}
+
+// MARK: - Layers
+extension DirectedAcyclicGraph {
+    var nodeLayers: [[N]] {
+        var nodeLayers: [[N]] = []
+
+        var currentNodes = Set(nodes)
+        var currentEdges = Set(edges)
+        var currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
+
+        while !currentLayer.isEmpty {
+            nodeLayers.append(Array(currentLayer))
+            currentNodes.subtract(currentLayer)
+            currentEdges = currentEdges.filter { !currentLayer.contains($0.source) }
+            currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
+        }
+
+        return nodeLayers
+    }
+
 }
 
 enum DirectedAcyclicGraphError: Error {
