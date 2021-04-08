@@ -166,6 +166,10 @@ class Graph<N: Node> {
         assert(checkRepresentation())
     }
 
+    func getEdgesFromNode(_ targetNode: N) -> [E]? {
+        adjacencyList[targetNode]
+    }
+
     internal func checkRepresentation() -> Bool {
         let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
             edges.allSatisfy { $0.source == node }

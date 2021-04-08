@@ -41,3 +41,9 @@ extension CGPoint {
         (point - self).angle()
     }
 }
+
+extension CGPoint {
+    init(point: Point) {
+        self.init(x: CGFloat(point.x), y: CGFloat(point.y))
+    }
+}
