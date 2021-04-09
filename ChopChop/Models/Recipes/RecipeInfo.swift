@@ -1,6 +1,6 @@
-struct RecipeInfo: Identifiable, Equatable {
-    var id: Int64?
-    var name: String
-    var servings: Double
-    var difficulty: Difficulty?
+struct RecipeInfo: Identifiable {
+    let id: Int64?
+    let name: String
+    let servings: Double
+    let difficulty: Difficulty?
 }

@@ -70,7 +70,7 @@ struct RecipeCollectionView: View {
                     GridTile(recipe: recipe)
                         .contextMenu {
                             Button(action: {
-                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0.id == recipe.id }) else {
                                     return
                                 }
 
