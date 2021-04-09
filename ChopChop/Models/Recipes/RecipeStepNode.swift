@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-final class RecipeStepNode: Node {
+final class RecipeStepNode: DrawableNode {
     let id = UUID()
     var label: RecipeStep
     var position: CGPoint?

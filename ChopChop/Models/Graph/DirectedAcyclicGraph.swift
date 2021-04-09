@@ -187,27 +187,6 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
     }
 }
 
-// MARK: - Layers
-extension DirectedAcyclicGraph {
-    var nodeLayers: [[N]] {
-        var nodeLayers: [[N]] = []
-
-        var currentNodes = Set(nodes)
-        var currentEdges = Set(edges)
-        var currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
-
-        while !currentLayer.isEmpty {
-            nodeLayers.append(Array(currentLayer))
-            currentNodes.subtract(currentLayer)
-            currentEdges = currentEdges.filter { !currentLayer.contains($0.source) }
-            currentLayer = getNodesWithoutIncomingEdges(nodes: currentNodes, edges: currentEdges)
-        }
-
-        return nodeLayers
-    }
-
-}
-
 enum DirectedAcyclicGraphError: Error {
     case addedEdgeFormsCycle
 }

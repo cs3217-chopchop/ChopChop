@@ -2,7 +2,7 @@ import Combine
 import CoreGraphics
 import Foundation
 
-final class SessionRecipeStepNode: Node, ObservableObject {
+final class SessionRecipeStepNode: DrawableNode, ObservableObject {
     let id = UUID()
     var label: SessionRecipeStep
     var position: CGPoint?

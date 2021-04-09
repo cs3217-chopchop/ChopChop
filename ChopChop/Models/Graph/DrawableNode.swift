@@ -1,3 +1,5 @@
+import CoreGraphics
+
 protocol DrawableNode: Node {
-    var position: Point? { get }
+    var position: CGPoint? { get set }
 }

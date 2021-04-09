@@ -8,17 +8,13 @@ final class EditorGraphViewModel: ObservableObject {
     let isEditable: Bool
 
     init(graph: RecipeStepGraph, isEditable: Bool = true) {
-        let maxCount = graph.nodeLayers.reduce(into: 0) { $0 = max($0, $1.count) }
-
-        for (layerIndex, layer) in graph.nodeLayers.enumerated() {
-            for (index, node) in layer.enumerated() {
-                node.position = CGPoint(x: CGFloat(index + 1) * RecipeStepNode.horizontalDistance
-                                            + CGFloat(maxCount - layer.count) * RecipeStepNode.horizontalDistance / 2,
-                                        y: CGFloat(layerIndex + 1) * RecipeStepNode.verticalDistance)
-            }
-        }
-
         self.graph = graph
+
+        let drawer = LayeredDAGDrawer(graph)
+        drawer?.positionNodes(
+            horizontalDistance: RecipeStepNode.horizontalDistance,
+            verticalDistance: RecipeStepNode.verticalDistance)
+
         self.isEditable = isEditable
     }
 

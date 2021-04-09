@@ -1,14 +1,19 @@
 import Foundation
+import CoreGraphics
 
 class LayeredDAGDrawer<N: DrawableNode> {
     typealias E = Edge<DrawerNode>
     typealias Layer = [DrawerNode]
 
     let graph: DirectedAcyclicGraph<DrawerNode>
-    let nodes: [N]
+    var nodes: [N]
     private var layers: [Layer]
 
     init?(_ dag: DirectedAcyclicGraph<N>) {
+        guard !dag.nodes.isEmpty else {
+            return nil
+        }
+
         self.nodes = dag.nodes
         var nodeToId: [N: Int] = [:]
 
@@ -63,12 +68,12 @@ class LayeredDAGDrawer<N: DrawableNode> {
         return nodes.filter { !destinationNodes.contains($0) }
     }
 
-    func calculateNodePositions(horizontalDistance: Float, verticalDistance: Float) {
+    func positionNodes(horizontalDistance: CGFloat, verticalDistance: CGFloat) {
         insertVirtualNodesAndEdges()
 
         var optimalLayers = layers
 
-        for i in 0..<24 {
+        for i in 1..<24 {
             reorderLayersByMedian(iteration: i)
             reduceCrossingsWithTransposition()
             if countCrossings(layers: layers) < countCrossings(layers: optimalLayers) {
@@ -79,7 +84,7 @@ class LayeredDAGDrawer<N: DrawableNode> {
         self.layers = optimalLayers
 
         positionDrawerNodes(horizontalDistance: horizontalDistance, verticalDistance: verticalDistance)
-        
+        positionNodes()
     }
 
     // MARK: - Node Ordering: Virtual Nodes
@@ -92,7 +97,7 @@ class LayeredDAGDrawer<N: DrawableNode> {
             for currentNode in currentLayer {
                 let longOutgoingEdges = graph.edges
                     .filter { $0.source == currentNode }
-                    .filter { getNumberOfLayers(between: $0.destination, and: currentNode) > 1}
+                    .filter { getNumberOfLayers(between: $0.destination, and: currentNode) > 1 }
 
                 for edge in longOutgoingEdges {
                     let virtualNode = DrawerNode(label: virtualNodeId)
@@ -206,6 +211,10 @@ class LayeredDAGDrawer<N: DrawableNode> {
     }
 
     private func getMedianOfSortedArray(_ array: [Int]) -> Double {
+        guard !array.isEmpty else {
+            return 0
+        }
+
         if array.count % 2 == 0 {
             let leftMid = array[array.count / 2 - 1]
             let rightMid = array[array.count / 2]
@@ -292,6 +301,7 @@ class LayeredDAGDrawer<N: DrawableNode> {
                         hasImproved = true
                     } else {
                         swap(&currentLayer, firstId: i, secondId: i + 1)
+                        layers[layerNumber] = currentLayer
                     }
                 }
             }
@@ -309,13 +319,19 @@ class LayeredDAGDrawer<N: DrawableNode> {
     }
 
     // MARK: - Node Positioning
-    private func positionDrawerNodes(horizontalDistance: Float, verticalDistance: Float) {
+    private func positionDrawerNodes(horizontalDistance: CGFloat, verticalDistance: CGFloat) {
         for (layerIndex, layer) in layers.enumerated() {
             for (nodeIndex, node) in layer.enumerated() {
-                node.position = Point(
-                    x: Float(nodeIndex) * horizontalDistance,
-                    y: Float(layerIndex) * verticalDistance)
+                node.position = CGPoint(
+                    x: CGFloat(nodeIndex) * horizontalDistance,
+                    y: CGFloat(layerIndex) * verticalDistance)
             }
+        }
+    }
+
+    private func positionNodes() {
+        for node in graph.nodes where !node.isVirtual {
+            nodes[node.label].position = node.position ?? .zero
         }
     }
 }
@@ -325,7 +341,11 @@ extension LayeredDAGDrawer {
     class DrawerNode: DrawableNode {
         let id = UUID()
         let label: Int
-        var position: Point?
+        var position: CGPoint?
+
+        var isVirtual: Bool {
+            label < 0
+        }
 
         init(label: Int) {
             self.label = label

@@ -61,8 +61,11 @@ class SessionRecipeStepGraph {
         graph.topologicallySortedNodes
     }
 
-    var nodeLayers: [[SessionRecipeStepNode]] {
-        graph.nodeLayers
+    func positionNodes() {
+        let drawer = LayeredDAGDrawer(graph)
+        drawer?.positionNodes(
+            horizontalDistance: RecipeStepNode.horizontalDistance,
+            verticalDistance: RecipeStepNode.verticalDistance)
     }
 
     private func updateCompletableNodes() {
