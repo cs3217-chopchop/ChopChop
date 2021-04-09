@@ -298,11 +298,11 @@ extension AppDatabase {
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[2].id, destinationId: steps[3].id),
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[3].id, destinationId: steps[4].id),
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[4].id, destinationId: steps[5].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[6].id, destinationId: steps[7].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[7].id, destinationId: steps[8].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[8].id, destinationId: steps[9].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[9].id, destinationId: steps[10].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[10].id, destinationId: steps[11].id)
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[6].id, destinationId: steps[7].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[7].id, destinationId: steps[8].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[8].id, destinationId: steps[9].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[9].id, destinationId: steps[10].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[10].id, destinationId: steps[11].id)
         ]
 
         for index in edges.indices {
