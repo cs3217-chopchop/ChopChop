@@ -181,7 +181,10 @@ extension AppDatabase {
         }
 
         var recipes = [
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Pancakes",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
             RecipeRecord(recipeCategoryId: categories[1].id,
                          name: "Carbonara",
                          servings: Double(Int.random(in: 1...5)),
@@ -190,9 +193,18 @@ extension AppDatabase {
                          name: "Scrambled Eggs",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Pizza",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[0].id,
+                         name: "Ramen",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[0].id,
+                         name: "Katsudon",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
             RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
                          servings: Double(Int.random(in: 1...5)))
         ]
@@ -399,13 +411,11 @@ extension AppDatabase {
                 throw DatabaseError(message: "Recipe ingredients belong to the wrong recipe.")
             }
 
-            // Delete all ingredients that are not in the array and existing different graphs
+            // Delete all ingredients that are not in the array and the existing graph
             try recipe.ingredients
                 .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
-            try recipe.stepGraph
-                .filter(RecipeStepGraphRecord.Columns.id != stepGraph.id)
-                .deleteAll(db)
+            try recipe.stepGraph.deleteAll(db)
 
             // Save recipe ingredients
             for index in ingredients.indices {
@@ -413,17 +423,12 @@ extension AppDatabase {
                 try ingredients[index].save(db)
             }
 
-            var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
-            try graphRecord.save(db)
-            stepGraph.id = graphRecord.id
-
-            // Delete all steps and edges
-            try graphRecord.steps.deleteAll(db)
-            try graphRecord.edges.deleteAll(db)
+            var stepGraphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
+            try stepGraphRecord.save(db)
 
             for node in stepGraph.nodes {
                 let step = node.label
-                var stepRecord = RecipeStepRecord(graphId: stepGraph.id, content: step.content)
+                var stepRecord = RecipeStepRecord(graphId: stepGraphRecord.id, content: step.content)
                 try stepRecord.save(db)
                 step.id = stepRecord.id
             }
@@ -431,7 +436,7 @@ extension AppDatabase {
             for edge in stepGraph.edges {
                 let sourceId = edge.source.label.id
                 let destinationId = edge.destination.label.id
-                var edgeRecord = RecipeStepEdgeRecord(graphId: stepGraph.id,
+                var edgeRecord = RecipeStepEdgeRecord(graphId: stepGraphRecord.id,
                                                       sourceId: sourceId,
                                                       destinationId: destinationId)
                 try edgeRecord.save(db)
@@ -599,6 +604,7 @@ extension AppDatabase {
             .tracking({ db in
                 let request = RecipeRecord
                     .filter(key: id)
+                    .including(optional: RecipeRecord.category)
                     .including(all: RecipeRecord.ingredients)
                     .including(required: RecipeRecord.stepGraph
                         .including(all: RecipeStepGraphRecord.steps)
@@ -643,6 +649,7 @@ extension AppDatabase {
             .tracking({ db in
                 let request = IngredientRecord
                     .filter(key: id)
+                    .including(optional: IngredientRecord.category)
                     .including(all: IngredientRecord.batches)
 
                 return try Ingredient.fetchOne(db, request)

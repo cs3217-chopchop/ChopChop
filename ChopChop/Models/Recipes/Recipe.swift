@@ -119,7 +119,6 @@ class Recipe: FetchableRecord, ObservableObject {
             return try? RecipeIngredient(name: record.name, quantity: quantity)
         } ?? []
 
-        let graph = row["recipeStepGraph"]
         stepGraph = row["recipeStepGraph"]
     }
 

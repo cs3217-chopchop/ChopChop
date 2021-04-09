@@ -217,14 +217,16 @@ class AppDatabaseTests: XCTestCase {
     func testSaveRecipe_insertsValidGraph_success() throws {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
-        var steps: [RecipeStepRecord] = []
         var graph = RecipeStepGraph()
 
         try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
-
         try dbWriter.read { db in
+            guard let graphRecord = try recipe.stepGraph.fetchOne(db) else {
+                XCTFail("Graph not found")
+                return
+            }
+
             try XCTAssertTrue(graphRecord.exists(db))
         }
     }
@@ -258,12 +260,17 @@ class AppDatabaseTests: XCTestCase {
 
         try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
-
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
 
-            for step in try graphRecord.steps.fetchAll(db) {
+            let graphRecord = try recipe.stepGraph.fetchOne(db)
+
+            guard let stepRecords = try graphRecord?.steps.fetchAll(db) else {
+                XCTFail("Graph steps cannot be found")
+                return
+            }
+
+            for step in try stepRecords {
                 XCTAssertTrue(steps.contains(where: { $0.content == step.content }))
             }
         }
@@ -302,12 +309,16 @@ class AppDatabaseTests: XCTestCase {
 
         try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
-
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
+            let graphRecord = try recipe.stepGraph.fetchOne(db)
 
-            for edge in try graphRecord.edges.fetchAll(db) {
+            guard let edgeRecords = try graphRecord?.edges.fetchAll(db) else {
+                XCTFail("Graph edges cannot be found")
+                return
+            }
+
+            for edge in edgeRecords {
                 let source = try edge.source.fetchOne(db)
                 let destination = try edge.destination.fetchOne(db)
 
