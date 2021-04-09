@@ -27,7 +27,7 @@ class RecipeFormViewModel: ObservableObject {
     @Published var serving = ""
     @Published var allRecipeCategories = [RecipeCategory]()
     @Published var recipeCategory = ""
-    @Published var difficulty: String = ""
+    @Published var difficulty: Difficulty?
     @Published var ingredients = [RecipeIngredientRowViewModel]()
     @Published var ingredientParsingString = ""
     @Published var instructionParsingString = ""
@@ -39,7 +39,7 @@ class RecipeFormViewModel: ObservableObject {
         recipeId = recipe.id
         recipeName = recipe.name
         serving = recipe.servings.description
-        difficulty = recipe.difficulty?.description ?? ""
+        difficulty = recipe.difficulty
         ingredients = recipe.ingredients.map({
             RecipeIngredientRowViewModel(
                 amount: $0.quantity.value.description,
@@ -180,7 +180,7 @@ class RecipeFormViewModel: ObservableObject {
             try $0.convertToIngredient()
         })
         let recipeCategoryId = getRecipeCategoryId()
-        let recipeDifficulty = difficulty.isEmpty ? nil : try Difficulty(description: difficulty)
+        let recipeDifficulty = difficulty
 
         let newRecipe = try Recipe(
             name: recipeName,

@@ -130,12 +130,12 @@ struct RecipeFormView: View {
     var difficulty: some View {
         HStack {
             Picker("Difficulty", selection: $viewModel.difficulty) {
-                ForEach(Difficulty.allCases.map({ $0.description }), id: \.self) {
-                    Text($0)
+                ForEach(Difficulty.allCases, id: \.self) { difficulty in
+                    Text(difficulty.description).tag(difficulty as Difficulty?)
                 }
             }
             Spacer()
-            Text(viewModel.difficulty)
+            Text(viewModel.difficulty?.description ?? "None")
         }
         .pickerStyle(MenuPickerStyle())
     }
