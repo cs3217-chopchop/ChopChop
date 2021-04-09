@@ -134,7 +134,7 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
@@ -165,8 +165,8 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, graph: &graph)
-        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, graph: &graph)
+        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, stepGraph: &graph)
+        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(pancakeRecipe.exists(db))
@@ -195,7 +195,7 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph))
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
@@ -211,7 +211,7 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph))
     }
 
     func testSaveRecipe_insertsValidGraph_success() throws {
@@ -220,7 +220,7 @@ class AppDatabaseTests: XCTestCase {
         var steps: [RecipeStepRecord] = []
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
@@ -256,7 +256,7 @@ class AppDatabaseTests: XCTestCase {
         let nodes = steps.map { RecipeStepNode($0) }
         var graph = try RecipeStepGraph(nodes: nodes, edges: [])
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
@@ -300,7 +300,7 @@ class AppDatabaseTests: XCTestCase {
                      Edge<RecipeStepNode>(source: nodes[0], destination: nodes[3])].compactMap { $0 }
         var graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
 
@@ -1121,7 +1121,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let recipeCategory = try RecipeCategory(name: "American")
-        let fetchedRecipeCategory = try appDatabase.fetchRecipeCategoryByName(name: "American")
+        let fetchedRecipeCategory = try appDatabase.fetchRecipeCategory(name: "American")
 
         XCTAssertEqual(fetchedRecipeCategory?.name, recipeCategory.name)
     }
@@ -1134,7 +1134,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let recipe = try Recipe(name: "Pancakes", onlineId: "1", servings: 1)
-        let fetchedRecipe = try appDatabase.fetchRecipeByOnlineId(onlineId: "1")
+        let fetchedRecipe = try appDatabase.fetchRecipe(onlineId: "1")
 
         XCTAssertEqual(recipe, fetchedRecipe)
     }

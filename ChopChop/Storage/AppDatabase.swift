@@ -383,16 +383,13 @@ extension AppDatabase {
 extension AppDatabase {
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
-        var graph = RecipeStepGraph()
+        var stepGraph = RecipeStepGraph()
 
-        try saveRecipe(
-            &recipe,
-            ingredients: &ingredients,
-            graph: &graph)
+        try saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &stepGraph)
     }
 
     func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
-                    graph: inout RecipeStepGraph) throws {
+                    stepGraph: inout RecipeStepGraph) throws {
         try dbWriter.write { db in
             try recipe.save(db)
 
@@ -407,7 +404,7 @@ extension AppDatabase {
                 .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
             try recipe.stepGraph
-                .filter(RecipeStepGraphRecord.Columns.id != graph.id)
+                .filter(RecipeStepGraphRecord.Columns.id != stepGraph.id)
                 .deleteAll(db)
 
             // Save recipe ingredients
@@ -418,23 +415,25 @@ extension AppDatabase {
 
             var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
             try graphRecord.save(db)
-            graph.id = graphRecord.id
+            stepGraph.id = graphRecord.id
 
             // Delete all steps and edges
             try graphRecord.steps.deleteAll(db)
             try graphRecord.edges.deleteAll(db)
 
-            for node in graph.nodes {
+            for node in stepGraph.nodes {
                 let step = node.label
-                var stepRecord = RecipeStepRecord(graphId: graph.id, content: step.content)
+                var stepRecord = RecipeStepRecord(graphId: stepGraph.id, content: step.content)
                 try stepRecord.save(db)
                 step.id = stepRecord.id
             }
 
-            for edge in graph.edges {
+            for edge in stepGraph.edges {
                 let sourceId = edge.source.label.id
                 let destinationId = edge.destination.label.id
-                var edgeRecord = RecipeStepEdgeRecord(graphId: graph.id, sourceId: sourceId, destinationId: destinationId)
+                var edgeRecord = RecipeStepEdgeRecord(graphId: stepGraph.id,
+                                                      sourceId: sourceId,
+                                                      destinationId: destinationId)
                 try edgeRecord.save(db)
             }
         }
@@ -552,7 +551,7 @@ extension AppDatabase {
         }
     }
 
-    func fetchRecipeByOnlineId(onlineId: String) throws -> Recipe? {
+    func fetchRecipe(onlineId: String) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.onlineId == onlineId)
@@ -573,10 +572,10 @@ extension AppDatabase {
         }
     }
 
-    func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try dbWriter.read { db in
             let request = RecipeCategoryRecord
-                .filter(key: ["name": name])
+                .filter(RecipeCategoryRecord.Columns.name == name)
             return try RecipeCategory.fetchOne(db, request)
         }
     }

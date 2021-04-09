@@ -20,12 +20,9 @@ struct StorageManager {
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
         }
-        var graph = recipe.stepGraph
+        var stepGraph = recipe.stepGraph
 
-        try appDatabase.saveRecipe(
-            &recipeRecord,
-            ingredients: &ingredientRecords,
-            graph: &graph)
+        try appDatabase.saveRecipe(&recipeRecord, ingredients: &ingredientRecords, stepGraph: &stepGraph)
 
         recipe.id = recipeRecord.id
     }
@@ -103,8 +100,8 @@ struct StorageManager {
         try appDatabase.fetchRecipe(id: id)
     }
 
-    func fetchRecipeByOnlineId(onlineId: String) throws -> Recipe? {
-        try appDatabase.fetchRecipeByOnlineId(onlineId: onlineId)
+    func fetchRecipe(onlineId: String) throws -> Recipe? {
+        try appDatabase.fetchRecipe(onlineId: onlineId)
     }
 
     func fetchIngredient(id: Int64) throws -> Ingredient? {
@@ -115,8 +112,8 @@ struct StorageManager {
         try appDatabase.fetchRecipeCategory(id: id)
     }
 
-    func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategoryByName(name: name)
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategory(name: name)
     }
 
     // MARK: - Database Access: Publishers
@@ -331,7 +328,7 @@ extension StorageManager {
         firebaseStorage.deleteImage(name: recipe.id)
 
         // might alr have deleted local recipe
-        let fetchedRecipe = try? self.fetchRecipeByOnlineId(onlineId: recipe.id)
+        let fetchedRecipe = try? self.fetchRecipe(onlineId: recipe.id)
         guard var localRecipe = fetchedRecipe else {
             return
         }
@@ -440,13 +437,13 @@ extension StorageManager {
     func downloadRecipe(newName: String, recipe: OnlineRecipe) throws {
         var cuisineId: Int64?
         if let cuisine = recipe.cuisine {
-            cuisineId = try self.fetchRecipeCategoryByName(name: cuisine)?.id
+            cuisineId = try self.fetchRecipeCategory(name: cuisine)?.id
         }
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
         let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
-        let isRecipeAlreadyConnected = (try? fetchRecipeByOnlineId(onlineId: recipe.id)) == nil
+        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) == nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
