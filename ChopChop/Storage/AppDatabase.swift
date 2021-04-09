@@ -572,14 +572,6 @@ extension AppDatabase {
         }
     }
 
-    // TODO: Remove
-    func fetchRecipeCategory(id: Int64) throws -> RecipeCategoryRecord? {
-        try dbWriter.read { db in
-            try RecipeCategoryRecord.fetchOne(db, key: id)
-        }
-    }
-
-    // TODO: Remove
     func fetchRecipeCategory(name: String) throws -> RecipeCategoryRecord? {
         try dbWriter.read { db in
             try RecipeCategoryRecord.filter(RecipeCategoryRecord.Columns.name == name).fetchOne(db)

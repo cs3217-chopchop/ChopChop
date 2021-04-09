@@ -19,13 +19,20 @@ struct RecipeCategory: Identifiable {
     // swiftlint:enable function_default_parameter_at_end
 }
 
+extension RecipeCategory: FetchableRecord {
+    init(row: Row) {
+        id = row[RecipeCategoryRecord.Columns.id]
+        name = row[RecipeCategoryRecord.Columns.name]
+    }
+}
+
 enum RecipeCategoryError: LocalizedError {
     case invalidName
 
     var errorDescription: String? {
         switch self {
         case .invalidName:
-            return "Category name cannot be empty"
+            return "Category name should not be empty."
         }
     }
 }

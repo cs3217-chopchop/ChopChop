@@ -15,7 +15,7 @@ struct StorageManager {
 
     func saveRecipe(_ recipe: inout Recipe) throws {
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
-                                        recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
+                                        recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
             RecipeIngredientRecord(recipeId: recipe.id, name: ingredient.name, quantity: ingredient.quantity.record)
@@ -106,10 +106,6 @@ struct StorageManager {
 
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try appDatabase.fetchIngredient(id: id)
-    }
-
-    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategory(id: id).map { try RecipeCategory(id: $0.id, name: $0.name) }
     }
 
     func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
@@ -204,7 +200,11 @@ extension StorageManager {
     }
 
     func saveRecipeImage(_ image: UIImage, name: String) throws {
-        try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
+        do {
+            try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
+        } catch {
+            throw StorageError.saveImageFailure
+        }
     }
 
     func deleteIngredientImage(name: String) {
@@ -242,10 +242,7 @@ extension StorageManager {
 
     // publish your local recipe online
     func publishRecipe(recipe: inout Recipe, userId: String) throws {
-        var cuisine: String?
-        if let categoryId = recipe.recipeCategoryId {
-            cuisine = try? fetchRecipeCategory(id: categoryId)?.name
-        }
+        let cuisine = recipe.category?.name
         let ingredients = recipe.ingredients.map({
             OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
         })
@@ -283,10 +280,7 @@ extension StorageManager {
 
     // update details of published recipe (note that ratings cant be updated here)
     func updateOnlineRecipe(recipe: Recipe, userId: String) {
-        var cuisine: String?
-        if let categoryId = recipe.recipeCategoryId {
-            cuisine = try? fetchRecipeCategory(id: categoryId)?.name
-        }
+        let cuisine = recipe.category?.name
         let ingredients = recipe.ingredients.map({
             OnlineIngredientRecord(name: $0.name, quantity: $0.quantity.record)
         })
@@ -435,9 +429,9 @@ extension StorageManager {
 
     // download an online recipe to local
     func downloadRecipe(newName: String, recipe: OnlineRecipe) throws {
-        var cuisineId: Int64?
-        if let cuisine = recipe.cuisine {
-            cuisineId = try self.fetchRecipeCategory(name: cuisine)?.id
+        var cuisine: RecipeCategory?
+        if let cuisineName = recipe.cuisine {
+            cuisine = try fetchRecipeCategory(name: cuisineName)
         }
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
@@ -449,11 +443,11 @@ extension StorageManager {
         var localRecipe = try Recipe(
             name: newName,
             onlineId: newOnlineId,
+            category: cuisine,
             servings: recipe.servings,
-            recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,
             ingredients: recipe.ingredients,
-            graph: recipe.stepGraph
+            stepGraph: recipe.stepGraph
         )
         try self.saveRecipe(&localRecipe)
         firebaseStorage.downloadImage(name: recipe.id) { data in

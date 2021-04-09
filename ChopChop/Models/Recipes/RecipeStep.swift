@@ -16,20 +16,13 @@ struct RecipeStep: Hashable {
     }
 }
 
-// TODO: Remove?
-extension RecipeStep: Codable {
-    enum CodingKeys: String, CodingKey {
-        case content = "step"
-    }
-}
-
 enum RecipeStepError: LocalizedError {
     case invalidContent
 
     var errorDescription: String? {
         switch self {
         case .invalidContent:
-            return "Recipe step cannot be empty."
+            return "Recipe step should not be empty."
         }
     }
 }

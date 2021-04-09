@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
+final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode> {
     override init() {
         super.init()
     }
@@ -19,8 +19,12 @@ final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableReco
 
         assert(checkRepresentation())
     }
+}
 
-    init(row: Row) {
+extension RecipeStepGraph: FetchableRecord {
+    convenience init(row: Row) {
+        self.init()
+
         let nodes: [Int64?: RecipeStepNode] = row.prefetchedRows["recipeSteps"]?.reduce(into: [:], { nodes, row in
             let record = RecipeStepRecord(row: row)
 
@@ -40,8 +44,6 @@ final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableReco
 
             return Edge<RecipeStepNode>(source: sourceNode, destination: destinationNode)
         } ?? []
-
-        super.init()
 
         for node in nodes.values {
             adjacencyList[node] = []
