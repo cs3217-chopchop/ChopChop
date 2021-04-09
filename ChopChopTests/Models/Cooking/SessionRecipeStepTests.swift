@@ -14,7 +14,7 @@ class SessionRecipeStepTests: XCTestCase {
         let sessionRecipeStep = SessionRecipeStep(step: lastStep, actionTimeTracker: ActionTimeTracker())
         XCTAssertFalse(sessionRecipeStep.isCompleted)
         XCTAssertEqual(sessionRecipeStep.timeTaken, 0)
-        XCTAssertTrue(sessionRecipeStep.step === lastStep)
+        XCTAssertTrue(sessionRecipeStep.step == lastStep)
         XCTAssertEqual(sessionRecipeStep.timers.map { $0.0 }, ["30s", "1 to 2 minutes"])
         XCTAssertEqual(sessionRecipeStep.timers.map { $0.1.defaultTime }, [30, 90])
     }

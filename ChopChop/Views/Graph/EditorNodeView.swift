@@ -86,7 +86,7 @@ struct EditorNodeView: View {
 
 struct EditorNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep(content: "#") {
+        if let step = try? RecipeStep("#") {
             EditorNodeView(viewModel: EditorNodeViewModel(graph: RecipeStepGraph(),
                                                           node: RecipeStepNode(step)),
                            selection: SelectionHandler())

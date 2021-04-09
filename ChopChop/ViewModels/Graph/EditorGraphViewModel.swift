@@ -27,7 +27,7 @@ final class EditorGraphViewModel: ObservableObject {
     }
 
     func onLongPressPortal(_ value: DragGesture.Value) {
-        guard let step = try? RecipeStep(content: "Add step details..."), isEditable else {
+        guard let step = try? RecipeStep("Add step details..."), isEditable else {
             return
         }
 

@@ -426,16 +426,19 @@ extension AppDatabase {
             var stepGraphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
             try stepGraphRecord.save(db)
 
+            var nodeIds: [UUID: Int64?] = [:]
+
             for node in stepGraph.nodes {
                 let step = node.label
                 var stepRecord = RecipeStepRecord(graphId: stepGraphRecord.id, content: step.content)
                 try stepRecord.save(db)
-                step.id = stepRecord.id
+
+                nodeIds[node.id] = stepRecord.id
             }
 
             for edge in stepGraph.edges {
-                let sourceId = edge.source.label.id
-                let destinationId = edge.destination.label.id
+                let sourceId = nodeIds[edge.source.id, default: nil]
+                let destinationId = nodeIds[edge.destination.id, default: nil]
                 var edgeRecord = RecipeStepEdgeRecord(graphId: stepGraphRecord.id,
                                                       sourceId: sourceId,
                                                       destinationId: destinationId)

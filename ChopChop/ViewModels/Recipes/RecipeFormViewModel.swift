@@ -92,7 +92,7 @@ class RecipeFormViewModel: ObservableObject {
         ingredients.append(contentsOf: parsedIngredients)
 
         let nodes = parsedSteps.compactMap { content -> RecipeStepNode? in
-            guard let step = try? RecipeStep(content: content) else {
+            guard let step = try? RecipeStep(content) else {
                 return nil
             }
 
@@ -147,7 +147,7 @@ class RecipeFormViewModel: ObservableObject {
         case RecipeFormError.invalidServing:
             errorMessage = RecipeFormError.invalidServing.rawValue
         case RecipeStepError.invalidContent:
-            errorMessage = RecipeStepError.invalidContent.rawValue
+            errorMessage = RecipeStepError.invalidContent.errorDescription ?? ""
         case RecipeFormError.invalidIngredientQuantity:
             errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
         case IngredientError.emptyName:

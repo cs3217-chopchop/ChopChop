@@ -1,4 +1,5 @@
 import Combine
+import Foundation
 
 final class EditorNodeViewModel: ObservableObject {
     @Published var isEditing = false
@@ -24,15 +25,17 @@ final class EditorNodeViewModel: ObservableObject {
 
     func saveAction() {
         do {
-            try node.label.updateContent(text)
+            node.label = try RecipeStep(text)
             isEditing = false
         } catch {
-            guard let message = (error as? RecipeStepError)?.rawValue else {
-                return
+            alertTitle = "Error"
+
+            if let message = (error as? LocalizedError)?.errorDescription {
+                alertMessage = message
+            } else {
+                alertMessage = "\(error)"
             }
 
-            alertTitle = "Error"
-            alertMessage = message
             alertIsPresented = true
         }
     }

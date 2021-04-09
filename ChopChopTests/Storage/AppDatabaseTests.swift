@@ -235,22 +235,22 @@ class AppDatabaseTests: XCTestCase {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         let steps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add milk and mix well until smooth.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -280,22 +280,22 @@ class AppDatabaseTests: XCTestCase {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         let steps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add milk and mix well until smooth.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -1039,7 +1039,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let nodes = stepRecords.map { stepRecord -> RecipeStepNode? in
-            guard let step = try? RecipeStep(content: stepRecord.content) else {
+            guard let step = try? RecipeStep(stepRecord.content) else {
                 return nil
             }
 
@@ -1048,8 +1048,8 @@ class AppDatabaseTests: XCTestCase {
         let edges = edgeRecords.map { edgeRecord -> Edge<RecipeStepNode>? in
             guard let sourceRecord = stepRecords.first(where: { $0.id == edgeRecord.sourceId }),
                   let destinationRecord = stepRecords.first(where: { $0.id == edgeRecord.destinationId }),
-                  let sourceStep = try? RecipeStep(content: sourceRecord.content),
-                  let destinationStep = try? RecipeStep(content: destinationRecord.content),
+                  let sourceStep = try? RecipeStep(sourceRecord.content),
+                  let destinationStep = try? RecipeStep(destinationRecord.content),
                   let sourceNode = nodes.first(where: { $0.label == sourceStep }),
                   let destinationNode = nodes.first(where: { $0.label == destinationStep }) else {
                 return nil

@@ -1,3 +1,4 @@
+import Foundation
 import GRDB
 
 class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
@@ -26,17 +27,25 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
             RecipeStepRecord(row: $0)
         }
 
-        let steps = stepRecords?.compactMap {
-            try? RecipeStep(content: $0.content, id: $0.id)
-        } ?? []
+        var nodeIds: [UUID: Int64?] = [:]
 
-        let nodes = steps.map { RecipeStepNode($0) }
+        let nodes: [RecipeStepNode] = stepRecords?.compactMap {
+            guard let step = try? RecipeStep($0.content) else {
+                return nil
+            }
+
+            let node = RecipeStepNode(step)
+            nodeIds[node.id] = $0.id
+
+            return node
+        } ?? []
 
         let edges: [Edge<RecipeStepNode>] = row.prefetchedRows["recipeStepEdges"]?.compactMap {
             let record = RecipeStepEdgeRecord(row: $0)
 
-            guard let sourceNode = nodes.first(where: { $0.label.id == record.sourceId }),
-                  let destinationNode = nodes.first(where: { $0.label.id == record.destinationId }) else {
+            guard let sourceNode = nodes.first(where: { nodeIds[$0.id, default: nil] == record.sourceId }),
+                  let destinationNode = nodes.first(where: { nodeIds[$0.id, default: nil] == record.destinationId })
+            else {
                 return nil
             }
 

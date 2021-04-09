@@ -80,7 +80,7 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep(content: "#")),
+        if let step = try? RecipeStepNode(RecipeStep("#")),
            let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionNodeView(viewModel:
                                 SessionNodeViewModel(graph: graph,
