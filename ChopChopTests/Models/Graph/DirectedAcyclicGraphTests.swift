@@ -115,7 +115,7 @@ extension DirectedAcyclicGraphTests {
 
 // MARK: - Topological Sort
 extension DirectedAcyclicGraphTests {
-    func testGetTopologicallySortedNodes() throws {
+    func testTopologicallySortedNodes() throws {
         dag = try makeTestDAG()
         let nodes = dag.nodes.sorted(by: { $0.label < $1.label })
 
@@ -149,7 +149,7 @@ extension DirectedAcyclicGraphTests {
             ]
         ]
 
-        let result = dag.getTopologicallySortedNodes()
+        let result = dag.topologicallySortedNodes
 
         XCTAssertTrue(expectedResults.contains(result), "Result should be one of the correct topological orders")
     }
@@ -157,7 +157,7 @@ extension DirectedAcyclicGraphTests {
 
 // MARK: - Layers
 extension DirectedAcyclicGraphTests {
-    func testGetNodeLayers() throws {
+    func testNodeLayers() throws {
         dag = try makeTestDAG()
         let nodes = dag.nodes.sorted(by: { $0.label < $1.label })
 
@@ -180,7 +180,7 @@ extension DirectedAcyclicGraphTests {
             ]
         ]
 
-        let result = dag.getNodeLayers()
+        let result = dag.nodeLayers
 
         XCTAssertTrue(expectedResults.contains(result), "IntNode layers should be computed correctly")
     }

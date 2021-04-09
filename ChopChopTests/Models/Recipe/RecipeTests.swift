@@ -71,8 +71,14 @@ class RecipeTests: XCTestCase {
 
     static func generateSampleRecipe() -> Recipe {
         do {
-            return try Recipe(name: "Pancakes", servings: 3, difficulty: Difficulty.easy,
-                              steps: RecipeTests.generateSteps(), ingredients: RecipeTests.generateIngredients())
+            let steps = RecipeTests.generateSteps()
+            let graph = RecipeTests.generateGraph(steps: steps)
+
+            return try Recipe(name: "Pancakes",
+                              servings: 3,
+                              difficulty: Difficulty.easy,
+                              ingredients: RecipeTests.generateIngredients(),
+                              graph: graph)
         } catch {
             fatalError("Could not generate sample recipe")
         }
@@ -82,15 +88,13 @@ class RecipeTests: XCTestCase {
         let steps = RecipeTests.generateSteps()
         let graph = RecipeTests.generateGraph(steps: steps)
         let recipe = try Recipe(name: "Pancakes",
-                                steps: steps,
                                 ingredients: RecipeTests.generateIngredients(),
-                                stepGraph: graph
+                                graph: graph
                             )
 
         XCTAssertEqual(recipe.name, "Pancakes")
         XCTAssertEqual(recipe.servings, 1)
         XCTAssertNil(recipe.difficulty)
-        XCTAssertEqual(recipe.steps, RecipeTests.generateSteps())
         XCTAssertEqual(recipe.ingredients, RecipeTests.generateIngredients())
         XCTAssertEqual(recipe.stepGraph, graph)
     }
@@ -100,68 +104,24 @@ class RecipeTests: XCTestCase {
         XCTAssertThrowsError(try Recipe(name: "Recipe", servings: -2))
     }
 
-    func testAddStep() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        try recipe.addStep(content: "Wait some more")
-        XCTAssertEqual(recipe.steps.last, try RecipeStep(content: "Wait some more"))
-    }
-
     func testUpdateRecipe() throws {
         let newRecipe = RecipeTests.generateSampleRecipe()
+        let steps = RecipeTests.generateSteps()
+        let graph = RecipeTests.generateGraph(steps: steps)
         let recipeToUpdate = try Recipe(
             name: "Pizza",
             servings: 4,
             difficulty: Difficulty.hard,
-            steps: RecipeTests.generateSteps(),
-            ingredients: RecipeTests.generateIngredients()
+            ingredients: RecipeTests.generateIngredients(),
+            graph: graph
         )
         newRecipe.updateRecipe(recipeToUpdate)
         XCTAssertEqual(newRecipe.name, recipeToUpdate.name)
         XCTAssertEqual(newRecipe.servings, recipeToUpdate.servings)
         XCTAssertEqual(newRecipe.difficulty, recipeToUpdate.difficulty)
         XCTAssertEqual(newRecipe.recipeCategoryId, newRecipe.recipeCategoryId)
-        XCTAssertEqual(newRecipe.steps, recipeToUpdate.steps)
         XCTAssertEqual(newRecipe.ingredients, recipeToUpdate.ingredients)
-    }
-
-    func testAddStep_empty() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.addStep(content: "       "))
-    }
-
-    func testRemoveStep() {
-        let recipe = RecipeTests.generateSampleRecipe()
-        guard let lastStep = recipe.steps.last else {
-            XCTFail("There are no steps")
-            return
-        }
-        recipe.removeStep(lastStep)
-
-        var steps = RecipeTests.generateSteps()
-        steps.removeLast()
-        XCTAssertEqual(recipe.steps, steps)
-    }
-
-    func testRemoveStep_nonExistent() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        recipe.removeStep(try RecipeStep(content: "Wait some more"))
-
-        XCTAssertEqual(recipe.steps, RecipeTests.generateSteps())
-    }
-
-    func testReorderStep() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        let firstStep = recipe.steps[0]
-        let secondStep = recipe.steps[1]
-        try recipe.reorderStep(idx1: 0, idx2: 1)
-        XCTAssertEqual(firstStep, recipe.steps[1])
-        XCTAssertEqual(secondStep, recipe.steps[0])
-    }
-
-    func testReorderStep_fail() throws {
-        let recipe = RecipeTests.generateSampleRecipe()
-        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: -1))
-        XCTAssertThrowsError(try recipe.reorderStep(idx1: 0, idx2: 10))
+        XCTAssertEqual(newRecipe.stepGraph, recipeToUpdate.stepGraph)
     }
 
     func testAddIngredient_existingIngredient() throws {
