@@ -109,11 +109,11 @@ struct StorageManager {
     }
 
     func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategory(id: id)
+        try appDatabase.fetchRecipeCategory(id: id).map { try RecipeCategory(id: $0.id, name: $0.name) }
     }
 
     func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategory(name: name)
+        try appDatabase.fetchRecipeCategory(name: name).map { try RecipeCategory(id: $0.id, name: $0.name) }
     }
 
     // MARK: - Database Access: Publishers
@@ -132,7 +132,7 @@ struct StorageManager {
 
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesPublisher()
-            .map { $0.compactMap { try? RecipeCategory(name: $0.name, id: $0.id) } }
+            .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
 
