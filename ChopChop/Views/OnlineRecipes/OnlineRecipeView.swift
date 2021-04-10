@@ -86,9 +86,9 @@ struct OnlineRecipeView: View {
 
 }
 
-struct OnlineRecipeView_Previews: PreviewProvider {
-    // swiftlint:disable force_try line_length
-    static var previews: some View {
-        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
-    }
-}
+// struct OnlineRecipeView_Previews: PreviewProvider {
+//    // swiftlint:disable force_try line_length
+//    static var previews: some View {
+//        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
+//    }
+// }

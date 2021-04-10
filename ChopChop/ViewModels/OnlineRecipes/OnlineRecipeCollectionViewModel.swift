@@ -5,19 +5,19 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
     @Published private(set) var recipes: [OnlineRecipe] = []
 
     private let storageManager = StorageManager()
-    private var recipesCancellable: AnyCancellable?
 
     @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
 
-    init(publisher: AnyPublisher<[OnlineRecipe], Error>) {
-        recipesCancellable = publisher
-            .catch { _ in
-                Just<[OnlineRecipe]>([])
-            }
-            .eraseToAnyPublisher()
-            .sink { [weak self] recipes in
-                self?.recipes = recipes
-            }
+    init(userIds: [String]?) {
+        guard let userIds = userIds else {
+            storageManager.fetchAllRecipes(completion: onLoadOnlineRecipes(onlineRecipes:error:))
+            return
+        }
+        storageManager.fetchRecipesByUsers(userIds: userIds, completion: onLoadOnlineRecipes(onlineRecipes:error:))
+    }
+
+    private func onLoadOnlineRecipes(onlineRecipes: [OnlineRecipe], error: Error?) {
+        recipes = onlineRecipes
     }
 
 }

@@ -38,9 +38,16 @@ struct FirebaseCloudStorage {
         }
     }
 
-    func fetchImage(name: String) -> AnyPublisher<Data, Error> {
+    func fetchImage(name: String, completion: @escaping (Data?) -> Void) {
         let fetchRef = storageRef.child("images/\(name).png")
-        return fetchRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize)
+        fetchRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize) {
+            data, error in
+                if error != nil {
+                    completion(nil)
+                } else {
+                    completion(data)
+                }
+        }
     }
 
     func deleteImage(name: String) {

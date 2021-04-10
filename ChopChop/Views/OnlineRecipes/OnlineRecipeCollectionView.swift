@@ -36,9 +36,9 @@ struct OnlineRecipeCollectionView: View {
     }
 }
 
-struct OnlineRecipeCollectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher:
-                                                                                StorageManager().allRecipesPublisher()))
-    }
-}
+// struct OnlineRecipeCollectionView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher:
+//                                                                                StorageManager().allRecipesPublisher()))
+//    }
+// }

@@ -5,16 +5,26 @@ final class UserSettings: ObservableObject {
     @Published var viewType = ViewType.list
     @Published var userId = UserDefaults.standard.string(forKey: "userId") {
         didSet {
-            guard let userId = userId else {
-                return
-            }
-            // listener should only be created once
-            storageManager.listenUserById(userId: userId, onChange: { user in self.user = user })
+            setPublisher()
         }
     }
 
     private let storageManager = StorageManager()
     @Published var user: User?
+
+    init() {
+        setPublisher()
+    }
+
+    private func setPublisher() {
+        guard let userId = userId else {
+            return
+        }
+        // listener should only be created once
+        storageManager.listenUserById(userId: userId) { user in
+            self.user = user
+        }
+    }
 
 }
 

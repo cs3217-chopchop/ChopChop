@@ -1,5 +1,5 @@
 import Foundation
-import UIKit
+import UIKit // TODO shouldnt be importing UIKit this far into models
 import Combine
 
 struct StorageManager {
@@ -464,13 +464,8 @@ extension StorageManager {
         }
     }
 
-    // TODO
-    func onlineRecipeImagePublisher(recipeId: String) -> AnyPublisher<UIImage, Error> {
-        firebaseStorage.fetchImage(name: recipeId)
-            .compactMap({
-                UIImage(data: $0)
-            })
-            .eraseToAnyPublisher()
+    func fetchOnlineRecipeImage(recipeId: String, completion: @escaping (Data?) -> Void) {
+        firebaseStorage.fetchImage(name: recipeId, completion: completion)
     }
 }
 

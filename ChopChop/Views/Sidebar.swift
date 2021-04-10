@@ -205,7 +205,7 @@ import SwiftUI
         Section(header: Text("Recipe Feed")) {
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher))
+                                OnlineRecipeCollectionViewModel(userIds: nil))
                     .navigationTitle("All Recipes")
             ) {
                 Label("All Recipes", systemImage: "tray.2")
@@ -213,8 +213,7 @@ import SwiftUI
 
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher:
-                                                                    viewModel.followeesRecipePublisher))
+                                                            OnlineRecipeCollectionViewModel(userIds: settings.user?.followees))
                     .navigationTitle("Recipes from followees")
             ) {
                 Label("Recipes from followees", systemImage: "folder")
@@ -222,7 +221,7 @@ import SwiftUI
 
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.ownRecipePublisher))
+                                OnlineRecipeCollectionViewModel(userIds: [settings.userId].compactMap { $0 }))
                     .navigationTitle("My Published Recipes")
             ) {
                 Label("My Published Recipes", systemImage: "folder")
