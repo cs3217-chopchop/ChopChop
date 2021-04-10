@@ -4,16 +4,23 @@ import Combine
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
 
+    private var creatorCancellable: AnyCancellable?
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
     private var imageCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
+    @Published var creatorName = "No name" {
+        willSet { self.objectWillChange.send() }
+    }
+
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
 
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
+
+    @Published var isShowingDetail: Bool = false
 
     let settings: UserSettings
 
@@ -23,6 +30,11 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
+
+        creatorCancellable = creatorPublisher()
+            .sink { [weak self] user in
+                self?.creatorName = user.name
+            }
 
         followeesCancellable = followeesPublisher()
             .sink { [weak self] followees in
@@ -70,6 +82,16 @@ class OnlineRecipeViewModel: ObservableObject {
 
     func setRecipe() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
+    }
+
+    func toggleShowDetail() {
+        isShowingDetail.toggle()
+    }
+
+    private func creatorPublisher() -> AnyPublisher<User, Never> {
+        storageManager.userByIdPublisher(userId: recipe.userId)
+            .assertNoFailure()
+            .eraseToAnyPublisher()
     }
 
     private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {

@@ -4,36 +4,94 @@ struct OnlineRecipeView: View {
     @ObservedObject var viewModel: OnlineRecipeViewModel
 
     var body: some View {
-        VStack {
-            Image(uiImage: viewModel.image)
+        VStack(spacing: 0) {
+            userBar
+            recipeImage
+            averageRating
+            if viewModel.isShowingDetail {
+                recipeDetails
+            }
+            Divider()
+            showDetailBar
+        }
+    }
+
+    var userBar: some View {
+        HStack {
+            Image("default-user")
                 .resizable()
                 .scaledToFill()
-                .frame(height: 200)
-                .clipped()
+                .frame(width: 50, height: 50)
+                .clipShape(Circle())
+            Text(viewModel.creatorName)
+            Spacer()
+            downloadButton
+        }
+        .padding()
+    }
+
+    var recipeImage: some View {
+        Image(uiImage: viewModel.image)
+            .resizable()
+            .scaledToFill()
+            .frame(height: 300)
+            .clipped()
+            .overlay(recipeImageOverlay)
+    }
+
+    var recipeImageOverlay: some View {
+        var recipeName: some View {
             Text(viewModel.recipe.name)
-                .font(.largeTitle)
-                .bold()
-                .padding()
+                .font(.title)
                 .foregroundColor(.white)
-                .background(Color.blue)
-                .clipShape(Capsule())
-            recipeDetails
-            Divider()
-            Button(action: {
-                viewModel.setRecipe()
-            }) {
-                Label("Download", systemImage: "square.and.arrow.down")
-            }
-            averageRating
+                .lineLimit(1)
         }
 
+        var recipeDetails: some View {
+            VStack(alignment: .leading) {
+                Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
+                HStack {
+                    Text("Difficulty: ")
+                    DifficultyView(difficulty: viewModel.recipe.difficulty)
+                }
+                HStack {
+                    Text("Cuisine: ")
+                    Text(viewModel.recipe.cuisine ?? "Unspecified")
+                }
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+        }
+
+        return ZStack(alignment: .bottomLeading) {
+            Rectangle()
+                .foregroundColor(.clear)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .clear, .black]),
+                        startPoint: .top,
+                        endPoint: .bottom))
+            HStack {
+                recipeName
+                Spacer()
+                recipeDetails
+            }
+            .padding()
+        }
+    }
+
+    var averageRating: some View {
+        HStack {
+            Text("Rating: ")
+            StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
+                .frame(width: 150, height: 30)
+            Text(viewModel.ratingDetails)
+            Spacer()
+        }.padding()
     }
 
     var recipeDetails: some View {
-        VStack(alignment: .center) {
-            Text("General").font(.title).underline()
-            general
-            Spacer()
+        VStack(alignment: .leading, spacing: 0) {
             Text("Ingredients").font(.title).underline()
             ingredient
             Spacer()
@@ -43,24 +101,10 @@ struct OnlineRecipeView: View {
         .padding()
     }
 
-    var general: some View {
-        VStack {
-            Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
-            HStack {
-                Text("Difficulty: ")
-                DifficultyView(difficulty: viewModel.recipe.difficulty)
-            }
-            HStack {
-                Text("Cuisine: ")
-                Text(viewModel.recipe.cuisine ?? "Unspecified")
-            }
-        }.font(.body)
-    }
-
     var ingredient: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
             ForEach(viewModel.recipe.ingredients, id: \.self.description) { ingredient in
-                Text(ingredient.description)
+                Text("• \(ingredient.description)")
             }
         }.font(.body)
     }
@@ -75,15 +119,21 @@ struct OnlineRecipeView: View {
         }.font(.body)
     }
 
-    var averageRating: some View {
-        HStack {
-            Text("Average rating: ")
-            StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
-                .frame(width: 200, height: 40, alignment: .center)
-            Text(viewModel.ratingDetails)
-        }.padding()
+    var showDetailBar: some View {
+        Button(action: viewModel.toggleShowDetail) {
+            HStack {
+                Image(systemName: viewModel.isShowingDetail ? "chevron.up" : "chevron.down")
+                Text(viewModel.isShowingDetail ? "Hide Details" : "Show Details")
+            }
+        }
+        .padding()
     }
 
+    var downloadButton: some View {
+        Button(action: viewModel.setRecipe) {
+            Label("Download", systemImage: "square.and.arrow.down")
+        }
+    }
 }
 
 struct OnlineRecipeView_Previews: PreviewProvider {
