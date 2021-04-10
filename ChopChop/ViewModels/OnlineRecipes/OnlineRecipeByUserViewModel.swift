@@ -6,15 +6,16 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         willSet { self.objectWillChange.send() }
     }
 
-    private var creatorCancellable: AnyCancellable?
-
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
 
-        creatorCancellable = creatorPublisher()
-            .sink { [weak self] user in
-                self?.creatorName = user.name
+        storageManager.fetchUserById(userId: recipe.userId) {
+            user, _ in
+            guard let name = user?.name else {
+                return
             }
+            self.creatorName = name
+        }
     }
 
     var ownRating: RecipeRating? {
@@ -46,12 +47,6 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         }
 
         storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
-    }
-
-    private func creatorPublisher() -> AnyPublisher<User, Never> {
-        storageManager.userByIdPublisher(userId: recipe.userId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
     }
 
 }

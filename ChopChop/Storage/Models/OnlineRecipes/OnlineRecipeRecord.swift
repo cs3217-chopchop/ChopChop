@@ -12,7 +12,6 @@ struct OnlineRecipeRecord {
     var steps: [String]
     var stepEdges: [OnlineStepEdgeRecord]
     var ratings: [RecipeRating] = []
-    @ServerTimestamp var created: Date?
 
 }
 
@@ -23,5 +22,5 @@ extension OnlineRecipeRecord: Codable {
 }
 
 enum OnlineRecipeRecordError: Error {
-    case missingId, missingCreatedDate
+    case missingId, missingCreatedDate, missingUpdatedDate
 }

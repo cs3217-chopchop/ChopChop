@@ -12,11 +12,13 @@ class OnlineRecipe: Identifiable {
     private(set) var stepGraph: RecipeStepGraph
     private(set) var ingredients: [RecipeIngredient]
     private(set) var ratings: [RecipeRating]
-    private(set) var created: Date
+    let createdAt: Date
+    let updatedAt: Date
 
     init(id: String, userId: String, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
-         ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
+         ingredients: [RecipeIngredient], ratings: [RecipeRating],
+         created: Date, updatedAt: Date) throws {
         self.id = id
         self.userId = userId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -34,18 +36,24 @@ class OnlineRecipe: Identifiable {
         self.stepGraph = stepGraph
         self.ingredients = ingredients
         self.ratings = ratings
-        self.created = created
+        self.createdAt = created
+        self.updatedAt = updatedAt
     }
 }
 
 extension OnlineRecipe {
-    convenience init(from record: OnlineRecipeRecord) throws {
+    convenience init(from record: OnlineRecipeRecord, info: OnlineRecipeInfoRecord) throws {
         guard let id = record.id else {
             throw OnlineRecipeRecordError.missingId
         }
 
-        guard let createdDate = record.created else {
+        // TODO push everything to info
+        guard let createdDate = info.createdAt else {
             throw OnlineRecipeRecordError.missingCreatedDate
+        }
+
+        guard let updatedDate = info.updatedAt else {
+            throw OnlineRecipeRecordError.missingUpdatedDate
         }
 
         let stepGraphNodes = try record.steps.compactMap({
@@ -93,7 +101,8 @@ extension OnlineRecipe {
             stepGraph: stepGraph,
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,
-            created: createdDate
+            created: createdDate,
+            updatedAt: updatedDate
         )
     }
 }

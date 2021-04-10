@@ -13,4 +13,3 @@ extension OnlineRecipeInfoRecord: Equatable {
 
 extension OnlineRecipeInfoRecord: Codable {
 }
-
