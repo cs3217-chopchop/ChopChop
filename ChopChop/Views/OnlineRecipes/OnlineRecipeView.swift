@@ -91,14 +91,18 @@ struct OnlineRecipeView: View {
     }
 
     var recipeDetails: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Ingredients").font(.title).underline()
-            ingredient
+        HStack {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Ingredients").font(.title).underline()
+                ingredient
+                Spacer()
+                Text("Instructions").font(.title).underline()
+                instruction
+            }
+            .padding()
+
             Spacer()
-            Text("Instructions").font(.title).underline()
-            instruction
         }
-        .padding()
     }
 
     var ingredient: some View {
@@ -110,13 +114,15 @@ struct OnlineRecipeView: View {
     }
 
     var instruction: some View {
-        ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
-            HStack(alignment: .top) {
-                Text("Step \(idx + 1):")
-                    .bold()
-                Text(viewModel.recipe.stepGraph.topologicallySortedNodes[idx].label.content)
-            }
-        }.font(.body)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
+                HStack(alignment: .top) {
+                    Text("Step \(idx + 1):")
+                        .bold()
+                    Text(viewModel.recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                }
+            }.font(.body)
+        }
     }
 
     var showDetailBar: some View {
