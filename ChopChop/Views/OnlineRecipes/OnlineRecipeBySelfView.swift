@@ -5,15 +5,13 @@ struct OnlineRecipeBySelfView: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Spacer()
-                Button(action: {
-                    viewModel.onDelete()
-                }) {
-                    Label("Unpublish", systemImage: "trash")
-                }.padding()
-            }.padding()
             OnlineRecipeView(viewModel: viewModel)
+            Divider()
+            Button(action: {
+                    viewModel.onDelete()
+            }) {
+                Label("Unpublish", systemImage: "trash")
+            }.padding()
         }
         .overlay(
             RoundedRectangle(cornerRadius: 40)

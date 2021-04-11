@@ -47,7 +47,6 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingId
         }
 
-        // TODO push everything to info
         guard let createdDate = info.createdAt else {
             throw OnlineRecipeRecordError.missingCreatedDate
         }

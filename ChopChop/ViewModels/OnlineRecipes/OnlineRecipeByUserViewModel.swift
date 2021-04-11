@@ -9,7 +9,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
 
-        storageManager.fetchUserById(userId: recipe.userId) {
+        storageManager.fetchUserInfoById(userId: recipe.userId) {
             user, _ in
             guard let name = user?.name else {
                 return
@@ -33,11 +33,12 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             return
         }
 
-        guard ownRating != nil else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating)
+        guard let ownRating = ownRating else {
+            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating, completion: reload)
             return
         }
-        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: userId, score: rating))
+        storageManager.rerateRecipe(recipeId: recipe.id, oldRating: ownRating,
+                                    newRating: RecipeRating(userId: userId, score: rating), completion: reload)
     }
 
     func removeRating() {
@@ -46,7 +47,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             return
         }
 
-        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
+        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating, completion: reload)
     }
 
 }

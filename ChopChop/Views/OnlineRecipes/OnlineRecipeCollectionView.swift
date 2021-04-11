@@ -34,7 +34,8 @@ struct OnlineRecipeCollectionView: View {
                 })
             }
         }.onAppear {
-            viewModel.onLoad()
+            print("recipes about to appear")
+            viewModel.load()
         }
 
     }

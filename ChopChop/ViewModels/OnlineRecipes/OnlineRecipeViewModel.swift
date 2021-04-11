@@ -15,20 +15,8 @@ class OnlineRecipeViewModel: ObservableObject {
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
 
-        let firstRaterId = getRaterId(recipe: recipe)
-        storageManager.fetchUserById(userId: firstRater) { user, _ in
-            guard let name = user?.name else {
-                return
-            }
-            self.firstRater = (settings.userId == user?.id ? "You" : name)
-        }
-
-        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data in
-            guard let data = data, let image = UIImage(data: data) else {
-                return
-            }
-            self.image = image
-        }
+        updateFirstRaterName()
+        updateImage()
     }
 
     var averageRating: Double {
@@ -52,6 +40,38 @@ class OnlineRecipeViewModel: ObservableObject {
 
     func setRecipe() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
+    }
+
+    func reload() {
+        storageManager.fetchOnlineRecipe(onlineRecipeId: recipe.id) { onlineRecipe, _ in
+            guard let onlineRecipe = onlineRecipe else {
+                return
+            }
+            self.recipe = onlineRecipe
+            self.updateFirstRaterName()
+            self.updateImage()
+        }
+    }
+
+    private func updateImage() {
+        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data in
+            guard let data = data, let image = UIImage(data: data) else {
+                return
+            }
+            self.image = image
+        }
+    }
+
+    private func updateFirstRaterName() {
+        guard let firstRaterId = getRaterId(recipe: recipe) else {
+            return
+        }
+        storageManager.fetchUserById(userId: firstRaterId) { user, _ in
+            guard let name = user?.name else {
+                return
+            }
+            self.firstRater = (self.settings.userId == user?.id ? "You" : name)
+        }
     }
 
     private func getRaterId(recipe: OnlineRecipe) -> String? {

@@ -3,7 +3,7 @@ import Foundation
 import UIKit
 
 final class CreateUserProfileViewModel: ObservableObject {
-    private var settings: UserSettings
+    private let settings: UserSettings
 
     @Published var name: String = ""
     private let storageManager = StorageManager()

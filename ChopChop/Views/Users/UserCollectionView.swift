@@ -11,7 +11,7 @@ struct UserCollectionView: View {
                     NotFoundView(entityName: "Followees")
                 } else {
                     List(viewModel.followees) { followee in
-                        FolloweeView(viewModel: FolloweeViewModel(user: followee, settings: settings))
+                        FolloweeView(viewModel: FolloweeViewModel(user: followee, settings: settings, reload: viewModel.load))
                     }
                 }
             }
@@ -20,13 +20,14 @@ struct UserCollectionView: View {
                     NotFoundView(entityName: "Other Users")
                 } else {
                     List(viewModel.nonFollowees) { notCurrentFollowee in
-                        NonFolloweeView(viewModel: NonFolloweeViewModel(user: notCurrentFollowee, settings: settings))
+                        NonFolloweeView(viewModel: NonFolloweeViewModel(user: notCurrentFollowee, settings: settings, reload: viewModel.load))
                     }
                 }
             }
-        }.onAppear(perform: {
+        }.onAppear {
+            print("view created")
             viewModel.load()
-        })
+        }
     }
 }
 

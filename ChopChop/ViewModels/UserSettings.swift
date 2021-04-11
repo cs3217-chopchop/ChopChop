@@ -10,7 +10,7 @@ final class UserSettings: ObservableObject {
     }
 
     private let storageManager = StorageManager()
-    @Published var user: User?
+    private(set) var user: User?
 
     init() {
         userId = UserDefaults.standard.string(forKey: "userId")

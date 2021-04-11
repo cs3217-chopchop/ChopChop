@@ -16,10 +16,10 @@ struct NonFolloweeView: View {
     }
 }
 
-struct NotCurrentFolloweeView_Previews: PreviewProvider {
-    static var previews: some View {
-        // swiftlint:disable force_try
-        NonFolloweeView(viewModel: NonFolloweeViewModel(user: try! User(id: "Bob", name: "Bob"),
-                                                        settings: UserSettings()))
-    }
-}
+// struct NotCurrentFolloweeView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        // swiftlint:disable force_try
+//        NonFolloweeView(viewModel: NonFolloweeViewModel(user: try! User(id: "Bob", name: "Bob"),
+//                                                        settings: UserSettings()))
+//    }
+// }

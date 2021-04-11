@@ -14,17 +14,17 @@ final class Cache<Key: Hashable, Value> {
         return entry?.value
     }
 
-//    func removeValue(forKey key: Key) {
-//        wrapped.removeObject(forKey: WrappedKey(key))
-//    }
+    func removeValue(forKey key: Key) {
+        wrapped.removeObject(forKey: WrappedKey(key))
+    }
 
     subscript(key: Key) -> Value? {
         get { value(forKey: key) }
         set {
             guard let value = newValue else {
-                // If nil was assigned using our subscript,
-                // then we remove any value for that key:
-//                removeValue(forKey: key)
+//                 If nil was assigned using our subscript,
+//                 then we remove any value for that key:
+                removeValue(forKey: key)
                 return
             }
 

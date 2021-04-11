@@ -11,10 +11,11 @@ final class UserCollectionViewModel: ObservableObject {
 
     init(settings: UserSettings) {
         self.settings = settings
+        print("viewmodel created")
     }
 
     func load() {
-        storageManager.fetchAllUsers { users, _ in
+        storageManager.fetchAllUserInfos { users, _ in
             self.followees = users.filter { self.isFollowee(user: $0) }
             self.nonFollowees = users.filter { self.isNonFollowee(user: $0) }
         }

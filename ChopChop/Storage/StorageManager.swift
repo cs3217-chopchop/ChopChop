@@ -317,7 +317,7 @@ extension StorageManager {
             steps: nodes,
             stepEdges: edgeRecords
         )
-        firebaseDatabase.updateRecipeDetails(recipe: recipeRecord)
+        firebaseDatabase.updateRecipe(recipe: recipeRecord)
         let image = self.fetchRecipeImage(name: recipe.name)
         guard let fetchedImage = image, let onlineId = recipe.onlineId else {
             return
@@ -326,8 +326,8 @@ extension StorageManager {
     }
 
     // unpublish a recipe through the online interface
-    func removeRecipeFromOnline(recipe: OnlineRecipe) throws {
-        try firebaseDatabase.removeRecipe(recipeId: recipe.id)
+    func removeRecipeFromOnline(recipe: OnlineRecipe, completion: @escaping () -> Void) throws {
+        try firebaseDatabase.removeRecipe(recipeId: recipe.id, completion: completion)
         for rating in recipe.ratings {
             firebaseDatabase.removeUserRecipeRating(
                 userId: rating.userId,
@@ -351,35 +351,42 @@ extension StorageManager {
     }
 
     // fetch the details of a single user
-    func fetchUserById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
+    // not used
+    func fetchUserById(userId: String, completion: @escaping (User?, Error?) -> Void) {
         firebaseDatabase.fetchUserById(userId: userId, completion: completion)
     }
 
     // fetch the details of a single user
+    func fetchUserInfoById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
+        firebaseDatabase.fetchUserInfoById(userId: userId, completion: completion)
+    }
+
+    // listen to the details of a single user
     // use case: own user object
     func listenUserById(userId: String, onChange: @escaping (User) -> Void) {
+        // TODO dosent work when add followee -> recipes by followees
         firebaseDatabase.listenUserById(userId: userId, onChange: onChange)
     }
 
     // follow someone
-    func addFollowee(userId: String, followeeId: String) {
-        firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId)
+    func addFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
+        firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId, completion: completion)
     }
 
     // unfollow someone
-    func removeFollowee(userId: String, followeeId: String) {
-        firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId)
+    func removeFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
+        firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId, completion: completion)
     }
 
     // rate a recipe
-    func rateRecipe(recipeId: String, userId: String, rating: RatingScore) {
+    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping () -> Void) {
         firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
-        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating))
+        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
     }
 
     // remove rating of a recipe you rated
-    func unrateRecipe(recipeId: String, rating: RecipeRating) {
-        firebaseDatabase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating)
+    func unrateRecipe(recipeId: String, rating: RecipeRating, completion: @escaping () -> Void) {
+        firebaseDatabase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating, completion: completion)
         firebaseDatabase.removeUserRecipeRating(
             userId: rating.userId,
             rating: UserRating(recipeOnlineId: recipeId, score: rating.score)
@@ -387,9 +394,11 @@ extension StorageManager {
     }
 
     // change the rating of a recipe you have rated before
-    func rerateRecipe(recipeId: String, newRating: RecipeRating) {
-        firebaseDatabase.updateRecipeRating(recipeId: recipeId, recipeRating: newRating)
-        firebaseDatabase.updateUserRating(userId: newRating.userId, userRating: UserRating(recipeOnlineId: recipeId, score: newRating.score))
+    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping () -> Void) {
+        firebaseDatabase.updateRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
+        firebaseDatabase.updateUserRating(userId: newRating.userId,
+                                          oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
+                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score))
     }
 
     // fetch user details of all your followees
@@ -407,8 +416,13 @@ extension StorageManager {
     }
 
     // Fetch details of all users in the system
-    func fetchAllUsers(completion: @escaping ([UserInfo], Error?) -> Void) {
+    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
         firebaseDatabase.fetchAllUsers(completion: completion)
+    }
+
+    // Fetch details of all users in the system
+    func fetchAllUserInfos(completion: @escaping ([UserInfo], Error?) -> Void) {
+        firebaseDatabase.fetchAllUserInfos(completion: completion)
     }
 
     // Can be used to fetch all your own recipes or recipes of several selected users

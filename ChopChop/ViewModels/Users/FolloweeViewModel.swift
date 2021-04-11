@@ -5,10 +5,12 @@ final class FolloweeViewModel: ObservableObject, Identifiable {
     private let storageManager = StorageManager()
 
     private let settings: UserSettings
+    private let reload: () -> Void
 
-    init(user: UserInfo, settings: UserSettings) {
+    init(user: UserInfo, settings: UserSettings, reload: @escaping () -> Void) {
         self.user = user
         self.settings = settings
+        self.reload = reload
     }
 
     func onDelete() {
@@ -17,7 +19,7 @@ final class FolloweeViewModel: ObservableObject, Identifiable {
             return
         }
 
-        storageManager.removeFollowee(userId: userId, followeeId: followeeID)
+        storageManager.removeFollowee(userId: userId, followeeId: followeeID, completion: reload)
     }
 
 }
