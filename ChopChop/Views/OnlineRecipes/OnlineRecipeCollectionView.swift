@@ -1,20 +1,25 @@
 import SwiftUI
 
-struct OnlineRecipeCollectionView: View {
+struct OnlineRecipeCollectionView<Content: View>: View {
     @ObservedObject var viewModel: OnlineRecipeCollectionViewModel
     @ObservedObject var downloadRecipeViewModel: DownloadRecipeViewModel
     @EnvironmentObject var settings: UserSettings
+    let content: Content
 
-    init(viewModel: OnlineRecipeCollectionViewModel) {
+    init(viewModel: OnlineRecipeCollectionViewModel, @ViewBuilder content: @escaping() -> Content) {
         self.viewModel = viewModel
         self.downloadRecipeViewModel = viewModel.downloadRecipeViewModel
+        self.content = content()
     }
 
     var body: some View {
-        if viewModel.recipes.isEmpty {
-            NotFoundView(entityName: "Recipes")
-        } else {
-            ScrollView {
+        ScrollView {
+            content
+
+            if viewModel.recipes.isEmpty {
+                NotFoundView(entityName: "Recipes")
+                    .padding()
+            } else {
                 VStack(spacing: 20) {
                     ForEach(viewModel.recipes) { recipe in
                         if recipe.userId == settings.userId {
@@ -30,17 +35,18 @@ struct OnlineRecipeCollectionView: View {
                         }
                     }
                 }
-            }.background(EmptyView().sheet(isPresented: $downloadRecipeViewModel.isShow) {
-                DownloadRecipeView(viewModel: downloadRecipeViewModel)
-            })
-        }
-
+            }
+        }.background(EmptyView().sheet(isPresented: $downloadRecipeViewModel.isShow) {
+            DownloadRecipeView(viewModel: downloadRecipeViewModel)
+        })
     }
 }
 
 struct OnlineRecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
         OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher:
-                                                                                StorageManager().allRecipesPublisher()))
+                                                                                StorageManager().allRecipesPublisher())) {
+            EmptyView()
+        }
     }
 }

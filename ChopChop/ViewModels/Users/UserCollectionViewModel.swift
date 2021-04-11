@@ -1,6 +1,6 @@
 import Combine
 import Foundation
-import UIKit
+import SwiftUI
 
 final class UserCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()

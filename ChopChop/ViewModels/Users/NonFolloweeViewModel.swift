@@ -1,4 +1,4 @@
-import UIKit
+import SwiftUI
 
 final class NonFolloweeViewModel: ObservableObject, Identifiable {
     @Published var user: User
