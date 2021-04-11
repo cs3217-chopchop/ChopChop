@@ -87,6 +87,18 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("CreateRecipeStepTimer") { db in
+            try db.create(table: "recipeStepTimer") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("stepId", .integer)
+                    .notNull()
+                    .indexed()
+                    .references("recipeStep", onDelete: .cascade)
+                t.column("duration", .double)
+                    .notNull()
+            }
+        }
+
         migrator.registerMigration("CreateRecipeStepEdge") { db in
             try db.create(table: "recipeStepEdge") { t in
                 t.autoIncrementedPrimaryKey("id")

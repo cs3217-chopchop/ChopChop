@@ -4,6 +4,7 @@ import Foundation
 final class EditorNodeViewModel: ObservableObject {
     @Published var isEditing = false
     @Published var text = ""
+    @Published var showTimers = false
 
     @Published var alertIsPresented = false
     @Published var alertTitle = ""

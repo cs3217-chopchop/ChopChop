@@ -13,6 +13,8 @@ struct EditorNodeView: View {
         self.selection = selection
 
         UITextView.appearance().backgroundColor = .clear
+        UITableView.appearance().backgroundColor = .clear
+        UITableViewCell.appearance().backgroundColor = .clear
     }
 
     var body: some View {
@@ -46,6 +48,7 @@ struct EditorNodeView: View {
             }
             .padding()
         }
+        .overlay(timersView)
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
@@ -70,6 +73,11 @@ struct EditorNodeView: View {
                 }) {
                     Image(systemName: "square.and.pencil")
                 }
+                Button(action: {
+                    viewModel.showTimers.toggle()
+                }) {
+                    Image(systemName: "timer")
+                }
                 Spacer()
                 Button(action: {
                     viewModel.removeNode()
@@ -80,6 +88,40 @@ struct EditorNodeView: View {
             }
         }
         .padding(.top, 6)
+    }
+
+    @ViewBuilder
+    var timersView: some View {
+        if isSelected && viewModel.showTimers {
+            TileView(isSelected: true,
+                     expandedSize: CGSize(width: RecipeStepNode.expandedSize.width / 2,
+                                          height: RecipeStepNode.expandedSize.height)) {
+                VStack {
+                    Text("Timers")
+                        .font(.headline)
+                        .padding([.top, .leading, .trailing])
+                    List {
+                        ForEach(0..<20) { _ in
+                            HStack {
+                                Text("00:04:32")
+                            }
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    .padding([.top, .bottom], 4)
+                    HStack {
+                        Spacer()
+                        NavigationLink(
+                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: RecipeStepGraph()))
+                        ) {
+                            Image(systemName: "square.and.pencil")
+                        }
+                    }
+                    .padding([.bottom, .leading, .trailing])
+                }
+            }
+            .offset(x: RecipeStepNode.expandedSize.width * 0.75 + 32, y: 0)
+        }
     }
 }
 
