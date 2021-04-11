@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-struct RecipeCategory: Identifiable {
+struct RecipeCategory: Identifiable, Hashable {
     var id: Int64?
     let name: String
 

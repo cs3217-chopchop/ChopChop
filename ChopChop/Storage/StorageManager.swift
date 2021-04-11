@@ -441,8 +441,8 @@ extension StorageManager {
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
-            name: newName,
             onlineId: newOnlineId,
+            name: newName,
             category: cuisine,
             servings: recipe.servings,
             difficulty: recipe.difficulty,

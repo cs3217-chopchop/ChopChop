@@ -1,195 +1,166 @@
-import SwiftUI
 import Combine
 import GRDB
+import UIKit
 
-// class RecipeFormViewModel: ObservableObject {
-//
-//    private var existingRecipe: Recipe?
-//    private var recipeId: Int64?
-//    private let storageManager = StorageManager()
-//    private var recipeCategoryCancellable = Set<AnyCancellable>()
-//
-//    private(set) var errorMessage = ""
-//    private(set) var isEdit = false
-//
-//    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
-//
-//    @Published var hasError = false
-//    @Published var isShowingPhotoLibrary = false
-//    @Published var image = UIImage()
-//    @Published var recipeName = ""
-//    @Published var serving = ""
-//    @Published var allRecipeCategories = [RecipeCategory]()
-//    @Published var recipeCategory = ""
-//    @Published var difficulty: Difficulty?
-//    @Published var ingredients = [RecipeIngredientRowViewModel]()
-//    @Published var ingredientParsingString = ""
-//    @Published var instructionParsingString = ""
-//    // TODO: Deep copy recipe step graph
-//    @Published var stepGraph = RecipeStepGraph()
-//
-//    init(recipe: Recipe) {
-//        existingRecipe = recipe
-//        recipeId = recipe.id
-//        recipeName = recipe.name
-//        serving = recipe.servings.description
-//        difficulty = recipe.difficulty
-//        ingredients = recipe.ingredients.map({
-//            RecipeIngredientRowViewModel(
-//                amount: $0.quantity.value.description,
-//                unit: $0.quantity.type,
-//                ingredientName: $0.name
-//            )
-//        })
-//        stepGraph = recipe.stepGraph
-//        image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
-//        fetchCategories()
-//        isEdit = true
-//    }
-//
-//    init() {
-//        fetchCategories()
-//    }
-//
-//    private func fetchCategories() {
-//        storageManager
-//            .recipeCategoriesPublisher()
-//            .receive(on: DispatchQueue.main)
-//            .sink(receiveCompletion: { [weak self] value in
-//                switch value {
-//                case .failure:
-//                    self?.allRecipeCategories = []
-//                    self?.recipeCategory = ""
-//                case .finished:
-//                    break
-//                }
-//            },
-//            receiveValue: { [weak self] categories in
-//                self?.allRecipeCategories = categories
-//                if let categoryId = self?.existingRecipe?.category?.id {
-//                    self?.recipeCategory = categories.first(where: { $0.id == categoryId })?.name ?? ""
-//                }
-//            })
-//            .store(in: &recipeCategoryCancellable)
-//    }
-//
-//    func parseData() {
-//        let parsedIngredients = RecipeParser.parseIngredientString(ingredientString: ingredientParsingString)
-//            .map({
-//                RecipeIngredientRowViewModel(
-//                    amount: $0.value.value.description,
-//                    unit: $0.value.type,
-//                    ingredientName: $0.key
-//                )
-//            })
-//        let parsedSteps = RecipeParser.parseInstructions(instructions: instructionParsingString)
-//        ingredients.append(contentsOf: parsedIngredients)
-//
-//        let nodes = parsedSteps.compactMap { content -> RecipeStepNode? in
-//            guard let step = try? RecipeStep(content) else {
-//                return nil
-//            }
-//
-//            return RecipeStepNode(step)
-//        }
-//
-//        var edges: [Edge<RecipeStepNode>] = []
-//
-//        for index in nodes.indices.dropLast() {
-//            guard let edge = Edge(source: nodes[index], destination: nodes[index + 1]) else {
-//                continue
-//            }
-//
-//            edges.append(edge)
-//        }
-//
-//        stepGraph = (try? RecipeStepGraph(nodes: nodes, edges: edges)) ?? RecipeStepGraph()
-//
-//        instructionParsingString = ""
-//        ingredientParsingString = ""
-//    }
-//
-//    func saveRecipe() -> Bool {
-//        do {
-//            var newRecipe = try generateRecipe()
-//            if isEdit {
-//                guard var recipe = existingRecipe else {
-//                    fatalError("Missing existing recipe.")
-//                }
-//                recipe.updateRecipe(newRecipe)
-//                try storageManager.saveRecipe(&recipe)
-//            } else {
-//                try storageManager.saveRecipe(&newRecipe)
-//            }
-//            if image != UIImage() {
-//                try storageManager.saveRecipeImage(image, name: recipeName)
-//            }
-//            return true
-//        } catch {
-//            hasError = true
-//            setErrorMessage(error: error)
-//            return false
-//        }
-//    }
-//
-//    private func setErrorMessage(error: Error) {
-//        switch error {
-//        case RecipeError.invalidName:
-//            errorMessage = RecipeError.invalidName.rawValue
-//        case RecipeError.invalidServings:
-//            errorMessage = RecipeError.invalidServings.rawValue
-//        case RecipeFormError.invalidServing:
-//            errorMessage = RecipeFormError.invalidServing.rawValue
-//        case RecipeStepError.invalidContent:
-//            errorMessage = RecipeStepError.invalidContent.errorDescription ?? ""
-//        case RecipeFormError.invalidIngredientQuantity:
-//            errorMessage = RecipeFormError.invalidIngredientQuantity.rawValue
-//        case IngredientError.emptyName:
-//            errorMessage = IngredientError.emptyName.rawValue
-//        case DatabaseError.SQLITE_CONSTRAINT:
-//            errorMessage = "You already have a recipe with the same name."
-//        default:
-//            errorMessage = error.localizedDescription
-//        }
-//    }
-//
-//    private func getRecipeCategoryId() -> Int64? {
-//        if recipeCategory.isEmpty {
-//            return nil
-//        }
-//
-//        for category in allRecipeCategories where category.name == recipeCategory {
-//            return category.id
-//        }
-//
-//        return nil
-//    }
-//
-//    func generateRecipe() throws -> Recipe {
-//        guard let servingSize = Double(serving) else {
-//            throw RecipeFormError.invalidServing
-//        }
-//
-//        let recipeIngredient = try ingredients.map({
-//            try $0.convertToIngredient()
-//        })
-//        let recipeCategoryId = getRecipeCategoryId()
-//        let recipeDifficulty = difficulty
-//
-//        var newRecipe = try Recipe(
-//            name: recipeName,
-//            servings: servingSize,
-//            difficulty: recipeDifficulty,
-//            ingredients: recipeIngredient,
-//            stepGraph: stepGraph
-//        )
-//        newRecipe.id = recipeId
-//        newRecipe.recipeCategoryId = recipeCategoryId
-//        return newRecipe
-//    }
-// }
-//
- enum RecipeFormError: String, Error {
-    case invalidIngredientQuantity = "Recipe ingredient amount is not a valid number."
-    case invalidServing = "Recipe serving is empty or not a valid number."
- }
+class RecipeFormViewModel: ObservableObject {
+    @Published var categories: [RecipeCategory] = []
+
+    @Published var name: String
+    @Published var category: RecipeCategory?
+    @Published var servings: String
+    @Published var difficulty: Difficulty?
+    @Published var ingredients: [RecipeIngredientRowViewModel]
+    @Published var stepGraph: RecipeStepGraph
+    @Published var image: UIImage
+
+    @Published var isParsingIngredients = false
+    @Published var isParsingSteps = false
+    @Published var ingredientsToBeParsed = ""
+    @Published var stepsToBeParsed = ""
+    @Published var stepGraphIsPresented = false
+
+    @Published var imagePickerIsPresented = false
+    @Published var alertIsPresented = false
+    @Published var alertTitle = ""
+    @Published var alertMessage = ""
+
+    var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
+    var isEditing: Bool {
+        recipe != nil
+    }
+
+    private let storageManager = StorageManager()
+    private var categoriesCancellable: AnyCancellable?
+    private let recipe: Recipe?
+
+    init(recipe: Recipe? = nil) {
+        self.recipe = recipe
+
+        self.name = recipe?.name ?? ""
+        self.category = recipe?.category
+
+        if let servings = recipe?.servings {
+            self.servings = String(servings)
+        } else {
+            self.servings = ""
+        }
+
+        self.difficulty = recipe?.difficulty
+        self.ingredients = recipe?.ingredients.map {
+            RecipeIngredientRowViewModel(name: $0.name,
+                                         quantity: $0.quantity.value.description,
+                                         type: $0.quantity.type)
+
+        } ?? []
+        self.stepGraph = recipe?.stepGraph ?? RecipeStepGraph()
+
+        if let name = recipe?.name {
+            self.image = storageManager.fetchRecipeImage(name: name) ?? UIImage()
+        } else {
+            self.image = UIImage()
+        }
+
+        categoriesCancellable = categoriesPublisher()
+            .sink { [weak self] categories in
+                self?.categories = categories
+            }
+    }
+
+    func setServings(_ servings: String) {
+        self.servings = String(servings.filter { "0123456789.".contains($0) })
+            .components(separatedBy: ".")
+            .prefix(2)
+            .joined(separator: ".")
+    }
+
+    func parseIngredients() {
+        let parsedIngredients = RecipeParser.parseIngredientString(ingredientString: ingredientsToBeParsed)
+            .map({
+                RecipeIngredientRowViewModel(
+                    name: $0.key,
+                    quantity: $0.value.value.description,
+                    type: $0.value.type
+                )
+            })
+
+        ingredients.append(contentsOf: parsedIngredients)
+        isParsingIngredients = false
+        ingredientsToBeParsed = ""
+    }
+
+    func parseSteps() {
+        let parsedSteps = RecipeParser.parseInstructions(instructions: stepsToBeParsed)
+        let nodes: [RecipeStepNode] = parsedSteps.compactMap { content in
+            guard let step = try? RecipeStep(content) else {
+                return nil
+            }
+
+            return RecipeStepNode(step)
+        }
+
+        var edges: [Edge<RecipeStepNode>] = []
+
+        for index in nodes.indices.dropLast() {
+            guard let edge = Edge(source: nodes[index], destination: nodes[index + 1]) else {
+                continue
+            }
+
+            edges.append(edge)
+        }
+
+        stepGraph = (try? RecipeStepGraph(nodes: nodes, edges: edges)) ?? RecipeStepGraph()
+        isParsingSteps = false
+        stepsToBeParsed = ""
+        stepGraphIsPresented = true
+    }
+
+    func saveRecipe() -> Bool {
+        do {
+            guard let servings = Double(servings) else {
+                throw QuantityError.invalidQuantity
+            }
+
+            if image != UIImage() {
+                try storageManager.saveRecipeImage(image, name: name)
+
+                // Delete old image if name changed (if it exists)
+                if let oldName = recipe?.name, name != oldName {
+                    storageManager.deleteRecipeImage(name: oldName)
+                }
+            }
+
+            var updatedRecipe = try Recipe(id: recipe?.id,
+                                           onlineId: recipe?.onlineId,
+                                           name: name,
+                                           category: category,
+                                           servings: servings,
+                                           difficulty: difficulty,
+                                           ingredients: ingredients.map { try $0.convertToIngredient() },
+                                           stepGraph: stepGraph)
+
+            try storageManager.saveRecipe(&updatedRecipe)
+
+            return true
+        } catch {
+            if let message = (error as? LocalizedError)?.errorDescription {
+                alertTitle = "Error"
+                alertMessage = message
+            } else {
+                alertTitle = "Database error"
+                alertMessage = "\(error)"
+            }
+
+            alertIsPresented = true
+
+            return false
+        }
+    }
+
+    private func categoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
+        storageManager.recipeCategoriesPublisher()
+            .catch { _ in
+                Just<[RecipeCategory]>([])
+            }
+            .eraseToAnyPublisher()
+    }
+}

@@ -15,7 +15,8 @@ struct Recipe {
         stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 
-    init(name: String, onlineId: String? = nil, category: RecipeCategory? = nil, servings: Double = 1,
+    // swiftlint:disable function_default_parameter_at_end
+    init(id: Int64? = nil, onlineId: String? = nil, name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
          stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -32,14 +33,16 @@ struct Recipe {
             throw RecipeError.duplicateIngredients
         }
 
-        self.name = trimmedName
+        self.id = id
         self.onlineId = onlineId
+        self.name = trimmedName
         self.category = category
         self.servings = servings
         self.difficulty = difficulty
         self.ingredients = ingredients
         self.stepGraph = stepGraph
     }
+    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension Recipe: FetchableRecord {

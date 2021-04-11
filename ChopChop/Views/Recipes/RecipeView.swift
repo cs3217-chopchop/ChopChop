@@ -14,6 +14,14 @@ struct RecipeView: View {
             }
             .navigationTitle(recipe.name)
             .toolbar {
+                // Workaround for placing NavigationLink in toolbar
+                HStack {
+                    NavigationLink(
+                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe))
+                    ) {
+                        Image(systemName: "square.and.pencil")
+                    }
+                }
                 Menu {
                     Button(action: viewModel.publish) {
                         Label(viewModel.isPublished ? "Publish changes" : "Publish", systemImage: "icloud.and.arrow.up")
@@ -27,7 +35,7 @@ struct RecipeView: View {
                     }
                 }
                 label: {
-                    Label("Publish", systemImage: "paperplane")
+                    Image(systemName: "paperplane")
                 }
             }
         } else {

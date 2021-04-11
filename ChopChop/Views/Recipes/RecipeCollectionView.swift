@@ -14,9 +14,9 @@ struct RecipeCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
-//                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
-//                    Image(systemName: "plus")
-//                }
+                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
+                    Image(systemName: "plus")
+                }
                 Spacer()
                 MultiselectPicker("Filter by ingredient",
                                   selections: $viewModel.selectedIngredients,
