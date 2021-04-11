@@ -5,6 +5,7 @@ import GRDB
 class Recipe: FetchableRecord, ObservableObject {
     var id: Int64?
     @Published var onlineId: String?
+    @Published var parentId: String?
     @Published private(set) var name: String
     @Published private(set) var servings: Double
     @Published var recipeCategoryId: Int64?
@@ -12,10 +13,11 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var ingredients: [RecipeIngredient]
     @Published private(set) var stepGraph: RecipeStepGraph
 
-    init(name: String, onlineId: String? = nil, servings: Double = 1,
+    init(name: String, onlineId: String? = nil, parentId: String? = nil, servings: Double = 1,
          recipeCategoryId: Int64? = nil, difficulty: Difficulty? = nil,
          ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {
         self.onlineId = onlineId
+        self.parentId = parentId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -105,6 +107,7 @@ class Recipe: FetchableRecord, ObservableObject {
 
     required init(row: Row) {
         id = row[RecipeRecord.Columns.id]
+        parentId = row[RecipeRecord.Columns.parentId]
         onlineId = row[RecipeRecord.Columns.onlineId]
         recipeCategoryId = row[RecipeRecord.Columns.recipeCategoryId]
         name = row[RecipeRecord.Columns.name]

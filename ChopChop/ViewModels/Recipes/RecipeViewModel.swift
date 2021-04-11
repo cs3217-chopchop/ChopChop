@@ -4,12 +4,12 @@ import Combine
 class RecipeViewModel: ObservableObject {
     @ObservedObject private(set) var recipe: Recipe
 
-    private var storage = StorageManager()
     private var cancellables = Set<AnyCancellable>()
     private let storageManager = StorageManager()
 
     private(set) var hasError = false
 
+    @Published var parentRecipe: OnlineRecipe?
     @Published var isShowingForm = false
     @Published var isShowingPhotoLibrary = false
     @Published private(set) var recipeName: String = ""
@@ -39,6 +39,27 @@ class RecipeViewModel: ObservableObject {
         bindPublished()
         bindStepGraph()
 
+    }
+
+    func fetchParentRecipe() {
+        if parentRecipe != nil {
+            return
+        }
+        guard let parentId = recipe.parentId else {
+            return
+        }
+        storageManager.fetchOnlineRecipe(id: parentId)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure:
+                    self.parentRecipe = nil
+                }
+            }, receiveValue: { value in
+                self.parentRecipe = value
+            })
+            .store(in: &cancellables)
     }
 
     private func bindName() {
@@ -88,9 +109,8 @@ class RecipeViewModel: ObservableObject {
             .sink { [weak self] category in
                 if let categoryId = category {
                     do {
-                        self?.recipeCategory = try self?.storage.fetchRecipeCategory(id: categoryId)?.name ?? ""
+                        self?.recipeCategory = try self?.storageManager.fetchRecipeCategory(id: categoryId)?.name ?? ""
                     } catch {
-
                     }
                 }
             }

@@ -67,6 +67,10 @@ class OnlineRecipeViewModel: ObservableObject {
                 + (ratingsCount == 2 ? " other)" : " others)")
         }
     }
+    
+    func getDownloadedRecipes(parentId: String) throws -> [Recipe] {
+        try storageManager.fetchDownloadedRecipes(parentId: parentId)
+    }
 
     func setRecipe() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)

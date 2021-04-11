@@ -22,12 +22,30 @@ struct OnlineRecipeView: View {
             Button(action: {
                 viewModel.setRecipe()
             }) {
-                Label("Download", systemImage: "square.and.arrow.down")
+                Label("Download new copy", systemImage: "square.and.arrow.down")
             }
             averageRating
         }
 
     }
+    
+//    var updateChangesButton: some View {
+//        var downloadedRecipes = [Recipe]()
+//        do {
+//            downloadedRecipes = try viewModel.getDownloadedRecipes(parentId: viewModel.recipe.id)
+//        } catch {
+//            return EmptyView()
+//        }
+//        if downloadedRecipes.isEmpty {
+//            return EmptyView()
+//        } else {
+//            return Button(action: {
+//                
+//            }) {
+//                Label("Update downloaded copies", systemImage: "square.and.arrow.down")
+//            }
+//        }
+//    }
 
     var recipeDetails: some View {
         VStack(alignment: .center) {

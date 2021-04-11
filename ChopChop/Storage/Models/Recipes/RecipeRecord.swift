@@ -3,6 +3,7 @@ import GRDB
 struct RecipeRecord: Equatable {
     var id: Int64?
     var onlineId: String?
+    var parentId: String?
     var recipeCategoryId: Int64?
     var name: String
     var servings: Double
@@ -13,6 +14,7 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
         static let onlineId = Column(CodingKeys.onlineId)
+        static let parentId = Column(CodingKeys.parentId)
         static let recipeCategoryId = Column(CodingKeys.recipeCategoryId)
         static let name = Column(CodingKeys.name)
         static let servings = Column(CodingKeys.servings)

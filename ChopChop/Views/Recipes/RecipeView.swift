@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RecipeView: View {
     @ObservedObject var viewModel: RecipeViewModel
+    @EnvironmentObject var settings: UserSettings
     var body: some View {
         ScrollView {
             VStack {
@@ -38,11 +39,27 @@ struct RecipeView: View {
         }
         .onAppear {
             viewModel.isShowingForm = false
+            viewModel.fetchParentRecipe()
         }
     }
 
     var recipeDetails: some View {
         VStack(alignment: .center) {
+            if let parentRecipe = viewModel.parentRecipe {
+                NavigationLink(
+                    destination: OnlineRecipeByUserView(
+                        viewModel: OnlineRecipeByUserViewModel(
+                            recipe: parentRecipe,
+                            downloadRecipeViewModel: DownloadRecipeViewModel(),
+                            settings: settings
+                        )
+                    )
+                ) {
+                    Text("Adapted from here")
+                }
+            } else {
+                Text("Test")
+            }
             Text("General").font(.title).underline()
             general
             Spacer()

@@ -14,7 +14,7 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
+        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, parentId: recipe.parentId,
                                         recipeCategoryId: recipe.recipeCategoryId, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -117,6 +117,10 @@ struct StorageManager {
 
     func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
         try appDatabase.fetchRecipeCategoryByName(name: name)
+    }
+    
+    func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
+        try appDatabase.fetchDownloadedRecipes(parentId: parentId)
     }
 
     // MARK: - Database Access: Publishers
@@ -262,6 +266,7 @@ extension StorageManager {
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
+            parentId: recipe.parentId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -304,6 +309,7 @@ extension StorageManager {
             id: recipe.onlineId,
             name: recipe.name,
             creator: userId,
+            parentId: recipe.parentId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -342,6 +348,14 @@ extension StorageManager {
     // fetch the details of a single recipe
     func onlineRecipeByIdPublisher(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
+            .compactMap({
+                try? OnlineRecipe(from: $0)
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func fetchOnlineRecipe(id: String) -> AnyPublisher<OnlineRecipe, Error> {
+        firebase.fetchOnlineRecipeOnceById(onlineRecipeId: id)
             .compactMap({
                 try? OnlineRecipe(from: $0)
             })
@@ -452,6 +466,7 @@ extension StorageManager {
         var localRecipe = try Recipe(
             name: newName,
             onlineId: newOnlineId,
+            parentId: isRecipeOwner ? nil : recipe.id,
             servings: recipe.servings,
             recipeCategoryId: cuisineId,
             difficulty: recipe.difficulty,

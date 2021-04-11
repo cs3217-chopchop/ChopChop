@@ -32,6 +32,8 @@ struct AppDatabase {
                 t.column("onlineId", .text)
                     .unique()
                     .check { $0 != "" }
+                t.column("parentId", .text)
+                    .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
                     .indexed()
                     .references("recipeCategory", onDelete: .setNull)
@@ -562,6 +564,18 @@ extension AppDatabase {
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
+        }
+    }
+    
+    func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(RecipeRecord.Columns.parentId == parentId)
+                .including(all: RecipeRecord.ingredients)
+                .including(required: RecipeRecord.stepGraph
+                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.edges))
+            return try Recipe.fetchAll(db, request)
         }
     }
 
