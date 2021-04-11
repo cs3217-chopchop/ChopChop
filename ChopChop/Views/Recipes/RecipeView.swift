@@ -26,13 +26,6 @@ struct RecipeView: View {
                     Button(action: viewModel.publish) {
                         Label(viewModel.isPublished ? "Publish changes" : "Publish", systemImage: "icloud.and.arrow.up")
                     }
-
-                    // TODO: Make this work
-                    if viewModel.isPublished {
-                        Button(action: {}) {
-                            Label("Unpublish", systemImage: "icloud.slash")
-                        }
-                    }
                 }
                 label: {
                     Image(systemName: "paperplane")
@@ -84,6 +77,11 @@ struct RecipeView: View {
             Text(recipe.category?.name ?? "Uncategorised")
                 .lineLimit(1)
             Divider()
+
+            if recipe.totalTimeTaken != 0 {
+                Text("Takes \(get_HHMMSS_Display(seconds: recipe.totalTimeTaken))")
+                Divider()
+            }
 
             if viewModel.isPublished {
                 Text("Published")
