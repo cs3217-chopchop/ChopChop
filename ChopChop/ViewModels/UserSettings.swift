@@ -3,7 +3,7 @@ import Foundation
 
 final class UserSettings: ObservableObject {
     @Published var viewType = ViewType.list
-    @Published var userId = UserDefaults.standard.string(forKey: "userId") {
+    @Published var userId: String? {
         didSet {
             setPublisher()
         }
@@ -13,6 +13,7 @@ final class UserSettings: ObservableObject {
     @Published var user: User?
 
     init() {
+        userId = UserDefaults.standard.string(forKey: "userId")
         setPublisher()
     }
 

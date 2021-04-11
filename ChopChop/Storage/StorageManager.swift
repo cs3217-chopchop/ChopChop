@@ -351,7 +351,7 @@ extension StorageManager {
     }
 
     // fetch the details of a single user
-    func fetchUserById(userId: String, completion: @escaping (User?, Error?) -> Void) {
+    func fetchUserById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
         firebaseDatabase.fetchUserById(userId: userId, completion: completion)
     }
 
@@ -407,7 +407,7 @@ extension StorageManager {
     }
 
     // Fetch details of all users in the system
-    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
+    func fetchAllUsers(completion: @escaping ([UserInfo], Error?) -> Void) {
         firebaseDatabase.fetchAllUsers(completion: completion)
     }
 

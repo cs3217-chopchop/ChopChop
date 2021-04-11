@@ -1,12 +1,12 @@
 import UIKit
 
 final class NonFolloweeViewModel: ObservableObject, Identifiable {
-    @Published var user: User
+    @Published var user: UserInfo
     private let storageManager = StorageManager()
 
     private let settings: UserSettings
 
-    init(user: User, settings: UserSettings) {
+    init(user: UserInfo, settings: UserSettings) {
         self.user = user
         self.settings = settings
     }

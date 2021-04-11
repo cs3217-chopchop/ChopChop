@@ -4,20 +4,25 @@ import Foundation
 final class OnlineRecipeCollectionViewModel: ObservableObject {
     @Published private(set) var recipes: [OnlineRecipe] = []
 
+    let userIds: [String]?
     private let storageManager = StorageManager()
 
     @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
 
     init(userIds: [String]?) {
-        guard let userIds = userIds else {
-            storageManager.fetchAllRecipes(completion: onLoadOnlineRecipes(onlineRecipes:error:))
-            return
-        }
-        storageManager.fetchRecipesByUsers(userIds: userIds, completion: onLoadOnlineRecipes(onlineRecipes:error:))
+        self.userIds = userIds
     }
 
-    private func onLoadOnlineRecipes(onlineRecipes: [OnlineRecipe], error: Error?) {
-        recipes = onlineRecipes
+    func onLoad() {
+        guard let userIds = userIds else {
+            storageManager.fetchAllRecipes { onlineRecipes, _ in
+                self.recipes = onlineRecipes
+            }
+            return
+        }
+        storageManager.fetchRecipesByUsers(userIds: userIds) { onlineRecipes, _ in
+            self.recipes = onlineRecipes
+        }
     }
 
 }

@@ -5,6 +5,7 @@ struct FirebaseDatabase {
     private let recipePath: String = "recipes"
     private let recipeInfoPath: String = "recipeInfos"
     private let userPath: String = "users"
+    private let userInfoPath: String = "userInfos"
     private let db = Firestore.firestore()
     private let cache: FirebaseCache
 
@@ -45,7 +46,7 @@ struct FirebaseDatabase {
         }
 
         let batch = db.batch()
-        let recipeDocRef = db.collection(recipePath).document()
+        let recipeDocRef = db.collection(recipePath).document(recipeId)
         batch.setData([
             "name": recipe.name,
             "creator": recipe.creator,
@@ -56,9 +57,9 @@ struct FirebaseDatabase {
             "ingredients": recipe.ingredients.map({ $0.asDict })
         ], forDocument: recipeDocRef, merge: true)
 
-        let recipeInfoDocRef = db.collection(recipeInfoPath).document()
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
         batch.setData([
-            "updatedAt": nil as Date? // replaced with `FieldValue.serverTimestamp()` as it is sent.
+            "updatedAt": FieldValue.serverTimestamp()
         ], forDocument: recipeInfoDocRef, merge: true)
 
         batch.commit()
@@ -105,9 +106,8 @@ struct FirebaseDatabase {
                 assertionFailure("Should have an id")
                 continue
             }
-            guard shouldInvalidate(onlineRecipeId: recipeInfoId, recipeInfoRecord: recipeInfoRecord) else {
+            if shouldFetchOnlineRecipe(onlineRecipeId: recipeInfoId, recipeInfoRecord: recipeInfoRecord) {
                 recipeIdsToFetch.append(recipeInfoId)
-                continue
             }
         }
 
@@ -116,7 +116,7 @@ struct FirebaseDatabase {
         let queryLimit = QueryLimiter(max: totalRecipeCount)
         while queryLimit.hasNext {
             let range = [] + recipeIdsToFetch[queryLimit.current..<queryLimit.next()]
-            db.collection(recipePath).whereField("id", in: range).getDocuments { snapshot, err in
+            db.collection(recipePath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
                 guard let documents = snapshot?.documents else {
                     completion([], err)
                     assertionFailure("Should get some documents")
@@ -139,8 +139,8 @@ struct FirebaseDatabase {
         }
     }
 
-    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
-        db.collection(userPath).getDocuments { snapshot, err in
+    func fetchAllUsers(completion: @escaping ([UserInfo], Error?) -> Void) {
+        db.collection(userInfoPath).getDocuments { snapshot, err in
             guard let userIds = (snapshot?.documents.map { $0.documentID }) else {
                 completion([], err)
                 assertionFailure("Should have user ids")
@@ -163,29 +163,31 @@ struct FirebaseDatabase {
 //            .eraseToAnyPublisher()
 //    }
 
-    func fetchUsers(userIds: [String], completion: @escaping ([User], Error?) -> Void) {
+    func fetchUsers(userIds: [String], completion: @escaping ([UserInfo], Error?) -> Void) {
         let totalUserCount = userIds.count
         let queryLimit = QueryLimiter(max: totalUserCount)
         while queryLimit.hasNext {
             let range = [] + userIds[queryLimit.current..<queryLimit.next()]
-            db.collection(userPath).whereField("id", in: range).getDocuments { snapshot, err in
+            db.collection(userPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
                 fetchUserHelper(snapshot: snapshot, error: err, completion: completion, userIds: userIds)
             }
         }
     }
 
     private func fetchUserHelper(snapshot: QuerySnapshot?, error: Error?,
-                                 completion: @escaping ([User], Error?) -> Void, userIds: [String]) {
+                                 completion: @escaping ([UserInfo], Error?) -> Void, userIds: [String]) {
         guard let documents = snapshot?.documents else {
             completion([], error)
             assertionFailure("Should have user ids")
             return
         }
         for document in documents {
-            guard let user = try? document.data(as: User.self), let userId = user.id else {
+            guard let user = try? document.data(as: UserInfo.self), let userId = user.id else {
                 completion([], error)
                 continue
             }
+
+            // TODO fetch from actual user array
             cache.userCache.insert(user, forKey: userId)
         }
 
@@ -199,7 +201,7 @@ struct FirebaseDatabase {
 
         let batch = db.batch()
         batch.updateData(["ratings": FieldValue.arrayRemove([recipeRating.asDict])], forDocument: docRef)
-        batch.updateData(["updatedAt": nil as Date?], forDocument: recipeInfoDocRef)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoDocRef)
         batch.commit()
     }
 
@@ -216,7 +218,7 @@ struct FirebaseDatabase {
                 return
             }
 
-            guard shouldInvalidate(onlineRecipeId: onlineRecipeId, recipeInfoRecord: recipeInfoRecord) else {
+            guard shouldFetchOnlineRecipe(onlineRecipeId: onlineRecipeId, recipeInfoRecord: recipeInfoRecord) else {
                 guard let cachedCopy = cache.onlineRecipeCache[onlineRecipeId] else {
                     completion(nil, err)
                     assertionFailure("Should have cached copy")
@@ -247,7 +249,7 @@ struct FirebaseDatabase {
         batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: recipeRef)
 
         let recipeInfoRef = db.collection(recipeInfoPath).document(onlineRecipeId)
-        batch.updateData(["updatedAt": nil as Date?], forDocument: recipeInfoRef)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoRef)
 
         batch.commit()
     }
@@ -258,7 +260,7 @@ struct FirebaseDatabase {
         batch.updateData(["ratings": FieldValue.arrayRemove([rating.asDict])], forDocument: recipeRef)
 
         let recipeInfoRef = db.collection(recipeInfoPath).document(onlineRecipeId)
-        batch.updateData(["updatedAt": nil as Date?], forDocument: recipeInfoRef)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoRef)
 
         batch.commit()
     }
@@ -292,7 +294,7 @@ struct FirebaseDatabase {
 
     }
 
-    func fetchUserById(userId: String, completion: @escaping (User?, Error?) -> Void) {
+    func fetchUserById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
         // TODO check user not expired
         if let user = cache.userCache[userId] {
             completion(user, nil)
@@ -317,7 +319,7 @@ struct FirebaseDatabase {
         db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayRemove([followeeId])])
     }
 
-    private func shouldInvalidate(onlineRecipeId: String, recipeInfoRecord: OnlineRecipeInfoRecord) -> Bool {
+    private func shouldFetchOnlineRecipe(onlineRecipeId: String, recipeInfoRecord: OnlineRecipeInfoRecord) -> Bool {
         guard let cachedCopy = cache.onlineRecipeCache[onlineRecipeId],
               let actualLastUpdatedAt = recipeInfoRecord.updatedAt,
               cachedCopy.updatedAt >= actualLastUpdatedAt else {

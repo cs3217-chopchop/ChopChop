@@ -1,7 +1,8 @@
 class FirebaseCache {
 
     let onlineRecipeCache = Cache<String, OnlineRecipe>()
-    let userCache = Cache<String, User>()
+    let userCache = Cache<String, UserInfo>()
+//    let userInfoCache = Cache<String, UserInfo>()
 
 }
 
