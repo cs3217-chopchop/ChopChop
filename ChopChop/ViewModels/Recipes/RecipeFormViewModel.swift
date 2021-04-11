@@ -117,7 +117,7 @@ class RecipeFormViewModel: ObservableObject {
     func saveRecipe() -> Bool {
         do {
             guard let servings = Double(servings) else {
-                throw QuantityError.invalidQuantity
+                throw RecipeError.invalidServings
             }
 
             if image != UIImage() {
