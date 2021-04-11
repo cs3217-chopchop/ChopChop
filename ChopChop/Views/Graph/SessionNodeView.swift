@@ -36,7 +36,6 @@ import SwiftUI
                                                         : .blue)
                         })
                         .strikethrough(viewModel.node.isCompleted)
-                        .lineLimit(isSelected ? nil : 1)
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                     }
                 }
@@ -80,7 +79,7 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep(content: "#")),
+        if let step = try? RecipeStepNode(RecipeStep("#")),
            let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionNodeView(viewModel:
                                 SessionNodeViewModel(graph: graph,

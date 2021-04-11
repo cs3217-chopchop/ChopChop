@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 
 final class RecipeCollectionViewModel: ObservableObject {
     @Published var query = ""
@@ -44,6 +45,10 @@ final class RecipeCollectionViewModel: ObservableObject {
         }
     }
 
+    func getRecipeImage(recipe: RecipeInfo) -> UIImage? {
+        storageManager.fetchRecipeImage(name: recipe.name)
+    }
+
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
         $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients
             -> AnyPublisher<[RecipeInfo], Error> in
@@ -66,13 +71,5 @@ final class RecipeCollectionViewModel: ObservableObject {
                 Just<[String]>([])
             }
             .eraseToAnyPublisher()
-    }
-
-    func getRecipe(info: RecipeInfo) -> Recipe? {
-        guard let id = info.id else {
-            return nil
-        }
-
-        return try? storageManager.fetchRecipe(id: id)
     }
 }

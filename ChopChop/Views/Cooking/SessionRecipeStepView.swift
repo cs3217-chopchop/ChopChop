@@ -29,6 +29,6 @@ struct SessionRecipeStepView_Previews: PreviewProvider {
     // swiftlint:disable force_try line_length
     static var previews: some View {
         SessionRecipeStepView(viewModel:
-                                SessionRecipeStepViewModel(sessionRecipeStep: SessionRecipeStep(step: try! RecipeStep(content: "Cook for 4 mins, super long"), actionTimeTracker: ActionTimeTracker())))
+                                SessionRecipeStepViewModel(sessionRecipeStep: SessionRecipeStep(step: try! RecipeStep("Cook for 4 mins, super long"), actionTimeTracker: ActionTimeTracker())))
     }
 }

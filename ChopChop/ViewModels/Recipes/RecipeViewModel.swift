@@ -1,121 +1,50 @@
 import SwiftUI
 import Combine
 
-class RecipeViewModel: ObservableObject {
-    @ObservedObject private(set) var recipe: Recipe
+final class RecipeViewModel: ObservableObject {
+    @Published private(set) var recipe: Recipe?
+    @Published private(set) var image: UIImage?
 
-    private var storage = StorageManager()
-    private var cancellables = Set<AnyCancellable>()
+    var isPublished: Bool {
+        recipe?.onlineId != nil
+    }
+
     private let storageManager = StorageManager()
-
-    private(set) var hasError = false
-
-    @Published var isShowingForm = false
-    @Published var isShowingPhotoLibrary = false
-    @Published private(set) var recipeName: String = ""
-    @Published private(set) var serving: Double = 1
-    @Published private(set) var recipeCategory: String = ""
-    @Published private(set) var difficulty: Difficulty?
-    @Published var image: UIImage
-    @Published private(set) var errorMessage = ""
-    @Published private(set) var ingredients = [String]()
-    @Published private(set) var stepGraph = RecipeStepGraph()
-    @Published private(set) var isPublished = false
-    let totalTimeTaken: String
-
+    private var recipeCancellable: AnyCancellable?
     private let settings: UserSettings
 
-    init(recipe: Recipe, settings: UserSettings) {
-        self.recipe = recipe
+    init(id: Int64, settings: UserSettings) {
         self.settings = settings
-        image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
-        totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
 
-        bindName()
-        bindServing()
-        bindRecipeCategory()
-        bindDifficulty()
-        bindInstructions()
-        bindPublished()
-        bindStepGraph()
+        recipeCancellable = recipePublisher(id: id)
+            .sink { [weak self] recipe in
+                self?.recipe = recipe
 
-    }
-
-    private func bindName() {
-        recipe.$name
-            .sink { [weak self] name in
-                self?.recipeName = name
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindServing() {
-        recipe.$servings
-            .sink { [weak self] serving in
-                self?.serving = serving
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindDifficulty() {
-        recipe.$difficulty
-            .sink { [weak self] difficulty in
-                self?.difficulty = difficulty
-
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindStepGraph() {
-        recipe.$stepGraph
-            .sink { [weak self] stepGraph in
-                self?.stepGraph = stepGraph
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindInstructions() {
-        recipe.$ingredients
-            .sink { [weak self] ingredient in
-                self?.ingredients = ingredient.map({ $0.description })
-
-            }
-            .store(in: &cancellables)
-    }
-
-    private func bindRecipeCategory() {
-        recipe.$recipeCategoryId
-            .sink { [weak self] category in
-                if let categoryId = category {
-                    do {
-                        self?.recipeCategory = try self?.storage.fetchRecipeCategory(id: categoryId)?.name ?? ""
-                    } catch {
-
-                    }
+                if let recipe = recipe {
+                    self?.image = self?.storageManager.fetchRecipeImage(name: recipe.name)
                 }
             }
-            .store(in: &cancellables)
     }
 
-    private func bindPublished() {
-        recipe.$onlineId
-            .sink { [weak self] onlineId in
-                self?.isPublished = onlineId != nil
-            }
-            .store(in: &cancellables)
-    }
-
+    // TODO: Properly throw errors
     func publish() {
-        guard let userId = settings.userId else {
+        guard var recipe = recipe, let userId = settings.userId else {
             assertionFailure()
             return
         }
 
-        guard isPublished else {
+        if isPublished {
+            storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
+        } else {
             try? storageManager.publishRecipe(recipe: &recipe, userId: userId)
-            return
         }
-        storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
     }
 
+    private func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Never> {
+        storageManager.recipePublisher(id: id)
+            .catch { _ in
+                Just<Recipe?>(nil)
+            }
+            .eraseToAnyPublisher()
+    }
 }
