@@ -42,7 +42,7 @@ extension RecipeStepGraph: FetchableRecord {
                 return nil
             }
 
-            return Edge<RecipeStepNode>(source: sourceNode, destination: destinationNode)
+            return Edge(source: sourceNode, destination: destinationNode)
         } ?? []
 
         for node in nodes.values {
@@ -54,5 +54,26 @@ extension RecipeStepGraph: FetchableRecord {
         }
 
         assert(checkRepresentation())
+    }
+}
+
+extension RecipeStepGraph {
+    func copy() -> RecipeStepGraph? {
+        // [Original: Copied]
+        let copiedNodes: [RecipeStepNode: RecipeStepNode] = nodes.reduce(into: [:], { nodes, node in
+            let copiedNode = RecipeStepNode(node.label)
+
+            nodes[node] = copiedNode
+        })
+
+        let copiedEdges: [Edge<RecipeStepNode>] = edges.compactMap {
+            guard let sourceNode = copiedNodes[$0.source], let destinationNode = copiedNodes[$0.destination] else {
+                return nil
+            }
+
+            return Edge(source: sourceNode, destination: destinationNode)
+        }
+
+        return try? RecipeStepGraph(nodes: Array(copiedNodes.values), edges: copiedEdges)
     }
 }

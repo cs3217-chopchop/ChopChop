@@ -52,7 +52,7 @@ class RecipeFormViewModel: ObservableObject {
                                          type: $0.quantity.type)
 
         } ?? []
-        self.stepGraph = recipe?.stepGraph ?? RecipeStepGraph()
+        self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
 
         if let name = recipe?.name {
             self.image = storageManager.fetchRecipeImage(name: name) ?? UIImage()
