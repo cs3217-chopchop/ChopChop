@@ -26,7 +26,7 @@ struct EditorNodeView: View {
                 }
 
                 if viewModel.isEditing {
-                    TextEditor(text: $viewModel.text)
+                    TextEditor(text: $viewModel.content)
                         .background(Color.primary.opacity(0.1))
                         .transition(.scale)
                         // Prevent taps from propogating
@@ -62,7 +62,7 @@ struct EditorNodeView: View {
                 }
                 Spacer()
                 Button(action: {
-                    viewModel.text = viewModel.node.label.content
+                    viewModel.content = viewModel.node.label.content
                     viewModel.isEditing = false
                 }) {
                     Text("Cancel")
@@ -101,9 +101,9 @@ struct EditorNodeView: View {
                         .font(.headline)
                         .padding([.top, .leading, .trailing])
                     List {
-                        ForEach(0..<20) { _ in
+                        ForEach(viewModel.timers, id: \.self) { duration in
                             HStack {
-                                Text("00:04:32")
+                                Text(get_HHMMSS_Display(seconds: Int(duration)))
                             }
                         }
                         .listRowBackground(Color.clear)
@@ -112,7 +112,7 @@ struct EditorNodeView: View {
                     HStack {
                         Spacer()
                         NavigationLink(
-                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: RecipeStepGraph()))
+                            destination: RecipeStepTimersView(viewModel: viewModel.recipeStepTimersViewModel)
                         ) {
                             Image(systemName: "square.and.pencil")
                         }

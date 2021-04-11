@@ -5,12 +5,10 @@ final class RecipeStepNode: Node {
     let id = UUID()
     var label: RecipeStep
     var position: CGPoint?
-    var timers: [TimeInterval]
 
-    init(_ label: RecipeStep, position: CGPoint? = nil, timers: [TimeInterval] = []) {
+    init(_ label: RecipeStep, position: CGPoint? = nil) {
         self.label = label
         self.position = position
-        self.timers = timers
     }
 }
 
