@@ -36,7 +36,6 @@ import SwiftUI
                                                         : .blue)
                         })
                         .strikethrough(viewModel.node.isCompleted)
-                        .lineLimit(isSelected ? nil : 1)
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                     }
                 }

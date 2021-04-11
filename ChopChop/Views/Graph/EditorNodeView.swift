@@ -34,7 +34,6 @@ struct EditorNodeView: View {
                         Text(viewModel.node.label.content.isEmpty
                                 ? "Add step details..."
                                 : viewModel.node.label.content)
-                            .lineLimit(isSelected ? nil : 1)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                             .foregroundColor(viewModel.node.label.content.isEmpty ? .secondary : .primary)
                     }

@@ -32,6 +32,20 @@ final class SidebarViewModel: ObservableObject {
             }
     }
 
+    func addCategory() {
+        switch categoryType {
+        case .recipe:
+            addRecipeCategory(name: categoryName)
+        case .ingredient:
+            addIngredientCategory(name: categoryName)
+        case .none:
+            return
+        }
+
+        categoryName = ""
+        categoryType = nil
+    }
+
     func addRecipeCategory(name: String) {
         do {
             var category = try RecipeCategory(name: name)
