@@ -117,7 +117,7 @@ struct FirebaseDatabase {
 
     func updateRecipeRating(userId: String, recipeId: String, newScore: RatingScore) {
         let docRef = db.collection(recipePath).document(recipeId)
-        db.runTransction({ transaction -> Any? in
+        _ = db.runTransction({ transaction -> Any? in
             let document: DocumentSnapshot
             do {
                 try document = transaction.getDocument(docRef)
@@ -145,7 +145,7 @@ struct FirebaseDatabase {
 
     func updateUserRating(userId: String, recipeId: String, newScore: RatingScore) {
         let docRef = db.collection(userPath).document(userId)
-        db.runTransction({ transaction -> Any? in
+        _ = db.runTransction({ transaction -> Any? in
             let document: DocumentSnapshot
             do {
                 try document = transaction.getDocument(docRef)

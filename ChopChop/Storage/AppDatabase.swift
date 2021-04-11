@@ -402,6 +402,7 @@ extension AppDatabase {
 
     func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
                     stepGraph: inout RecipeStepGraph) throws {
+        // swiftlint:disable closure_body_length
         try dbWriter.write { db in
             try recipe.save(db)
 
@@ -445,6 +446,7 @@ extension AppDatabase {
                 try edgeRecord.save(db)
             }
         }
+        // swiftlint:enable closure_body_length
     }
 
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategoryRecord) throws {

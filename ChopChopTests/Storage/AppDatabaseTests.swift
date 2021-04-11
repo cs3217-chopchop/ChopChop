@@ -1144,7 +1144,7 @@ class AppDatabaseTests: XCTestCase {
             try recipeRecord.insert(db)
         }
 
-        let recipe = try Recipe(name: "Pancakes", onlineId: "1", servings: 1)
+        let recipe = try Recipe(onlineId: "1", name: "Pancakes", servings: 1)
         let fetchedRecipe = try appDatabase.fetchRecipe(onlineId: "1")
 
         XCTAssertEqual(recipe, fetchedRecipe)

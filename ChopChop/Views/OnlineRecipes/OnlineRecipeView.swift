@@ -45,7 +45,7 @@ struct OnlineRecipeView: View {
 
     var general: some View {
         VStack {
-            Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
+            Text("Serves \(viewModel.recipeServingText)")
             HStack {
                 Text("Difficulty: ")
                 DifficultyView(difficulty: viewModel.recipe.difficulty)

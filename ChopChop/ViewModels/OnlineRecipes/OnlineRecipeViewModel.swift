@@ -10,6 +10,8 @@ class OnlineRecipeViewModel: ObservableObject {
     private var imageCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
+    @Published private(set) var recipeServingText = ""
+
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
 
@@ -32,6 +34,8 @@ class OnlineRecipeViewModel: ObservableObject {
         recipeCancellable = onlineRecipePublisher()
             .sink { [weak self] recipe in
                 self?.recipe = recipe
+
+                self?.recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
 
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return

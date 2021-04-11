@@ -18,13 +18,15 @@ struct OnlineRecipeCollectionView: View {
                 VStack(spacing: 20) {
                     ForEach(viewModel.recipes) { recipe in
                         if recipe.userId == settings.userId {
-                            OnlineRecipeBySelfView(viewModel:
-                                OnlineRecipeBySelfViewModel(recipe: recipe,
-                                downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                            OnlineRecipeBySelfView(
+                                viewModel: OnlineRecipeBySelfViewModel(
+                                    recipe: recipe,
+                                    downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
                         } else {
-                            OnlineRecipeByUserView(viewModel:
-                                OnlineRecipeByUserViewModel(recipe: recipe,
-                                downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                            OnlineRecipeByUserView(
+                                viewModel: OnlineRecipeByUserViewModel(
+                                    recipe: recipe,
+                                    downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
                         }
                     }
                 }
