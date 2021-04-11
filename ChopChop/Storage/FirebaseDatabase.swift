@@ -138,13 +138,12 @@ struct FirebaseDatabase {
 
     // MARK: - FirebaseDatabase: Delete
 
-    // TODO havent test
     func removeRecipe(recipeId: String, completion: @escaping () -> Void) throws {
         let batch = db.batch()
-        let recipeDocRef = db.collection(recipePath).document()
+        let recipeDocRef = db.collection(recipePath).document(recipeId)
         batch.deleteDocument(recipeDocRef)
 
-        let recipeInfoDocRef = db.collection(recipeInfoPath).document()
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
         batch.deleteDocument(recipeInfoDocRef)
 
         batch.commit { err in
@@ -278,18 +277,6 @@ struct FirebaseDatabase {
         }
     }
 
-//    func fetchFolloweesId(userId: String) -> AnyPublisher<[String], Error> {
-//        db.collection(userPath).document(userId)
-//            .publisher()
-//            .map({
-//                try? $0.data(as: User.self)
-//            })
-//            .map({
-//                $0?.followees ?? []
-//            })
-//            .eraseToAnyPublisher()
-//    }
-
     func fetchOnlineRecipeById(onlineRecipeId: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
         db.collection(recipeInfoPath).document(onlineRecipeId).getDocument { snapshot, err in
             guard let recipeInfoRecord = try? snapshot?.data(as: OnlineRecipeInfoRecord.self) else {
@@ -312,7 +299,7 @@ struct FirebaseDatabase {
                 guard let recipeRecord = try? snapshot?.data(as: OnlineRecipeRecord.self),
                       let recipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord) else {
                     completion(nil, err)
-//                    assertionFailure("Should be able to convert")
+                    assertionFailure("Should be able to convert")
                     return
                 }
 
@@ -320,64 +307,6 @@ struct FirebaseDatabase {
                 completion(recipe, nil)
             }
 
-        }
-    }
-
-    // not used
-    func fetchUserById(userId: String, completion: @escaping (User?, Error?) -> Void) {
-        db.collection(userInfoPath).document(userId).getDocument { document, err in
-            guard let userInfo = try? document?.data(as: UserInfo.self) else {
-                assertionFailure("Should have document")
-                completion(nil, err)
-                return
-            }
-
-            guard shouldFetchUser(userInfo: userInfo) else {
-                guard let cacheCopy = cache.userCache[userId] else {
-                    assertionFailure("Does not exist in cache")
-                    return
-                }
-                completion(cacheCopy, nil)
-                return
-            }
-
-            db.collection(userPath).document(userId).getDocument { document, err in
-                guard let document = document, document.exists, let user = try? document.data(as: User.self) else {
-                    completion(nil, err)
-                    assertionFailure("Should have document")
-                    return
-                }
-                cache.userCache.insert(user, forKey: userId)
-                cache.userInfoCache.insert(userInfo, forKey: userId)
-                completion(user, nil)
-            }
-
-        }
-
-    }
-
-    // not used
-    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
-        db.collection(userInfoPath).getDocuments { snapshot, err in
-            guard let userIds = (snapshot?.documents.map { $0.documentID }) else {
-                assertionFailure("No user documents")
-                completion([], err)
-                return
-            }
-
-            fetchUserHelper(snapshot: snapshot, error: err, completion: completion, userIds: userIds)
-        }
-     }
-
-    // not used
-    func fetchUsers(userIds: [String], completion: @escaping ([User], Error?) -> Void) {
-        let totalUserCount = userIds.count
-        let queryLimit = QueryLimiter(max: totalUserCount)
-        while queryLimit.hasNext {
-            let range = [] + userIds[queryLimit.current..<queryLimit.next()]
-            db.collection(userInfoPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
-                fetchUserHelper(snapshot: snapshot, error: err, completion: completion, userIds: userIds)
-            }
         }
     }
 
@@ -449,53 +378,6 @@ struct FirebaseDatabase {
 
                 let recipes = allRecipeInfoRecords.dictionary.compactMap { cache.onlineRecipeCache[$0.value.id ?? ""] }
                 completion(recipes, nil)
-            }
-        }
-    }
-
-    // not used
-    private func fetchUserHelper(snapshot: QuerySnapshot?, error: Error?,
-                                 completion: @escaping ([User], Error?) -> Void, userIds: [String]) {
-        guard let documents = snapshot?.documents else {
-            completion([], error)
-            assertionFailure("Should have user ids")
-            return
-        }
-
-        var shouldFetchUserIds: [String] = []
-
-        for document in documents {
-            guard let user = try? document.data(as: UserInfo.self), let userId = user.id else {
-                completion([], error)
-                continue
-            }
-            cache.userInfoCache.insert(user, forKey: userId)
-
-            if shouldFetchUser(userInfo: user) {
-                shouldFetchUserIds.append(userId)
-            }
-        }
-
-        let queryLimit = QueryLimiter(max: shouldFetchUserIds.count)
-        while queryLimit.hasNext {
-            let range = [] + shouldFetchUserIds[queryLimit.current..<queryLimit.next()]
-            db.collection(userPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, _ in
-                guard let documents = snapshot?.documents else {
-                    completion([], error)
-                    assertionFailure("Should have user ids")
-                    return
-                }
-
-                for document in documents {
-                    guard let user = try? document.data(as: User.self), let userId = user.id else {
-                        completion([], error)
-                        continue
-                    }
-                    cache.userCache.insert(user, forKey: userId)
-                }
-
-                let users = userIds.compactMap { cache.userCache[$0] }
-                completion(users, nil)
             }
         }
     }

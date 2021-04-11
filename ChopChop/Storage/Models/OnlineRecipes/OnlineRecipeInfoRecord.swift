@@ -3,7 +3,7 @@ import FirebaseFirestoreSwift
 
 struct OnlineRecipeInfoRecord {
     @DocumentID var id: String? // same as OnlineRecipe id
-    var creator: String // creatorId
+    private(set) var creator: String // creatorId
     @ServerTimestamp var createdAt: Date?
     @ServerTimestamp var updatedAt: Date?
 }

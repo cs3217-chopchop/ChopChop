@@ -18,7 +18,7 @@ class OnlineRecipe: Identifiable {
     init(id: String, userId: String, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating],
-         created: Date, updatedAt: Date) throws {
+         createdAt: Date, updatedAt: Date) throws {
         self.id = id
         self.userId = userId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -36,7 +36,7 @@ class OnlineRecipe: Identifiable {
         self.stepGraph = stepGraph
         self.ingredients = ingredients
         self.ratings = ratings
-        self.createdAt = created
+        self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 }
@@ -100,7 +100,7 @@ extension OnlineRecipe {
             stepGraph: stepGraph,
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,
-            created: createdDate,
+            createdAt: createdDate,
             updatedAt: updatedDate
         )
     }

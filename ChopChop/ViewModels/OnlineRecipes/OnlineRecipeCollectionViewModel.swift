@@ -16,7 +16,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
 
     func load() {
         if filter == .everyone {
-            storageManager.fetchAllRecipes { onlineRecipes, _ in
+            storageManager.fetchAllOnlineRecipes { onlineRecipes, _ in
                 self.recipes = onlineRecipes
             }
         } else if filter == .followees {
@@ -32,8 +32,8 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
 
 }
 
-enum OnlineRecipeCollectionFilter {
-    case everyone
-    case followees
-    case own
+enum OnlineRecipeCollectionFilter: String {
+    case everyone = "All Recipes"
+    case followees = "Recipes from followees"
+    case own = "My Published Recipes"
 }

@@ -55,7 +55,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
     private func updateImage() {
         storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data in
-            guard let data = data, let image = UIImage(data: data) else {
+            guard let image = UIImage(data: data) else {
                 return
             }
             self.image = image
@@ -66,7 +66,7 @@ class OnlineRecipeViewModel: ObservableObject {
         guard let firstRaterId = getRaterId(recipe: recipe) else {
             return
         }
-        storageManager.fetchUserById(userId: firstRaterId) { user, _ in
+        storageManager.fetchUserInfoById(userId: firstRaterId) { user, _ in
             guard let name = user?.name else {
                 return
             }

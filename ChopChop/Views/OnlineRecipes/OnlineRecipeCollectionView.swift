@@ -21,7 +21,7 @@ struct OnlineRecipeCollectionView: View {
                             if recipe.userId == settings.userId {
                                 OnlineRecipeBySelfView(viewModel:
                                     OnlineRecipeBySelfViewModel(recipe: recipe,
-                                    downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                                        downloadRecipeViewModel: downloadRecipeViewModel, settings: settings, reload: viewModel.load))
                             } else {
                                 OnlineRecipeByUserView(viewModel:
                                     OnlineRecipeByUserViewModel(recipe: recipe,

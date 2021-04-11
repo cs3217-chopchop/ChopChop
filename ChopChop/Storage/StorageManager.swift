@@ -1,5 +1,5 @@
 import Foundation
-import UIKit // TODO shouldnt be importing UIKit this far into models
+import UIKit
 import Combine
 
 struct StorageManager {
@@ -11,7 +11,7 @@ struct StorageManager {
     init(appDatabase: AppDatabase = .shared) {
         self.appDatabase = appDatabase
         let cache = FirebaseCache()
-        firebaseCache = .shared // TODO rm singleton
+        firebaseCache = .shared
         firebaseDatabase = FirebaseDatabase(cache: cache)
         firebaseStorage = FirebaseCloudStorage(cache: cache)
     }
@@ -248,8 +248,10 @@ extension StorageManager {
 // MARK: - Firebase operations
 extension StorageManager {
 
+    // MARK: - Storage Manager: Create/Update
+
     // publish your local recipe online
-    func publishRecipe(recipe: inout Recipe, userId: String) throws {
+    func createOnlineRecipe(recipe: inout Recipe, userId: String) throws {
         var cuisine: String?
         if let categoryId = recipe.recipeCategoryId {
             cuisine = try? fetchRecipeCategory(id: categoryId)?.name
@@ -283,11 +285,6 @@ extension StorageManager {
             return
         }
         firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId)
-    }
-
-    // this should only be called once when the app first launched
-    func createUser(user: User) throws -> String {
-        try firebaseDatabase.addUser(user: user)
     }
 
     // update details of published recipe (note that ratings cant be updated here)
@@ -325,8 +322,34 @@ extension StorageManager {
         firebaseStorage.uploadImage(image: fetchedImage, name: onlineId)
     }
 
+    // rate a recipe
+    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping () -> Void) {
+        firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
+        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
+    }
+
+    // change the rating of a recipe you have rated before
+    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping () -> Void) {
+        firebaseDatabase.updateRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
+        firebaseDatabase.updateUserRating(userId: newRating.userId,
+                                          oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
+                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score))
+    }
+
+    // this should only be called once when the app first launched
+    func createUser(user: User) throws -> String {
+        try firebaseDatabase.addUser(user: user)
+    }
+
+    // follow someone
+    func addFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
+        firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId, completion: completion)
+    }
+
+    // MARK: - Storage Manager: Delete
+
     // unpublish a recipe through the online interface
-    func removeRecipeFromOnline(recipe: OnlineRecipe, completion: @escaping () -> Void) throws {
+    func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping () -> Void) throws {
         try firebaseDatabase.removeRecipe(recipeId: recipe.id, completion: completion)
         for rating in recipe.ratings {
             firebaseDatabase.removeUserRecipeRating(
@@ -345,43 +368,9 @@ extension StorageManager {
         try self.saveRecipe(&localRecipe)
     }
 
-    // fetch the details of a single recipe
-    func fetchOnlineRecipe(onlineRecipeId: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
-        firebaseDatabase.fetchOnlineRecipeById(onlineRecipeId: onlineRecipeId, completion: completion)
-    }
-
-    // fetch the details of a single user
-    // not used
-    func fetchUserById(userId: String, completion: @escaping (User?, Error?) -> Void) {
-        firebaseDatabase.fetchUserById(userId: userId, completion: completion)
-    }
-
-    // fetch the details of a single user
-    func fetchUserInfoById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
-        firebaseDatabase.fetchUserInfoById(userId: userId, completion: completion)
-    }
-
-    // listen to the details of a single user
-    // use case: own user object
-    func listenUserById(userId: String, onChange: @escaping (User) -> Void) {
-        // TODO dosent work when add followee -> recipes by followees
-        firebaseDatabase.listenUserById(userId: userId, onChange: onChange)
-    }
-
-    // follow someone
-    func addFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
-        firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId, completion: completion)
-    }
-
     // unfollow someone
     func removeFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
         firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId, completion: completion)
-    }
-
-    // rate a recipe
-    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping () -> Void) {
-        firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
-        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
     }
 
     // remove rating of a recipe you rated
@@ -393,31 +382,21 @@ extension StorageManager {
         )
     }
 
-    // change the rating of a recipe you have rated before
-    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping () -> Void) {
-        firebaseDatabase.updateRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
-        firebaseDatabase.updateUserRating(userId: newRating.userId,
-                                          oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
-                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score))
+    // MARK: - Storage Manager: Fetch
+
+    // fetch the details of a single recipe
+    func fetchOnlineRecipe(onlineRecipeId: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
+        firebaseDatabase.fetchOnlineRecipeById(onlineRecipeId: onlineRecipeId, completion: completion)
     }
 
-    // fetch user details of all your followees
-//    func allFolloweesPublisher(userId: String) -> AnyPublisher<[User], Error> {
-//        firebaseDatabase.fetchFolloweesId(userId: userId)
-//            .flatMap({ followees in
-//                firebaseDatabase.fetchUsers(userId: followees)
-//            })
-//            .eraseToAnyPublisher()
-//    }
+    // fetch the details of a single user
+    func fetchUserInfoById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
+        firebaseDatabase.fetchUserInfoById(userId: userId, completion: completion)
+    }
 
     // fetch all recipes published by everyone
-    func fetchAllRecipes(completion: @escaping ([OnlineRecipe], Error?) -> Void) {
+    func fetchAllOnlineRecipes(completion: @escaping ([OnlineRecipe], Error?) -> Void) {
         firebaseDatabase.fetchAllRecipes(completion: completion)
-    }
-
-    // Fetch details of all users in the system
-    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
-        firebaseDatabase.fetchAllUsers(completion: completion)
     }
 
     // Fetch details of all users in the system
@@ -429,19 +408,6 @@ extension StorageManager {
     func fetchRecipesByUsers(userIds: [String], completion: @escaping ([OnlineRecipe], Error?) -> Void) {
         firebaseDatabase.fetchRecipesByUsers(userIds: userIds, completion: completion)
     }
-
-//    func allFolloweesRecipePublisher(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
-//        firebaseDatabase.fetchFolloweesId(userId: userId)
-//            .flatMap({
-//                self.allRecipesByUsersPublisher(userIds: $0)
-//            })
-//            .eraseToAnyPublisher()
-//    }
-
-    // Fetch all the recipe ratings that a particular user has given
-//    func allUserRatingsPublisher(userId: String) -> AnyPublisher<[UserRating], Error> {
-//        firebaseDatabase.fetchUserRating(userId: userId)
-//    }
 
     // download an online recipe to local
     func downloadRecipe(newName: String, recipe: OnlineRecipe) throws {
@@ -466,11 +432,8 @@ extension StorageManager {
             graph: recipe.stepGraph
         )
         try self.saveRecipe(&localRecipe)
-        firebaseStorage.downloadImage(name: recipe.id) { data in
-            guard let fetchedData = data else {
-                return
-            }
-            let image = UIImage(data: fetchedData)
+        firebaseStorage.fetchImage(name: recipe.id) { data in
+            let image = UIImage(data: data)
             guard let fetchedImage = image else {
                 return
             }
@@ -478,8 +441,16 @@ extension StorageManager {
         }
     }
 
-    func fetchOnlineRecipeImage(recipeId: String, completion: @escaping (Data?) -> Void) {
+    func fetchOnlineRecipeImage(recipeId: String, completion: @escaping (Data) -> Void) {
         firebaseStorage.fetchImage(name: recipeId, completion: completion)
+    }
+
+    // MARK: - Storage Manager: Listen
+
+    // listen to the details of a single user
+    // use case: own user object
+    func listenUserById(userId: String, onChange: @escaping (User) -> Void) {
+        firebaseDatabase.listenUserById(userId: userId, onChange: onChange)
     }
 }
 

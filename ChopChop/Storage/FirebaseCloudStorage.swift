@@ -27,31 +27,26 @@ struct FirebaseCloudStorage {
         }
     }
 
-    func downloadImage(name: String, onComplete: @escaping (_ data: Data?) -> Void) {
+    func fetchImage(name: String, completion: @escaping (_ data: Data) -> Void) {
+        if let data = cache.imageCache[name] {
+            completion(data)
+            return
+        }
+
         let downloadRef = storageRef.child("images/\(name).png")
         downloadRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize) { data, error in
-            if error != nil {
-                onComplete(nil)
-            } else {
-                onComplete(data)
+            guard let data = data, error != nil else {
+                debugPrint("error")
+                return
             }
-        }
-    }
-
-    func fetchImage(name: String, completion: @escaping (Data?) -> Void) {
-        let fetchRef = storageRef.child("images/\(name).png")
-        fetchRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize) {
-            data, error in
-                if error != nil {
-                    completion(nil)
-                } else {
-                    completion(data)
-                }
+            cache.imageCache.insert(data, forKey: name)
+            completion(data)
         }
     }
 
     func deleteImage(name: String) {
         let imageRef = storageRef.child("images/\(name).png")
         imageRef.delete()
+        cache.imageCache.removeValue(forKey: name)
     }
 }

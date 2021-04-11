@@ -206,25 +206,25 @@ import SwiftUI
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
                                 OnlineRecipeCollectionViewModel(filter: .everyone, settings: settings))
-                    .navigationTitle("All Recipes")
+                    .navigationTitle(OnlineRecipeCollectionFilter.everyone.rawValue)
             ) {
-                Label("All Recipes", systemImage: "tray.2")
+                Label(OnlineRecipeCollectionFilter.everyone.rawValue, systemImage: "tray.2")
             }
 
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
                                 OnlineRecipeCollectionViewModel(filter: .followees, settings: settings))
-                    .navigationTitle("Recipes from followees")
+                    .navigationTitle(OnlineRecipeCollectionFilter.followees.rawValue)
             ) {
-                Label("Recipes from followees", systemImage: "folder")
+                Label(OnlineRecipeCollectionFilter.followees.rawValue, systemImage: "folder")
             }
 
             NavigationLink(
                 destination: OnlineRecipeCollectionView(viewModel:
                                 OnlineRecipeCollectionViewModel(filter: .own, settings: settings))
-                    .navigationTitle("My Published Recipes")
+                    .navigationTitle(OnlineRecipeCollectionFilter.own.rawValue)
             ) {
-                Label("My Published Recipes", systemImage: "folder")
+                Label(OnlineRecipeCollectionFilter.own.rawValue, systemImage: "folder")
             }
 
         }
