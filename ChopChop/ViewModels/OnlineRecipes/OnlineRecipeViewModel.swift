@@ -93,7 +93,7 @@ class OnlineRecipeViewModel: ObservableObject {
             fatalError("No user id stored")
         }
 
-        return storageManager.allFolloweesPublisher(userId: userId)
+        return storageManager.followeesPublisher(userId: userId)
             .catch { _ in
                 Just<[User]>([])
             }

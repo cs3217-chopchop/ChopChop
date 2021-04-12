@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 
-final class UserCollectionViewModel: ObservableObject {
+final class OldUserCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var usersCancellable: AnyCancellable?
     @Published private(set) var nonFollowees: [User] = []

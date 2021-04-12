@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct UserCollectionView: View {
-    @ObservedObject var viewModel: UserCollectionViewModel
+    @ObservedObject var viewModel: OldUserCollectionViewModel
     @EnvironmentObject var settings: UserSettings
 
     var body: some View {
@@ -28,6 +28,6 @@ struct UserCollectionView: View {
 
 struct FolloweeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        UserCollectionView(viewModel: UserCollectionViewModel(settings: UserSettings()))
+        UserCollectionView(viewModel: OldUserCollectionViewModel(settings: UserSettings()))
     }
 }

@@ -225,13 +225,13 @@ import SwiftUI
             }
 
             NavigationLink(
-                destination: UserCollectionView(viewModel: UserCollectionViewModel(settings: settings))
+                destination: followeesView
             ) {
                 Label("Followees", systemImage: "person.2")
             }
 
             NavigationLink(
-                destination: NotFoundView(entityName: "User")
+                destination: NotFoundView(entityName: "Settings")
             ) {
                 Label("Settings", systemImage: "gear")
             }
@@ -241,7 +241,16 @@ import SwiftUI
     @ViewBuilder
     var ownProfileView: some View {
         if let userId = settings.userId {
-            ProfileView(viewModel: ProfileViewModel(userId: userId))
+            ProfileView(viewModel: ProfileViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "User")
+        }
+    }
+
+    @ViewBuilder
+    var followeesView: some View {
+        if let userId = settings.userId {
+            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: userId, settings: settings))
         } else {
             NotFoundView(entityName: "User")
         }

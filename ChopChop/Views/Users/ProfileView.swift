@@ -16,6 +16,26 @@ struct ProfileView: View {
 
                 Divider()
                     .padding()
+
+                if !viewModel.isOwnProfile {
+                    followUnfollowButton
+
+                    Divider()
+                        .padding()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    var followUnfollowButton: some View {
+        if viewModel.isFollowedByUser {
+            Button(action: viewModel.removeFollowee) {
+                Label("Unfollow", systemImage: "person.badge.minus")
+            }
+        } else {
+            Button(action: viewModel.addFollowee) {
+                Label("Follow", systemImage: "person.badge.plus")
             }
         }
     }
