@@ -18,15 +18,25 @@ final class RecipeStepTimersViewModel: ObservableObject {
         self.timers = timers.map {
             let hours = String(Int(($0 / 3_600).rounded(.down)))
             let minutes = String(Int(($0.truncatingRemainder(dividingBy: 3_600) / 60).rounded(.down)))
-            let seconds = String(Int($0.truncatingRemainder(dividingBy: 3_600).truncatingRemainder(dividingBy: 60)))
+            let seconds = String(Int($0.truncatingRemainder(dividingBy: 60)))
 
             return RecipeStepTimerRowViewModel(hours: hours, minutes: minutes, seconds: seconds)
         }
     }
 
-    func saveTimers() {
+    func saveTimers() -> Bool {
         do {
-            subject.send(try timers.map { try $0.convertToTimeInterval() })
+            subject.send(try timers.map {
+                let duration = try $0.convertToTimeInterval()
+
+                guard duration > 0 else {
+                    throw RecipeStepError.invalidDuration
+                }
+
+                return duration
+            })
+
+            return true
         } catch {
             alertTitle = "Error"
 
@@ -37,6 +47,8 @@ final class RecipeStepTimersViewModel: ObservableObject {
             }
 
             alertIsPresented = true
+
+            return false
         }
     }
 }

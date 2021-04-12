@@ -26,8 +26,9 @@ struct RecipeStepTimersView: View {
 
             Section {
                 Button("Save timers") {
-                    viewModel.saveTimers()
-                    presentationMode.wrappedValue.dismiss()
+                    if viewModel.saveTimers() {
+                        presentationMode.wrappedValue.dismiss()
+                    }
                 }
             }
         }

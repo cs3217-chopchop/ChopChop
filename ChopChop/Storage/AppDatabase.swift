@@ -96,6 +96,7 @@ struct AppDatabase {
                     .references("recipeStep", onDelete: .cascade)
                 t.column("duration", .double)
                     .notNull()
+                    .check { $0 > 0 }
             }
         }
 

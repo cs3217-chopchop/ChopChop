@@ -100,14 +100,7 @@ struct EditorNodeView: View {
                     Text("Timers")
                         .font(.headline)
                         .padding([.top, .leading, .trailing])
-                    List {
-                        ForEach(viewModel.timers, id: \.self) { duration in
-                            HStack {
-                                Text(viewModel.timeFormatter.string(from: duration) ?? "")
-                            }
-                        }
-                        .listRowBackground(Color.clear)
-                    }
+                    timersList
                     .padding([.top, .bottom], 4)
                     HStack {
                         Spacer()
@@ -121,6 +114,25 @@ struct EditorNodeView: View {
                 }
             }
             .offset(x: RecipeStepNode.expandedSize.width * 0.75 + 32, y: 0)
+        }
+    }
+
+    @ViewBuilder
+    var timersList: some View {
+        if viewModel.timers.isEmpty {
+            Spacer()
+            Text("No step timers")
+                .foregroundColor(.secondary)
+            Spacer()
+        } else {
+            List {
+                ForEach(viewModel.timers, id: \.self) { duration in
+                    HStack {
+                        Text(viewModel.timeFormatter.string(from: duration) ?? "")
+                    }
+                }
+                .listRowBackground(Color.clear)
+            }
         }
     }
 }

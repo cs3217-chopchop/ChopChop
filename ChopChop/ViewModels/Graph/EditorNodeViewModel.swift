@@ -36,8 +36,12 @@ final class EditorNodeViewModel: ObservableObject {
         recipeStepTimersViewModel = RecipeStepTimersViewModel(timers: node.label.timers)
         timersCancellable = recipeStepTimersViewModel.timersPublisher
             .sink { [weak self] timers in
+                guard let step = try? RecipeStep(node.label.content, timers: timers) else {
+                    return
+                }
+
                 self?.timers = timers
-                node.label.timers = timers
+                node.label = step
             }
     }
 

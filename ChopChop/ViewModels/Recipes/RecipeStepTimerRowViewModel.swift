@@ -25,7 +25,8 @@ final class RecipeStepTimerRowViewModel: ObservableObject {
     }
 
     func convertToTimeInterval() throws -> TimeInterval {
-        guard let hours = TimeInterval(hours), let minutes = TimeInterval(minutes), let seconds = TimeInterval(seconds) else {
+        guard let hours = TimeInterval(hours), let minutes = TimeInterval(minutes),
+              let seconds = TimeInterval(seconds) else {
             throw RecipeStepError.invalidDuration
         }
 
