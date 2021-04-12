@@ -33,7 +33,7 @@ final class EditorNodeViewModel: ObservableObject {
         self.timers = node.label.timers
         self.index = graph.topologicallySortedNodes.firstIndex(of: node)
 
-        recipeStepTimersViewModel = RecipeStepTimersViewModel(timers: node.label.timers)
+        recipeStepTimersViewModel = RecipeStepTimersViewModel(node: node, timers: node.label.timers)
         timersCancellable = recipeStepTimersViewModel.timersPublisher
             .sink { [weak self] timers in
                 guard let step = try? RecipeStep(node.label.content, timers: timers) else {

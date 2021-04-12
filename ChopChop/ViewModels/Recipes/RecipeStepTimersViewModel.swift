@@ -8,19 +8,29 @@ final class RecipeStepTimersViewModel: ObservableObject {
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
+    @Published var actionSheetIsPresented = false
+
     var timersPublisher: AnyPublisher<[TimeInterval], Never> {
         subject.eraseToAnyPublisher()
     }
 
+    let node: RecipeStepNode
     private let subject = PassthroughSubject<[TimeInterval], Never>()
 
-    init(timers: [TimeInterval]) {
-        self.timers = timers.map {
-            let hours = String(Int(($0 / 3_600).rounded(.down)))
-            let minutes = String(Int(($0.truncatingRemainder(dividingBy: 3_600) / 60).rounded(.down)))
-            let seconds = String(Int($0.truncatingRemainder(dividingBy: 60)))
+    init(node: RecipeStepNode, timers: [TimeInterval]) {
+        self.node = node
+        self.timers = timers.map(RecipeStepTimersViewModel.convertToViewModel)
+    }
 
-            return RecipeStepTimerRowViewModel(hours: hours, minutes: minutes, seconds: seconds)
+    func parseTimers(shouldOverride: Bool = false) {
+        let timers = RecipeStepParser.parseTimerDurations(step: node.label.content).map {
+            TimeInterval(RecipeStepParser.parseToTime(timeString: $0))
+        }
+
+        if shouldOverride {
+            self.timers = timers.map(RecipeStepTimersViewModel.convertToViewModel)
+        } else {
+            self.timers.append(contentsOf: timers.map(RecipeStepTimersViewModel.convertToViewModel))
         }
     }
 
@@ -50,5 +60,13 @@ final class RecipeStepTimersViewModel: ObservableObject {
 
             return false
         }
+    }
+
+    private static func convertToViewModel(_ duration: TimeInterval) -> RecipeStepTimerRowViewModel {
+        let hours = String(Int((duration / 3_600).rounded(.down)))
+        let minutes = String(Int((duration.truncatingRemainder(dividingBy: 3_600) / 60).rounded(.down)))
+        let seconds = String(Int(duration.truncatingRemainder(dividingBy: 60)))
+
+        return RecipeStepTimerRowViewModel(hours: hours, minutes: minutes, seconds: seconds)
     }
 }

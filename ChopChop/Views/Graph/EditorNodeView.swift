@@ -122,6 +122,7 @@ struct EditorNodeView: View {
                 }
             }
             .offset(x: RecipeStepNode.expandedSize.width * 0.75 + 32, y: 0)
+            .transition(.identity)
         }
     }
 

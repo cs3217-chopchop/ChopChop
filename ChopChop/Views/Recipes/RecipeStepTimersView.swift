@@ -24,6 +24,8 @@ struct RecipeStepTimersView: View {
                 Button("Add timer") {
                     viewModel.timers.append(RecipeStepTimerRowViewModel())
                 }
+
+                parseButton
             }
 
             Section {
@@ -39,10 +41,31 @@ struct RecipeStepTimersView: View {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
     }
+
+    var parseButton: some View {
+        Button("Parse timers") {
+            viewModel.actionSheetIsPresented = true
+        }
+        .actionSheet(isPresented: $viewModel.actionSheetIsPresented) {
+            ActionSheet(title: Text("Parse step timers"),
+                        message: Text("Step: \(viewModel.node.label.content)"),
+                        buttons: [
+                            .cancel(),
+                            .destructive(Text("Overwrite current timers")) {
+                                viewModel.parseTimers(shouldOverride: true)
+                            },
+                            .default(Text("Append to current timers")) {
+                                viewModel.parseTimers(shouldOverride: false)
+                            }
+                        ])
+        }
+    }
 }
 
 struct RecipeStepTimersView_Previews: PreviewProvider {
     static var previews: some View {
-        RecipeStepTimersView(viewModel: RecipeStepTimersViewModel(timers: []))
+        if let step = try? RecipeStep("#") {
+            RecipeStepTimersView(viewModel: RecipeStepTimersViewModel(node: RecipeStepNode(step), timers: []))
+        }
     }
 }
