@@ -46,7 +46,11 @@ final class RecipeCollectionViewModel: ObservableObject {
     }
 
     func getRecipeImage(recipe: RecipeInfo) -> UIImage? {
-        storageManager.fetchRecipeImage(name: recipe.name)
+        guard let id = recipe.id else {
+            return nil
+        }
+
+        return storageManager.fetchRecipeImage(name: String(id))
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {

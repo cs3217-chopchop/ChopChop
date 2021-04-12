@@ -26,8 +26,8 @@ final class RecipeViewModel: ObservableObject {
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
-                if let recipe = recipe {
-                    self?.image = self?.storageManager.fetchRecipeImage(name: recipe.name)
+                if let recipe = recipe, let id = recipe.id {
+                    self?.image = self?.storageManager.fetchRecipeImage(name: String(id))
                 }
             }
     }

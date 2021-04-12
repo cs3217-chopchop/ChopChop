@@ -54,8 +54,8 @@ class RecipeFormViewModel: ObservableObject {
         } ?? []
         self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
 
-        if let name = recipe?.name {
-            self.image = storageManager.fetchRecipeImage(name: name) ?? UIImage()
+        if let id = recipe?.id {
+            self.image = storageManager.fetchRecipeImage(name: String(id)) ?? UIImage()
         } else {
             self.image = UIImage()
         }
@@ -120,15 +120,6 @@ class RecipeFormViewModel: ObservableObject {
                 throw RecipeError.invalidServings
             }
 
-            if image != UIImage() {
-                try storageManager.saveRecipeImage(image, name: name)
-
-                // Delete old image if name changed (if it exists)
-                if let oldName = recipe?.name, name != oldName {
-                    storageManager.deleteRecipeImage(name: oldName)
-                }
-            }
-
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
                                            name: name,
@@ -139,6 +130,14 @@ class RecipeFormViewModel: ObservableObject {
                                            stepGraph: stepGraph)
 
             try storageManager.saveRecipe(&updatedRecipe)
+
+            if let id = updatedRecipe.id {
+                if image == UIImage() {
+                    storageManager.deleteRecipeImage(name: String(id))
+                } else {
+                    try storageManager.saveRecipeImage(image, name: String(id))
+                }
+            }
 
             return true
         } catch {

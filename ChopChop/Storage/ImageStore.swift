@@ -12,6 +12,32 @@ struct ImageStore {
         try? ImageStore.fileManager.removeItem(at: imagePath)
     }
 
+    static func delete(imagesNamed names: [String], inFolderNamed folderName: String = "") {
+        for name in names {
+            delete(imageNamed: name, inFolderNamed: folderName)
+        }
+    }
+
+    static func deleteAll(inFolderNamed folderName: String = "") {
+        guard let folderPath = try? ImageStore.fileManager.url(for: .documentDirectory,
+                                                               in: .userDomainMask,
+                                                               appropriateFor: nil,
+                                                               create: true)
+                .appendingPathComponent("Images")
+                .appendingPathComponent(folderName) else {
+            return
+        }
+
+        guard let imagePaths = try? ImageStore.fileManager.contentsOfDirectory(at: folderPath,
+                                                                               includingPropertiesForKeys: nil) else {
+            return
+        }
+
+        for imagePath in imagePaths {
+            try? ImageStore.fileManager.removeItem(at: imagePath)
+        }
+    }
+
     static func fetch(imageNamed name: String, inFolderNamed folderName: String = "") -> UIImage? {
         guard let imagePath = ImageStore.getFilePath(for: name, folderName: folderName) else {
             return nil
@@ -41,13 +67,16 @@ struct ImageStore {
             return nil
         }
 
-        let directory = ImageStore.fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-
-        guard let folderURL = directory?
-            .appendingPathComponent("Images")
-            .appendingPathComponent(folderName) else {
+        guard let directory = try? ImageStore.fileManager.url(for: .documentDirectory,
+                                                              in: .userDomainMask,
+                                                              appropriateFor: nil,
+                                                              create: true) else {
             return nil
         }
+
+        let folderURL = directory
+            .appendingPathComponent("Images")
+            .appendingPathComponent(folderName)
 
         do {
             try ImageStore.fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)

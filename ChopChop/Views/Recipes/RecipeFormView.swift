@@ -69,27 +69,32 @@ struct RecipeFormView: View {
     }
 
     var imageSection: some View {
-       Section(header: Text("Image")) {
-           if viewModel.image != UIImage() {
-               Image(uiImage: viewModel.image)
-                   .resizable()
-                   .scaledToFill()
-                   .frame(height: 300)
-           }
-           HStack {
-               Button("Upload Image") {
-                   viewModel.pickerSourceType = .photoLibrary
-                   viewModel.imagePickerIsPresented = true
-               }
-               .buttonStyle(BorderlessButtonStyle())
-               Spacer()
-               Button("Take Photo") {
-                   viewModel.pickerSourceType = .camera
-                   viewModel.imagePickerIsPresented = true
-               }
-               .buttonStyle(BorderlessButtonStyle())
-           }
-       }
+        Section(header: Text("Image")) {
+            if viewModel.image != UIImage() {
+                Image(uiImage: viewModel.image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 300)
+            }
+            HStack {
+                Button("Upload Image") {
+                    viewModel.pickerSourceType = .photoLibrary
+                    viewModel.imagePickerIsPresented = true
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                Button("Remove Image") {
+                    viewModel.image = UIImage()
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                .padding(.leading)
+                Spacer()
+                Button("Take Photo") {
+                    viewModel.pickerSourceType = .camera
+                    viewModel.imagePickerIsPresented = true
+                }
+                .buttonStyle(BorderlessButtonStyle())
+            }
+        }
     }
 
     var ingredientsSection: some View {
