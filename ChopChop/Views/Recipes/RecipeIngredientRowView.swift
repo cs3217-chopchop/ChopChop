@@ -1,10 +1,3 @@
-//
-//  RecipeIngredientRowView.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 20/3/21.
-//
-
 import SwiftUI
 import Combine
 
@@ -13,21 +6,20 @@ struct RecipeIngredientRowView: View {
 
     var body: some View {
         HStack {
-            quantity
-            Picker("Unit", selection: $viewModel.unit) {
-                ForEach(QuantityType.allCases, id: \.self) {
-                    Text($0.description)
+            HStack {
+                TextField("Quantity", text: Binding(get: { viewModel.quantity },
+                                                    set: viewModel.setQuantity))
+                    .keyboardType(.numberPad)
+                Picker(viewModel.type.description, selection: $viewModel.type) {
+                    ForEach(QuantityType.allCases, id: \.self) {
+                        Text($0.description)
+                    }
                 }
+                .pickerStyle(MenuPickerStyle())
             }
-            .pickerStyle(MenuPickerStyle())
-            Spacer()
-            Text(viewModel.unit.description)
-            TextField("Ingredient", text: $viewModel.ingredientName)
+            .frame(width: 120)
+            TextField("Name", text: $viewModel.name)
         }
-    }
-
-    var quantity: some View {
-        TextField("Quantity", text: $viewModel.amount)
     }
 }
 

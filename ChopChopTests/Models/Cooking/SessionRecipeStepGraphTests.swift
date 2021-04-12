@@ -7,34 +7,34 @@ import XCTest
 class SessionRecipeStepGraphTests: XCTestCase {
     func testConstruct() throws {
         let recipeSteps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Boil a large, salted pot of water for the pasta and cook it al dente according to package directions.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Meanwhile, add the butter and oil to a skillet over medium-high heat.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms and garlic to the pan and sauté for about 5 minutes, stirring often,
                 until the mushrooms release most of their water and it's cooked off.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In the meantime, mix the wine, Italian seasoning, lemon juice, flour, and Dijon mustard together.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Once done, take the mushrooms out of the pan and set aside.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mix to the pan. Stir until it becomes a smooth paste.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Stir in the cream and let it simmer for a couple of minutes.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms back into the pan.
                 Reduce the heat and cook for a few more minutes until the sauce has thickened up a bit.
                 Season sauce with salt & pepper as needed.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Drain the pasta and toss it with the sauce along with the parsley and parmesan if using.
             """)
         ]
@@ -76,34 +76,34 @@ class SessionRecipeStepGraphTests: XCTestCase {
 
     func testResetSteps_success() throws {
         let recipeSteps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Boil a large, salted pot of water for the pasta and cook it al dente according to package directions.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Meanwhile, add the butter and oil to a skillet over medium-high heat.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms and garlic to the pan and sauté for about 5 minutes, stirring often,
                 until the mushrooms release most of their water and it's cooked off.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In the meantime, mix the wine, Italian seasoning, lemon juice, flour, and Dijon mustard together.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Once done, take the mushrooms out of the pan and set aside.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mix to the pan. Stir until it becomes a smooth paste.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Stir in the cream and let it simmer for a couple of minutes.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms back into the pan.
                 Reduce the heat and cook for a few more minutes until the sauce has thickened up a bit.
                 Season sauce with salt & pepper as needed.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Drain the pasta and toss it with the sauce along with the parsley and parmesan if using.
             """)
         ]
@@ -150,34 +150,34 @@ class SessionRecipeStepGraphTests: XCTestCase {
 
     func testCompleteStep() throws {
         let recipeSteps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Boil a large, salted pot of water for the pasta and cook it al dente according to package directions.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Meanwhile, add the butter and oil to a skillet over medium-high heat.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms and garlic to the pan and sauté for about 5 minutes, stirring often,
                 until the mushrooms release most of their water and it's cooked off.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In the meantime, mix the wine, Italian seasoning, lemon juice, flour, and Dijon mustard together.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Once done, take the mushrooms out of the pan and set aside.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mix to the pan. Stir until it becomes a smooth paste.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Stir in the cream and let it simmer for a couple of minutes.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms back into the pan.
                 Reduce the heat and cook for a few more minutes until the sauce has thickened up a bit.
                 Season sauce with salt & pepper as needed.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Drain the pasta and toss it with the sauce along with the parsley and parmesan if using.
             """)
         ]
@@ -257,34 +257,34 @@ class SessionRecipeStepGraphTests: XCTestCase {
 
     func testCompletableNodes() throws {
         let recipeSteps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Boil a large, salted pot of water for the pasta and cook it al dente according to package directions.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Meanwhile, add the butter and oil to a skillet over medium-high heat.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms and garlic to the pan and sauté for about 5 minutes, stirring often,
                 until the mushrooms release most of their water and it's cooked off.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In the meantime, mix the wine, Italian seasoning, lemon juice, flour, and Dijon mustard together.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Once done, take the mushrooms out of the pan and set aside.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mix to the pan. Stir until it becomes a smooth paste.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Stir in the cream and let it simmer for a couple of minutes.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add the mushrooms back into the pan.
                 Reduce the heat and cook for a few more minutes until the sauce has thickened up a bit.
                 Season sauce with salt & pepper as needed.
             """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Drain the pasta and toss it with the sauce along with the parsley and parmesan if using.
             """)
         ]

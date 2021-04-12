@@ -38,19 +38,7 @@ import SwiftUI
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: {
-            switch viewModel.categoryType {
-            case .recipe:
-                viewModel.addRecipeCategory(name: viewModel.categoryName)
-            case .ingredient:
-                viewModel.addIngredientCategory(name: viewModel.categoryName)
-            case .none:
-                return
-            }
-
-            viewModel.categoryName = ""
-            viewModel.categoryType = nil
-        }) {
+        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: viewModel.addCategory) {
             switch viewModel.categoryType {
             case .recipe:
                 addRecipeCategorySheet
@@ -63,29 +51,42 @@ import SwiftUI
         .environment(\.editMode, $editMode)
     }
 
+    @ViewBuilder
     var addRecipeCategorySheet: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Add Recipe Category")
-                .font(.title)
-            TextField("Category", text: $viewModel.categoryName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            Button("Done", action: {
-                viewModel.sheetIsPresented = false
-            })
+                .font(.largeTitle)
+                .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Recipe Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
         }
     }
 
     var addIngredientCategorySheet: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Add Ingredient Category")
-                .font(.title)
-            TextField("Category", text: $viewModel.categoryName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            Button("Done", action: {
-                viewModel.sheetIsPresented = false
-            })
+                .font(.largeTitle)
+                .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Ingredient Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
         }
     }
 

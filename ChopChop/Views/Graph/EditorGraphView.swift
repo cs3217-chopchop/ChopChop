@@ -121,7 +121,7 @@ struct EditorGraphView: View {
     }
 
     func placeholderNodeView(position: CGPoint) -> some View {
-        guard let step = try? RecipeStep(content: "Add step details...") else {
+        guard let step = try? RecipeStep("Add step details...") else {
             return AnyView(EmptyView())
         }
 

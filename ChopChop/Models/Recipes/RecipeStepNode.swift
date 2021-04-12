@@ -25,9 +25,9 @@ extension RecipeStepNode: Hashable {
 }
 
 extension RecipeStepNode {
-    static let normalSize = CGSize(width: 120, height: 84)
+    static let normalSize = CGSize(width: 162, height: 108)
     static let expandedSize = CGSize(width: 360, height: 240)
 
-    static let horizontalDistance = RecipeStepNode.normalSize.width * 1.3
+    static let horizontalDistance = RecipeStepNode.normalSize.width * 1.25
     static let verticalDistance = RecipeStepNode.normalSize.height * 1.4
 }

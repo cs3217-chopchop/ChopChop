@@ -1,3 +1,4 @@
+import Foundation
 import GRDB
 
 /**
@@ -263,10 +264,19 @@ extension Quantity: CustomStringConvertible {
     }
  }
 
-enum QuantityError: Error {
+enum QuantityError: LocalizedError {
     case negativeQuantity
     case divisionByZero
     case incompatibleTypes
     case invalidUnit
     case invalidQuantity
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidQuantity:
+            return "Ingredient quantity must be a non-negative number."
+        default:
+            return ""
+        }
+    }
 }
