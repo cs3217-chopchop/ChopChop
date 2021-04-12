@@ -39,10 +39,6 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
     }
 
-    func setShowRating(_ isShowing: Bool) {
-        isShowingRating = isShowing
-    }
-
     func toggleShowRating() {
         isShowingRating.toggle()
         self.objectWillChange.send()

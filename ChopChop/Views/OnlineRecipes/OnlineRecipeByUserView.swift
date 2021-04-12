@@ -10,12 +10,9 @@ struct OnlineRecipeByUserView: View {
 
             Divider()
 
-            HStack {
-                if viewModel.isShowingRating {
-                    StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
-                              maxRating: RatingScore.max, onTap: viewModel.tapRating)
-                        .frame(width: 200, height: 40, alignment: .center)
-                }
+            if viewModel.isShowingRating {
+                rateRecipeBar
+            } else {
                 rateRecipeButton
             }
         }
@@ -27,27 +24,24 @@ struct OnlineRecipeByUserView: View {
         .padding([.horizontal], 100)
     }
 
-    var rateRecipeButton: some View {
-        Button(action: {
-            if viewModel.isShowingRating {
-                if viewModel.ownRating != nil {
-                    viewModel.removeRating()
-                }
-            }
-            viewModel.toggleShowRating()
-        }) {
-            if viewModel.isShowingRating {
-                if viewModel.ownRating != nil {
-                    Text("Remove Rating")
-                } else {
-                    Text("Close")
-                }
+    var rateRecipeBar: some View {
+        HStack {
+            StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
+                      maxRating: RatingScore.max, onTap: viewModel.tapRating)
+                .frame(width: 200, height: 40, alignment: .center)
+
+            if viewModel.ownRating != nil {
+                Button("Remove Rating", action: viewModel.removeRating)
             } else {
-                HStack {
-                    Image(systemName: "star")
-                    Text("Rate Recipe")
-                }
+                Button("Close", action: viewModel.toggleShowRating)
             }
+        }
+        .padding()
+    }
+
+    var rateRecipeButton: some View {
+        Button(action: viewModel.toggleShowRating) {
+            Label("Rate Recipe", systemImage: "star")
         }
         .padding()
     }

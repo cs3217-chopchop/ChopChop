@@ -11,9 +11,7 @@ class OnlineRecipeViewModel: ObservableObject {
     private var imageCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
-    @Published var creatorName = "No name" {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var creatorName = "No name"
 
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
@@ -31,17 +29,17 @@ class OnlineRecipeViewModel: ObservableObject {
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
 
-        creatorCancellable = creatorPublisher()
+        creatorCancellable = creatorPublisher
             .sink { [weak self] user in
                 self?.creatorName = user.name
             }
 
-        followeesCancellable = followeesPublisher()
+        followeesCancellable = followeesPublisher
             .sink { [weak self] followees in
                 self?.followeeIds = followees.compactMap { $0.id }
             }
 
-        recipeCancellable = onlineRecipePublisher()
+        recipeCancellable = onlineRecipePublisher
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
@@ -55,7 +53,7 @@ class OnlineRecipeViewModel: ObservableObject {
                     }
             }
 
-        imageCancellable = imagePublisher()
+        imageCancellable = imagePublisher
             .sink { [weak self] image in
                 self?.image = image
             }
@@ -88,13 +86,13 @@ class OnlineRecipeViewModel: ObservableObject {
         isShowingDetail.toggle()
     }
 
-    private func creatorPublisher() -> AnyPublisher<User, Never> {
+    private var creatorPublisher: AnyPublisher<User, Never> {
         storageManager.userByIdPublisher(userId: recipe.userId)
             .assertNoFailure()
             .eraseToAnyPublisher()
     }
 
-    private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {
+    private var onlineRecipePublisher: AnyPublisher<OnlineRecipe, Never> {
         storageManager.onlineRecipeByIdPublisher(recipeId: recipe.id)
             .assertNoFailure()
             .eraseToAnyPublisher()
@@ -106,7 +104,7 @@ class OnlineRecipeViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func followeesPublisher() -> AnyPublisher<[User], Never> {
+    private var followeesPublisher: AnyPublisher<[User], Never> {
         guard let userId = settings.userId else {
             fatalError("No user id stored")
         }
@@ -118,7 +116,7 @@ class OnlineRecipeViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func imagePublisher() -> AnyPublisher<UIImage, Never> {
+    private var imagePublisher: AnyPublisher<UIImage, Never> {
         storageManager.onlineRecipeImagePublisher(recipeId: recipe.id)
             .catch { _ in
                 Just<UIImage>(UIImage(imageLiteralResourceName: "recipe"))
