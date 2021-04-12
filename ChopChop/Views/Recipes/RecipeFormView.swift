@@ -102,11 +102,13 @@ struct RecipeFormView: View {
             ForEach(viewModel.ingredients, id: \.self) { ingredientRowViewModel in
                 HStack {
                     RecipeIngredientRowView(viewModel: ingredientRowViewModel)
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                        .onTapGesture {
-                            viewModel.ingredients.removeAll(where: { $0 === ingredientRowViewModel })
-                        }
+                    Button(action: {
+                        viewModel.ingredients.removeAll(where: { $0 === ingredientRowViewModel })
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
                 }
             }
 

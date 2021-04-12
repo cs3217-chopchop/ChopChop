@@ -11,11 +11,13 @@ struct RecipeStepTimersView: View {
                     HStack {
                         RecipeStepTimerRowView(viewModel: timerRowViewModel)
                         Spacer()
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                            .onTapGesture {
-                                viewModel.timers.removeAll(where: { $0 === timerRowViewModel })
-                            }
+                        Button(action: {
+                            viewModel.timers.removeAll(where: { $0 === timerRowViewModel })
+                        }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
                     }
                 }
 
