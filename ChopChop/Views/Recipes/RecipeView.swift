@@ -47,11 +47,9 @@ struct RecipeView: View {
         VStack(alignment: .center) {
             if let parentRecipe = viewModel.parentRecipe {
                 NavigationLink(
-                    destination: OnlineRecipeByUserView(
-                        viewModel: OnlineRecipeByUserViewModel(
-                            recipe: parentRecipe,
-                            downloadRecipeViewModel: DownloadRecipeViewModel(),
-                            settings: settings
+                    destination: OnlineRecipeCollectionView(
+                        viewModel: OnlineRecipeCollectionViewModel(
+                            recipe: parentRecipe
                         )
                     )
                 ) {

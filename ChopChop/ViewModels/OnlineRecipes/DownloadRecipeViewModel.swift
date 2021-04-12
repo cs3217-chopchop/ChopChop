@@ -12,6 +12,7 @@ class DownloadRecipeViewModel: ObservableObject {
     var forkedRecipesCheckList: CheckListViewModel<Recipe>?
 
     func setRecipe(recipe: OnlineRecipe) {
+        print("yo")
         recipeToDownload = recipe
         isShow = true
         recipeNameToSave = ""

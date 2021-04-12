@@ -20,6 +20,7 @@ struct OnlineRecipeView: View {
             recipeDetails
             Divider()
             Button(action: {
+                print("hello")
                 viewModel.setRecipe()
             }) {
                 Label("Download new copy", systemImage: "square.and.arrow.down")
