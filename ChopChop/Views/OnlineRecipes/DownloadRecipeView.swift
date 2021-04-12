@@ -4,9 +4,14 @@ struct DownloadRecipeView: View {
     @ObservedObject var viewModel: DownloadRecipeViewModel
 
     var body: some View {
-        downloadNewCopyView
+        if viewModel.isNewDownload {
+            downloadNewCopyView
+        } else {
+            updateExistingCopyView
+        }
+
     }
-    
+
     var downloadNewCopyView: some View {
         VStack {
             Text("Save as")
@@ -20,6 +25,26 @@ struct DownloadRecipeView: View {
                 viewModel.downloadRecipe()
             }, label: {
                 Text("Download Recipe")
+            })
+        }
+    }
+
+    var updateExistingCopyView: some View {
+        VStack {
+            Text("""
+                Please select existing recipes to update. Note that the update will \
+                override all changes you have made to selected recipes.
+                """
+            )
+            CheckListView(
+                viewModel: viewModel.forkedRecipesCheckList ?? CheckListViewModel(checkList: [])
+            )
+            Text(viewModel.errorMessage)
+                .foregroundColor(.red)
+            Button(action: {
+                viewModel.updateRecipes()
+            }, label: {
+                Text("Update Recipes")
             })
         }
     }

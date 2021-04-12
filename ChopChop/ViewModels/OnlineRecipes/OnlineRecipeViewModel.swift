@@ -3,7 +3,7 @@ import Combine
 
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
-
+    private(set) var downloadedRecipes: [Recipe]
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
@@ -23,6 +23,11 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
+        do {
+            self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentId: recipe.id)
+        } catch {
+            self.downloadedRecipes = []
+        }
 
         followeesCancellable = followeesPublisher()
             .sink { [weak self] followees in
@@ -67,13 +72,17 @@ class OnlineRecipeViewModel: ObservableObject {
                 + (ratingsCount == 2 ? " other)" : " others)")
         }
     }
-    
-    func getDownloadedRecipes(parentId: String) throws -> [Recipe] {
-        try storageManager.fetchDownloadedRecipes(parentId: parentId)
-    }
+
+//    func getDownloadedRecipes(parentId: String) throws -> [Recipe] {
+//        try storageManager.fetchDownloadedRecipes(parentId: parentId)
+//    }
 
     func setRecipe() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
+    }
+
+    func updateForkedRecipes() {
+        downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
     private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {

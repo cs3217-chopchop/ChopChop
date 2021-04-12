@@ -566,7 +566,7 @@ extension AppDatabase {
             return try Recipe.fetchOne(db, request)
         }
     }
-    
+
     func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
         try dbWriter.read { db in
             let request = RecipeRecord

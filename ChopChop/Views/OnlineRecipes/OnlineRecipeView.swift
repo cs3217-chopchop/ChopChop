@@ -24,11 +24,18 @@ struct OnlineRecipeView: View {
             }) {
                 Label("Download new copy", systemImage: "square.and.arrow.down")
             }
+            if !viewModel.downloadedRecipes.isEmpty {
+                Button(action: {
+                    viewModel.updateForkedRecipes()
+                }) {
+                    Label("Update downloaded copies", systemImage: "square.and.arrow.down")
+                }
+            }
             averageRating
         }
 
     }
-    
+
 //    var updateChangesButton: some View {
 //        var downloadedRecipes = [Recipe]()
 //        do {
@@ -40,7 +47,7 @@ struct OnlineRecipeView: View {
 //            return EmptyView()
 //        } else {
 //            return Button(action: {
-//                
+//                viewModel.updateForkedRecipes(recipes: downloadedRecipes)
 //            }) {
 //                Label("Update downloaded copies", systemImage: "square.and.arrow.down")
 //            }

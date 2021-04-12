@@ -118,7 +118,7 @@ struct StorageManager {
     func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
         try appDatabase.fetchRecipeCategoryByName(name: name)
     }
-    
+
     func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
         try appDatabase.fetchDownloadedRecipes(parentId: parentId)
     }
@@ -484,6 +484,27 @@ extension StorageManager {
             }
             try? self.saveRecipeImage(fetchedImage, name: newName)
         }
+    }
+
+    func updateForkedRecipes(forked: Recipe, original: OnlineRecipe) throws {
+        var cuisineId: Int64?
+        if let cuisine = original.cuisine {
+            cuisineId = try self.fetchRecipeCategoryByName(name: cuisine)?.id
+        }
+
+        var localRecipe = try Recipe(
+            id: forked.id,
+            name: forked.name,
+            onlineId: forked.onlineId,
+            parentId: forked.parentId,
+            servings: original.servings,
+            recipeCategoryId: cuisineId,
+            difficulty: original.difficulty,
+            ingredients: original.ingredients,
+            graph: original.stepGraph
+        )
+
+        try self.saveRecipe(&localRecipe)
     }
 
     func onlineRecipeImagePublisher(recipeId: String) -> AnyPublisher<UIImage, Error> {
