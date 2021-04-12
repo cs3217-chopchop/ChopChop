@@ -1,10 +1,3 @@
-//
-//  RecipeIngredientRowView.swift
-//  ChopChop
-//
-//  Created by Cao Wenjie on 20/3/21.
-//
-
 import SwiftUI
 import Combine
 

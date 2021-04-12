@@ -37,24 +37,6 @@ struct OnlineRecipeView: View {
 
     }
 
-//    var updateChangesButton: some View {
-//        var downloadedRecipes = [Recipe]()
-//        do {
-//            downloadedRecipes = try viewModel.getDownloadedRecipes(parentId: viewModel.recipe.id)
-//        } catch {
-//            return EmptyView()
-//        }
-//        if downloadedRecipes.isEmpty {
-//            return EmptyView()
-//        } else {
-//            return Button(action: {
-//                viewModel.updateForkedRecipes(recipes: downloadedRecipes)
-//            }) {
-//                Label("Update downloaded copies", systemImage: "square.and.arrow.down")
-//            }
-//        }
-//    }
-
     var recipeDetails: some View {
         VStack(alignment: .center) {
             Text("General").font(.title).underline()
