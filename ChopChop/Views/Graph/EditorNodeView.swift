@@ -41,7 +41,7 @@ struct EditorNodeView: View {
                     }
                 }
 
-                if isSelected && viewModel.isEditable {
+                if isSelected {
                     detailView
                         .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                 }
@@ -68,22 +68,28 @@ struct EditorNodeView: View {
                     Text("Cancel")
                 }
             } else {
-                Button(action: {
-                    viewModel.isEditing = true
-                }) {
-                    Image(systemName: "square.and.pencil")
+                if viewModel.isEditable {
+                    Button(action: {
+                        viewModel.isEditing = true
+                    }) {
+                        Image(systemName: "square.and.pencil")
+                    }
                 }
+
                 Button(action: {
                     viewModel.showTimers.toggle()
                 }) {
                     Image(systemName: "timer")
                 }
                 Spacer()
-                Button(action: {
-                    viewModel.removeNode()
-                    selection.toggleNode(viewModel.node)
-                }) {
-                    Image(systemName: "trash")
+
+                if viewModel.isEditable {
+                    Button(action: {
+                        viewModel.removeNode()
+                        selection.toggleNode(viewModel.node)
+                    }) {
+                        Image(systemName: "trash")
+                    }
                 }
             }
         }
@@ -102,15 +108,17 @@ struct EditorNodeView: View {
                         .padding([.top, .leading, .trailing])
                     timersList
                     .padding([.top, .bottom], 4)
-                    HStack {
-                        Spacer()
-                        NavigationLink(
-                            destination: RecipeStepTimersView(viewModel: viewModel.recipeStepTimersViewModel)
-                        ) {
-                            Image(systemName: "square.and.pencil")
+                    if viewModel.isEditable {
+                        HStack {
+                            Spacer()
+                            NavigationLink(
+                                destination: RecipeStepTimersView(viewModel: viewModel.recipeStepTimersViewModel)
+                            ) {
+                                Image(systemName: "square.and.pencil")
+                            }
                         }
+                        .padding([.bottom, .leading, .trailing])
                     }
-                    .padding([.bottom, .leading, .trailing])
                 }
             }
             .offset(x: RecipeStepNode.expandedSize.width * 0.75 + 32, y: 0)
