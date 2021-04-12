@@ -112,16 +112,36 @@ struct RecipeFormView: View {
                 }
             }
 
-            if viewModel.isParsingIngredients {
-                TextEditor(text: $viewModel.ingredientsToBeParsed)
-                Button("Add ingredients", action: viewModel.parseIngredients)
-            } else {
-                Button("Add ingredient") {
-                    viewModel.ingredients.append(RecipeIngredientRowViewModel())
-                }
-                Button("Parse ingredients") {
-                    viewModel.isParsingIngredients = true
-                }
+            ingredientsActions
+        }
+    }
+
+    @ViewBuilder
+    var ingredientsActions: some View {
+        if viewModel.isParsingIngredients {
+            TextEditor(text: $viewModel.ingredientsToBeParsed)
+            Button("Add ingredients") {
+                viewModel.ingredientActionSheetIsPresented = true
+            }
+            .actionSheet(isPresented: $viewModel.ingredientActionSheetIsPresented) {
+                ActionSheet(title: Text("Add ingredients"),
+                            message: Text("Do you wish to overwrite or append to the current ingredients?"),
+                            buttons: [
+                                .cancel(),
+                                .destructive(Text("Overwrite")) {
+                                    viewModel.parseIngredients(shouldOverwrite: true)
+                                },
+                                .default(Text("Append")) {
+                                    viewModel.parseIngredients(shouldOverwrite: false)
+                                }
+                            ])
+            }
+        } else {
+            Button("Add ingredient") {
+                viewModel.ingredients.append(RecipeIngredientRowViewModel())
+            }
+            Button("Parse ingredients") {
+                viewModel.isParsingIngredients = true
             }
         }
     }
@@ -134,7 +154,19 @@ struct RecipeFormView: View {
 
             if viewModel.isParsingSteps {
                 TextEditor(text: $viewModel.stepsToBeParsed)
-                Button("Replace steps", action: viewModel.parseSteps)
+                Button("Replace steps") {
+                    viewModel.stepActionSheetIsPresented = true
+                }
+                .actionSheet(isPresented: $viewModel.stepActionSheetIsPresented) {
+                    ActionSheet(title: Text("Warning"),
+                                message: Text("Parsing these steps will overwrite the current steps"),
+                                buttons: [
+                                    .cancel({
+                                        viewModel.isParsingSteps = false
+                                    }),
+                                    .destructive(Text("I understand"), action: viewModel.parseSteps)
+                                ])
+                }
             } else {
                 Button("Parse steps") {
                     viewModel.isParsingSteps = true

@@ -22,12 +22,12 @@ final class RecipeStepTimersViewModel: ObservableObject {
         self.timers = timers.map(RecipeStepTimersViewModel.convertToViewModel)
     }
 
-    func parseTimers(shouldOverride: Bool = false) {
+    func parseTimers(shouldOverwrite: Bool = false) {
         let timers = RecipeStepParser.parseTimerDurations(step: node.label.content).map {
             TimeInterval(RecipeStepParser.parseToTime(timeString: $0))
         }
 
-        if shouldOverride {
+        if shouldOverwrite {
             self.timers = timers.map(RecipeStepTimersViewModel.convertToViewModel)
         } else {
             self.timers.append(contentsOf: timers.map(RecipeStepTimersViewModel.convertToViewModel))

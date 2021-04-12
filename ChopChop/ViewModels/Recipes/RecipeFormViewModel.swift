@@ -18,6 +18,8 @@ class RecipeFormViewModel: ObservableObject {
     @Published var ingredientsToBeParsed = ""
     @Published var stepsToBeParsed = ""
     @Published var stepGraphIsPresented = false
+    @Published var ingredientActionSheetIsPresented = false
+    @Published var stepActionSheetIsPresented = false
 
     @Published var imagePickerIsPresented = false
     @Published var alertIsPresented = false
@@ -73,7 +75,7 @@ class RecipeFormViewModel: ObservableObject {
             .joined(separator: ".")
     }
 
-    func parseIngredients() {
+    func parseIngredients(shouldOverwrite: Bool = false) {
         let parsedIngredients = RecipeParser.parseIngredientString(ingredientString: ingredientsToBeParsed)
             .map({
                 RecipeIngredientRowViewModel(
@@ -83,7 +85,12 @@ class RecipeFormViewModel: ObservableObject {
                 )
             })
 
-        ingredients.append(contentsOf: parsedIngredients)
+        if shouldOverwrite {
+            ingredients = parsedIngredients
+        } else {
+            ingredients.append(contentsOf: parsedIngredients)
+        }
+
         isParsingIngredients = false
         ingredientsToBeParsed = ""
     }

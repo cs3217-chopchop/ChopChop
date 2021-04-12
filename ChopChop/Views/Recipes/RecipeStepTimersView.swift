@@ -52,10 +52,10 @@ struct RecipeStepTimersView: View {
                         buttons: [
                             .cancel(),
                             .destructive(Text("Overwrite current timers")) {
-                                viewModel.parseTimers(shouldOverride: true)
+                                viewModel.parseTimers(shouldOverwrite: true)
                             },
                             .default(Text("Append to current timers")) {
-                                viewModel.parseTimers(shouldOverride: false)
+                                viewModel.parseTimers(shouldOverwrite: false)
                             }
                         ])
         }
