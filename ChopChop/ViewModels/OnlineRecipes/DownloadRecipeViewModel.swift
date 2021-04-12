@@ -7,7 +7,6 @@ class DownloadRecipeViewModel: ObservableObject {
     @Published var isShow = false
     @Published var errorMessage = ""
     private let storageManager = StorageManager()
-//    @Published var forkedRecipes = [Recipe]()
     @Published var isNewDownload = true
     var forkedRecipesCheckList: CheckListViewModel<Recipe>?
 
@@ -56,6 +55,7 @@ class DownloadRecipeViewModel: ObservableObject {
         forkedRecipesCheckList = CheckListViewModel(checkList: recipes.map({
             CheckListItem(item: $0, displayName: $0.name)
         }))
+        errorMessage = ""
         recipeToDownload = onlineRecipe
         isShow = true
         isNewDownload = false

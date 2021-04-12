@@ -3,11 +3,13 @@ import Combine
 
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
+    private(set) var parentRecipe: OnlineRecipe?
     private(set) var downloadedRecipes: [Recipe]
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
     private var imageCancellable: AnyCancellable?
+    private var parentRecipeCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
     @Published private var firstRater = "No name"
@@ -23,10 +25,25 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
+
         do {
             self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentId: recipe.id)
         } catch {
             self.downloadedRecipes = []
+        }
+
+        if let parentId = recipe.parentId {
+            parentRecipeCancellable = storageManager.fetchOnlineRecipe(id: parentId)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .finished:
+                        break
+                    case .failure:
+                        self.parentRecipe = nil
+                    }
+                }, receiveValue: { value in
+                    self.parentRecipe = value
+                })
         }
 
         followeesCancellable = followeesPublisher()

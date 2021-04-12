@@ -20,7 +20,6 @@ struct OnlineRecipeView: View {
             recipeDetails
             Divider()
             Button(action: {
-                print("hello")
                 viewModel.setRecipe()
             }) {
                 Label("Download new copy", systemImage: "square.and.arrow.down")
@@ -39,6 +38,17 @@ struct OnlineRecipeView: View {
 
     var recipeDetails: some View {
         VStack(alignment: .center) {
+            if let parentRecipe = viewModel.parentRecipe {
+                NavigationLink(
+                    destination: OnlineRecipeCollectionView(
+                        viewModel: OnlineRecipeCollectionViewModel(
+                            recipe: parentRecipe
+                        )
+                    )
+                ) {
+                    Text("Adapted from here")
+                }
+            }
             Text("General").font(.title).underline()
             general
             Spacer()

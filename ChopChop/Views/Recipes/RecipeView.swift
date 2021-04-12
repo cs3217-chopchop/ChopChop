@@ -55,8 +55,6 @@ struct RecipeView: View {
                 ) {
                     Text("Adapted from here")
                 }
-            } else {
-                Text("Test")
             }
             Text("General").font(.title).underline()
             general
