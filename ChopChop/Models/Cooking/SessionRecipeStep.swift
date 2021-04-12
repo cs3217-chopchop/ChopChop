@@ -4,7 +4,7 @@ class SessionRecipeStep: Identifiable {
     private(set) var isCompleted = false
     private(set) var timeTaken = 0.0 // for user log only
     private(set) var step: RecipeStep
-    private(set) var timers: [(String, CountdownTimer)]
+    private(set) var timers: [CountdownTimer]
 
     private let actionTimeTracker: ActionTimeTracker
 
@@ -12,8 +12,7 @@ class SessionRecipeStep: Identifiable {
         self.step = step
         self.actionTimeTracker = actionTimeTracker
 
-        let durationPhrases = RecipeStepParser.parseTimerDurations(step: step.content)
-        timers = SessionRecipeStep.convertToTimers(durationPhrases: durationPhrases)
+        timers = SessionRecipeStep.convertToTimers(durations: step.timers)
     }
 
     /// If previously checked, becomes unchecked and timeTaken resets to 0.
@@ -31,11 +30,10 @@ class SessionRecipeStep: Identifiable {
         try? actionTimeTracker.updateTimeOfLastAction(date: Date())
     }
 
-    private static func convertToTimers(durationPhrases: [String]) -> [(String, CountdownTimer)] {
-        durationPhrases.map { duration -> (String, CountdownTimer) in
+    private static func convertToTimers(durations: [TimeInterval]) -> [CountdownTimer] {
+        durations.map { duration in
             do {
-                let timer = try CountdownTimer(time: RecipeStepParser.parseToTime(timeString: duration))
-                return (duration, timer)
+                return try CountdownTimer(time: Int(duration))
             } catch {
                 fatalError("Time was not valid")
             }
