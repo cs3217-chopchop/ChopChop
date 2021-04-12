@@ -1,4 +1,5 @@
 import Foundation
+import GRDB
 
 struct RecipeStep: Hashable {
     let content: String

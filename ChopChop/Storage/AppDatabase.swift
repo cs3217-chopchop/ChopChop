@@ -447,6 +447,11 @@ extension AppDatabase {
                 try stepRecord.save(db)
 
                 nodeIds[node.id] = stepRecord.id
+
+                for timer in step.timers {
+                    var timerRecord = RecipeStepTimerRecord(stepId: stepRecord.id, duration: timer)
+                    try timerRecord.save(db)
+                }
             }
 
             for edge in stepGraph.edges {
@@ -565,7 +570,8 @@ extension AppDatabase {
                 .filter(key: id)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
-                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.steps
+                                .including(all: RecipeStepRecord.timers))
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
@@ -578,7 +584,8 @@ extension AppDatabase {
                 .filter(RecipeRecord.Columns.onlineId == onlineId)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
-                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.steps
+                                .including(all: RecipeStepRecord.timers))
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
@@ -613,7 +620,8 @@ extension AppDatabase {
                     .including(optional: RecipeRecord.category)
                     .including(all: RecipeRecord.ingredients)
                     .including(required: RecipeRecord.stepGraph
-                        .including(all: RecipeStepGraphRecord.steps)
+                        .including(all: RecipeStepGraphRecord.steps
+                                    .including(all: RecipeStepRecord.timers))
                         .including(all: RecipeStepGraphRecord.edges))
 
                 return try Recipe.fetchOne(db, request)
