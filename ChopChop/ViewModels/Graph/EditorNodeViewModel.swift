@@ -15,6 +15,7 @@ final class EditorNodeViewModel: ObservableObject {
     let node: RecipeStepNode
     let index: Int?
     let isEditable: Bool
+    let timeFormatter: DateComponentsFormatter
 
     let recipeStepTimersViewModel: RecipeStepTimersViewModel
     private var timersCancellable: AnyCancellable?
@@ -23,6 +24,10 @@ final class EditorNodeViewModel: ObservableObject {
         self.graph = graph
         self.node = node
         self.isEditable = isEditable
+
+        timeFormatter = DateComponentsFormatter()
+        timeFormatter.allowedUnits = [.hour, .minute, .second]
+        timeFormatter.zeroFormattingBehavior = .pad
 
         self.content = node.label.content
         self.timers = node.label.timers

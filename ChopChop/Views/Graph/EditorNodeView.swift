@@ -103,7 +103,7 @@ struct EditorNodeView: View {
                     List {
                         ForEach(viewModel.timers, id: \.self) { duration in
                             HStack {
-                                Text(get_HHMMSS_Display(seconds: Int(duration)))
+                                Text(viewModel.timeFormatter.string(from: duration) ?? "")
                             }
                         }
                         .listRowBackground(Color.clear)

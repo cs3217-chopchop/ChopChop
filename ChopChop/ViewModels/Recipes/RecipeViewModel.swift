@@ -9,12 +9,18 @@ final class RecipeViewModel: ObservableObject {
         recipe?.onlineId != nil
     }
 
+    let timeFormatter: DateComponentsFormatter
     private let storageManager = StorageManager()
     private var recipeCancellable: AnyCancellable?
     private let settings: UserSettings
 
     init(id: Int64, settings: UserSettings) {
         self.settings = settings
+
+        timeFormatter = DateComponentsFormatter()
+        timeFormatter.allowedUnits = [.hour, .minute, .second]
+        timeFormatter.includesApproximationPhrase = true
+        timeFormatter.unitsStyle = .abbreviated
 
         recipeCancellable = recipePublisher(id: id)
             .sink { [weak self] recipe in
