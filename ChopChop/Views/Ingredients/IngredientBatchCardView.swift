@@ -9,11 +9,6 @@ struct IngredientBatchCardView: View {
             Spacer()
             expiryDateLabel
         }
-        .padding()
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.secondary, lineWidth: 1)
-        )
     }
 
     @ViewBuilder

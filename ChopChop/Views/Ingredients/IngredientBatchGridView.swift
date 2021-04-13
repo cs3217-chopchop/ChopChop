@@ -10,10 +10,26 @@ struct IngredientBatchGridView: View {
              LazyVGrid(columns: columns) {
                 ForEach(viewModel.ingredientBatches, id: \.expiryDate) { batch in
                     let batchViewModel = IngredientBatchViewModel(batch: batch)
-                    let batchFormViewModel = IngredientBatchFormViewModel(edit: batch, in: viewModel.ingredient)
-                    NavigationLink(destination: IngredientBatchFormView(viewModel: batchFormViewModel)) {
-                        IngredientBatchCardView(viewModel: batchViewModel)
+                    let batchFormViewModel = IngredientBatchFormViewModel(edit: batch, ingredientViewModel: viewModel)
+
+                    HStack(spacing: 0) {
+                        NavigationLink(destination: IngredientBatchFormView(viewModel: batchFormViewModel)) {
+                            IngredientBatchCardView(viewModel: batchViewModel)
+                                .padding()
+                        }
+
+                        Divider()
+
+                        Button(action: { viewModel.deleteBatch(expiryDate: batch.expiryDate) }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .padding()
                     }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.secondary, lineWidth: 1)
+                    )
                 }
              }
              .padding()

@@ -4,8 +4,10 @@ struct IngredientDetailView: View {
     @ObservedObject var viewModel: IngredientViewModel
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ingredientBanner
+            toolbar
+            Divider()
             IngredientBatchGridView(viewModel: viewModel)
 
             NavigationLink(
@@ -23,12 +25,6 @@ struct IngredientDetailView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { viewModel.activeFormView = .addBatch }) {
-                    Image(systemName: "plus")
-                }
-            }
-
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { viewModel.activeFormView = .editIngredient }) {
                     Image(systemName: "square.and.pencil")
@@ -49,8 +45,7 @@ struct IngredientDetailView: View {
         }
 
         return ZStack(alignment: .bottomLeading) {
-            Image(uiImage: viewModel.ingredientImage)
-                .resizable()
+            ingredientImage
                 .scaledToFill()
                 .frame(height: 300)
                 .clipped()
@@ -67,14 +62,36 @@ struct IngredientDetailView: View {
         }
     }
 
+    @ViewBuilder
+    var ingredientImage: some View {
+        if let image = viewModel.ingredientImage {
+            Image(uiImage: image)
+                .resizable()
+        } else {
+            Image("ingredient")
+                .resizable()
+        }
+    }
+
     var toolbar: some View {
         HStack {
-            Spacer()
-            NavigationLink(destination: addBatchView) {
+            Button(action: { viewModel.activeFormView = .addBatch }) {
                 Image(systemName: "plus")
             }
-            NavigationLink(destination: editIngredientView) {
-                Image(systemName: "square.and.pencil")
+
+            Spacer()
+
+            Menu {
+                Button(action: viewModel.deleteAllBatches) {
+                    Label("Delete All Batches", systemImage: "trash")
+                }
+
+                Button(action: viewModel.deleteExpiredBatches) {
+                    Label("Delete Expired Batches", systemImage: "calendar")
+                }
+            }
+            label: {
+                Image(systemName: "trash")
             }
         }
         .padding()
@@ -87,8 +104,7 @@ struct IngredientDetailView: View {
 
     @ViewBuilder
     var addBatchView: some View {
-        if let batchFormViewModel = try? IngredientBatchFormViewModel(
-            addBatchTo: viewModel.ingredient) {
+        if let batchFormViewModel = try? IngredientBatchFormViewModel(addBatchTo: viewModel) {
             IngredientBatchFormView(viewModel: batchFormViewModel)
         }
     }

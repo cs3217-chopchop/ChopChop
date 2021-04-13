@@ -283,6 +283,10 @@ extension Ingredient {
         removeBatches(removedBatches)
     }
 
+    func removeAllBatches() {
+        batches = []
+    }
+
     private func removeBatches(_ removedBatches: [IngredientBatch]) {
         for batch in removedBatches {
             removeBatch(expiryDate: batch.expiryDate)

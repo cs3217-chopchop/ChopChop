@@ -22,7 +22,7 @@ struct IngredientBatchFormView: View {
                     .frame(width: 100)
                 Text(viewModel.selectedUnit)
                 Spacer()
-                switch viewModel.ingredient.quantityType {
+                switch viewModel.ingredientViewModel.ingredient.quantityType {
                 case .count:
                     EmptyView()
                 case .mass:
@@ -104,38 +104,5 @@ struct IngredientBatchFormView: View {
                 message: Text("An error occurred with saving the batch"),
                 dismissButton: .default(Text("OK")))
         }
-    }
-}
-
-struct IngredientBatchEditView_Previews: PreviewProvider {
-    // swiftlint:disable force_try
-    static var previews: some View {
-        IngredientBatchFormView(
-            viewModel: IngredientBatchFormViewModel(
-                edit: IngredientBatch(
-                    quantity: try! Quantity(.count, value: 3),
-                    expiryDate: Date().addingTimeInterval(100_000)),
-                in: try! Ingredient(
-                    name: "Apple",
-                    type: .count,
-                    batches: [
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date()),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(100_000)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(200_000))
-                    ])))
-    }
-}
-
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

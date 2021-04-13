@@ -116,14 +116,24 @@ struct IngredientCollectionView: View {
     }
 
     @ViewBuilder
+    func IngredientImage(_ ingredient: Ingredient) -> some View {
+        if let image = viewModel.getIngredientImage(ingredient: ingredient) {
+            Image(uiImage: image)
+                .resizable()
+        } else {
+            Image("ingredient")
+                .resizable()
+        }
+    }
+
+    @ViewBuilder
     func IngredientRow(info: IngredientInfo) -> some View {
         if let ingredient = viewModel.getIngredient(info: info) {
             NavigationLink(
                 destination: IngredientDetail(ingredient: ingredient)
             ) {
                 HStack(alignment: .top) {
-                    Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
-                        .resizable()
+                    IngredientImage(ingredient)
                         .scaledToFill()
                         .frame(width: 48, height: 48)
                         .cornerRadius(10)
@@ -147,15 +157,7 @@ struct IngredientCollectionView: View {
             NavigationLink(
                 destination: IngredientDetail(ingredient: ingredient)
             ) {
-                Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
-                    .resizable()
-                    .scaledToFill()
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    .aspectRatio(1, contentMode: .fill)
-                    .cornerRadius(10)
-                    .clipped()
-                    .overlay(gridOverlay(ingredient))
-                    .padding([.leading, .trailing], 8)
+                GridTileImage(ingredient)
             }
             .contextMenu {
                 Button(action: {
@@ -171,19 +173,27 @@ struct IngredientCollectionView: View {
         }
     }
 
-    private func gridOverlay(_ ingredient: Ingredient) -> some View {
+    @ViewBuilder
+    func GridTileImage(_ ingredient: Ingredient) -> some View {
+        IngredientImage(ingredient)
+            .scaledToFill()
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .aspectRatio(1, contentMode: .fill)
+            .cornerRadius(10)
+            .clipped()
+            .overlay(
+                GridTileOverlay(ingredient)
+            )
+            .padding([.leading, .trailing], 8)
+    }
+
+    private func GridTileOverlay(_ ingredient: Ingredient) -> some View {
         ZStack(alignment: .bottomLeading) {
             Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .clear, location: 0),
-                            .init(color: .black, location: 0.5)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundColor(.clear)
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, .black]),
+                                           startPoint: .top,
+                                           endPoint: .bottom))
                 .cornerRadius(10)
                 .opacity(0.8)
             VStack(alignment: .leading) {
@@ -192,7 +202,7 @@ struct IngredientCollectionView: View {
                     .lineLimit(1)
                 Text("Quantity: \(ingredient.totalQuantityDescription)")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
             }
             .padding()
         }
