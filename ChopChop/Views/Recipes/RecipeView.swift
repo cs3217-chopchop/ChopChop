@@ -79,7 +79,7 @@ struct RecipeView: View {
             Divider()
 
             if recipe.totalTimeTaken != 0 {
-                Text("Takes \(get_HHMMSS_Display(seconds: recipe.totalTimeTaken))")
+                Text(viewModel.timeFormatter.string(from: TimeInterval(recipe.totalTimeTaken)) ?? "")
                 Divider()
             }
 

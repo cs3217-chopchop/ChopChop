@@ -22,7 +22,7 @@ struct TimerNodeView: View {
                 }
 
                 LazyHGrid(rows: rows) {
-                    ForEach(viewModel.textWithTimers.compactMap({ $0.1 }), id: \.self) { timer in
+                    ForEach(viewModel.node.label.timers, id: \.self) { timer in
                         CountdownTimerView(viewModel: CountdownTimerViewModel(countdownTimer: timer))
                             .padding()
                     }

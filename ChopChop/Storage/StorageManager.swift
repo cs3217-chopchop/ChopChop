@@ -64,10 +64,14 @@ struct StorageManager {
 
     func deleteRecipes(ids: [Int64]) throws {
         try appDatabase.deleteRecipes(ids: ids)
+
+        ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.recipeFolderName)
     }
 
     func deleteAllRecipes() throws {
         try appDatabase.deleteAllRecipes()
+
+        ImageStore.deleteAll(inFolderNamed: StorageManager.recipeFolderName)
     }
 
     func deleteRecipeCategories(ids: [Int64]) throws {
@@ -182,19 +186,6 @@ extension StorageManager {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
-    func renameRecipeImage(from oldName: String, to newName: String) throws {
-        guard oldName != newName else {
-            return
-        }
-
-        guard let image = fetchRecipeImage(name: oldName) else {
-            return
-        }
-
-        try saveRecipeImage(image, name: newName)
-        deleteRecipeImage(name: oldName)
-    }
-
     func fetchRecipeImage(name: String) -> UIImage? {
         ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
@@ -266,7 +257,12 @@ extension StorageManager {
         let onlineId = try firebase.addRecipe(recipe: recipeRecord)
         recipe.onlineId = onlineId
         try self.saveRecipe(&recipe)
-        let recipeImage = self.fetchRecipeImage(name: recipe.name)
+
+        guard let id = recipe.id else {
+            return
+        }
+
+        let recipeImage = self.fetchRecipeImage(name: String(id))
         guard let fetchedRecipeImage = recipeImage else {
             return
         }
@@ -303,7 +299,12 @@ extension StorageManager {
             stepEdges: edgeRecords
         )
         firebase.updateRecipeDetails(recipe: recipeRecord)
-        let image = self.fetchRecipeImage(name: recipe.name)
+
+        guard let id = recipe.id else {
+            return
+        }
+
+        let image = self.fetchRecipeImage(name: String(id))
         guard let fetchedImage = image, let onlineId = recipe.onlineId else {
             return
         }
@@ -450,6 +451,11 @@ extension StorageManager {
             stepGraph: recipe.stepGraph
         )
         try self.saveRecipe(&localRecipe)
+
+        guard let id = localRecipe.id else {
+            return
+        }
+
         firebaseStorage.downloadImage(name: recipe.id) { data in
             guard let fetchedData = data else {
                 return
@@ -458,7 +464,7 @@ extension StorageManager {
             guard let fetchedImage = image else {
                 return
             }
-            try? self.saveRecipeImage(fetchedImage, name: newName)
+            try? self.saveRecipeImage(fetchedImage, name: String(id))
         }
     }
 
