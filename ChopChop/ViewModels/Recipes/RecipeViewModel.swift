@@ -9,6 +9,7 @@ final class RecipeViewModel: ObservableObject {
         recipe?.onlineId != nil
     }
 
+    let timeFormatter: DateComponentsFormatter
     private let storageManager = StorageManager()
     private var recipeCancellable: AnyCancellable?
     private let settings: UserSettings
@@ -16,12 +17,17 @@ final class RecipeViewModel: ObservableObject {
     init(id: Int64, settings: UserSettings) {
         self.settings = settings
 
+        timeFormatter = DateComponentsFormatter()
+        timeFormatter.allowedUnits = [.hour, .minute, .second]
+        timeFormatter.includesApproximationPhrase = true
+        timeFormatter.unitsStyle = .abbreviated
+
         recipeCancellable = recipePublisher(id: id)
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
-                if let recipe = recipe {
-                    self?.image = self?.storageManager.fetchRecipeImage(name: recipe.name)
+                if let recipe = recipe, let id = recipe.id {
+                    self?.image = self?.storageManager.fetchRecipeImage(name: String(id))
                 }
             }
     }
