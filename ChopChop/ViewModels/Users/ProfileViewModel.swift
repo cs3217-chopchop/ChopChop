@@ -11,10 +11,12 @@ final class ProfileViewModel: ObservableObject {
     private var userCancellable: AnyCancellable?
     private var recipesCancellable: AnyCancellable?
 
-    private var followeeIds: [String] = []
     @Published private(set) var userName = ""
     @Published private(set) var publishedRecipesCount = 0
     @Published private(set) var followeeCount = 0
+
+    private var followeeIds: [String] = []
+    @Published private(set) var isFollowedByUser = false
 
     init(userId: String, settings: UserSettings) {
         self.userId = userId
@@ -25,6 +27,7 @@ final class ProfileViewModel: ObservableObject {
         ownUserCancellable = ownUserPublisher?
             .sink { [weak self] ownUser in
                 self?.followeeIds = ownUser.followees
+                self?.isFollowedByUser = ownUser.followees.contains(userId)
             }
 
         userCancellable = userPublisher
@@ -43,17 +46,12 @@ final class ProfileViewModel: ObservableObject {
         userId == settings.userId
     }
 
-    var isFollowedByUser: Bool {
-        followeeIds.contains(userId)
-    }
-
     func addFollowee() {
         guard let ownId = settings.userId, !isOwnProfile, !isFollowedByUser else {
             return
         }
 
         storageManager.addFollowee(userId: ownId, followeeId: userId)
-        self.objectWillChange.send()
     }
 
     func removeFollowee() {
@@ -62,7 +60,6 @@ final class ProfileViewModel: ObservableObject {
         }
 
         storageManager.removeFollowee(userId: ownId, followeeId: userId)
-        self.objectWillChange.send()
     }
 
     private var ownUserPublisher: AnyPublisher<User, Never>? {
