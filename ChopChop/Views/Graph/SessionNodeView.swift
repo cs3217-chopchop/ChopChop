@@ -95,7 +95,7 @@ struct SessionNodeView_Previews: PreviewProvider {
                     node: SessionRecipeStepNode(
                         step,
                         actionTimeTracker: ActionTimeTracker())),
-                selection: SelectionHandler())
+                        selection: SelectionHandler())
         }
     }
 }

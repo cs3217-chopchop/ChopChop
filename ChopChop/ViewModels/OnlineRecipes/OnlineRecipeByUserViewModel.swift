@@ -2,19 +2,10 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    @Published var creatorName = "No name" {
-        willSet { self.objectWillChange.send() }
-    }
-
-    private var creatorCancellable: AnyCancellable?
+    @Published var isShowingRating: Bool = false
 
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
-
-        creatorCancellable = creatorPublisher()
-            .sink { [weak self] user in
-                self?.creatorName = user.name
-            }
     }
 
     var ownRating: RecipeRating? {
@@ -48,10 +39,8 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
     }
 
-    private func creatorPublisher() -> AnyPublisher<User, Never> {
-        storageManager.userByIdPublisher(userId: recipe.userId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
+    func toggleShowRating() {
+        isShowingRating.toggle()
+        self.objectWillChange.send()
     }
-
 }

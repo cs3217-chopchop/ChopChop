@@ -26,26 +26,29 @@ struct OnlineRecipeCollectionView<Content: View>: View {
                             OnlineRecipeBySelfView(
                                 viewModel: OnlineRecipeBySelfViewModel(
                                     recipe: recipe,
-                                    downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                                    downloadRecipeViewModel: downloadRecipeViewModel,
+                                    settings: settings))
                         } else {
                             OnlineRecipeByUserView(
                                 viewModel: OnlineRecipeByUserViewModel(
                                     recipe: recipe,
-                                    downloadRecipeViewModel: downloadRecipeViewModel, settings: settings))
+                                    downloadRecipeViewModel: downloadRecipeViewModel,
+                                    settings: settings))
                         }
                     }
                 }
             }
-        }.background(EmptyView().sheet(isPresented: $downloadRecipeViewModel.isShow) {
+        }.sheet(isPresented: $downloadRecipeViewModel.isShow) {
             DownloadRecipeView(viewModel: downloadRecipeViewModel)
-        })
+        }
     }
 }
 
 struct OnlineRecipeCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        OnlineRecipeCollectionView(viewModel: OnlineRecipeCollectionViewModel(publisher:
-                                                                                StorageManager().allRecipesPublisher())) {
+        OnlineRecipeCollectionView(
+            viewModel: OnlineRecipeCollectionViewModel(
+                publisher: StorageManager().allRecipesPublisher())) {
             EmptyView()
         }
     }
