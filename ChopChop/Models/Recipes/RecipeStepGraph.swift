@@ -27,8 +27,13 @@ extension RecipeStepGraph: FetchableRecord {
 
         let nodes: [Int64?: RecipeStepNode] = row.prefetchedRows["recipeSteps"]?.reduce(into: [:], { nodes, row in
             let record = RecipeStepRecord(row: row)
+            let timers: [TimeInterval] = row.prefetchedRows["recipeStepTimers"]?.map {
+                let record = RecipeStepTimerRecord(row: $0)
 
-            guard let step = try? RecipeStep(record.content) else {
+                return record.duration
+            } ?? []
+
+            guard let step = try? RecipeStep(record.content, timers: timers) else {
                 return
             }
 

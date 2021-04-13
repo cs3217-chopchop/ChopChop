@@ -69,27 +69,32 @@ struct RecipeFormView: View {
     }
 
     var imageSection: some View {
-       Section(header: Text("Image")) {
-           if viewModel.image != UIImage() {
-               Image(uiImage: viewModel.image)
-                   .resizable()
-                   .scaledToFill()
-                   .frame(height: 300)
-           }
-           HStack {
-               Button("Upload Image") {
-                   viewModel.pickerSourceType = .photoLibrary
-                   viewModel.imagePickerIsPresented = true
-               }
-               .buttonStyle(BorderlessButtonStyle())
-               Spacer()
-               Button("Take Photo") {
-                   viewModel.pickerSourceType = .camera
-                   viewModel.imagePickerIsPresented = true
-               }
-               .buttonStyle(BorderlessButtonStyle())
-           }
-       }
+        Section(header: Text("Image")) {
+            if viewModel.image != UIImage() {
+                Image(uiImage: viewModel.image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 300)
+            }
+            HStack {
+                Button("Upload Image") {
+                    viewModel.pickerSourceType = .photoLibrary
+                    viewModel.imagePickerIsPresented = true
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                Button("Remove Image") {
+                    viewModel.image = UIImage()
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                .padding(.leading)
+                Spacer()
+                Button("Take Photo") {
+                    viewModel.pickerSourceType = .camera
+                    viewModel.imagePickerIsPresented = true
+                }
+                .buttonStyle(BorderlessButtonStyle())
+            }
+        }
     }
 
     var ingredientsSection: some View {
@@ -97,24 +102,46 @@ struct RecipeFormView: View {
             ForEach(viewModel.ingredients, id: \.self) { ingredientRowViewModel in
                 HStack {
                     RecipeIngredientRowView(viewModel: ingredientRowViewModel)
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                        .onTapGesture {
-                            viewModel.ingredients.removeAll(where: { $0 === ingredientRowViewModel })
-                        }
+                    Button(action: {
+                        viewModel.ingredients.removeAll(where: { $0 === ingredientRowViewModel })
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
                 }
             }
 
-            if viewModel.isParsingIngredients {
-                TextEditor(text: $viewModel.ingredientsToBeParsed)
-                Button("Add ingredients", action: viewModel.parseIngredients)
-            } else {
-                Button("Add ingredient") {
-                    viewModel.ingredients.append(RecipeIngredientRowViewModel())
-                }
-                Button("Parse ingredients") {
-                    viewModel.isParsingIngredients = true
-                }
+            ingredientsActions
+        }
+    }
+
+    @ViewBuilder
+    var ingredientsActions: some View {
+        if viewModel.isParsingIngredients {
+            TextEditor(text: $viewModel.ingredientsToBeParsed)
+            Button("Add ingredients") {
+                viewModel.ingredientActionSheetIsPresented = true
+            }
+            .actionSheet(isPresented: $viewModel.ingredientActionSheetIsPresented) {
+                ActionSheet(title: Text("Add ingredients"),
+                            message: Text("Do you wish to overwrite or append to the current ingredients?"),
+                            buttons: [
+                                .cancel(),
+                                .destructive(Text("Overwrite")) {
+                                    viewModel.parseIngredients(shouldOverwrite: true)
+                                },
+                                .default(Text("Append")) {
+                                    viewModel.parseIngredients(shouldOverwrite: false)
+                                }
+                            ])
+            }
+        } else {
+            Button("Add ingredient") {
+                viewModel.ingredients.append(RecipeIngredientRowViewModel())
+            }
+            Button("Parse ingredients") {
+                viewModel.isParsingIngredients = true
             }
         }
     }
@@ -127,7 +154,19 @@ struct RecipeFormView: View {
 
             if viewModel.isParsingSteps {
                 TextEditor(text: $viewModel.stepsToBeParsed)
-                Button("Replace steps", action: viewModel.parseSteps)
+                Button("Replace steps") {
+                    viewModel.stepActionSheetIsPresented = true
+                }
+                .actionSheet(isPresented: $viewModel.stepActionSheetIsPresented) {
+                    ActionSheet(title: Text("Warning"),
+                                message: Text("Parsing these steps will overwrite the current steps"),
+                                buttons: [
+                                    .cancel({
+                                        viewModel.isParsingSteps = false
+                                    }),
+                                    .destructive(Text("I understand"), action: viewModel.parseSteps)
+                                ])
+                }
             } else {
                 Button("Parse steps") {
                     viewModel.isParsingSteps = true

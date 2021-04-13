@@ -43,16 +43,9 @@ import SwiftUI
     var nodeView: some View {
         ScrollView(isSelected ? [.vertical] : []) {
             VStack {
-                viewModel.textWithTimers.reduce(Text(""), {
-                    $0 + Text($1.0)
-                        .foregroundColor(viewModel.node.isCompleted
-                                            ? .secondary
-                                            : $1.1 == nil
-                                                ? .primary
-                                                : .blue)
-                })
-                .strikethrough(viewModel.node.isCompleted)
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+                Text(viewModel.node.label.step.content)
+                    .strikethrough(viewModel.node.isCompleted)
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
             }
         }
     }
