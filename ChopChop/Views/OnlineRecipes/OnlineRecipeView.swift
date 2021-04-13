@@ -6,6 +6,7 @@ struct OnlineRecipeView: View {
     var body: some View {
         VStack(spacing: 0) {
             userBar
+            Divider()
             recipeImage
             averageRating
             if viewModel.isShowingDetail {

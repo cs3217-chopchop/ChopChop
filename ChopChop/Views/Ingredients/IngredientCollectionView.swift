@@ -20,6 +20,9 @@ struct IngredientCollectionView: View {
                 expiryDatePicker
             }
 
+            Divider()
+                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
+
             if viewModel.ingredients.isEmpty {
                 NotFoundView(entityName: "Ingredients")
             } else {
@@ -69,7 +72,7 @@ struct IngredientCollectionView: View {
                 Text("Filter by expiry date")
             }
         }
-        .padding([.leading, .trailing])
+        .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
     }
 
     var expiryDatePicker: some View {
@@ -90,7 +93,6 @@ struct IngredientCollectionView: View {
             )
             .fixedSize()
         }
-        .padding([.leading, .trailing])
     }
 
     var listView: some View {
