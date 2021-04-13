@@ -25,7 +25,6 @@ struct OnlineRecipeView: View {
                 .clipShape(Circle())
             Text(viewModel.creatorName)
             Spacer()
-            downloadButton
         }
         .padding()
     }
@@ -87,6 +86,7 @@ struct OnlineRecipeView: View {
                 .frame(width: 150, height: 30)
             Text(viewModel.ratingDetails)
             Spacer()
+            downloadButton
         }.padding()
     }
 
