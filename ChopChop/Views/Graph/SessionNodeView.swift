@@ -81,11 +81,13 @@ struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
         if let step = try? RecipeStepNode(RecipeStep("#")),
            let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
-            SessionNodeView(viewModel:
-                                SessionNodeViewModel(graph: graph,
-                                                     node: SessionRecipeStepNode(step,
-                                                                                 actionTimeTracker: ActionTimeTracker())),
-                            selection: SelectionHandler())
+            SessionNodeView(
+                viewModel: SessionNodeViewModel(
+                    graph: graph,
+                    node: SessionRecipeStepNode(
+                        step,
+                        actionTimeTracker: ActionTimeTracker())),
+                        selection: SelectionHandler())
         }
     }
 }

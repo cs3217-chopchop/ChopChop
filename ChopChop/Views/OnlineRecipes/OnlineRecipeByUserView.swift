@@ -3,26 +3,18 @@ import SwiftUI
 struct OnlineRecipeByUserView: View {
     @ObservedObject var viewModel: OnlineRecipeByUserViewModel
 
+    @ViewBuilder
     var body: some View {
-        VStack {
-            Text("Created by: \(viewModel.creatorName)")
+        VStack(spacing: 0) {
             OnlineRecipeView(viewModel: viewModel)
 
-            HStack {
-                Text("Own rating:")
-                StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
-                          maxRating: RatingScore.max, onTap: viewModel.tapRating)
-                    .frame(width: 200, height: 40, alignment: .center)
-            }
+            Divider()
 
-            if viewModel.ownRating != nil {
-                Button(action: {
-                    viewModel.removeRating()
-                }) {
-                    Text("Remove rating")
-                }
+            if viewModel.isShowingRating {
+                rateRecipeBar
+            } else {
+                rateRecipeButton
             }
-
         }
         .overlay(
             RoundedRectangle(cornerRadius: 40)
@@ -32,6 +24,27 @@ struct OnlineRecipeByUserView: View {
         .padding([.horizontal], 100)
     }
 
+    var rateRecipeBar: some View {
+        HStack {
+            StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
+                      maxRating: RatingScore.max, onTap: viewModel.tapRating)
+                .frame(width: 200, height: 40, alignment: .center)
+
+            if viewModel.ownRating != nil {
+                Button("Remove Rating", action: viewModel.removeRating)
+            } else {
+                Button("Close", action: viewModel.toggleShowRating)
+            }
+        }
+        .padding()
+    }
+
+    var rateRecipeButton: some View {
+        Button(action: viewModel.toggleShowRating) {
+            Label("Rate Recipe", systemImage: "star")
+        }
+        .padding()
+    }
 }
 
 struct OnlineRecipeByUserView_Previews: PreviewProvider {
