@@ -1,9 +1,18 @@
 import Combine
 import Foundation
 
+// State machine is as follows:
+//
+// .stopped - [ play() ] -> .running
+// .stopped - [ reset() ] -> .stopped
+// .running - [ pause() ] -> .paused
+// .running - [ timeRemaining <= 0 ] -> .ended
+// .paused - [ resume() ] -> .running
+// .paused - [ reset() ] -> .stopped
+// .ended - [ reset() ] -> .stopped
 final class CountdownTimer2 {
     @Published private(set) var timeRemaining: TimeInterval
-    @Published private(set) var status: Status = .paused
+    @Published private(set) var status: Status = .stopped
 
     private let duration: TimeInterval
     private var durationRemaining: TimeInterval
@@ -25,7 +34,7 @@ final class CountdownTimer2 {
     }
 
     func start() {
-        guard status != .running else {
+        guard status == .paused || status == .stopped else {
             return
         }
 
@@ -46,7 +55,7 @@ final class CountdownTimer2 {
                 self?.timeRemaining = timeRemaining
 
                 if timeRemaining <= 0 {
-                    self?.stop()
+                    self?.status = .ended
                     return
                 }
             }
@@ -63,10 +72,18 @@ final class CountdownTimer2 {
     }
 
     func resume() {
+        guard status == .paused else {
+            return
+        }
+
         start()
     }
 
-    func stop() {
+    func reset() {
+        guard status != .running else {
+            return
+        }
+
         status = .stopped
         durationRemaining = duration
         cancellable?.cancel()
@@ -75,7 +92,7 @@ final class CountdownTimer2 {
 
 extension CountdownTimer2 {
     enum Status {
-        case running, paused, stopped
+        case stopped, running, paused, ended
     }
 }
 
