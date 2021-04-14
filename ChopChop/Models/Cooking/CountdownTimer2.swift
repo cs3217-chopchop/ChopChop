@@ -2,11 +2,10 @@ import Combine
 import Foundation
 
 final class CountdownTimer2 {
-    private let duration: TimeInterval
-    private let action: (TimeInterval) -> Void
-    private let onEnded: () -> Void
+    @Published private(set) var timeRemaining: TimeInterval
+    @Published private(set) var status: Status = .paused
 
-    private var isRunning = false
+    private let duration: TimeInterval
     private var durationRemaining: TimeInterval
     private var startDate: Date?
 
@@ -15,23 +14,22 @@ final class CountdownTimer2 {
         .merge(with: Deferred { Just(Date()) })
     private var cancellable: AnyCancellable?
 
-    init(duration: TimeInterval, action: @escaping (TimeInterval) -> Void = { _ in },
-         onEnded: @escaping () -> Void = {}) throws {
+    init(duration: TimeInterval) throws {
         guard duration > 0 else {
             throw CountdownTimer2Error.invalidDuration
         }
 
+        self.timeRemaining = duration
         self.duration = duration
-        self.action = action
-        self.onEnded = onEnded
         self.durationRemaining = duration
     }
 
     func start() {
-        guard !isRunning else {
+        guard status != .running else {
             return
         }
 
+        status = .running
         startDate = Date()
 
         // Delay until the next second if the timer starts in between seconds.
@@ -39,32 +37,27 @@ final class CountdownTimer2 {
         // use the current Date() instead of the date provided by the timer closure
         cancellable = timer.delay(for: .seconds(durationRemaining.truncatingRemainder(dividingBy: 1)),
                                   scheduler: RunLoop.main)
-            .handleEvents(receiveSubscription: { [weak self] _ in
-                self?.isRunning = true
-            }, receiveCancel: { [weak self] in
-                self?.isRunning = false
-            })
             .sink { [weak self] _ in
                 guard let durationRemaining = self?.durationRemaining, let startDate = self?.startDate else {
                     return
                 }
 
                 let timeRemaining = (durationRemaining - Date().timeIntervalSince(startDate)).rounded()
-                self?.action(timeRemaining)
+                self?.timeRemaining = timeRemaining
 
                 if timeRemaining <= 0 {
                     self?.stop()
-                    self?.onEnded()
                     return
                 }
             }
     }
 
     func pause() {
-        guard isRunning, let startDate = startDate else {
+        guard status == .running, let startDate = startDate else {
             return
         }
 
+        status = .paused
         durationRemaining -= Date().timeIntervalSince(startDate)
         cancellable?.cancel()
     }
@@ -74,8 +67,15 @@ final class CountdownTimer2 {
     }
 
     func stop() {
+        status = .stopped
         durationRemaining = duration
         cancellable?.cancel()
+    }
+}
+
+extension CountdownTimer2 {
+    enum Status {
+        case running, paused, stopped
     }
 }
 
