@@ -14,7 +14,7 @@ final class CountdownTimer2 {
     @Published private(set) var timeRemaining: TimeInterval
     @Published private(set) var status: Status = .stopped
 
-    private let duration: TimeInterval
+    let duration: TimeInterval
     private var durationRemaining: TimeInterval
     private var startDate: Date?
 
@@ -23,11 +23,7 @@ final class CountdownTimer2 {
         .merge(with: Deferred { Just(Date()) })
     private var cancellable: AnyCancellable?
 
-    init(duration: TimeInterval) throws {
-        guard duration > 0 else {
-            throw CountdownTimer2Error.invalidDuration
-        }
-
+    init(duration: TimeInterval) {
         self.timeRemaining = duration
         self.duration = duration
         self.durationRemaining = duration
@@ -85,6 +81,7 @@ final class CountdownTimer2 {
         }
 
         status = .stopped
+        timeRemaining = duration
         durationRemaining = duration
         cancellable?.cancel()
     }
@@ -93,16 +90,5 @@ final class CountdownTimer2 {
 extension CountdownTimer2 {
     enum Status {
         case stopped, running, paused, ended
-    }
-}
-
-enum CountdownTimer2Error: LocalizedError {
-    case invalidDuration
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidDuration:
-            return "Timer duration should be positive."
-        }
     }
 }
