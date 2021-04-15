@@ -47,7 +47,7 @@ class StorageManagerTests: XCTestCase {
                                     try RecipeIngredient(name: "Egg", quantity: try Quantity(from: .count(1))),
                                     try RecipeIngredient(name: "Sugar", quantity: try Quantity(from: .volume(1, unit: .tablespoon)))
                                 ],
-                                graph: try RecipeStepGraph(nodes: nodes, edges: edges)
+                                stepGraph: try RecipeStepGraph(nodes: nodes, edges: edges)
                             )
 
         try storageManager.saveRecipe(&recipe)
@@ -148,24 +148,6 @@ extension StorageManagerTests {
 
         storageManager.deleteRecipeImage(name: imageName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
-    }
-
-    func testRenameRecipeImage() {
-        let image = UIImage(imageLiteralResourceName: "apple-pie")
-
-        let oldName = "Apple Pie"
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: oldName))
-
-        let newName = "Delicious Apple Pie"
-        XCTAssertNoThrow(try storageManager.renameRecipeImage(from: oldName, to: newName))
-        XCTAssertNil(storageManager.fetchRecipeImage(name: oldName))
-
-        let renamedImage = storageManager.fetchRecipeImage(name: newName)
-        XCTAssertNotNil(renamedImage)
-        XCTAssertEqual(renamedImage?.pngData(), image.pngData())
-
-        storageManager.deleteRecipeImage(name: newName)
-        XCTAssertNil(storageManager.fetchRecipeImage(name: newName))
     }
 
     func testOverwriteExistingRecipeImage() {

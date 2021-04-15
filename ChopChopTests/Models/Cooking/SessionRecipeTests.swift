@@ -8,7 +8,7 @@ class SessionRecipeTests: XCTestCase {
         let sessionRecipe = SessionRecipe(recipe: recipe)
         XCTAssertEqual(sessionRecipe.recipe, recipe)
         XCTAssertTrue(sessionRecipe.stepGraph.nodes.isEmpty)
-        XCTAssertTrue(sessionRecipe.recipe === recipe)
+        XCTAssertTrue(sessionRecipe.recipe == recipe)
 
         let recipe2 = RecipeTests.generateSampleRecipe()
         let sessionRecipe2 = SessionRecipe(recipe: recipe2)

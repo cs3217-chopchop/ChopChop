@@ -1,6 +1,6 @@
 import Foundation
 
-struct RecipeIngredient {
+struct RecipeIngredient: Equatable {
     let name: String
     let quantity: Quantity
 

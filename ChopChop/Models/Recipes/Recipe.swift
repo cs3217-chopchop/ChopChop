@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-struct Recipe {
+struct Recipe: Equatable {
     var id: Int64?
     var onlineId: String?
     let name: String
