@@ -1,4 +1,4 @@
-class SessionRecipeStepGraph {
+final class SessionRecipeStepGraph {
     private let graph: DirectedAcyclicGraph<SessionRecipeStepNode>
     private let actionTimeTracker: ActionTimeTracker
 

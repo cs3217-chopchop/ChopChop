@@ -15,11 +15,13 @@ final class SessionRecipeStepNode: Node, ObservableObject {
     }
 }
 
-extension SessionRecipeStepNode: Hashable {
+extension SessionRecipeStepNode: Equatable {
     static func == (lhs: SessionRecipeStepNode, rhs: SessionRecipeStepNode) -> Bool {
         ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
+}
 
+extension SessionRecipeStepNode: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }
