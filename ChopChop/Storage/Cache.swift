@@ -1,7 +1,7 @@
 import Foundation
 
 // https://www.swiftbysundell.com/articles/caching-in-swift/
-final class Cache<Key: Hashable, Value> {
+final class Cache<Key: Hashable, Value: CachableEntity> {
     private let wrapped = NSCache<WrappedKey, Entry>()
 
     func insert(_ value: Value, forKey key: Key) {
@@ -31,6 +31,15 @@ final class Cache<Key: Hashable, Value> {
             insert(value, forKey: key)
         }
     }
+
+    // NOTE: No type safety here because can compare any idss
+    func isEntityCachedAndValid(id: Key, updatedDate: Date) -> Bool {
+        guard let entity = value(forKey: id), entity.updatedAt >= updatedDate else {
+            return false
+        }
+        return true
+    }
+
 }
 
 extension Cache {

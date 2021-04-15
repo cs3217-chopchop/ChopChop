@@ -4,16 +4,13 @@ import Combine
 
 struct StorageManager {
     let appDatabase: AppDatabase
-    let firebaseDatabase: FirebaseDatabase
-    let firebaseStorage: FirebaseCloudStorage
-    let firebaseCache: FirebaseCache
+    let firebaseDatabase = FirebaseDatabase()
+    let firebaseStorage = FirebaseCloudStorage()
+    let firebaseCache: FirebaseCache // TODO rename to cache
 
     init(appDatabase: AppDatabase = .shared) {
         self.appDatabase = appDatabase
-        let cache = FirebaseCache()
         firebaseCache = .shared
-        firebaseDatabase = FirebaseDatabase(cache: cache)
-        firebaseStorage = FirebaseCloudStorage(cache: cache)
     }
 
     // MARK: - Storage Manager: Create/Update
@@ -316,6 +313,8 @@ extension StorageManager {
         )
         firebaseDatabase.updateRecipe(recipe: recipeRecord)
         let image = self.fetchRecipeImage(name: recipe.name)
+
+        // TODO image??
         guard let fetchedImage = image, let onlineId = recipe.onlineId else {
             return
         }
@@ -323,13 +322,13 @@ extension StorageManager {
     }
 
     // rate a recipe
-    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping () -> Void) {
+    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating))
         firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
     }
 
     // change the rating of a recipe you have rated before
-    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping () -> Void) {
+    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.updateRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
         firebaseDatabase.updateUserRating(userId: newRating.userId,
                                           oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
@@ -337,19 +336,19 @@ extension StorageManager {
     }
 
     // this should only be called once when the app first launched
-    func createUser(user: User) throws -> String {
+    func createUser(user: UserRecord) throws -> String {
         try firebaseDatabase.addUser(user: user)
     }
 
     // follow someone
-    func addFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
+    func addFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId, completion: completion)
     }
 
     // MARK: - Storage Manager: Delete
 
     // unpublish a recipe through the online interface
-    func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping () -> Void) throws {
+    func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
         try firebaseDatabase.removeRecipe(recipeId: recipe.id, completion: completion)
         for rating in recipe.ratings {
             firebaseDatabase.removeUserRecipeRating(
@@ -358,6 +357,9 @@ extension StorageManager {
             )
         }
         firebaseStorage.deleteImage(name: recipe.id)
+
+        firebaseCache.onlineRecipeCache.removeValue(forKey: recipe.id)
+        firebaseCache.imageCache.removeValue(forKey: recipe.id)
 
         // might alr have deleted local recipe
         let fetchedRecipe = try? self.fetchRecipeByOnlineId(onlineId: recipe.id)
@@ -369,12 +371,12 @@ extension StorageManager {
     }
 
     // unfollow someone
-    func removeFollowee(userId: String, followeeId: String, completion: @escaping () -> Void) {
+    func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId, completion: completion)
     }
 
     // remove rating of a recipe you rated
-    func unrateRecipe(recipeId: String, rating: RecipeRating, completion: @escaping () -> Void) {
+    func unrateRecipe(recipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating, completion: completion)
         firebaseDatabase.removeUserRecipeRating(
             userId: rating.userId,
@@ -385,12 +387,26 @@ extension StorageManager {
     // MARK: - Storage Manager: Fetch
 
     // fetch the details of a single recipe
-    func fetchOnlineRecipe(onlineRecipeId: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
-        firebaseDatabase.fetchOnlineRecipeById(onlineRecipeId: onlineRecipeId, completion: completion)
+    func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
+        firebaseDatabase.fetchOnlineRecipeInfo(id: id) { recipeInfo, err in
+            guard let recipeInfo = recipeInfo else {
+                completion(nil, err)
+                return
+            }
+
+            firebaseDatabase.fetchOnlineRecipe(id: id) { onlineRecipeRecord, err in
+                guard let recipeRecord = onlineRecipeRecord, let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfo) else {
+                    completion(nil, err)
+                    return
+                }
+                completion(onlineRecipe, nil)
+            }
+
+        }
     }
 
     // fetch the details of a single user
-    func fetchUserInfoById(userId: String, completion: @escaping (UserInfo?, Error?) -> Void) {
+    func fetchUserInfoById(userId: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
         firebaseDatabase.fetchUserInfoById(userId: userId, completion: completion)
     }
 
@@ -400,13 +416,96 @@ extension StorageManager {
     }
 
     // Fetch details of all users in the system
-    func fetchAllUserInfos(completion: @escaping ([UserInfo], Error?) -> Void) {
+    func fetchAllUserInfos(completion: @escaping ([UserInfoRecord], Error?) -> Void) {
         firebaseDatabase.fetchAllUserInfos(completion: completion)
     }
 
     // Can be used to fetch all your own recipes or recipes of several selected users
     func fetchRecipesByUsers(userIds: [String], completion: @escaping ([OnlineRecipe], Error?) -> Void) {
-        firebaseDatabase.fetchRecipesByUsers(userIds: userIds, completion: completion)
+        firebaseDatabase.fetchRecipeInfosByUsers(userIds: userIds) { recipeInfoRecords, err in
+            if let err = err {
+                completion([], err)
+                return
+            }
+
+            // figure out which recipes actually need to fetch
+            let recipesToFetch = recipeInfoRecords.values.filter{ recipeInfo in
+                guard let id = recipeInfo.id, let updatedAt = recipeInfo.updatedAt else {
+                    return false
+                }
+                return firebaseCache.onlineRecipeCache.isEntityCachedAndValid(id: id, updatedDate: updatedAt)
+            }
+
+            let recipeIdsToFetch = recipesToFetch.compactMap{$0.id}
+
+            firebaseDatabase.fetchOnlineRecipes(ids: recipeIdsToFetch) { onlineRecipeRecords, _ in
+                for onlineRecipeRecord in onlineRecipeRecords {
+                    guard let id = onlineRecipeRecord.id else {
+                        assertionFailure("Should have an id")
+                        continue
+                    }
+                    guard let recipeInfoRecord = recipeInfoRecords[id], let onlineRecipe = try? OnlineRecipe(from: onlineRecipeRecord, info: recipeInfoRecord) else {
+                        assertionFailure("Should have an id")
+                        continue
+                    }
+                    firebaseCache.onlineRecipeCache.insert(onlineRecipe, forKey: id)
+                }
+
+                let recipes = recipeInfoRecords.keys.compactMap { firebaseCache.onlineRecipeCache[$0]
+                }
+                completion(recipes, nil)
+
+            }
+
+        }
+
+//
+//        recipeInfoRecords.forEach { allRecipeInfoRecords.dictionary[$0.id] = $0 }
+//
+//        for recipeInfoRecord in recipeInfoRecords {
+//            guard let recipeInfoId = recipeInfoRecord.id else {
+//                assertionFailure("Should have an id")
+//                continue
+//            }
+//            if shouldFetchOnlineRecipe(recipeInfoRecord: recipeInfoRecord) {
+//                recipeIdsToFetch.append(recipeInfoId)
+//            }
+//        }
+//
+//        guard !recipeIdsToFetch.isEmpty else {
+//            let recipes = allRecipeInfoRecords.dictionary.compactMap { cache.onlineRecipeCache[$0.value.id ?? ""] }
+//            completion(recipes, nil)
+//            return
+//        }
+//
+//        // to update cache with fetched recipes
+//        let totalRecipeCount = recipeIdsToFetch.count
+//        let queryLimit = QueryLimiter(max: totalRecipeCount)
+//        while queryLimit.hasNext {
+//            let range = [] + recipeIdsToFetch[queryLimit.current..<queryLimit.next()]
+//            db.collection(recipePath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+//                guard let documents = snapshot?.documents else {
+//                    completion([], err)
+//                    assertionFailure("Should get some documents")
+//                    return
+//                }
+//
+//                for document in documents {
+//                    guard let recipeRecord = try? document.data(as: OnlineRecipeRecord.self),
+//                          let recipeInfoRecord = allRecipeInfoRecords.dictionary[recipeRecord.id],
+//                          let recipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord)
+//                          else {
+//                        completion([], err)
+//                        continue
+//                    }
+//                    cache.onlineRecipeCache.insert(recipe, forKey: recipe.id)
+//                    print(recipe.name)
+//                }
+//
+//                let recipes = allRecipeInfoRecords.dictionary.compactMap { cache.onlineRecipeCache[$0.value.id ?? ""] }
+//                completion(recipes, nil)
+//            }
+//        }
     }
 
     // download an online recipe to local

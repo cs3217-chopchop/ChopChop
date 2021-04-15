@@ -1,17 +1,16 @@
 import Foundation
-import FirebaseFirestoreSwift
 
-class OnlineRecipe: Identifiable {
-    private(set) var id: String
-    private(set) var userId: String
+struct OnlineRecipe: Identifiable, CachableEntity {
+    let id: String
+    let userId: String
 
-    private(set) var name: String
-    private(set) var servings: Double
-    private(set) var cuisine: String?
-    private(set) var difficulty: Difficulty?
-    private(set) var stepGraph: RecipeStepGraph
-    private(set) var ingredients: [RecipeIngredient]
-    private(set) var ratings: [RecipeRating]
+    let name: String
+    let servings: Double
+    let cuisine: String?
+    let difficulty: Difficulty?
+    let stepGraph: RecipeStepGraph
+    let ingredients: [RecipeIngredient]
+    let ratings: [RecipeRating]
     let createdAt: Date
     let updatedAt: Date
 
@@ -42,7 +41,7 @@ class OnlineRecipe: Identifiable {
 }
 
 extension OnlineRecipe {
-    convenience init(from record: OnlineRecipeRecord, info: OnlineRecipeInfoRecord) throws {
+    init(from record: OnlineRecipeRecord, info: OnlineRecipeInfoRecord) throws {
         guard let id = record.id else {
             throw OnlineRecipeRecordError.missingId
         }

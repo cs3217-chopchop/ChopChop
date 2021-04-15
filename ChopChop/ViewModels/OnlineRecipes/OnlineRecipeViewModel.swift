@@ -43,7 +43,7 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     func reload() {
-        storageManager.fetchOnlineRecipe(onlineRecipeId: recipe.id) { onlineRecipe, _ in
+        storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
             guard let onlineRecipe = onlineRecipe else {
                 return
             }

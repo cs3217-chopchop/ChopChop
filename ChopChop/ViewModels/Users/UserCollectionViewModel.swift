@@ -4,8 +4,8 @@ import UIKit
 
 final class UserCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()
-    @Published private(set) var nonFollowees: [UserInfo] = []
-    @Published private(set) var followees: [UserInfo] = []
+    @Published private(set) var nonFollowees: [UserInfoRecord] = []
+    @Published private(set) var followees: [UserInfoRecord] = []
 
     private let settings: UserSettings
 
@@ -21,12 +21,12 @@ final class UserCollectionViewModel: ObservableObject {
         }
     }
 
-    private func isNonFollowee(user: UserInfo) -> Bool {
+    private func isNonFollowee(user: UserInfoRecord) -> Bool {
         !(settings.user?.followees.contains(where: { followee in followee == user.id }) ?? false) &&
             user.id != settings.userId
     }
 
-    private func isFollowee(user: UserInfo) -> Bool {
+    private func isFollowee(user: UserInfoRecord) -> Bool {
         (settings.user?.followees.contains(where: { followee in followee == user.id }) ?? false) &&
             user.id != settings.userId
     }
