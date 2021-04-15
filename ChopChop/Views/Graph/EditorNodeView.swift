@@ -29,8 +29,6 @@ struct EditorNodeView: View {
                     TextEditor(text: $viewModel.content)
                         .background(Color.primary.opacity(0.1))
                         .transition(.scale)
-                        // Prevent taps from propogating
-                        .onTapGesture {}
                 } else {
                     ScrollView(isSelected ? [.vertical] : []) {
                         Text(viewModel.node.label.content.isEmpty
@@ -55,7 +53,7 @@ struct EditorNodeView: View {
     }
 
     var detailView: some View {
-        HStack {
+        HStack(spacing: 16) {
             if viewModel.isEditing {
                 Button(action: viewModel.saveAction) {
                     Text("Save")
@@ -148,7 +146,7 @@ struct EditorNodeView: View {
 
 struct EditorNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep("#") {
+        if let step = try? RecipeStep("Preview") {
             EditorNodeView(viewModel: EditorNodeViewModel(graph: RecipeStepGraph(),
                                                           node: RecipeStepNode(step)),
                            selection: SelectionHandler())

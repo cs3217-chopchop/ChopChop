@@ -64,7 +64,7 @@ struct RecipeStepTimersView: View {
 
 struct RecipeStepTimersView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep("#") {
+        if let step = try? RecipeStep("Preview") {
             RecipeStepTimersView(viewModel: RecipeStepTimersViewModel(node: RecipeStepNode(step), timers: []))
         }
     }

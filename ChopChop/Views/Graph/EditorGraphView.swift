@@ -86,7 +86,7 @@ struct EditorGraphView: View {
                             + (nodeDragOffset?.id == node.id ? nodeDragOffset?.offset ?? .zero : .zero))
                 .onTapGesture {
                     withAnimation {
-                        selection.toggleNode(node)
+                        selection.selectNode(node)
                     }
                 }
                 .gesture(getNodeGesture(node))

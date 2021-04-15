@@ -76,7 +76,7 @@ import SwiftUI
                 .position((node.position ?? .zero) + viewModel.portalPosition + portalDragOffset)
                 .onTapGesture {
                     withAnimation {
-                        selection.toggleNode(node)
+                        selection.selectNode(node)
                     }
                 }
         }

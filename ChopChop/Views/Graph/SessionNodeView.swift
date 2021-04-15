@@ -51,7 +51,7 @@ import SwiftUI
     }
 
     var detailView: some View {
-        HStack {
+        HStack(spacing: 16) {
             Button(action: {
                 withAnimation {
                     viewModel.graph.toggleStep(viewModel.node)
@@ -80,7 +80,7 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep("#")),
+        if let step = try? RecipeStepNode(RecipeStep("Preview")),
            let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionNodeView(
                 viewModel: SessionNodeViewModel(

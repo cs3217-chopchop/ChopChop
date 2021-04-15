@@ -7,10 +7,6 @@ struct MainView: View {
     @State var editMode = EditMode.inactive
     @EnvironmentObject var settings: UserSettings
 
-    init(viewModel: MainViewModel) {
-        self.viewModel = viewModel
-    }
-
     var body: some View {
         Sidebar(viewModel: SidebarViewModel(settings: settings), editMode: $editMode)
         RecipeCollectionView(viewModel: RecipeCollectionViewModel(title: "All Recipes",

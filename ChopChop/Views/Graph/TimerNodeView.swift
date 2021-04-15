@@ -36,7 +36,7 @@ struct TimerNodeView: View {
 
  struct TimerNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep("#") {
+        if let step = try? RecipeStep("Preview") {
             TimerNodeView(viewModel:
                             TimerNodeViewModel(graph: SessionRecipeStepGraph(),
                                                node: SessionRecipeStepNode(RecipeStepNode(step),
