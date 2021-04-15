@@ -568,6 +568,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(key: id)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps
@@ -582,6 +583,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.onlineId == onlineId)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps

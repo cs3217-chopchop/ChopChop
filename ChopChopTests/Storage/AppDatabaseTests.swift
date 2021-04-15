@@ -1061,13 +1061,12 @@ class AppDatabaseTests: XCTestCase {
         let graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
         let recipe = try Recipe(
+            id: recipeRecord.id,
             name: recipeRecord.name,
+            category: RecipeCategory(id: categoryRecord.id, name: categoryRecord.name),
             ingredients: ingredientRecords
                 .compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) },
-            graph: graph)
-
-        recipe.id = recipeRecord.id
-        recipe.recipeCategoryId = categoryRecord.id
+            stepGraph: graph)
 
         guard let id = recipeRecord.id else {
             XCTFail("Recipes should have a non-nil ID after insertion into database")
@@ -1078,8 +1077,7 @@ class AppDatabaseTests: XCTestCase {
 
         XCTAssertEqual(fetchedRecipe, recipe)
         let fetchedGraph = fetchedRecipe?.stepGraph
-        // TODO: Fix
-//        XCTAssertEqual(fetchedGraph, recipe.stepGraph)
+        XCTAssertEqual(fetchedGraph, recipe.stepGraph)
     }
 
     func testFetchIngredient() throws {
@@ -1144,7 +1142,7 @@ class AppDatabaseTests: XCTestCase {
             try recipeRecord.insert(db)
         }
 
-        let recipe = try Recipe(name: "Pancakes", onlineId: "1", servings: 1)
+        let recipe = try Recipe(onlineId: "1", name: "Pancakes", servings: 1)
         let fetchedRecipe = try appDatabase.fetchRecipe(onlineId: "1")
 
         XCTAssertEqual(recipe, fetchedRecipe)
