@@ -6,7 +6,7 @@ final class SessionRecipeStepNode: Node {
     var label: SessionRecipeStep
     var position: CGPoint?
 
-    var isCompletable = true
+    var isCompletable = false
     var isCompleted = false
 
     init(node: RecipeStepNode) {

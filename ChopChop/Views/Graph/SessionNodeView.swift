@@ -73,6 +73,16 @@ import SwiftUI
             }
 
             Spacer()
+
+            if !viewModel.node.label.timers.isEmpty {
+                Button(action: {
+                    withAnimation {
+                        viewModel.proxy?.scrollTo(viewModel.node, anchor: .top)
+                    }
+                }) {
+                    Image(systemName: "timer")
+                }
+            }
         }
         .padding(.top, 6)
     }

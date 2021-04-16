@@ -41,6 +41,7 @@ final class SessionRecipeStepGraph {
         }
 
         self.graph = try DirectedAcyclicGraph(nodes: Array(sessionNodes.values), edges: sessionEdges)
+        updateNodes()
     }
 
     func toggleNode(_ node: SessionRecipeStepNode) {

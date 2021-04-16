@@ -4,17 +4,19 @@ struct SessionRecipeView: View {
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.recipe.stepGraph))
+        ScrollViewReader { proxy in
+            ZStack(alignment: .trailing) {
+                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.recipe.stepGraph, proxy: proxy))
 
-            if viewModel.showDetailsPanel {
-                VStack(spacing: 24) {
-                    ingredientsPanel
-                    timersPanel
+                if viewModel.showDetailsPanel {
+                    VStack(spacing: 24) {
+                        ingredientsPanel
+                        timersPanel
+                    }
+                    .frame(width: 250)
+                    .padding()
+                    .transition(.move(edge: .trailing))
                 }
-                .frame(width: 250)
-                .padding()
-                .transition(.move(edge: .trailing))
             }
         }
         .toolbar {
@@ -59,6 +61,7 @@ struct SessionRecipeView: View {
                     ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
                         TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
                                                                     node: node))
+                            .id(node)
                     }
                 }
                 .frame(minWidth: 0, maxWidth: .infinity)
