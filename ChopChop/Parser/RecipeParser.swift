@@ -1,6 +1,9 @@
 import Foundation
 import NaturalLanguage
 
+/**
+ Represents a parser that parses text into recipe instructions, timers, ingredients and their quantities.
+ */
 struct RecipeParser {
     // matches 1., 1), Step 1., Step 1)
     static let stepsIndexRegex = "(Step\\s)?[1-9][0-9]*(\\.|\\))\\s"
@@ -21,8 +24,9 @@ struct RecipeParser {
     static let ingredientConnector = "of"
 
     /**
-     Parses a chunk of instructions into an array of steps. Parsing is done differently depending on
-     whether the instructions are already numbered.
+     Parses instruction text and returns an array of step strings.
+
+     - Remark: Parsing is done differently depending on whether the instructions are already numbered.
      */
     static func parseInstructions(instructions: String) -> [String] {
         let trimmedInstructions = instructions.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -74,44 +78,50 @@ struct RecipeParser {
             .map({ String(paragraph[$0]).trimmingCharacters(in: .whitespaces) })
     }
 
-    static func parseIngredientString(ingredientString: String) -> [String: Quantity] {
-        let trimmedIngredient = ingredientString.trimmingCharacters(in: .whitespacesAndNewlines)
+    /**
+     Parses a text containing ingredients and their quantities, and returns a map of the name of each ingredient to its quantity.
+     */
+    static func parseIngredientText(ingredientText: String) -> [String: Quantity] {
+        let trimmedIngredient = ingredientText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedIngredient.isEmpty {
             return [:]
         }
         var ingredientList = [String]()
         if trimmedIngredient.contains(where: \.isNewline) {
-            ingredientList = splitByNewLine(text: ingredientString)
+            ingredientList = splitByNewLine(text: ingredientText)
         } else {
-            ingredientList = splitBySentence(paragraph: ingredientString)
+            ingredientList = splitBySentence(paragraph: ingredientText)
         }
 
         return parseIngredientList(ingredientList: ingredientList)
     }
+
     /**
-     Parse a list of ingredient description into a dictionary of ingredient name and its corresponding quantity.
+     Parses a list of ingredient descriptions and returns a map of the name of each ingredient to its quantity.
      */
     static func parseIngredientList(ingredientList: [String]) -> [String: Quantity] {
 
         var ingredientDict = [String: Quantity]()
 
-        ingredientList.map({ parseIngredient(ingredientText: $0) })
+        ingredientList.map({ parseIngredient(ingredientString: $0) })
             .forEach({ ingredient in
                 ingredientDict[ingredient.name] = ingredient.quantity
             })
         return ingredientDict
     }
+
     /**
-     Parse a ingredient description into a pair of ingredient name and its corresponding quantity
+     Parses an ingredient string into a pair containing its name and quantity.
      */
-    static func parseIngredient(ingredientText: String) -> (name: String, quantity: Quantity) {
+    private static func parseIngredient(ingredientString: String) -> (name: String, quantity: Quantity) {
         // checks if the text has both a number and a fraction, e.g. 1 1/2 gram of potato
-        var parseResult = matchNumberFractionOptionalUnitFormat(text: ingredientText)
+        var parseResult = matchMixedFractionFormat(text: ingredientString)
         if let ingredients = parseResult {
             return ingredients
         }
+
         // checks if the text has either a number or a fraction, e.g. 1 egg, 1/2 lemon
-        parseResult = matchNumberOrFractionOptionalUnitFormat(text: ingredientText)
+        parseResult = matchNumberOrFractionFormat(text: ingredientString)
         if let ingredients = parseResult {
             return ingredients
         }
@@ -119,26 +129,26 @@ struct RecipeParser {
         // case where there is no numerical information about the ingredient, e.g. salt
         do {
             let count = try Quantity(.count, value: 0)
-            return (ingredientText, count)
+            return (ingredientString, count)
         } catch {
             fatalError("Invalid count")
         }
     }
 
-    private static func generateNumberFractionOptionalUnitRegex() -> NSRegularExpression {
+    private static var mixedFractionRegex: NSRegularExpression {
         let pattern = groupWithName(pattern: integer, name: "number")
             + whitespace + groupWithName(pattern: fraction, name: "fraction")
             + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
             + whitespace + groupWithName(pattern: ".*", name: "ingredient")
+
         return NSRegularExpression(pattern)
     }
 
-    private static func matchNumberFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
-
-        let regex = generateNumberFractionOptionalUnitRegex()
-        guard let result =
-            regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
-
+    private static func matchMixedFractionFormat(text: String) -> (name: String, quantity: Quantity)? {
+        guard let result = mixedFractionRegex.firstMatch(
+                in: text,
+                options: [],
+                range: NSRange(location: 0, length: text.utf16.count)) else {
             return nil
         }
 
@@ -151,16 +161,13 @@ struct RecipeParser {
         }
 
         let value = number + parseFraction(fraction: String(text[fractionRange]))
+
         var quantity: Quantity?
         if let unitRange = Range(result.range(withName: "unit"), in: text) {
             let unit = text[unitRange]
             quantity = QuantityParser.parseQuantity(value: value, unit: String(unit))
         } else {
-            do {
-                quantity = try Quantity(.count, value: value)
-            } catch {
-                fatalError("Invalid quantity.")
-            }
+            quantity = try? Quantity(.count, value: value)
         }
 
         let ingredient = extractIngredient(text: text, range: ingredientRange)
@@ -182,7 +189,7 @@ struct RecipeParser {
         return ingredient
     }
 
-    private static func generateNumberOrFractionOptionalUnitRegex() -> NSRegularExpression {
+    private static var numberOrFractionRegex: NSRegularExpression {
         let pattern = groupWithName(pattern: decimalOrFraction, name: "numeral")
             + optionalWhiteSpace + groupWithName(pattern: units, name: "unit", isOptional: true)
             + whitespace + groupWithName(pattern: ".*", name: "ingredient")
@@ -190,12 +197,11 @@ struct RecipeParser {
         return NSRegularExpression(pattern)
     }
 
-    private static func matchNumberOrFractionOptionalUnitFormat(text: String) -> (name: String, quantity: Quantity)? {
-
-        let regex = generateNumberOrFractionOptionalUnitRegex()
-        guard let result =
-            regex.firstMatch(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count)) else {
-
+    private static func matchNumberOrFractionFormat(text: String) -> (name: String, quantity: Quantity)? {
+        guard let result = numberOrFractionRegex.firstMatch(
+                in: text,
+                options: [],
+                range: NSRange(location: 0, length: text.utf16.count)) else {
             return nil
         }
 
@@ -219,11 +225,7 @@ struct RecipeParser {
             let unit = text[unitRange]
             quantity = QuantityParser.parseQuantity(value: value, unit: String(unit))
         } else {
-            do {
-                quantity = try Quantity(.count, value: value)
-            } catch {
-                fatalError("Invalid quantity")
-            }
+            quantity = try? Quantity(.count, value: value)
         }
 
         let ingredient = extractIngredient(text: text, range: ingredientRange)

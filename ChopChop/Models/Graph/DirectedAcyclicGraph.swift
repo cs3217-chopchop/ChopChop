@@ -7,7 +7,6 @@
  - There are no cycles in the graph.
  */
 class DirectedAcyclicGraph<N: Node>: Graph<N> {
-
     /**
      Initialises an empty DAG.
      */

@@ -1,3 +1,6 @@
+/**
+ Represents a parser that parses text into quantities.
+ */
 struct QuantityParser {
     static let volumeWordMap: [String: VolumeUnit] = [
         "tablespoon": .tablespoon,
@@ -39,25 +42,16 @@ struct QuantityParser {
         "lb": .pound
     ]
 
-    static func parseQuantity( value: Double, unit: String) -> Quantity {
+    /**
+     Parses the given unit string and returns a quantity with the given value and unit.
+     */
+    static func parseQuantity(value: Double, unit: String) -> Quantity? {
         if let unit = volumeWordMap[unit.lowercased()] {
-            do {
-                return try Quantity(.volume(unit), value: value)
-            } catch {
-                fatalError("Invalid quantity")
-            }
+            return try? Quantity(.volume(unit), value: value)
         } else if let unit = massWordMap[unit.lowercased()] {
-            do {
-                return try Quantity(.mass(unit), value: value)
-            } catch {
-                fatalError("Invalid quantity")
-            }
+            return try? Quantity(.mass(unit), value: value)
         } else {
-            do {
-                return try Quantity(.count, value: value)
-            } catch {
-                fatalError("Invalid quantity")
-            }
+            return try? Quantity(.count, value: value)
         }
     }
 }

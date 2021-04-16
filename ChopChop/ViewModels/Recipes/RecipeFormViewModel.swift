@@ -76,7 +76,7 @@ class RecipeFormViewModel: ObservableObject {
     }
 
     func parseIngredients(shouldOverwrite: Bool = false) {
-        let parsedIngredients = RecipeParser.parseIngredientString(ingredientString: ingredientsToBeParsed)
+        let parsedIngredients = RecipeParser.parseIngredientText(ingredientText: ingredientsToBeParsed)
             .map({
                 RecipeIngredientRowViewModel(
                     name: $0.key,
