@@ -50,7 +50,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
 
             guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
                 ingredientViewModel.updateError(msg: """
-                    Not a valid unit. Change to \(quantityUsed.baseType == .count ? "mass/volume" : "count" )
+                    Not a valid unit. Change to \(quantityUsed.type == .count ? "mass/volume" : "count" )
                     """)
                 continue
             }

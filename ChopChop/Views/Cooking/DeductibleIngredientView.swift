@@ -16,7 +16,7 @@ struct DeductibleIngredientView: View {
                     .border(Color.primary, width: 1)
                     .multilineTextAlignment(.center)
                 Menu(viewModel.unit.description) {
-                    ForEach(QuantityType.allCases, id: \.description) { type in
+                    ForEach(QuantityUnit.allCases, id: \.description) { type in
                         Button(action: {
                             viewModel.updateUnit(unit: type)
                         }) {

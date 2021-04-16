@@ -3,13 +3,16 @@ import Combine
 import Foundation
 
 /**
- Represents a collection of ingredients grouped under a category.
+ Represents a collection of ingredients.
  
- Invariants:
+ Representation Invariants:
  - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
 struct IngredientCategory: Identifiable, Hashable {
     var id: Int64?
+
+    // MARK: - Specification Fields
+    /// The name of the category. Cannot be empty.
     private(set) var name: String
 
     init(name: String, id: Int64? = nil) throws {

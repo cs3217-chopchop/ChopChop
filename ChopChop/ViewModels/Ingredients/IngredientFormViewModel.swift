@@ -5,7 +5,7 @@ class IngredientFormViewModel: ObservableObject {
     private(set) var ingredient: Ingredient?
     let isEdit: Bool
 
-    @Published var selectedType: BaseQuantityType
+    @Published var selectedType: QuantityType
     @Published var inputName: String
     @Published var selectedCategory: IngredientCategory?
     @Published var image: UIImage

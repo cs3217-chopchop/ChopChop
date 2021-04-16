@@ -12,12 +12,12 @@ import GRDB
 class Ingredient: FetchableRecord, ObservableObject {
     var id: Int64?
     var ingredientCategoryId: Int64?
-    let quantityType: BaseQuantityType
+    let quantityType: QuantityType
 
     @Published private(set) var name: String
     @Published private(set) var batches: [IngredientBatch]
 
-    init(name: String, type: BaseQuantityType, batches: [IngredientBatch] = []) throws {
+    init(name: String, type: QuantityType, batches: [IngredientBatch] = []) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
@@ -27,7 +27,7 @@ class Ingredient: FetchableRecord, ObservableObject {
         self.quantityType = type
         self.name = trimmedName
 
-        for batch in batches where batch.quantity.baseType != type {
+        for batch in batches where batch.quantity.type != type {
             throw QuantityError.incompatibleTypes
         }
 
@@ -119,7 +119,7 @@ extension Ingredient {
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     func add(quantity: Quantity, expiryDate: Date?) throws {
-        guard self.quantityType == quantity.baseType else {
+        guard self.quantityType == quantity.type else {
             throw QuantityError.incompatibleTypes
         }
 
@@ -207,7 +207,7 @@ extension Ingredient {
     }
 
     func contains(quantity: Quantity) throws -> Bool {
-        switch (quantityType, quantity.baseType) {
+        switch (quantityType, quantity.type) {
         case (.count, .count), (.mass, .mass), (.mass, .volume), (.volume, .mass), (.volume, .volume):
             return quantity.baseValue <= totalUsableQuantity
         default:

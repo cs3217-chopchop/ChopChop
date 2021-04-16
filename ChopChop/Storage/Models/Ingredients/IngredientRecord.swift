@@ -5,7 +5,7 @@ struct IngredientRecord: Equatable {
     var id: Int64?
     var ingredientCategoryId: Int64?
     var name: String
-    var quantityType: BaseQuantityType
+    var quantityType: QuantityType
 }
 
 extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {

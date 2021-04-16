@@ -17,7 +17,7 @@ class IngredientBatchFormViewModel: ObservableObject {
         self.ingredient = ingredient
         self.isEdit = true
 
-        self.selectedUnit = batch.quantity.type.description
+        self.selectedUnit = batch.quantity.unit.description
         self.inputQuantity = String(batch.quantity.value)
 
         if let expiryDate = batch.expiryDate {
@@ -47,7 +47,7 @@ class IngredientBatchFormViewModel: ObservableObject {
         self.ingredient = ingredient
         self.isEdit = false
 
-        self.selectedUnit = batch.quantity.type.description
+        self.selectedUnit = batch.quantity.unit.description
         self.inputQuantity = String(batch.quantity.value)
         self.expiryDateEnabled = false
         self.selectedDate = Date()

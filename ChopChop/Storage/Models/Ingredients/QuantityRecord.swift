@@ -11,7 +11,7 @@ extension QuantityRecord: Codable {
         case count, mass, volume, unit
     }
 
-    var type: BaseQuantityType {
+    var type: QuantityType {
         switch self {
         case .count:
             return .count

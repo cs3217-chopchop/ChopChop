@@ -1,9 +1,16 @@
+/**
+ Represents a unit of the mass type.
+ 
+ - Important: The cases are ordered in ascending size within each group (metric/imperial)
+ */
 enum MassUnit: Int, CaseIterable {
     static let baseUnit: MassUnit = .kilogram
 
+    /// Imperial units
     case ounce
     case pound
 
+    /// Metric units
     case gram
     case kilogram
 
@@ -16,6 +23,7 @@ enum MassUnit: Int, CaseIterable {
         }
     }
 
+    /// The conversion ratio from the unit to kilogram.
     var ratioToKilogram: Double {
         switch self {
         case .ounce:
@@ -29,12 +37,28 @@ enum MassUnit: Int, CaseIterable {
         }
     }
 
+    /**
+     Converts the given value represented in `currentUnit` to the equivalent value represented in `newUnit`
+
+     - Parameters:
+        - `value`: The value to be converted.
+        - `currentUnit`: The current unit in which the given value is expressed.
+        - `newUnit`: The unit to which the given value is to be converted.
+     */
     static func convert(_ value: Double, from currentUnit: MassUnit, to newUnit: MassUnit) -> Double {
         (value * currentUnit.ratioToKilogram) / newUnit.ratioToKilogram
     }
 
+    /**
+     Converts the given value represented in `massUnit` to the equivalent value represented in `volumeUnit`
+
+     - Parameters:
+        - `value`: The value to be converted.
+        - `massUnit`: The mass unit in which the given value is expressed.
+        - `volumeUnit`: The volume unit to which the given value is to be converted.
+     */
     static func convertToVolume(_ value: Double, from massUnit: MassUnit, to volumeUnit: VolumeUnit) -> Double {
-        (value * massUnit.ratioToKilogram * QuantityType.massToVolumeBaseRatio) / volumeUnit.ratioToLiter
+        (value * massUnit.ratioToKilogram * QuantityUnit.massToVolumeBaseRatio) / volumeUnit.ratioToLiter
     }
 }
 

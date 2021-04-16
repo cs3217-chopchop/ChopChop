@@ -51,7 +51,7 @@ class RecipeFormViewModel: ObservableObject {
         self.ingredients = recipe?.ingredients.map {
             RecipeIngredientRowViewModel(name: $0.name,
                                          quantity: $0.quantity.value.description,
-                                         type: $0.quantity.type)
+                                         unit: $0.quantity.unit)
 
         } ?? []
         self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
@@ -81,7 +81,7 @@ class RecipeFormViewModel: ObservableObject {
                 RecipeIngredientRowViewModel(
                     name: $0.key,
                     quantity: $0.value.value.description,
-                    type: $0.value.type
+                    unit: $0.value.unit
                 )
             })
 

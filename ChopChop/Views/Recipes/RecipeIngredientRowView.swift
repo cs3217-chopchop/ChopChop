@@ -10,8 +10,8 @@ struct RecipeIngredientRowView: View {
                 TextField("Quantity", text: Binding(get: { viewModel.quantity },
                                                     set: viewModel.setQuantity))
                     .keyboardType(.numberPad)
-                Picker(viewModel.type.description, selection: $viewModel.type) {
-                    ForEach(QuantityType.allCases, id: \.self) {
+                Picker(viewModel.unit.description, selection: $viewModel.unit) {
+                    ForEach(QuantityUnit.allCases, id: \.self) {
                         Text($0.description)
                     }
                 }

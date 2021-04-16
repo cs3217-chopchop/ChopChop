@@ -143,7 +143,7 @@ struct AppDatabase {
                     .collate(.localizedStandardCompare)
                 t.column("quantityType", .text)
                     .notNull()
-                    .check { BaseQuantityType.allCases.map { $0.rawValue }.contains($0) }
+                    .check { QuantityType.allCases.map { $0.rawValue }.contains($0) }
             }
         }
 

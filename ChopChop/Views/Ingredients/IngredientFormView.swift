@@ -26,7 +26,7 @@ struct IngredientFormView: View {
                 Text(viewModel.selectedType.description)
                 Spacer()
                 Picker("Quantity Type", selection: $viewModel.selectedType) {
-                    ForEach(BaseQuantityType.allCases, id: \.self) {
+                    ForEach(QuantityType.allCases, id: \.self) {
                         Text($0.description)
                     }
                 }
