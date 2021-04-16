@@ -14,7 +14,7 @@ struct SessionRecipeView: View {
                 }
                 .frame(width: 250)
                 .padding()
-                .transition(AnyTransition.move(edge: .trailing))
+                .transition(.move(edge: .trailing))
             }
         }
         .toolbar {
@@ -37,13 +37,16 @@ struct SessionRecipeView: View {
                 Text("Ingredients")
                     .font(.headline)
                 ScrollView {
-                    ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
-                        Text(ingredient.description)
+                    VStack {
+                        ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
+                            Text(ingredient.description)
+                                .multilineTextAlignment(.center)
+                        }
                     }
+                    .frame(minWidth: 0, maxWidth: .infinity)
                 }
             }
             .padding()
-            .frame(minWidth: 0, maxWidth: .infinity)
             .background(panelBackground)
         }
     }
@@ -51,18 +54,16 @@ struct SessionRecipeView: View {
     @ViewBuilder
     var timersPanel: some View {
         if viewModel.recipe.stepGraph.hasTimers {
-            VStack {
-                Text("Timers")
-                    .font(.headline)
-                ScrollView {
+            ScrollView {
+                VStack {
                     ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
                         TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
                                                                     node: node))
                     }
                 }
+                .frame(minWidth: 0, maxWidth: .infinity)
             }
             .padding()
-            .frame(minWidth: 0, maxWidth: .infinity)
             .background(panelBackground)
         }
     }

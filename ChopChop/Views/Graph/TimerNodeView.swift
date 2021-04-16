@@ -9,11 +9,11 @@ struct TimerNodeView: View {
                 if let index = viewModel.index {
                     Text("Step \(index + 1)")
                         .font(.headline)
+                        .padding([.top, .bottom], 8)
                 }
 
                 ForEach(viewModel.node.label.timers, id: \.self) { timer in
                     CountdownTimerView(viewModel: CountdownTimerViewModel(timer: timer))
-                        .padding()
                 }
             }
         } else {
