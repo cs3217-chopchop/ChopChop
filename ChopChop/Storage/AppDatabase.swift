@@ -516,7 +516,7 @@ extension AppDatabase {
 extension AppDatabase {
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeRecord.deleteAll(db, keys: ids)
+            _ = try RecipeRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -528,7 +528,7 @@ extension AppDatabase {
 
     func deleteRecipeCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeCategoryRecord.deleteAll(db, keys: ids)
+            _ = try RecipeCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -540,7 +540,7 @@ extension AppDatabase {
 
     func deleteIngredients(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientRecord.deleteAll(db, keys: ids)
+            _ = try IngredientRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -552,7 +552,7 @@ extension AppDatabase {
 
     func deleteIngredientCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientCategoryRecord.deleteAll(db, keys: ids)
+            _ = try IngredientCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -569,7 +569,7 @@ extension AppDatabase {
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
-                .filter(key: id)
+                .filter(id: id)
                 .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
@@ -618,7 +618,7 @@ extension AppDatabase {
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try dbWriter.read { db in
             let request = IngredientRecord
-                .filter(key: id)
+                .filter(id: id)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
@@ -633,7 +633,7 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = RecipeRecord
-                    .filter(key: id)
+                    .filter(id: id)
                     .including(optional: RecipeRecord.category)
                     .including(all: RecipeRecord.ingredients)
                     .including(required: RecipeRecord.stepGraph
@@ -679,7 +679,7 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = IngredientRecord
-                    .filter(key: id)
+                    .filter(id: id)
                     .including(optional: IngredientRecord.category)
                     .including(all: IngredientRecord.batches)
 

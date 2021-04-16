@@ -487,7 +487,7 @@ class AppDatabaseTests: XCTestCase {
             try XCTAssertFalse(category.exists(db))
 
             // Deleting categories should set the category ID of its contained recipes to nil
-            if let fetchedRecipe = try RecipeRecord.fetchOne(db, key: recipe.id) {
+            if let fetchedRecipe = try RecipeRecord.fetchOne(db, id: recipe.id) {
                 XCTAssertNil(fetchedRecipe.recipeCategoryId)
             } else {
                 XCTFail("Inserted recipe cannot be found")
@@ -680,7 +680,7 @@ class AppDatabaseTests: XCTestCase {
             try XCTAssertFalse(category.exists(db))
 
             // Deleting categories should set the category ID of its contained ingredients to nil
-            if let fetchedIngredient = try IngredientRecord.fetchOne(db, key: ingredient.id) {
+            if let fetchedIngredient = try IngredientRecord.fetchOne(db, id: ingredient.id) {
                 XCTAssertNil(fetchedIngredient.ingredientCategoryId)
             } else {
                 XCTFail("Inserted ingredient cannot be found")

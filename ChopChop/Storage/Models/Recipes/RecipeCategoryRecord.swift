@@ -1,6 +1,6 @@
 import GRDB
 
-struct RecipeCategoryRecord: Equatable {
+struct RecipeCategoryRecord: Identifiable, Equatable {
     var id: Int64?
     var name: String
 }
