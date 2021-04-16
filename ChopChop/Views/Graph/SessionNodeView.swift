@@ -54,7 +54,7 @@ import SwiftUI
         HStack(spacing: 16) {
             Button(action: {
                 withAnimation {
-                    viewModel.graph.toggleStep(viewModel.node)
+                    viewModel.graph.toggleNode(viewModel.node)
                     selection.deselectNode(viewModel.node)
                 }
             }) {
@@ -80,14 +80,12 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep("Preview")),
-           let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
+        if let node = try? RecipeStepNode(RecipeStep("Preview")),
+           let graph = try? SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionNodeView(
                 viewModel: SessionNodeViewModel(
                     graph: graph,
-                    node: SessionRecipeStepNode(
-                        step,
-                        actionTimeTracker: ActionTimeTracker())),
+                    node: SessionRecipeStepNode(node: node)),
                         selection: SelectionHandler())
         }
     }

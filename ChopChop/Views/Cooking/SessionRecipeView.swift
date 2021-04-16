@@ -4,101 +4,80 @@ struct SessionRecipeView: View {
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
-        ScrollView {
-            recipeBanner
-            Text("Details")
-                .font(.title2)
-                .bold()
-            Text("""
-                Serves \(viewModel.servings.removeZerosFromEnd()) \(viewModel.servings == 1 ? "person" : "people")
-                """)
-            HStack(spacing: 0) {
-                Text("Difficulty: ")
-                DifficultyView(difficulty: viewModel.difficulty)
-            }
-            Text(viewModel.recipeCategory)
-            Text("Time taken: \(viewModel.totalTimeTaken)")
+        ZStack(alignment: .trailing) {
+            SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.recipe.stepGraph))
 
-            ingredients
-            steps
-
-            Spacer()
-            completeCookingButton
-        }
-        .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
-            CompleteSessionRecipeView(viewModel: viewModel.completeSessionRecipeViewModel)
-        })
-    }
-
-    var recipeBanner: some View {
-        var bannerOverlay: some View {
-            Rectangle()
-                .foregroundColor(.clear)
-                .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]),
-                                           startPoint: .top,
-                                           endPoint: .bottom))
-        }
-
-        return ZStack(alignment: .bottomLeading) {
-            Image(uiImage: viewModel.image)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 300)
-                .clipped()
-                .overlay(bannerOverlay)
-            Text(viewModel.name)
-                .font(.largeTitle)
-                .foregroundColor(.white)
-                .padding()
-        }
-    }
-
-    var ingredients: some View {
-        VStack(alignment: .center) {
-            Text("Ingredients")
-                .font(.title2)
-                .bold()
-            ForEach(viewModel.ingredients, id: \.name) { ingredient in
-                Text(ingredient.description)
-            }
-        }.padding()
-    }
-
-    var steps: some View {
-        VStack {
-            Text("Steps")
-                .font(.title2)
-                .bold()
-            HStack {
-                Spacer()
-                NavigationLink(destination: SessionGraphView(viewModel:
-                                                                SessionGraphViewModel(graph: viewModel.stepGraph))) {
-                    Label("View steps", systemImage: "rectangle.expand.vertical")
+            if viewModel.showDetailsPanel {
+                VStack(spacing: 24) {
+                    ingredientsPanel
+                    timersPanel
                 }
-                Spacer()
+                .frame(width: 250)
+                .padding()
+                .transition(AnyTransition.move(edge: .trailing))
             }
-        }.padding([.horizontal], 100)
+        }
+        .toolbar {
+            Button(action: {
+                withAnimation {
+                    viewModel.showDetailsPanel.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "dial.min")
+                }
+            }
+        }
     }
 
-    var completeCookingButton: some View {
-        Button(action: viewModel.toggleShowComplete) {
-            Text("  ✔ Complete cooking  ")
-                .foregroundColor(viewModel.completeSessionRecipeViewModel.isSuccess ? .gray : .black)
-                .background(viewModel.completeSessionRecipeViewModel.isSuccess ? Color.white : Color.green)
-                .font(.title2)
-                .clipShape(Capsule())
-                .padding()
+    var ingredientsPanel: some View {
+        ScrollView {
+            VStack {
+                Text("Ingredients")
+                    .font(.headline)
+                    .padding(.bottom, 8)
+                ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
+                    Text(ingredient.description)
+                }
+            }
+            .padding()
         }
-        .disabled(viewModel.completeSessionRecipeViewModel.isSuccess)
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .background(panelBackground)
+    }
+
+    var timersPanel: some View {
+        ScrollView {
+            VStack {
+                ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
+                    TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
+                                                                node: node))
+                }
+            }
+            .padding()
+        }
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .background(panelBackground)
+    }
+
+    var panelBackground: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color.accentColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color(UIColor.systemBackground).opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .stroke(Color.accentColor, lineWidth: 1.5)
+            )
     }
 }
 
 struct SessionRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionRecipeView(viewModel: SessionRecipeViewModel(recipeInfo:
-                                                                RecipeInfo(id: 5,
-                                                                           name: "Pancakes",
-                                                                           servings: 5,
-                                                                           difficulty: Difficulty.easy)))
+        if let recipe = try? Recipe(name: "Sample recipe") {
+            SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe))
+        }
     }
 }

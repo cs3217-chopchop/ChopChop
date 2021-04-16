@@ -5,7 +5,7 @@ struct RecipeStep: Hashable {
     let content: String
     let timers: [TimeInterval]
     var timeTaken: TimeInterval {
-        TimeInterval(RecipeStepParser.parseTotalDuration(step: content))
+        timers.isEmpty ? TimeInterval(RecipeStepParser.parseTotalDuration(step: content)) : timers.reduce(0, +)
     }
 
     init(_ content: String, timers: [TimeInterval] = []) throws {

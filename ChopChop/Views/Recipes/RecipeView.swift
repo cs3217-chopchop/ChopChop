@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RecipeView: View {
     @ObservedObject var viewModel: RecipeViewModel
+    @State private var showSessionRecipe = false
+    @State private var showRecipeForm = false
 
     var body: some View {
         if let recipe = viewModel.recipe {
@@ -13,22 +15,41 @@ struct RecipeView: View {
                 }
             }
             .navigationTitle(recipe.name)
-            .toolbar {
-                // Workaround for placing NavigationLink in toolbar
-                HStack {
+            .background(
+                ZStack {
                     NavigationLink(
-                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe))
+                        destination: SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe)),
+                        isActive: $showSessionRecipe
                     ) {
-                        Image(systemName: "square.and.pencil")
+                        EmptyView()
                     }
+                    NavigationLink(
+                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe)),
+                        isActive: $showRecipeForm
+                    ) {
+                        EmptyView()
+                    }
+                }
+            )
+            .toolbar {
+                Button(action: {
+                    showSessionRecipe = true
+                }) {
+                    Image(systemName: "flame")
+                }
+                Button(action: {
+                    showRecipeForm = true
+                }) {
+                    Image(systemName: "square.and.pencil")
                 }
                 Menu {
                     Button(action: viewModel.publish) {
                         Label(viewModel.isPublished ? "Publish changes" : "Publish", systemImage: "icloud.and.arrow.up")
                     }
-                }
-                label: {
+                } label: {
                     Image(systemName: "paperplane")
+                        .imageScale(.large)
+                        .padding(.leading, 8)
                 }
             }
         } else {

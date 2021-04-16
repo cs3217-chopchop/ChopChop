@@ -1,92 +1,106 @@
-import Foundation
 import Combine
+import Foundation
 
-// All timings are in seconds
-class CountdownTimer {
-    private(set) var defaultTime: Int
-    private(set) var remainingTime: Int
-    private(set) var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+// State machine is as follows:
+//
+// .stopped - [ play() ] -> .running
+// .stopped - [ reset() ] -> .stopped
+// .running - [ pause() ] -> .paused
+// .running - [ timeRemaining <= 0 ] -> .ended
+// .paused - [ resume() ] -> .running
+// .paused - [ reset() ] -> .stopped
+// .ended - [ reset() ] -> .stopped
+final class CountdownTimer {
+    @Published private(set) var timeRemaining: TimeInterval
+    @Published private(set) var status: Status = .stopped
 
-    private(set) var isRunning = false
-    private(set) var isStart = false
+    let duration: TimeInterval
+    private var durationRemaining: TimeInterval
+    private var startDate: Date?
 
-    static let minimumTime = 0
-    static let maximumTime = 24 * 60 * 60 - 1 // Maximum count is 1 day
+    private let timer = Timer.publish(every: 1, on: .main, in: .common)
+        .autoconnect()
+        .merge(with: Deferred { Just(Date()) })
+    private var cancellable: AnyCancellable?
 
-    init(time: Int) throws {
-        guard time >= CountdownTimer.minimumTime && time <= CountdownTimer.maximumTime else {
-            throw CountdownTimerError.invalidTiming
-        }
-        remainingTime = time
-        defaultTime = time
-    }
-
-    func countdown() {
-        guard isRunning else {
-            return
-        }
-        remainingTime -= 1
-        guard remainingTime > 0 else {
-            isRunning = false
-            return
-        }
+    init(duration: TimeInterval) {
+        self.timeRemaining = duration
+        self.duration = duration
+        self.durationRemaining = duration
     }
 
     func start() {
-        guard !isRunning && remainingTime > 0 else {
+        guard status == .paused || status == .stopped else {
             return
         }
-        remainingTime = defaultTime
-        isRunning = true
-        _ = timer.merge(with: Just(Date()))
-        isStart = true
+
+        status = .running
+        startDate = Date()
+
+        // Delay until the next second if the timer starts in between seconds.
+        // Since the delay affects the delivery of elements and completion, but not of the original subscription,
+        // use the current Date() instead of the date provided by the timer closure
+        cancellable = timer.delay(for: .seconds(durationRemaining.truncatingRemainder(dividingBy: 1)),
+                                  scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let durationRemaining = self?.durationRemaining, let startDate = self?.startDate else {
+                    return
+                }
+
+                let timeRemaining = (durationRemaining - Date().timeIntervalSince(startDate)).rounded()
+                self?.timeRemaining = timeRemaining
+
+                if timeRemaining <= 0 {
+                    self?.status = .ended
+                    return
+                }
+            }
     }
 
     func pause() {
-        guard isRunning && remainingTime > 0 else {
+        guard status == .running, let startDate = startDate else {
             return
         }
-        isRunning = false
+
+        status = .paused
+        durationRemaining -= Date().timeIntervalSince(startDate)
+        cancellable?.cancel()
     }
 
     func resume() {
-        guard !isRunning else {
-            return
-        }
-        isRunning = true
-    }
-
-    func restart() {
-        remainingTime = defaultTime
-        isRunning = false
-        isStart = false
-    }
-
-    func updateDefaultTime(defaultTime: Int) throws {
-        // cannot update default time while running
-        guard !isRunning && !isStart else {
+        guard status == .paused else {
             return
         }
 
-        guard defaultTime >= CountdownTimer.minimumTime && defaultTime <= CountdownTimer.maximumTime else {
-            throw CountdownTimerError.invalidTiming
-        }
-        self.defaultTime = defaultTime
-        self.remainingTime = defaultTime
+        start()
     }
 
+    func reset() {
+        guard status != .running else {
+            return
+        }
+
+        status = .stopped
+        timeRemaining = duration
+        durationRemaining = duration
+        cancellable?.cancel()
+    }
 }
 
-extension CountdownTimer: Equatable, Hashable {
+extension CountdownTimer: Equatable {
     static func == (lhs: CountdownTimer, rhs: CountdownTimer) -> Bool {
         ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
+}
 
+extension CountdownTimer: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }
 }
 
-enum CountdownTimerError: Error {
-    case invalidTiming
+extension CountdownTimer {
+    enum Status {
+        case stopped, running, paused, ended
+    }
 }
