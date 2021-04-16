@@ -415,6 +415,7 @@ extension AppDatabase {
 
     func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
                     stepGraph: inout RecipeStepGraph) throws {
+        // swiftlint:disable closure_body_length
         try dbWriter.write { db in
             try recipe.save(db)
 
@@ -463,6 +464,7 @@ extension AppDatabase {
                 try edgeRecord.save(db)
             }
         }
+        // swiftlint:enable closure_body_length
     }
 
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategoryRecord) throws {
@@ -568,6 +570,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(key: id)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps
@@ -582,6 +585,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.onlineId == onlineId)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps

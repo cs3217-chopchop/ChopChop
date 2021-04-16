@@ -11,7 +11,7 @@ import SwiftUI
             recipesSection
             ingredientsSection
             recipeFeedSection
-            usersSection
+            accountSection
         }
         .listStyle(SidebarListStyle())
         .toolbar {
@@ -192,43 +192,67 @@ import SwiftUI
         }
     }
 
-    var usersSection: some View {
-        NavigationLink(
-            destination: UserCollectionView(viewModel: UserCollectionViewModel(settings: settings))
-        ) {
-            Text("Users")
-                .font(.title3)
-                .bold()
-        }
-    }
-
     var recipeFeedSection: some View {
         Section(header: Text("Recipe Feed")) {
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher))
-                    .navigationTitle("All Recipes")
+                destination: OnlineRecipeCollectionView(
+                    viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.followeesRecipePublisher)) {
+                    EmptyView()
+                }
+                    .navigationTitle("Recipes by Followees")
             ) {
-                Label("All Recipes", systemImage: "tray.2")
+                Label("Recipes by Followees", systemImage: "tray.2")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher:
-                                                                    viewModel.followeesRecipePublisher))
-                    .navigationTitle("Recipes from followees")
+                destination: OnlineRecipeCollectionView(
+                    viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher)) {
+                    EmptyView()
+                }
+                    .navigationTitle("Discover")
             ) {
-                Label("Recipes from followees", systemImage: "folder")
+                Label("Discover", systemImage: "magnifyingglass")
+            }
+        }
+    }
+
+    var accountSection: some View {
+        Section(header: Text("Account")) {
+            NavigationLink(
+                destination: ownProfileView
+            ) {
+                Label("Profile", systemImage: "person")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.ownRecipePublisher))
-                    .navigationTitle("My Published Recipes")
+                destination: followeesView
             ) {
-                Label("My Published Recipes", systemImage: "folder")
+                Label("Followees", systemImage: "person.2")
             }
 
+            NavigationLink(
+                destination: NotFoundView(entityName: "Settings")
+            ) {
+                Label("Settings", systemImage: "gear")
+            }
+        }
+    }
+
+    @ViewBuilder
+    var ownProfileView: some View {
+        if let userId = settings.userId {
+            ProfileView(viewModel: ProfileViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "User")
+        }
+    }
+
+    @ViewBuilder
+    var followeesView: some View {
+        if let userId = settings.userId {
+            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "User")
         }
     }
 

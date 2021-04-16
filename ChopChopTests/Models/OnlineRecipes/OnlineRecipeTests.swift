@@ -1,4 +1,4 @@
-// swiftlint:disable line_length
+// swiftlint:disable line_length function_body_length
 
 import XCTest
 @testable import ChopChop
@@ -222,8 +222,7 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.difficulty, .medium)
         XCTAssertEqual(onlineRecipe.cuisine, "Chinese")
-        // TODO: Fix
-//        XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
+        XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
         XCTAssertEqual(onlineRecipe.created, currentDate)
@@ -240,8 +239,7 @@ class OnlineRecipeTests: XCTestCase {
         let node1 = RecipeStepNode(try RecipeStep("Cook the pancakes"))
         let node2 = RecipeStepNode(try RecipeStep("Make the pancakes"))
         let edges = [Edge(source: node1, destination: node2)].compactMap { $0 }
-        // TODO: Fix
-//        XCTAssertEqual(onlineRecipe.stepGraph, try RecipeStepGraph(nodes: [node1, node2], edges: edges))
+        XCTAssertEqual(onlineRecipe.stepGraph, try RecipeStepGraph(nodes: [node1, node2], edges: edges))
     }
 
 }

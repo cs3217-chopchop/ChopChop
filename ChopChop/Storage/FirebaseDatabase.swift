@@ -65,7 +65,7 @@ struct FirebaseDatabase {
             .eraseToAnyPublisher()
     }
 
-    func fetchAllUsers() -> AnyPublisher<[User], Error> {
+    func fetchAllUsers(query: String = "") -> AnyPublisher<[User], Error> {
         db.collection(userPath)
             .publisher()
             .map({
@@ -73,6 +73,18 @@ struct FirebaseDatabase {
                     try? $0.data(as: User.self)
                 })
             })
+            .map {
+                $0.compactMap {
+                    $0
+                }
+                .filter {
+                    guard !query.isEmpty else {
+                        return true
+                    }
+
+                    return $0.name.contains(query)
+                }
+            }
             .eraseToAnyPublisher()
     }
 
@@ -88,7 +100,7 @@ struct FirebaseDatabase {
             .eraseToAnyPublisher()
     }
 
-    func fetchUsers(userId: [String]) -> AnyPublisher<[User], Error> {
+    func fetchUsers(userId: [String], query: String = "") -> AnyPublisher<[User], Error> {
         let docRefs = userId.map({
             db.collection(userPath).document($0)
         })
@@ -98,11 +110,18 @@ struct FirebaseDatabase {
             })
         })
         .combineLatest
-        .map({
-            $0.compactMap({
+        .map {
+            $0.compactMap {
                 $0
-            })
-        })
+            }
+            .filter {
+                guard !query.isEmpty else {
+                    return true
+                }
+
+                return $0.name.contains(query)
+            }
+        }
         .eraseToAnyPublisher()
     }
 
@@ -117,7 +136,7 @@ struct FirebaseDatabase {
 
     func updateRecipeRating(userId: String, recipeId: String, newScore: RatingScore) {
         let docRef = db.collection(recipePath).document(recipeId)
-        db.runTransction({ transaction -> Any? in
+        _ = db.runTransction({ transaction -> Any? in
             let document: DocumentSnapshot
             do {
                 try document = transaction.getDocument(docRef)
@@ -145,7 +164,7 @@ struct FirebaseDatabase {
 
     func updateUserRating(userId: String, recipeId: String, newScore: RatingScore) {
         let docRef = db.collection(userPath).document(userId)
-        db.runTransction({ transaction -> Any? in
+        _ = db.runTransction({ transaction -> Any? in
             let document: DocumentSnapshot
             do {
                 try document = transaction.getDocument(docRef)

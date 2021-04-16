@@ -11,7 +11,8 @@ class OnlineRecipeViewModel: ObservableObject {
     private var imageCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
-    @Published var creatorName = "No name"
+    @Published private(set) var recipeServingText = ""
+    @Published private(set) var creatorName = "No name"
 
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
@@ -42,6 +43,8 @@ class OnlineRecipeViewModel: ObservableObject {
         recipeCancellable = onlineRecipePublisher
             .sink { [weak self] recipe in
                 self?.recipe = recipe
+
+                self?.recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
 
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return
@@ -109,7 +112,7 @@ class OnlineRecipeViewModel: ObservableObject {
             fatalError("No user id stored")
         }
 
-        return storageManager.allFolloweesPublisher(userId: userId)
+        return storageManager.followeesPublisher(userId: userId)
             .catch { _ in
                 Just<[User]>([])
             }

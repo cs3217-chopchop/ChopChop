@@ -18,20 +18,8 @@ import SwiftUI
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
-                if let index = viewModel.index {
-                    Text("Step \(index + 1)")
-                        .font(.headline)
-                        .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
-                        .strikethrough(viewModel.node.isCompleted)
-                }
-
-                ScrollView(isSelected ? [.vertical] : []) {
-                    VStack {
-                        Text(viewModel.node.label.step.content)
-                            .strikethrough(viewModel.node.isCompleted)
-                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                    }
-                }
+                stepText
+                nodeView
 
                 if isSelected {
                     detailView
@@ -39,6 +27,26 @@ import SwiftUI
                 }
             }
             .padding()
+        }
+    }
+
+    @ViewBuilder
+    var stepText: some View {
+        if let index = viewModel.index {
+            Text("Step \(index + 1)")
+                .font(.headline)
+                .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
+                .strikethrough(viewModel.node.isCompleted)
+        }
+    }
+
+    var nodeView: some View {
+        ScrollView(isSelected ? [.vertical] : []) {
+            VStack {
+                Text(viewModel.node.label.step.content)
+                    .strikethrough(viewModel.node.isCompleted)
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+            }
         }
     }
 

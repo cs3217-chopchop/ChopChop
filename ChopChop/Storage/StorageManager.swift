@@ -1,3 +1,5 @@
+// swiftlint:disable file_length
+
 import Foundation
 import UIKit
 import Combine
@@ -364,11 +366,15 @@ extension StorageManager {
         firebase.updateUserRating(userId: newRating.userId, recipeId: recipeId, newScore: newRating.score)
     }
 
+    func usersPublisher(userIds: [String], query: String = "") -> AnyPublisher<[User], Error> {
+        firebase.fetchUsers(userId: userIds, query: query)
+    }
+
     // fetch user details of all your followees
-    func allFolloweesPublisher(userId: String) -> AnyPublisher<[User], Error> {
+    func followeesPublisher(userId: String, query: String = "") -> AnyPublisher<[User], Error> {
         firebase.fetchFolloweesId(userId: userId)
             .flatMap({ followees in
-                firebase.fetchUsers(userId: followees)
+                firebase.fetchUsers(userId: followees, query: query)
             })
             .eraseToAnyPublisher()
     }
@@ -386,8 +392,8 @@ extension StorageManager {
     }
 
     // Fetch details of all users in the system
-    func allUsersPublisher() -> AnyPublisher<[User], Error> {
-        firebase.fetchAllUsers()
+    func allUsersPublisher(query: String = "") -> AnyPublisher<[User], Error> {
+        firebase.fetchAllUsers(query: query)
     }
 
     // Can be used to fetch all your own recipes or recipes of several selected users
