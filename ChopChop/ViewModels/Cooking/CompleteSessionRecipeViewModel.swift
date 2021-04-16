@@ -1,34 +1,37 @@
-import SwiftUI
 import Combine
+import InflectorKit
 
 class CompleteSessionRecipeViewModel: ObservableObject {
-    @Published var deductibleIngredientsViewModels: [DeductibleIngredientViewModel] = []
+    @Published var recipeIngredients: [DeductibleIngredientViewModel] = []
     @Published var isSuccess = false
-    private var recipe: Recipe
 
     private let storageManager = StorageManager()
-    private(set) var ingredientsInStore: [IngredientInfo] = []
-    private var ingredientsCancellable: AnyCancellable?
 
     init(recipe: Recipe) {
-        self.recipe = recipe
+        let ingredients = (try? storageManager.fetchIngredients()) ?? []
 
-        ingredientsCancellable = ingredientsPublisher()
-            .sink { [weak self] ingredients in
-                self?.ingredientsInStore = ingredients
-                guard self?.isSuccess == false else {
-                    return
-                }
-                self?.deductibleIngredientsViewModels =
-                    self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients)
-                    ?? []
+        recipeIngredients = recipe.ingredients.compactMap { recipeIngredient in
+            // First check for exact matches, then case-insensitive matches, then plurality-insensitive matches
+            let exactMatch = ingredients.first(where: { $0.name == recipeIngredient.name })
+            let caseInsensitiveMatch = ingredients.first(where: {
+                $0.name.localizedCaseInsensitiveCompare(recipeIngredient.name) == .orderedSame
+            })
+            let pluralityInsensitiveMatch = ingredients.first(where: {
+                $0.name.singularized.localizedCaseInsensitiveCompare(recipeIngredient.name.singularized) == .orderedSame
+            })
+
+            guard let ingredient = exactMatch ?? caseInsensitiveMatch ?? pluralityInsensitiveMatch else {
+                return nil
             }
+
+            return DeductibleIngredientViewModel(ingredient: ingredient, recipeIngredient: recipeIngredient)
+        }
     }
 
     func submit() {
         var ingredientsToSave: [Ingredient] = []
         // atomic
-        for ingredientViewModel in deductibleIngredientsViewModels {
+        for ingredientViewModel in recipeIngredients {
             ingredientViewModel.updateError(msg: "") // reset error
 
             guard let amount = Double(ingredientViewModel.deductBy) else {
@@ -69,7 +72,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        guard (deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }) else {
+        guard (recipeIngredients.allSatisfy { $0.errorMsg.isEmpty }) else {
             return
         }
 
@@ -82,31 +85,6 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        isSuccess = deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }
+        isSuccess = recipeIngredients.allSatisfy { $0.errorMsg.isEmpty }
     }
-
-    private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        storageManager.ingredientsPublisher()
-            .catch { _ in
-                Just<[IngredientInfo]>([])
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func convertToDeductibleIngredientViewModels(recipeIngredients: [RecipeIngredient]) ->
-    [DeductibleIngredientViewModel] {
-
-        recipeIngredients.compactMap { recipeIngredient -> DeductibleIngredientViewModel? in
-            guard let mappedIngredientId =
-                    (ingredientsInStore.first { $0.name == recipeIngredient.name })?.id else {
-                return nil
-            }
-            guard let mappedIngredient = try? storageManager.fetchIngredient(id: mappedIngredientId) else {
-                return nil
-            }
-
-            return DeductibleIngredientViewModel(ingredient: mappedIngredient, recipeIngredient: recipeIngredient)
-        }
-    }
-
 }

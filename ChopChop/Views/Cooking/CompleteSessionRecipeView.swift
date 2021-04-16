@@ -8,13 +8,13 @@ struct CompleteSessionRecipeView: View {
             Text("Ingredients to Deduct")
                 .font(.largeTitle)
                 .padding()
-            ForEach(viewModel.deductibleIngredientsViewModels, id: \.ingredient.name) { deductibleIngredient in
+            ForEach(viewModel.recipeIngredients, id: \.ingredient.name) { deductibleIngredient in
                 DeductibleIngredientView(viewModel: deductibleIngredient)
             }
-            Text(viewModel.deductibleIngredientsViewModels.isEmpty ? "No ingredients to deduct" : "")
+            Text(viewModel.recipeIngredients.isEmpty ? "No ingredients to deduct" : "")
             Button("Submit") {
                 viewModel.submit()
-            }.disabled(viewModel.isSuccess || viewModel.deductibleIngredientsViewModels.isEmpty)
+            }.disabled(viewModel.isSuccess || viewModel.recipeIngredients.isEmpty)
             .font(.title2)
             .padding()
             Text(viewModel.isSuccess ? "Success" : "")
@@ -24,9 +24,9 @@ struct CompleteSessionRecipeView: View {
     }
 }
 
- struct CompleteSessionView_Previews: PreviewProvider {
+struct CompleteSessionView_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable force_try
         CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes")))
     }
- }
+}
