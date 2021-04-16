@@ -16,7 +16,6 @@ struct IngredientCategory: Identifiable, Hashable {
      Instantiates an ingredient category with the given name.
 
      - Throws:`IngredientCategoryError.invalidName` if the given name trimmed is empty.
-     
      */
     init(name: String, id: Int64? = nil) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
