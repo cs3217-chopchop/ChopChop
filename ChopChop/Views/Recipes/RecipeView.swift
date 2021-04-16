@@ -134,8 +134,12 @@ struct RecipeView: View {
                 .font(.title)
                 .padding(.bottom, 4)
             VStack(alignment: .leading) {
-                ForEach(recipe.ingredients, id: \.name) { ingredient in
-                    Text(ingredient.description)
+                if recipe.ingredients.isEmpty {
+                    Text("No ingredients")
+                } else {
+                    ForEach(recipe.ingredients, id: \.name) { ingredient in
+                        Text(ingredient.description)
+                    }
                 }
             }
             .padding(.bottom)
@@ -148,26 +152,30 @@ struct RecipeView: View {
                 .font(.title)
                 .padding(.bottom, 4)
             VStack(alignment: .leading) {
-                ForEach(0..<recipe.stepGraph.nodes.count, id: \.self) { idx in
-                    HStack(alignment: .top) {
-                        Text("Step \(idx + 1):")
-                            .bold()
-                        Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                if recipe.stepGraph.nodes.isEmpty {
+                    Text("No steps")
+                } else {
+                    ForEach(0..<recipe.stepGraph.nodes.count, id: \.self) { idx in
+                        HStack(alignment: .top) {
+                            Text("Step \(idx + 1):")
+                                .bold()
+                            Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                        }
+                    }
+                    HStack {
+                        Spacer()
+                        NavigationLink(
+                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
+                                                                                         isEditable: false))
+                        ) {
+                            Label("View detailed steps", systemImage: "rectangle.expand.vertical")
+                        }
+                        .padding()
+                        Spacer()
                     }
                 }
             }
             .padding(.bottom)
-            HStack {
-                Spacer()
-                NavigationLink(
-                    destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
-                                                                                 isEditable: false))
-                ) {
-                    Label("View detailed steps", systemImage: "rectangle.expand.vertical")
-                }
-                .padding()
-                Spacer()
-            }
         }
     }
 }

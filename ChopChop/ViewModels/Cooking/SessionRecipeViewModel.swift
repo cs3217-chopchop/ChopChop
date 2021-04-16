@@ -3,9 +3,9 @@ import SwiftUI
 class SessionRecipeViewModel: ObservableObject {
     @Published var showDetailsPanel = true
 
-    let recipe: SessionRecipe
+    let sessionRecipe: SessionRecipe
 
     init(recipe: Recipe) {
-        self.recipe = SessionRecipe(recipe: recipe)
+        sessionRecipe = SessionRecipe(recipe: recipe)
     }
 }

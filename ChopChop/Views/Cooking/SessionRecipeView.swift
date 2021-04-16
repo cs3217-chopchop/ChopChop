@@ -6,7 +6,7 @@ struct SessionRecipeView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ZStack(alignment: .trailing) {
-                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.recipe.stepGraph, proxy: proxy))
+                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.sessionRecipe.stepGraph, proxy: proxy))
 
                 if viewModel.showDetailsPanel {
                     VStack(spacing: 24) {
@@ -34,13 +34,13 @@ struct SessionRecipeView: View {
 
     @ViewBuilder
     var ingredientsPanel: some View {
-        if !viewModel.recipe.recipe.ingredients.isEmpty {
+        if !viewModel.sessionRecipe.recipe.ingredients.isEmpty {
             VStack {
                 Text("Ingredients")
                     .font(.headline)
                 ScrollView {
                     VStack {
-                        ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
+                        ForEach(viewModel.sessionRecipe.recipe.ingredients, id: \.name) { ingredient in
                             Text(ingredient.description)
                                 .multilineTextAlignment(.center)
                         }
@@ -68,11 +68,11 @@ struct SessionRecipeView: View {
 
     @ViewBuilder
     func timersPanel(proxy: ScrollViewProxy) -> some View {
-        if viewModel.recipe.stepGraph.hasTimers {
+        if viewModel.sessionRecipe.stepGraph.hasTimers {
             ScrollView {
                 VStack {
-                    ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
-                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
+                    ForEach(viewModel.sessionRecipe.stepGraph.topologicallySortedNodes) { node in
+                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.sessionRecipe.stepGraph,
                                                                     node: node,
                                                                     proxy: proxy))
                             .id(node)
