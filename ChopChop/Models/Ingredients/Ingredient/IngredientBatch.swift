@@ -11,6 +11,9 @@ struct IngredientBatch {
     /// The expiry date of the batch, or `nil` if the batch does not expire.
     let expiryDate: Date?
 
+    /**
+     Instantiates a batch of some ingredient with the given quantity and expiry date.
+     */
     init(quantity: Quantity, expiryDate: Date? = nil) {
         self.quantity = quantity
         self.expiryDate = expiryDate?.startOfDay

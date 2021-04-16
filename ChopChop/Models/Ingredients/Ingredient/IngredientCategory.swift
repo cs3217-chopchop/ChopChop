@@ -4,9 +4,6 @@ import Foundation
 
 /**
  Represents a collection of ingredients.
- 
- Representation Invariants:
- - The `ingredientCategoryId` of all ingredients contained in this category is the same as the category's `id`.
  */
 struct IngredientCategory: Identifiable, Hashable {
     var id: Int64?
@@ -15,11 +12,17 @@ struct IngredientCategory: Identifiable, Hashable {
     /// The name of the category. Cannot be empty.
     let name: String
 
+    /**
+     Instantiates an ingredient category with the given name.
+
+     - Throws:`IngredientCategoryError.invalidName` if the given name trimmed is empty.
+     
+     */
     init(name: String, id: Int64? = nil) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw IngredientCategoryError.emptyName
+            throw IngredientCategoryError.invalidName
         }
 
         self.id = id
@@ -35,12 +38,12 @@ extension IngredientCategory: FetchableRecord {
 }
 
 enum IngredientCategoryError: LocalizedError {
-    case emptyName
+    case invalidName
 
     var errorDescription: String? {
         switch self {
-        case .emptyName:
-            return "Category name cannot be empty"
+        case .invalidName:
+            return "Category name should not be empty."
         }
     }
 }

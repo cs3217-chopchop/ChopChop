@@ -1,5 +1,8 @@
 import GRDB
 
+/**
+ Represents the type of a quantity.
+ */
 enum QuantityType: String, Equatable, Codable, DatabaseValueConvertible, CaseIterable {
     case count
     case mass

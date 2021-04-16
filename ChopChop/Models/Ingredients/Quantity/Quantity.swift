@@ -14,6 +14,11 @@ struct Quantity: Equatable {
     /// The magnitude of the quantity. Must be non negative.
     var value: Double
 
+    /**
+     Instantiates a quantity with the given value, expressed in terms of the given unit.
+
+     - Throws:`QuantityError.negativeQuantity` if the given quantity is negative.
+     */
     init(_ unit: QuantityUnit, value: Double) throws {
         guard value >= 0 else {
             throw QuantityError.negativeQuantity
