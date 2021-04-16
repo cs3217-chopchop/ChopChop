@@ -7,6 +7,8 @@ struct IngredientView: View {
         if let ingredient = viewModel.ingredient {
             VStack {
                 ingredientBanner(ingredient)
+                toolbar
+                Divider()
                 ingredientBatches(ingredient)
 
                 NavigationLink(
@@ -24,12 +26,6 @@ struct IngredientView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { viewModel.activeFormView = .addBatch }) {
-                        Image(systemName: "plus")
-                    }
-                }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { viewModel.activeFormView = .editIngredient }) {
                         Image(systemName: "square.and.pencil")
@@ -81,6 +77,30 @@ struct IngredientView: View {
         }
     }
 
+    var toolbar: some View {
+        HStack {
+            Button(action: { viewModel.activeFormView = .addBatch }) {
+                Label("Add Batch", systemImage: "plus")
+            }
+
+            Spacer()
+
+            Menu {
+                Button(action: viewModel.deleteAllBatches) {
+                    Label("Delete All Batches", systemImage: "trash")
+                }
+
+                Button(action: viewModel.deleteExpiredBatches) {
+                    Label("Delete Expired Batches", systemImage: "calendar")
+                }
+            }
+            label: {
+                Label("Delete...", systemImage: "trash")
+            }
+        }
+        .padding(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
+    }
+
     private func ingredientBatches(_ ingredient: Ingredient) -> some View {
         let columns: [GridItem] = [GridItem(.adaptive(minimum: 250))]
 
@@ -93,9 +113,24 @@ struct IngredientView: View {
                         quantityType: ingredient.quantityType,
                         ingredientViewModel: viewModel)
 
-                    NavigationLink(destination: IngredientBatchFormView(viewModel: batchFormViewModel)) {
-                        IngredientBatchCardView(viewModel: batchViewModel)
+                    HStack(spacing: 0) {
+                        NavigationLink(destination: IngredientBatchFormView(viewModel: batchFormViewModel)) {
+                            IngredientBatchCardView(viewModel: batchViewModel)
+                                .padding()
+                        }
+
+                        Divider()
+
+                        Button(action: { viewModel.deleteBatch(expiryDate: batch.expiryDate) }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .padding()
                     }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.secondary, lineWidth: 1)
+                    )
                 }
             }
             .padding()

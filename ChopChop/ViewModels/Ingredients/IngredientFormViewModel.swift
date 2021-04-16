@@ -69,7 +69,7 @@ class IngredientFormViewModel: ObservableObject {
             } else {
                 try storageManager.saveIngredientImage(image, name: String(id))
             }
-        }g
+        }
     }
 
     func reset() {

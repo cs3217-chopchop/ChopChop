@@ -5,7 +5,9 @@ import Combine
 class IngredientViewModel: ObservableObject {
     @Published private(set) var ingredient: Ingredient?
     @Published private(set) var image: UIImage?
+
     @Published var activeFormView: FormView?
+    @Published var alertIdentifier: AlertIdentifier?
 
     private let storageManager = StorageManager()
     private var ingredientCancellable: AnyCancellable?
@@ -35,8 +37,7 @@ class IngredientViewModel: ObservableObject {
         }
 
         ingredient.removeBatch(expiryDate: expiryDate)
-        try storageManager.saveIngredient(&ingredient)
-        self.ingredient = ingredient
+        save(&ingredient)
     }
 
     func add(quantity: Quantity, expiryDate: Date?) throws {
@@ -45,8 +46,57 @@ class IngredientViewModel: ObservableObject {
         }
 
         try ingredient.add(quantity: quantity, expiryDate: expiryDate)
-        try storageManager.saveIngredient(&ingredient)
-        self.ingredient = ingredient
+        save(&ingredient)
+    }
+
+    func deleteBatch(expiryDate: Date?) {
+        guard var ingredient = ingredient else {
+            return
+        }
+
+        ingredient.removeBatch(expiryDate: expiryDate)
+        save(&ingredient)
+    }
+
+    func deleteExpiredBatches() {
+        guard var ingredient = ingredient else {
+            return
+        }
+
+        ingredient.removeExpiredBatches()
+        save(&ingredient)
+    }
+
+    func deleteAllBatches() {
+        guard var ingredient = ingredient else {
+            return
+        }
+
+        ingredient.removeAllBatches()
+        save(&ingredient)
+    }
+
+    private func save(_ ingredient: inout Ingredient) {
+        do {
+            try storageManager.saveIngredient(&ingredient)
+            self.ingredient = ingredient
+        } catch {
+            setAlertState(.saveError)
+        }
+    }
+
+    struct AlertIdentifier: Identifiable {
+        var id: AlertState
+
+        // swiftlint:disable nesting
+        enum AlertState {
+            case saveError
+        }
+        // swiftlint:enable nesting
+    }
+
+    func setAlertState(_ state: AlertIdentifier.AlertState) {
+        self.alertIdentifier = AlertIdentifier(id: state)
     }
 
     enum FormView {

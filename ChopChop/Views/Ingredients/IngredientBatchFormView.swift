@@ -22,6 +22,7 @@ struct IngredientBatchFormView: View {
                     .frame(width: 100)
                 Text(viewModel.selectedUnit)
                 Spacer()
+
                 switch viewModel.quantityType {
                 case .count:
                     EmptyView()
