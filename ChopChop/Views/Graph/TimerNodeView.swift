@@ -14,6 +14,7 @@ struct TimerNodeView: View {
 
                 ForEach(viewModel.node.label.timers, id: \.self) { timer in
                     CountdownTimerView(viewModel: CountdownTimerViewModel(timer: timer))
+                        .id(timer)
                 }
             }
         } else {

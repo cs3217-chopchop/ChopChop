@@ -50,7 +50,7 @@ final class CountdownTimer {
                 let timeRemaining = (durationRemaining - Date().timeIntervalSince(startDate)).rounded()
                 self?.timeRemaining = timeRemaining
 
-                if timeRemaining <= 0 {
+                if timeRemaining <= 0 && self?.status != .ended {
                     self?.status = .ended
                     return
                 }

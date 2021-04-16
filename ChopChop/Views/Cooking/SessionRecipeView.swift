@@ -11,7 +11,7 @@ struct SessionRecipeView: View {
                 if viewModel.showDetailsPanel {
                     VStack(spacing: 24) {
                         ingredientsPanel
-                        timersPanel
+                        timersPanel(proxy: proxy)
                     }
                     .frame(width: 250)
                     .padding()
@@ -53,24 +53,6 @@ struct SessionRecipeView: View {
         }
     }
 
-    @ViewBuilder
-    var timersPanel: some View {
-        if viewModel.recipe.stepGraph.hasTimers {
-            ScrollView {
-                VStack {
-                    ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
-                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
-                                                                    node: node))
-                            .id(node)
-                    }
-                }
-                .frame(minWidth: 0, maxWidth: .infinity)
-            }
-            .padding()
-            .background(panelBackground)
-        }
-    }
-
     var panelBackground: some View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)
             .fill(Color.accentColor)
@@ -82,6 +64,25 @@ struct SessionRecipeView: View {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .stroke(Color.accentColor, lineWidth: 1.5)
             )
+    }
+
+    @ViewBuilder
+    func timersPanel(proxy: ScrollViewProxy) -> some View {
+        if viewModel.recipe.stepGraph.hasTimers {
+            ScrollView {
+                VStack {
+                    ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
+                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
+                                                                    node: node,
+                                                                    proxy: proxy))
+                            .id(node)
+                    }
+                }
+                .frame(minWidth: 0, maxWidth: .infinity)
+            }
+            .padding()
+            .background(panelBackground)
+        }
     }
 }
 

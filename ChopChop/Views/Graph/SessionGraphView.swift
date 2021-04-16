@@ -42,7 +42,8 @@ import SwiftUI
 
     func nodesView(nodes: [SessionRecipeStepNode]) -> some View {
         ForEach(nodes) { node in
-            SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node, proxy: viewModel.proxy), selection: selection)
+            SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node, proxy: viewModel.proxy),
+                            selection: selection)
                 .position((node.position ?? .zero) + viewModel.portalPosition + portalDragOffset)
                 .onTapGesture {
                     withAnimation {
