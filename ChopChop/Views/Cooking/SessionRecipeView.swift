@@ -30,34 +30,41 @@ struct SessionRecipeView: View {
         }
     }
 
+    @ViewBuilder
     var ingredientsPanel: some View {
-        ScrollView {
+        if !viewModel.recipe.recipe.ingredients.isEmpty {
             VStack {
                 Text("Ingredients")
                     .font(.headline)
-                    .padding(.bottom, 8)
-                ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
-                    Text(ingredient.description)
+                ScrollView {
+                    ForEach(viewModel.recipe.recipe.ingredients, id: \.name) { ingredient in
+                        Text(ingredient.description)
+                    }
                 }
             }
             .padding()
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .background(panelBackground)
         }
-        .frame(minWidth: 0, maxWidth: .infinity)
-        .background(panelBackground)
     }
 
+    @ViewBuilder
     var timersPanel: some View {
-        ScrollView {
+        if viewModel.recipe.stepGraph.hasTimers {
             VStack {
-                ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
-                    TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
-                                                                node: node))
+                Text("Timers")
+                    .font(.headline)
+                ScrollView {
+                    ForEach(viewModel.recipe.stepGraph.topologicallySortedNodes) { node in
+                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.recipe.stepGraph,
+                                                                    node: node))
+                    }
                 }
             }
             .padding()
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .background(panelBackground)
         }
-        .frame(minWidth: 0, maxWidth: .infinity)
-        .background(panelBackground)
     }
 
     var panelBackground: some View {

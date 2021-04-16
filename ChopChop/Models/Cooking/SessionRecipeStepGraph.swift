@@ -17,6 +17,10 @@ final class SessionRecipeStepGraph {
         graph.nodeLayers
     }
 
+    var hasTimers: Bool {
+        !nodes.allSatisfy { $0.label.timers.isEmpty }
+    }
+
     init() {
         graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
     }
