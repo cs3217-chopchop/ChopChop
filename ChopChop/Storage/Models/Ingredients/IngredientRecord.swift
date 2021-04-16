@@ -1,10 +1,18 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a record of an ingredient stored in the local database.
+ */
 struct IngredientRecord: Equatable {
     var id: Int64?
+
+    // MARK: - Specification Fields
+    /// The id of the category the ingredient belongs to, or `nil` if it does not belong to any category.
     var ingredientCategoryId: Int64?
+    /// The name of the ingredient.
     var name: String
+    /// The type of the quantities of the ingredient.
     var quantityType: QuantityType
 }
 
