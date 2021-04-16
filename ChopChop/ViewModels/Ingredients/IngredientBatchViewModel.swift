@@ -2,24 +2,18 @@ import Foundation
 import SwiftUI
 import Combine
 
-class IngredientBatchViewModel {
-    @ObservedObject var batch: IngredientBatch
-
+class IngredientBatchViewModel: ObservableObject {
     @Published private(set) var quantityDescription: String = ""
+    @Published private(set) var expiryDateDescription: String?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(batch: IngredientBatch) {
-        self.batch = batch
-
-        batch.$quantity
-            .sink { [weak self] quantity in
-                self?.quantityDescription = quantity.description
-            }
-            .store(in: &cancellables)
+        self.quantityDescription = batch.quantity.description
+        self.expiryDateDescription = IngredientBatchViewModel.getExpiryDateDescription(batch)
     }
 
-    var expiryDateDescription: String? {
+    private static func getExpiryDateDescription(_ batch: IngredientBatch) -> String? {
         guard let expiryDate = batch.expiryDate else {
             return nil
         }

@@ -3,31 +3,50 @@ import UIKit
 import Combine
 
 class IngredientViewModel: ObservableObject {
-    @ObservedObject var ingredient: Ingredient
-
-    @Published private(set) var ingredientName: String = ""
-    @Published private(set) var ingredientBatches: [IngredientBatch] = []
-    @Published private(set) var ingredientImage = UIImage()
+    @Published private(set) var ingredient: Ingredient?
+    @Published private(set) var image: UIImage?
     @Published var activeFormView: FormView?
 
     private let storageManager = StorageManager()
-    private var cancellables = Set<AnyCancellable>()
+    private var ingredientCancellable: AnyCancellable?
 
-    init(ingredient: Ingredient) {
+    init(id: Int64) {
+        ingredientCancellable = ingredientPublisher(id: id)
+            .sink { [weak self] ingredient in
+                self?.ingredient = ingredient
+
+                if let ingredient = ingredient, let id = ingredient.id {
+                    self?.image = self?.storageManager.fetchIngredientImage(name: String(id))
+                }
+            }
+    }
+
+    private func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Never> {
+        storageManager.ingredientPublisher(id: id)
+            .catch { _ in
+                Just<Ingredient?>(nil)
+            }
+            .eraseToAnyPublisher()
+    }
+
+    func removeBatch(expiryDate: Date?) throws {
+        guard var ingredient = ingredient else {
+            return
+        }
+
+        ingredient.removeBatch(expiryDate: expiryDate)
+        try storageManager.saveIngredient(&ingredient)
         self.ingredient = ingredient
+    }
 
-        ingredient.$name
-            .sink { [weak self] name in
-                self?.ingredientName = name
-                self?.ingredientImage = StorageManager().fetchIngredientImage(name: name) ?? UIImage()
-            }
-            .store(in: &cancellables)
+    func add(quantity: Quantity, expiryDate: Date?) throws {
+        guard var ingredient = ingredient else {
+            return
+        }
 
-        ingredient.$batches
-            .sink { [weak self] batches in
-                self?.ingredientBatches = batches
-            }
-            .store(in: &cancellables)
+        try ingredient.add(quantity: quantity, expiryDate: expiryDate)
+        try storageManager.saveIngredient(&ingredient)
+        self.ingredient = ingredient
     }
 
     enum FormView {

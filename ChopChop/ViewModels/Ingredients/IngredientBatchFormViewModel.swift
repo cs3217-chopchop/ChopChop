@@ -2,7 +2,8 @@ import SwiftUI
 
 class IngredientBatchFormViewModel: ObservableObject {
     let batch: IngredientBatch
-    var ingredient: Ingredient
+    let quantityType: QuantityType
+    let ingredientViewModel: IngredientViewModel
     let isEdit: Bool
 
     @Published var selectedUnit: String
@@ -12,9 +13,10 @@ class IngredientBatchFormViewModel: ObservableObject {
 
     @Published var alertIdentifier: AlertIdentifier?
 
-    init(edit batch: IngredientBatch, in ingredient: Ingredient) {
+    init(edit batch: IngredientBatch, quantityType: QuantityType, ingredientViewModel: IngredientViewModel) {
         self.batch = batch
-        self.ingredient = ingredient
+        self.quantityType = quantityType
+        self.ingredientViewModel = ingredientViewModel
         self.isEdit = true
 
         self.selectedUnit = batch.quantity.unit.description
@@ -31,10 +33,10 @@ class IngredientBatchFormViewModel: ObservableObject {
         }
     }
 
-    init(addBatchTo ingredient: Ingredient) throws {
+    init(addBatchTo ingredientViewModel: IngredientViewModel, quantityType: QuantityType) throws {
         var quantity: Quantity
 
-        switch ingredient.quantityType {
+        switch quantityType {
         case .count:
             quantity = try Quantity(.count, value: 0)
         case .mass:
@@ -44,7 +46,8 @@ class IngredientBatchFormViewModel: ObservableObject {
         }
 
         self.batch = IngredientBatch(quantity: quantity)
-        self.ingredient = ingredient
+        self.quantityType = quantityType
+        self.ingredientViewModel = ingredientViewModel
         self.isEdit = false
 
         self.selectedUnit = batch.quantity.unit.description
@@ -60,7 +63,7 @@ class IngredientBatchFormViewModel: ObservableObject {
 
         var newQuantity: Quantity
 
-        switch ingredient.quantityType {
+        switch quantityType {
         case .count:
             newQuantity = try Quantity(.count, value: convertedValue)
         case .mass:
@@ -80,12 +83,10 @@ class IngredientBatchFormViewModel: ObservableObject {
         let newExpiryDate: Date? = expiryDateEnabled ? selectedDate : nil
 
         if isEdit {
-            ingredient.removeBatch(expiryDate: batch.expiryDate)
+            try ingredientViewModel.removeBatch(expiryDate: batch.expiryDate)
         }
 
-        try ingredient.add(quantity: newQuantity, expiryDate: newExpiryDate)
-
-        try StorageManager().saveIngredient(&ingredient)
+        try ingredientViewModel.add(quantity: newQuantity, expiryDate: newExpiryDate)
     }
 
     let massUnitMap: [String: MassUnit] = [

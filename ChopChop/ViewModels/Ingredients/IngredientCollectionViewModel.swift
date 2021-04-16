@@ -88,7 +88,11 @@ final class IngredientCollectionViewModel: ObservableObject {
         return try? storageManager.fetchIngredient(id: id)
     }
 
-    func getIngredientImage(ingredient: Ingredient) -> UIImage {
-        storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
+    func getIngredientImage(ingredient: IngredientInfo) -> UIImage? {
+        guard let id = ingredient.id else {
+            return nil
+        }
+
+        return storageManager.fetchIngredientImage(name: String(id))
     }
 }

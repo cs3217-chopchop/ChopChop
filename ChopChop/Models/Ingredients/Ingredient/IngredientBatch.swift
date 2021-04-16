@@ -4,10 +4,10 @@ import SwiftUI
 /**
  Represents some quantity of an ingredient with the same expiry date.
  */
-class IngredientBatch: ObservableObject {
+struct IngredientBatch {
     // MARK: - Specification Fields
     /// The quantity of the batch.
-    @Published private(set) var quantity: Quantity
+    var quantity: Quantity
     /// The expiry date of the batch, or `nil` if the batch does not expire.
     let expiryDate: Date?
 
@@ -26,7 +26,7 @@ class IngredientBatch: ObservableObject {
      - Throws:
         - `QuantityError.incompatibleTypes`: if the type of the quantity is not compatible with that of the batch.
      */
-    func add(_ quantity: Quantity) throws {
+    mutating func add(_ quantity: Quantity) throws {
         try self.quantity += quantity
     }
 
@@ -37,7 +37,7 @@ class IngredientBatch: ObservableObject {
         - `QuantityError.incompatibleTypes`: if the type of the quantity is not compatible with that of the batch.
         - `QuantityError.negativeQuantity`: if the given quantity is greater than that contained in the batch.
      */
-    func subtract(_ quantity: Quantity) throws {
+    mutating func subtract(_ quantity: Quantity) throws {
         try self.quantity -= quantity
     }
 }

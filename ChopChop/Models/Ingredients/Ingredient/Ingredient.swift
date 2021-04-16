@@ -9,45 +9,33 @@ import GRDB
  - All quantities are of the same type.
  - Each batch has a unique expiry date.
  */
-class Ingredient: FetchableRecord, ObservableObject {
+struct Ingredient {
     var id: Int64?
-    var ingredientCategoryId: Int64?
+
+    let name: String
     let quantityType: QuantityType
+    var batches: [IngredientBatch]
+    let category: IngredientCategory?
 
-    @Published private(set) var name: String
-    @Published private(set) var batches: [IngredientBatch]
-
-    init(name: String, type: QuantityType, batches: [IngredientBatch] = []) throws {
+    // swiftlint:disable function_default_parameter_at_end
+    init(id: Int64? = nil, name: String, type: QuantityType, batches: [IngredientBatch] = [], category: IngredientCategory? = nil) throws {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
             throw IngredientError.emptyName
         }
 
-        self.quantityType = type
-        self.name = trimmedName
-
         for batch in batches where batch.quantity.type != type {
             throw QuantityError.incompatibleTypes
         }
 
+        self.id = id
+        self.name = trimmedName
+        self.quantityType = type
         self.batches = batches
+        self.category = category
     }
-
-    required init(row: Row) {
-        id = row[IngredientRecord.Columns.id]
-        ingredientCategoryId = row[IngredientRecord.Columns.ingredientCategoryId]
-        quantityType = row[IngredientRecord.Columns.quantityType]
-        name = row[IngredientRecord.Columns.name]
-        batches = row.prefetchedRows["ingredientBatches"]?.compactMap {
-            let record = IngredientBatchRecord(row: $0)
-            guard let quantity = try? Quantity(from: record.quantity) else {
-                return nil
-            }
-
-            return IngredientBatch(quantity: quantity, expiryDate: record.expiryDate)
-        } ?? []
-    }
+    // swiftlint:enable function_default_parameter_at_end
 
     var notExpiredBatches: [IngredientBatch] {
         batches.filter { batch in
@@ -94,23 +82,24 @@ class Ingredient: FetchableRecord, ObservableObject {
     }
 }
 
-extension Ingredient {
-    /**
-     Renames the ingredient with a given name.
-     - Throws:
-        - `IngredientError.emptyName`: if the given name is empty.
-     */
-    func rename(_ newName: String) throws {
-        let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+extension Ingredient: FetchableRecord {
+    init(row: Row) {
+        id = row[IngredientRecord.Columns.id]
+        category = row["ingredientCategory"]
+        quantityType = row[IngredientRecord.Columns.quantityType]
+        name = row[IngredientRecord.Columns.name]
+        batches = row.prefetchedRows["ingredientBatches"]?.compactMap {
+            let record = IngredientBatchRecord(row: $0)
+            guard let quantity = try? Quantity(from: record.quantity) else {
+                return nil
+            }
 
-        guard !trimmedName.isEmpty else {
-            throw IngredientError.emptyName
-        }
-
-        try StorageManager().renameIngredientImage(from: self.name, to: trimmedName)
-        self.name = trimmedName
+            return IngredientBatch(quantity: quantity, expiryDate: record.expiryDate)
+        } ?? []
     }
+}
 
+extension Ingredient {
     /**
      Adds a batch of the ingredient, represented by the given quantity and expiry date.
      - Throws:
@@ -118,24 +107,17 @@ extension Ingredient {
             if the given quantity does not have the same type as the ingredient.
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
-    func add(quantity: Quantity, expiryDate: Date?) throws {
+    mutating func add(quantity: Quantity, expiryDate: Date?) throws {
         guard self.quantityType == quantity.type else {
             throw QuantityError.incompatibleTypes
         }
 
-        var batch: IngredientBatch?
-
-        if let addedDate = expiryDate {
-            batch = batches.first(where: { $0.expiryDate == addedDate.startOfDay })
-        } else {
-            batch = batches.first(where: { $0.expiryDate == nil })
-        }
-
-        if let existingBatch = batch {
-            try existingBatch.add(quantity)
+        if let batchId = batches.firstIndex(where: { $0.expiryDate == expiryDate?.startOfDay }) {
+            var batch = batches[batchId]
+            try batch.add(quantity)
+            batches[batchId] = batch
         } else {
             let addedBatch = IngredientBatch(quantity: quantity, expiryDate: expiryDate?.startOfDay)
-
             batches.append(addedBatch)
         }
     }
@@ -153,19 +135,22 @@ extension Ingredient {
         - `IngredientError.insufficientQuantity`:
             if the batch with the given expiry date does not contain enough quantity.
      */
-    func subtract(quantity: Quantity, expiryDate: Date?) throws {
-        guard let batch = getBatch(expiryDate: expiryDate) else {
+    mutating func subtract(quantity: Quantity, expiryDate: Date?) throws {
+        guard let batchId = batches.firstIndex(where: { $0.expiryDate == expiryDate?.startOfDay }) else {
             throw IngredientError.nonExistentBatch
         }
 
         do {
+            var batch = batches[batchId]
             try batch.subtract(quantity)
+
+            if batch.isEmpty {
+                removeBatch(expiryDate: expiryDate)
+            } else {
+                batches[batchId] = batch
+            }
         } catch QuantityError.negativeQuantity {
             throw IngredientError.insufficientQuantity
-        }
-
-        if batch.isEmpty {
-            removeBatch(expiryDate: expiryDate)
         }
     }
 
@@ -178,7 +163,7 @@ extension Ingredient {
         - `QuantityError.negativeQuantity`: if the result is negative.
         - `IngredientError.insufficientQuantity`: if all non-expired batches combined do not contain enough quantity.
      */
-    func use(quantity: Quantity) throws {
+    mutating func use(quantity: Quantity) throws {
         guard try contains(quantity: quantity) else {
             throw IngredientError.insufficientQuantity
         }
@@ -191,7 +176,7 @@ extension Ingredient {
                 try subtractedQuantity -= batch.quantity
                 usedBatches.append(batch)
             } catch QuantityError.negativeQuantity {
-                try batch.subtract(subtractedQuantity)
+                try subtract(quantity: subtractedQuantity, expiryDate: batch.expiryDate)
                 subtractedQuantity.value = 0
                 // swiftlint:disable unneeded_break_in_switch
                 break
@@ -214,33 +199,6 @@ extension Ingredient {
             throw QuantityError.incompatibleTypes
         }
     }
-
-    /**
-     Combines this ingredient with another of the same name and quantity type.
-     Batches with the same expiry date are merged.
-     - Throws:
-        - `QuantityError.differentQuantityTypes`:
-            if the given quantity does not have the same type as the ingredient.
-        - `QuantityError.negativeQuantity`:
-            f any addition result is negative.
-        - `IngredientError.differentIngredients`:
-            if the given ingredient does not have the same name as this ingredient.
-     */
-    func combine(with ingredient: Ingredient) throws {
-        guard self.name == ingredient.name else {
-            throw IngredientError.differentIngredients
-        }
-
-        guard self.quantityType == ingredient.quantityType else {
-            throw QuantityError.incompatibleTypes
-        }
-
-        for batch in ingredient.batches {
-            let quantity = batch.quantity
-            let expiryDate = batch.expiryDate
-            try add(quantity: quantity, expiryDate: expiryDate)
-        }
-    }
 }
 
 // MARK: - Batch operations
@@ -258,7 +216,7 @@ extension Ingredient {
      Removes the batch identified by the given expiry date.
      If such a batch does not exist, do nothing.
      */
-    func removeBatch(expiryDate: Date?) {
+    mutating func removeBatch(expiryDate: Date?) {
         batches.removeAll { batch in
             batch.expiryDate == expiryDate?.startOfDay
         }
@@ -267,7 +225,7 @@ extension Ingredient {
     /**
      Removes all batches with expiry dates earlier than the current date.
      */
-    func removeExpiredBatches() {
+    mutating func removeExpiredBatches() {
         var removedBatches: [IngredientBatch] = []
 
         for batch in batches {
@@ -283,7 +241,7 @@ extension Ingredient {
         removeBatches(removedBatches)
     }
 
-    private func removeBatches(_ removedBatches: [IngredientBatch]) {
+    private mutating func removeBatches(_ removedBatches: [IngredientBatch]) {
         for batch in removedBatches {
             removeBatch(expiryDate: batch.expiryDate)
         }

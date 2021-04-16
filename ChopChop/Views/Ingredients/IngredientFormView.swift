@@ -23,9 +23,9 @@ struct IngredientFormView: View {
     var quantityTypeSection: some View {
         Section(header: Text("QUANTITY TYPE")) {
             HStack {
-                Text(viewModel.selectedType.description)
+                Text(viewModel.quantityType.description)
                 Spacer()
-                Picker("Quantity Type", selection: $viewModel.selectedType) {
+                Picker("Quantity Type", selection: $viewModel.quantityType) {
                     ForEach(QuantityType.allCases, id: \.self) {
                         Text($0.description)
                     }
@@ -37,20 +37,20 @@ struct IngredientFormView: View {
 
     var nameSection: some View {
         Section(header: Text("NAME")) {
-            TextField("Name", text: $viewModel.inputName)
+            TextField("Name", text: $viewModel.name)
         }
     }
 
     var categorySection: some View {
         Section(header: Text("CATEGORY")) {
             HStack {
-                Text(viewModel.selectedCategory?.name ?? "Uncategorised")
+                Text(viewModel.category?.name ?? "Uncategorised")
                 Spacer()
                 Picker(
-                    selection: $viewModel.selectedCategory,
+                    selection: $viewModel.category,
                     label: Image(systemName: "tag.circle")) {
                     Text("Uncategorised").tag(nil as IngredientCategory?)
-                    ForEach(viewModel.ingredientCategories, id: \.id) {
+                    ForEach(viewModel.categories, id: \.id) {
                         Text($0.name).tag($0 as IngredientCategory?)
                     }
                 }

@@ -33,7 +33,7 @@ class SessionRecipeViewModel: ObservableObject {
         sessionRecipe = SessionRecipe(recipe: recipe)
         stepGraph = SessionRecipeStepGraph(graph: recipe.stepGraph) ?? SessionRecipeStepGraph()
         completeSessionRecipeViewModel = CompleteSessionRecipeViewModel(recipe: sessionRecipe.recipe)
-        image = storageManager.fetchIngredientImage(name: recipe.name) ?? UIImage(imageLiteralResourceName: "recipe")
+        image = storageManager.fetchRecipeImage(name: String(id)) ?? UIImage(imageLiteralResourceName: "recipe")
         self.recipeCategory = recipe.category?.name ?? ""
     }
 

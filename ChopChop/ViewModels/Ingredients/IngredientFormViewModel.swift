@@ -2,14 +2,14 @@ import SwiftUI
 import Combine
 
 class IngredientFormViewModel: ObservableObject {
-    private(set) var ingredient: Ingredient?
+    @Published var categories: [IngredientCategory] = []
+
     let isEdit: Bool
 
-    @Published var selectedType: QuantityType
-    @Published var inputName: String
-    @Published var selectedCategory: IngredientCategory?
+    @Published var name: String
+    @Published var quantityType: QuantityType
+    @Published var category: IngredientCategory?
     @Published var image: UIImage
-    @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
     @Published var alertIdentifier: AlertIdentifier?
 
@@ -18,70 +18,73 @@ class IngredientFormViewModel: ObservableObject {
 
     private let storageManager = StorageManager()
     private var ingredientCategoriesCancellable: AnyCancellable?
+    private let ingredient: Ingredient?
 
     init(edit ingredient: Ingredient) {
         self.ingredient = ingredient
         self.isEdit = true
 
-        self.selectedType = ingredient.quantityType
-        self.inputName = ingredient.name
-        self.image = storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
+        self.quantityType = ingredient.quantityType
+        self.name = ingredient.name
+        self.category = ingredient.category
 
-        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
-            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
-                self?.ingredientCategories = categories
-                self?.selectedCategory = categories.first(where: { $0.id == ingredient.ingredientCategoryId })
-            })
+        if let id = ingredient.id {
+            self.image = storageManager.fetchIngredientImage(name: String(id)) ?? UIImage()
+        } else {
+            self.image = UIImage()
+        }
+
+        ingredientCategoriesCancellable = categoriesPublisher()
+            .sink { [weak self] categories in
+                self?.categories = categories
+            }
     }
 
     init(addToCategory categoryId: Int64?) {
         self.ingredient = nil
         self.isEdit = false
 
-        self.selectedType = .count
-        self.inputName = ""
+        self.quantityType = .count
+        self.name = ""
         self.image = UIImage()
 
-        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
-            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
-                self?.ingredientCategories = categories
-                self?.selectedCategory = categories.first(where: { $0.id == categoryId })
-            })
+        ingredientCategoriesCancellable = categoriesPublisher()
+            .sink { [weak self] categories in
+                self?.categories = categories
+            }
     }
 
     func save() throws {
-        if isEdit {
-            try ingredient?.rename(inputName)
+        var updatedIngredient = try Ingredient(id: ingredient?.id,
+                                               name: name,
+                                               type: quantityType,
+                                               batches: ingredient?.batches ?? [],
+                                               category: category)
 
-            if image != UIImage() {
-                try storageManager.saveIngredientImage(image, name: inputName)
+        try storageManager.saveIngredient(&updatedIngredient)
+
+        if let id = updatedIngredient.id {
+            if image == UIImage() {
+                storageManager.deleteIngredientImage(name: String(id))
+            } else {
+                try storageManager.saveIngredientImage(image, name: String(id))
             }
-        } else {
-            ingredient = try Ingredient(name: inputName, type: selectedType)
-        }
-
-        guard var savedIngredient = ingredient else {
-            return
-        }
-
-        if let category = selectedCategory {
-            try category.add(savedIngredient)
-        } else {
-            savedIngredient.ingredientCategoryId = nil
-        }
-
-        if image != UIImage() {
-            try storageManager.saveIngredientImage(image, name: inputName)
-        }
-
-        try storageManager.saveIngredient(&savedIngredient)
+        }g
     }
 
     func reset() {
-        self.selectedType = .count
-        self.inputName = ""
-        self.selectedCategory = nil
+        self.quantityType = .count
+        self.name = ""
+        self.category = nil
         self.image = UIImage()
+    }
+
+    private func categoriesPublisher() -> AnyPublisher<[IngredientCategory], Never> {
+        storageManager.ingredientCategoriesPublisher()
+            .catch { _ in
+                Just<[IngredientCategory]>([])
+            }
+            .eraseToAnyPublisher()
     }
 
     struct AlertIdentifier: Identifiable {

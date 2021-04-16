@@ -37,7 +37,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
 
             guard let id = ingredientViewModel.ingredient.id,
-                  let ingredient = try? storageManager.fetchIngredient(id: id) else {
+                  var ingredient = try? storageManager.fetchIngredient(id: id) else {
                 // publisher would have updated viewModels otherwise
                 assertionFailure("Ingredient should exist in store")
                 continue
