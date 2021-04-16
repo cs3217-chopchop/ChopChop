@@ -8,6 +8,9 @@ final class RecipeViewModel: ObservableObject {
     var isPublished: Bool {
         recipe?.onlineId != nil
     }
+    var isCookingDisabled: Bool {
+        (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
+    }
 
     let timeFormatter: DateComponentsFormatter
     private let storageManager = StorageManager()

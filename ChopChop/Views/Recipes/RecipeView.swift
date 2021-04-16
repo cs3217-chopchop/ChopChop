@@ -37,6 +37,7 @@ struct RecipeView: View {
                 }) {
                     Image(systemName: "flame")
                 }
+                .disabled(viewModel.isCookingDisabled)
                 Button(action: {
                     showRecipeForm = true
                 }) {
