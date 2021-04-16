@@ -3,7 +3,6 @@ import SwiftUI
 struct OnlineRecipeByUserView: View {
     @ObservedObject var viewModel: OnlineRecipeByUserViewModel
 
-    @ViewBuilder
     var body: some View {
         VStack(spacing: 0) {
             OnlineRecipeView(viewModel: viewModel)

@@ -6,6 +6,7 @@ struct OnlineRecipeView: View {
     var body: some View {
         VStack(spacing: 0) {
             userBar
+            Divider()
             recipeImage
             averageRating
             if viewModel.isShowingDetail {
@@ -17,16 +18,21 @@ struct OnlineRecipeView: View {
     }
 
     var userBar: some View {
-        HStack {
-            Image("default-user")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 50, height: 50)
-                .clipShape(Circle())
-            Text(viewModel.creatorName)
-            Spacer()
+        NavigationLink(
+            destination: ProfileView(viewModel: ProfileViewModel(userId: viewModel.recipe.userId, settings: viewModel.settings))
+        ) {
+            HStack {
+                Image("default-user")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+                Text(viewModel.creatorName)
+                Spacer()
+            }
+            .padding()
         }
-        .padding()
+        .zIndex(1)
     }
 
     var recipeImage: some View {

@@ -1,4 +1,4 @@
-// swiftlint:disable line_length
+// swiftlint:disable line_length function_body_length
 
 import XCTest
 @testable import ChopChop

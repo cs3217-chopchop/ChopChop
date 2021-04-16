@@ -1,4 +1,4 @@
-// swiftlint:disable function_body_length
+// swiftlint:disable function_body_length type_body_length
 
 import XCTest
 
@@ -338,7 +338,8 @@ class SessionRecipeStepGraphTests: XCTestCase {
         XCTAssertEqual(graph.completableNodes, Set([nodes[0], nodes[1]]))
     }
 
-    private func getSessionNode(_ idx: Int, steps: [RecipeStep], nodes: [SessionRecipeStepNode]) -> SessionRecipeStepNode? {
+    private func getSessionNode(_ idx: Int, steps: [RecipeStep],
+                                nodes: [SessionRecipeStepNode]) -> SessionRecipeStepNode? {
         let content = steps[idx].content
         return nodes.first(where: { $0.label.step.content == content })
     }
