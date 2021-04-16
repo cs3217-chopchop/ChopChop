@@ -312,8 +312,8 @@ enum QuantityError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidQuantity:
-            return "Ingredient quantity must be a non-negative number."
+        case .negativeQuantity, .invalidQuantity:
+            return "Ingredient quantity should be a non-negative number."
         default:
             return ""
         }
