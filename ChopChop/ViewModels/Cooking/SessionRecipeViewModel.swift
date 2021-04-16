@@ -2,6 +2,7 @@ import SwiftUI
 
 class SessionRecipeViewModel: ObservableObject {
     @Published var showDetailsPanel = true
+    @Published var sheetIsPresented = false
 
     let sessionRecipe: SessionRecipe
 

@@ -6,7 +6,8 @@ struct SessionRecipeView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ZStack(alignment: .trailing) {
-                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.sessionRecipe.stepGraph, proxy: proxy))
+                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.sessionRecipe.stepGraph,
+                                                                  proxy: proxy))
 
                 if viewModel.showDetailsPanel {
                     VStack(spacing: 24) {
@@ -21,14 +22,20 @@ struct SessionRecipeView: View {
         }
         .toolbar {
             Button(action: {
+                viewModel.sheetIsPresented = true
+            }) {
+                Image(systemName: "checkmark")
+            }
+            Button(action: {
                 withAnimation {
                     viewModel.showDetailsPanel.toggle()
                 }
             }) {
-                HStack {
-                    Image(systemName: "dial.min")
-                }
+                Image(systemName: "gauge")
             }
+        }
+        .sheet(isPresented: $viewModel.sheetIsPresented) {
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: viewModel.sessionRecipe.recipe))
         }
     }
 

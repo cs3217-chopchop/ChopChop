@@ -21,6 +21,10 @@ final class SessionRecipeStepGraph {
         !nodes.allSatisfy { $0.label.timers.isEmpty }
     }
 
+    var isCompleted: Bool {
+        nodes.allSatisfy { $0.isCompleted }
+    }
+
     init() {
         graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
     }
