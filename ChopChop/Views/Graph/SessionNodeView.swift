@@ -18,28 +18,8 @@ import SwiftUI
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
-                if let index = viewModel.index {
-                    Text("Step \(index + 1)")
-                        .font(.headline)
-                        .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
-                        .strikethrough(viewModel.node.isCompleted)
-                }
-
-                ScrollView(isSelected ? [.vertical] : []) {
-                    VStack {
-                        viewModel.textWithTimers.reduce(Text(""), {
-                            $0 + Text($1.0)
-                                .foregroundColor(viewModel.node.isCompleted
-                                                    ? .secondary
-                                                    : $1.1 == nil
-                                                        ? .primary
-                                                        : .blue)
-                        })
-                        .strikethrough(viewModel.node.isCompleted)
-                        .lineLimit(isSelected ? nil : 1)
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
-                    }
-                }
+                stepText
+                nodeView
 
                 if isSelected {
                     detailView
@@ -47,6 +27,26 @@ import SwiftUI
                 }
             }
             .padding()
+        }
+    }
+
+    @ViewBuilder
+    var stepText: some View {
+        if let index = viewModel.index {
+            Text("Step \(index + 1)")
+                .font(.headline)
+                .foregroundColor(viewModel.node.isCompleted ? .secondary : .primary)
+                .strikethrough(viewModel.node.isCompleted)
+        }
+    }
+
+    var nodeView: some View {
+        ScrollView(isSelected ? [.vertical] : []) {
+            VStack {
+                Text(viewModel.node.label.step.content)
+                    .strikethrough(viewModel.node.isCompleted)
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
+            }
         }
     }
 
@@ -80,13 +80,15 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep(content: "#")),
+        if let step = try? RecipeStepNode(RecipeStep("#")),
            let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
-            SessionNodeView(viewModel:
-                                SessionNodeViewModel(graph: graph,
-                                                     node: SessionRecipeStepNode(step,
-                                                                                 actionTimeTracker: ActionTimeTracker())),
-                            selection: SelectionHandler())
+            SessionNodeView(
+                viewModel: SessionNodeViewModel(
+                    graph: graph,
+                    node: SessionRecipeStepNode(
+                        step,
+                        actionTimeTracker: ActionTimeTracker())),
+                        selection: SelectionHandler())
         }
     }
 }

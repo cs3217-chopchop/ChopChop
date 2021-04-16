@@ -18,8 +18,6 @@ struct User: Identifiable, CachableEntity {
 
         self.followees = followees
         self.ratings = ratings
-        self.followees = followees
-        self.ratings = ratings
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

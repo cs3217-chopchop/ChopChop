@@ -22,7 +22,10 @@ struct RecipeCollectionView: View {
                                   selections: $viewModel.selectedIngredients,
                                   options: viewModel.recipeIngredients)
             }
-            .padding([.leading, .trailing])
+            .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+
+            Divider()
+                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
 
             if viewModel.recipes.isEmpty {
                 NotFoundView(entityName: "Recipes")
@@ -70,7 +73,7 @@ struct RecipeCollectionView: View {
                     GridTile(recipe: recipe)
                         .contextMenu {
                             Button(action: {
-                                guard let index = viewModel.recipes.firstIndex(where: { $0 == recipe }) else {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0.id == recipe.id }) else {
                                     return
                                 }
 
@@ -83,25 +86,32 @@ struct RecipeCollectionView: View {
             }
             .padding([.bottom, .leading, .trailing])
         }
-        .padding(.top)
+    }
+
+    @ViewBuilder
+    func RecipeImage(recipe: RecipeInfo) -> some View {
+        if let image = viewModel.getRecipeImage(recipe: recipe) {
+            Image(uiImage: image)
+                .resizable()
+        } else {
+            Image("recipe")
+                .resizable()
+        }
     }
 
     @ViewBuilder
     func RecipeRow(recipe: RecipeInfo) -> some View {
-        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+        if let id = recipe.id {
             NavigationLink(
-                destination: RecipeView(
-                    viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe, settings: settings)
-                )
+                destination: RecipeView(viewModel: RecipeViewModel(id: id, settings: settings))
             ) {
                 HStack(alignment: .top) {
-                    Image("recipe")
-                        .resizable()
+                    RecipeImage(recipe: recipe)
                         .scaledToFill()
                         .frame(width: 60, height: 60)
                         .cornerRadius(10)
                         .clipped()
+
                     VStack(alignment: .leading) {
                         Text(recipe.name)
                             .lineLimit(1)
@@ -116,53 +126,53 @@ struct RecipeCollectionView: View {
 
     @ViewBuilder
     func GridTile(recipe: RecipeInfo) -> some View {
-        if let fetchedRecipe = viewModel.getRecipe(info: recipe) {
+        if let id = recipe.id {
             NavigationLink(
-                destination: RecipeView(
-                    viewModel: RecipeViewModel(
-                        recipe: fetchedRecipe, settings: settings)
-                )
+                destination: RecipeView(viewModel: RecipeViewModel(id: id, settings: settings))
             ) {
                 GridTileImage(recipe: recipe)
             }
-
         }
     }
 
+    @ViewBuilder
     func GridTileImage(recipe: RecipeInfo) -> some View {
-        Image("recipe")
-            .resizable()
+        RecipeImage(recipe: recipe)
             .scaledToFill()
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .aspectRatio(1, contentMode: .fill)
             .cornerRadius(10)
             .clipped()
             .overlay(
-                ZStack(alignment: .bottomLeading) {
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(stops: [
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .black, location: 0.5)
-                                ]),
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .cornerRadius(10)
-                        .opacity(0.8)
-                    VStack(alignment: .leading) {
-                        Text(recipe.name)
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                        RecipeCaption(recipe: recipe)
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                }
+                GridTileOverlay(recipe: recipe)
             )
             .padding([.leading, .trailing], 8)
+    }
+
+    func GridTileOverlay(recipe: RecipeInfo) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: Color.black.opacity(0), location: 0.3),
+                            .init(color: .black, location: 0.6)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(10)
+                .opacity(0.8)
+            VStack(alignment: .leading) {
+                Text(recipe.name)
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                RecipeCaption(recipe: recipe)
+                    .foregroundColor(.gray)
+            }
+            .padding()
+        }
     }
 
     func RecipeCaption(recipe: RecipeInfo) -> some View {
@@ -172,20 +182,7 @@ struct RecipeCollectionView: View {
                 """)
             HStack(spacing: 0) {
                 Text("Difficulty: ")
-
-                if let difficulty = recipe.difficulty {
-                    ForEach(0..<difficulty.rawValue, id: \.self) { _ in
-                        Image(systemName: "star.fill")
-                    }
-
-                    ForEach(difficulty.rawValue..<5, id: \.self) { _ in
-                        Image(systemName: "star")
-                    }
-                } else {
-                    ForEach(0..<5) { _ in
-                        Image(systemName: "star")
-                    }
-                }
+                DifficultyView(difficulty: recipe.difficulty)
             }
         }
         .font(.caption)

@@ -178,8 +178,22 @@ class Graph<N: Node> {
 }
 
 extension Graph: Equatable {
+    private struct EquatableEdge: Hashable {
+        let source: N.T
+        let destination: N.T
+        let weight: Double
+    }
+
     static func == (lhs: Graph<N>, rhs: Graph<N>) -> Bool {
-        Set(lhs.nodes) == Set(rhs.nodes) && Set(lhs.edges) == Set(rhs.edges)
+        Set(lhs.nodes.map { $0.label }) == Set(rhs.nodes.map { $0.label })
+            && Set(lhs.edges.map { EquatableEdge(source: $0.source.label,
+                                                 destination: $0.destination.label,
+                                                 weight: $0.weight)
+            })
+            == Set(rhs.edges.map { EquatableEdge(source: $0.source.label,
+                                                 destination: $0.destination.label,
+                                                 weight: $0.weight)
+            })
     }
 }
 

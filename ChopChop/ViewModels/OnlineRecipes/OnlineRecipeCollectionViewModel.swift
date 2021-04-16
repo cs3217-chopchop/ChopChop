@@ -1,7 +1,8 @@
 import Foundation
 
 final class OnlineRecipeCollectionViewModel: ObservableObject {
-    private let filter: OnlineRecipeCollectionFilter
+    private let filter: OnlineRecipeCollectionFilter?
+    private let userIds: [String]?
     @Published private(set) var recipes: [OnlineRecipe] = []
 
     private let storageManager = StorageManager()
@@ -11,10 +12,24 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
 
     init(filter: OnlineRecipeCollectionFilter, settings: UserSettings) {
         self.filter = filter
+        self.userIds = nil
+        self.settings = settings
+    }
+
+    init(userIds: [String], settings: UserSettings) {
+        self.userIds = userIds
+        self.filter = nil
         self.settings = settings
     }
 
     func load() {
+        if let userIds = userIds {
+            storageManager.fetchOnlineRecipes(userIds: userIds) { onlineRecipes, _ in
+                self.recipes = onlineRecipes
+            }
+            return
+        }
+
         if filter == .everyone {
             storageManager.fetchAllOnlineRecipes { onlineRecipes, _ in
                 self.recipes = onlineRecipes
@@ -33,7 +48,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
 }
 
 enum OnlineRecipeCollectionFilter: String {
-    case everyone = "All Recipes"
+    case everyone = "Discover"
     case followees = "Recipes from followees"
-    case own = "My Published Recipes"
+    case own = "Own"
 }

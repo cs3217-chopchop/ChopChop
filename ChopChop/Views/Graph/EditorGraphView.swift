@@ -89,39 +89,41 @@ struct EditorGraphView: View {
                         selection.toggleNode(node)
                     }
                 }
-                .gesture(
-                    LongPressGesture()
-                        .sequenced(before: DragGesture()
-                            .updating($lineDragInfo) { value, state, _ in
-                                guard let position = node.position else {
-                                    return
-                                }
-
-                                state = viewModel.onLongPressDragNode(value, position: position)
-                            }
-                            .onEnded { value in
-                                viewModel.onLongPressDragNodeEnd(value, node: node)
-                            }
-                        )
-                        .exclusively(before: DragGesture()
-                            .updating($nodeDragOffset) { value, state, _ in
-                                state = viewModel.onDragNode(value, node: node)
-                            }
-                            .onEnded { value in
-                                guard let position = node.position else {
-                                    return
-                                }
-
-                                node.position = position + CGVector(dx: value.translation.width,
-                                                                    dy: value.translation.height)
-                            }
-                    )
-                )
+                .gesture(getNodeGesture(node))
         }
     }
 
+    private func getNodeGesture(_ node: RecipeStepNode) -> some Gesture {
+        LongPressGesture()
+            .sequenced(before: DragGesture()
+                .updating($lineDragInfo) { value, state, _ in
+                    guard let position = node.position else {
+                        return
+                    }
+
+                    state = viewModel.onLongPressDragNode(value, position: position)
+                }
+                .onEnded { value in
+                    viewModel.onLongPressDragNodeEnd(value, node: node)
+                }
+            )
+            .exclusively(before: DragGesture()
+                .updating($nodeDragOffset) { value, state, _ in
+                    state = viewModel.onDragNode(value, node: node)
+                }
+                .onEnded { value in
+                    guard let position = node.position else {
+                        return
+                    }
+
+                    node.position = position + CGVector(dx: value.translation.width,
+                                                        dy: value.translation.height)
+                }
+            )
+    }
+
     func placeholderNodeView(position: CGPoint) -> some View {
-        guard let step = try? RecipeStep(content: "Add step details...") else {
+        guard let step = try? RecipeStep("Add step details...") else {
             return AnyView(EmptyView())
         }
 

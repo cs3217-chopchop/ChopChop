@@ -71,13 +71,15 @@ struct FirebaseDatabase {
         }
     }
 
-    func updateRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping (Error?) -> Void) {
+    func updateRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+                            completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(recipePath).document(recipeId)
-        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
 
         let batch = db.batch()
         batch.updateData(["ratings": FieldValue.arrayRemove([oldRating.asDict])], forDocument: docRef)
         batch.updateData(["ratings": FieldValue.arrayUnion([newRating.asDict])], forDocument: docRef)
+
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoDocRef)
 
         batch.commit { err in
@@ -312,6 +314,29 @@ struct FirebaseDatabase {
         }
     }
 
+    func fetchAllUserInfos(completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
+        var allUserInfoRecords = [String: UserInfoRecord]()
+        db.collection(userInfoPath).getDocuments { snapshot, err in
+            if let err = err {
+                completion(allUserInfoRecords, err)
+                return
+            }
+
+            guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }) else {
+                completion(allUserInfoRecords, err)
+                return
+            }
+
+            for userInfo in userInfoRecords {
+                guard let id = userInfo.id else {
+                    continue
+                }
+                allUserInfoRecords[id] = userInfo
+            }
+            completion(allUserInfoRecords, nil)
+        }
+    }
+
     // used for users page
     func fetchUserInfos(ids: [String], completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
@@ -350,7 +375,10 @@ struct FirebaseDatabase {
 
     }
 
-    func fetchUsers(ids: [String], completion: @escaping ([UserRecord], Error?) -> Void) {
+// TODO fetch all users
+// query: String = ""
+
+    func fetchUsers(ids: [String], query: String = "", completion: @escaping ([UserRecord], Error?) -> Void) {
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
         var allUserRecords: [UserRecord] = []
 
@@ -375,7 +403,12 @@ struct FirebaseDatabase {
         }
 
         dispatchGroup.notify(queue: .main) {
-            completion(allUserRecords, nil)
+            guard !query.isEmpty else {
+                completion(allUserRecords, nil)
+                return
+            }
+
+            completion(allUserRecords.filter { $0.name.contains(query) }, nil)
         }
     }
 

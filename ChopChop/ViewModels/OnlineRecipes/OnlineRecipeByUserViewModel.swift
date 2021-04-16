@@ -2,20 +2,11 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    @Published var creatorName = "No name" {
-        willSet { self.objectWillChange.send() }
-    }
+
+    @Published var isShowingRating: Bool = false
 
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
-
-        storageManager.fetchUserInfoById(userId: recipe.userId) {
-            user, _ in
-            guard let name = user?.name else {
-                return
-            }
-            self.creatorName = name
-        }
     }
 
     var ownRating: RecipeRating? {
@@ -34,11 +25,21 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         }
 
         guard let ownRating = ownRating else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating, completion: reload)
+            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating) { err in
+                guard err == nil else {
+                    return
+                }
+                self.reload()
+            }
             return
         }
         storageManager.rerateRecipe(recipeId: recipe.id, oldRating: ownRating,
-                                    newRating: RecipeRating(userId: userId, score: rating), completion: reload)
+                                    newRating: RecipeRating(userId: userId, score: rating)) { err in
+            guard err == nil else {
+                return
+            }
+            self.reload()
+        }
     }
 
     func removeRating() {
@@ -47,7 +48,17 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             return
         }
 
-        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating, completion: reload)
+        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating) { err in
+            guard err == nil else {
+                return
+            }
+            self.reload()
+        }
+
     }
 
+    func toggleShowRating() {
+        isShowingRating.toggle()
+        self.objectWillChange.send()
+    }
 }

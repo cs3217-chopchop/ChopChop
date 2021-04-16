@@ -1,4 +1,5 @@
 import GRDB
+
 enum QuantityType: Equatable, CaseIterable, Hashable {
 
     static let massToVolumeBaseRatio = 1.0

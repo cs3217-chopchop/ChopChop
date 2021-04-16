@@ -134,7 +134,7 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
@@ -165,8 +165,8 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, graph: &graph)
-        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, graph: &graph)
+        try appDatabase.saveRecipe(&pancakeRecipe, ingredients: &pancakeIngredients, stepGraph: &graph)
+        try appDatabase.saveRecipe(&scrambledEggRecipe, ingredients: &scrambledEggIngredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(pancakeRecipe.exists(db))
@@ -195,7 +195,7 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph))
     }
 
     func testSaveRecipe_insertsDuplicateIngredients_throwsError() throws {
@@ -211,20 +211,22 @@ class AppDatabaseTests: XCTestCase {
         ]
         var graph = RecipeStepGraph()
 
-        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph))
+        try XCTAssertThrowsError(appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph))
     }
 
     func testSaveRecipe_insertsValidGraph_success() throws {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
-        var steps: [RecipeStepRecord] = []
         var graph = RecipeStepGraph()
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
-
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         try dbWriter.read { db in
+            guard let graphRecord = try recipe.stepGraph.fetchOne(db) else {
+                XCTFail("Graph not found")
+                return
+            }
+
             try XCTAssertTrue(graphRecord.exists(db))
         }
     }
@@ -233,22 +235,22 @@ class AppDatabaseTests: XCTestCase {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         let steps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add milk and mix well until smooth.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -256,14 +258,19 @@ class AppDatabaseTests: XCTestCase {
         let nodes = steps.map { RecipeStepNode($0) }
         var graph = try RecipeStepGraph(nodes: nodes, edges: [])
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
-
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
 
-            for step in try graphRecord.steps.fetchAll(db) {
+            let graphRecord = try recipe.stepGraph.fetchOne(db)
+
+            guard let stepRecords = try graphRecord?.steps.fetchAll(db) else {
+                XCTFail("Graph steps cannot be found")
+                return
+            }
+
+            for step in try stepRecords {
                 XCTAssertTrue(steps.contains(where: { $0.content == step.content }))
             }
         }
@@ -273,22 +280,22 @@ class AppDatabaseTests: XCTestCase {
         var recipe = RecipeRecord(name: "Pancakes", servings: 2)
         var ingredients: [RecipeIngredientRecord] = []
         let steps = [
-            try RecipeStep(content: """
+            try RecipeStep("""
                 In a large bowl, mix dry ingredients together until well-blended.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Add milk and mix well until smooth.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Beat whites until stiff and then fold into batter gently.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Pour ladles of the mixture into a non-stick pan, one at a time.
                 """),
-            try RecipeStep(content: """
+            try RecipeStep("""
                 Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
                 pancakes.
                 """)
@@ -300,14 +307,18 @@ class AppDatabaseTests: XCTestCase {
                      Edge<RecipeStepNode>(source: nodes[0], destination: nodes[3])].compactMap { $0 }
         var graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
-        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, graph: &graph)
-
-        let graphRecord = RecipeStepGraphRecord(id: graph.id, recipeId: recipe.id)
+        try appDatabase.saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &graph)
 
         try dbWriter.read { db in
             try XCTAssertTrue(recipe.exists(db))
+            let graphRecord = try recipe.stepGraph.fetchOne(db)
 
-            for edge in try graphRecord.edges.fetchAll(db) {
+            guard let edgeRecords = try graphRecord?.edges.fetchAll(db) else {
+                XCTFail("Graph edges cannot be found")
+                return
+            }
+
+            for edge in edgeRecords {
                 let source = try edge.source.fetchOne(db)
                 let destination = try edge.destination.fetchOne(db)
 
@@ -1028,7 +1039,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let nodes = stepRecords.map { stepRecord -> RecipeStepNode? in
-            guard let step = try? RecipeStep(content: stepRecord.content) else {
+            guard let step = try? RecipeStep(stepRecord.content) else {
                 return nil
             }
 
@@ -1037,8 +1048,8 @@ class AppDatabaseTests: XCTestCase {
         let edges = edgeRecords.map { edgeRecord -> Edge<RecipeStepNode>? in
             guard let sourceRecord = stepRecords.first(where: { $0.id == edgeRecord.sourceId }),
                   let destinationRecord = stepRecords.first(where: { $0.id == edgeRecord.destinationId }),
-                  let sourceStep = try? RecipeStep(content: sourceRecord.content),
-                  let destinationStep = try? RecipeStep(content: destinationRecord.content),
+                  let sourceStep = try? RecipeStep(sourceRecord.content),
+                  let destinationStep = try? RecipeStep(destinationRecord.content),
                   let sourceNode = nodes.first(where: { $0.label == sourceStep }),
                   let destinationNode = nodes.first(where: { $0.label == destinationStep }) else {
                 return nil
@@ -1050,13 +1061,12 @@ class AppDatabaseTests: XCTestCase {
         let graph = try RecipeStepGraph(nodes: nodes, edges: edges)
 
         let recipe = try Recipe(
+            id: recipeRecord.id,
             name: recipeRecord.name,
+            category: RecipeCategory(id: categoryRecord.id, name: categoryRecord.name),
             ingredients: ingredientRecords
                 .compactMap { try? RecipeIngredient(name: $0.name, quantity: Quantity(from: $0.quantity)) },
             stepGraph: graph)
-
-        recipe.id = recipeRecord.id
-        recipe.recipeCategoryId = categoryRecord.id
 
         guard let id = recipeRecord.id else {
             XCTFail("Recipes should have a non-nil ID after insertion into database")
@@ -1120,7 +1130,7 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let recipeCategory = try RecipeCategory(name: "American")
-        let fetchedRecipeCategory = try appDatabase.fetchRecipeCategoryByName(name: "American")
+        let fetchedRecipeCategory = try appDatabase.fetchRecipeCategory(name: "American")
 
         XCTAssertEqual(fetchedRecipeCategory?.name, recipeCategory.name)
     }
@@ -1132,8 +1142,8 @@ class AppDatabaseTests: XCTestCase {
             try recipeRecord.insert(db)
         }
 
-        let recipe = try Recipe(name: "Pancakes", onlineId: "1", servings: 1)
-        let fetchedRecipe = try appDatabase.fetchRecipeByOnlineId(onlineId: "1")
+        let recipe = try Recipe(onlineId: "1", name: "Pancakes", servings: 1)
+        let fetchedRecipe = try appDatabase.fetchRecipe(onlineId: "1")
 
         XCTAssertEqual(recipe, fetchedRecipe)
     }

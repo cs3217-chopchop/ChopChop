@@ -71,6 +71,7 @@ extension CombineLatestCollection.Subscription: Combine.Subscription {
         var hasCompleted = false
         let lock = NSLock()
 
+        // swiftlint:disable closure_body_length
         cancellables = publishers.enumerated().map { index, publisher in
 
             publisher.sink(receiveCompletion: { completion in

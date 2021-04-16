@@ -3,10 +3,17 @@ import Combine
 
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
+
+    let storageManager = StorageManager()
+
+    @Published private(set) var recipeServingText = ""
+    @Published private(set) var creatorName = "No name"
+
     @Published private var firstRater = "No name"
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
-    let storageManager = StorageManager()
+    @Published var isShowingDetail: Bool = false
+
     let settings: UserSettings
     @Published var downloadRecipeViewModel: DownloadRecipeViewModel
 
@@ -15,8 +22,11 @@ class OnlineRecipeViewModel: ObservableObject {
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
 
+        updateCreatorName()
         updateFirstRaterName()
+        recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
         updateImage()
+
     }
 
     var averageRating: Double {
@@ -53,9 +63,22 @@ class OnlineRecipeViewModel: ObservableObject {
         }
     }
 
+    func toggleShowDetail() {
+        isShowingDetail.toggle()
+    }
+
+    private func updateCreatorName() {
+        storageManager.fetchUser(id: recipe.userId) { user, _ in
+            guard let name = user?.name else {
+                return
+            }
+            self.creatorName = name
+        }
+    }
+
     private func updateImage() {
-        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data in
-            guard let image = UIImage(data: data) else {
+        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, _  in
+            guard let data = data, let image = UIImage(data: data) else {
                 return
             }
             self.image = image
@@ -66,11 +89,11 @@ class OnlineRecipeViewModel: ObservableObject {
         guard let firstRaterId = getRaterId(recipe: recipe) else {
             return
         }
-        storageManager.fetchUserInfoById(userId: firstRaterId) { user, _ in
+        storageManager.fetchUser(id: firstRaterId) { user, _ in
             guard let name = user?.name else {
                 return
             }
-            self.firstRater = (self.settings.userId == user?.id ? "You" : name)
+            self.firstRater = (self.settings.userId == firstRaterId ? "You" : name)
         }
     }
 

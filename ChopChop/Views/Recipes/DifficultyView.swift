@@ -4,7 +4,6 @@ struct DifficultyView: View {
     let difficulty: Difficulty?
 
     var body: some View {
-
         if let difficulty = difficulty {
             ForEach(0..<difficulty.rawValue, id: \.self) { _ in
                 Image(systemName: "star.fill")

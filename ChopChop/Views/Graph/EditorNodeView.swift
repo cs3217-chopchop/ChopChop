@@ -13,6 +13,8 @@ struct EditorNodeView: View {
         self.selection = selection
 
         UITextView.appearance().backgroundColor = .clear
+        UITableView.appearance().backgroundColor = .clear
+        UITableViewCell.appearance().backgroundColor = .clear
     }
 
     var body: some View {
@@ -24,7 +26,7 @@ struct EditorNodeView: View {
                 }
 
                 if viewModel.isEditing {
-                    TextEditor(text: $viewModel.text)
+                    TextEditor(text: $viewModel.content)
                         .background(Color.primary.opacity(0.1))
                         .transition(.scale)
                         // Prevent taps from propogating
@@ -34,19 +36,19 @@ struct EditorNodeView: View {
                         Text(viewModel.node.label.content.isEmpty
                                 ? "Add step details..."
                                 : viewModel.node.label.content)
-                            .lineLimit(isSelected ? nil : 1)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .topLeading)
                             .foregroundColor(viewModel.node.label.content.isEmpty ? .secondary : .primary)
                     }
                 }
 
-                if isSelected && viewModel.isEditable {
+                if isSelected {
                     detailView
                         .transition(AnyTransition.scale.combined(with: AnyTransition.move(edge: .top)))
                 }
             }
             .padding()
         }
+        .overlay(timersView)
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
@@ -60,33 +62,93 @@ struct EditorNodeView: View {
                 }
                 Spacer()
                 Button(action: {
-                    viewModel.text = viewModel.node.label.content
+                    viewModel.content = viewModel.node.label.content
                     viewModel.isEditing = false
                 }) {
                     Text("Cancel")
                 }
             } else {
+                if viewModel.isEditable {
+                    Button(action: {
+                        viewModel.isEditing = true
+                    }) {
+                        Image(systemName: "square.and.pencil")
+                    }
+                }
+
                 Button(action: {
-                    viewModel.isEditing = true
+                    viewModel.showTimers.toggle()
                 }) {
-                    Image(systemName: "square.and.pencil")
+                    Image(systemName: "timer")
                 }
                 Spacer()
-                Button(action: {
-                    viewModel.removeNode()
-                    selection.toggleNode(viewModel.node)
-                }) {
-                    Image(systemName: "trash")
+
+                if viewModel.isEditable {
+                    Button(action: {
+                        viewModel.removeNode()
+                        selection.toggleNode(viewModel.node)
+                    }) {
+                        Image(systemName: "trash")
+                    }
                 }
             }
         }
         .padding(.top, 6)
     }
+
+    @ViewBuilder
+    var timersView: some View {
+        if isSelected && viewModel.showTimers {
+            TileView(isSelected: true,
+                     expandedSize: CGSize(width: RecipeStepNode.expandedSize.width / 2,
+                                          height: RecipeStepNode.expandedSize.height)) {
+                VStack {
+                    Text("Timers")
+                        .font(.headline)
+                        .padding([.top, .leading, .trailing])
+                    timersList
+                    .padding([.top, .bottom], 4)
+                    if viewModel.isEditable {
+                        HStack {
+                            Spacer()
+                            NavigationLink(
+                                destination: RecipeStepTimersView(viewModel: viewModel.recipeStepTimersViewModel)
+                            ) {
+                                Image(systemName: "square.and.pencil")
+                            }
+                        }
+                        .padding([.bottom, .leading, .trailing])
+                    }
+                }
+            }
+            .offset(x: RecipeStepNode.expandedSize.width * 0.75 + 32, y: 0)
+            .transition(.identity)
+        }
+    }
+
+    @ViewBuilder
+    var timersList: some View {
+        if viewModel.timers.isEmpty {
+            Spacer()
+            Text("No step timers")
+                .foregroundColor(.secondary)
+            Spacer()
+        } else {
+            List {
+                ForEach(viewModel.timers, id: \.self) { duration in
+                    HStack {
+                        Text(viewModel.timeFormatter.string(from: duration) ?? "")
+                    }
+                }
+                .listRowBackground(Color.clear)
+            }
+        }
+    }
 }
 
 struct EditorNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep(content: "#") {
+        if let step = try? RecipeStep("#") {
             EditorNodeView(viewModel: EditorNodeViewModel(graph: RecipeStepGraph(),
                                                           node: RecipeStepNode(step)),
                            selection: SelectionHandler())

@@ -22,7 +22,7 @@ struct TimerNodeView: View {
                 }
 
                 LazyHGrid(rows: rows) {
-                    ForEach(viewModel.textWithTimers.compactMap({ $0.1 }), id: \.self) { timer in
+                    ForEach(viewModel.node.label.timers, id: \.self) { timer in
                         CountdownTimerView(viewModel: CountdownTimerViewModel(countdownTimer: timer))
                             .padding()
                     }
@@ -36,7 +36,7 @@ struct TimerNodeView: View {
 
  struct TimerNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep(content: "#") {
+        if let step = try? RecipeStep("#") {
             TimerNodeView(viewModel:
                             TimerNodeViewModel(graph: SessionRecipeStepGraph(),
                                                node: SessionRecipeStepNode(RecipeStepNode(step),
