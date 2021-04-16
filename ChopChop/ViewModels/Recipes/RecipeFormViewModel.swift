@@ -127,8 +127,8 @@ class RecipeFormViewModel: ObservableObject {
             } else {
                 try storageManager.saveRecipe(&newRecipe)
             }
-            if image != UIImage() {
-                try storageManager.saveRecipeImage(image, name: recipeName)
+            if image != UIImage(), let id = recipeId {
+                try storageManager.saveRecipeImage(image, id: id, name: recipeName)
             }
             return true
         } catch {

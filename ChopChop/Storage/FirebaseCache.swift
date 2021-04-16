@@ -4,7 +4,7 @@ class FirebaseCache {
 
     let onlineRecipeCache = Cache<String, OnlineRecipe>()
     let userCache = Cache<String, User>()
-    let imageCache = Cache<String, Data>()
+    var onlineRecipeImageCache = [String: Data]() // TODO Dont use NSCache, otherwise will evict images out when low on memory??
 
 }
 

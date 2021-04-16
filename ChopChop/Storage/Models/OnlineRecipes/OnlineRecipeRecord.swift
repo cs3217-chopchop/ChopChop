@@ -22,5 +22,5 @@ extension OnlineRecipeRecord: Codable {
 }
 
 enum OnlineRecipeRecordError: Error {
-    case missingId, missingCreatedDate, missingUpdatedDate
+    case missingId, missingCreatedDate, missingUpdatedDate, missingImageUpdatedDate
 }

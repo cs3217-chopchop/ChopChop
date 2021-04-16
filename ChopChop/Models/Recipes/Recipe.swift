@@ -11,11 +11,13 @@ class Recipe: FetchableRecord, ObservableObject {
     @Published private(set) var difficulty: Difficulty?
     @Published private(set) var ingredients: [RecipeIngredient]
     @Published private(set) var stepGraph: RecipeStepGraph
+    var isImageUploaded: Bool
 
-    init(name: String, onlineId: String? = nil, servings: Double = 1,
+    init(name: String, onlineId: String? = nil, isImageUploaded: Bool, servings: Double = 1,
          recipeCategoryId: Int64? = nil, difficulty: Difficulty? = nil,
          ingredients: [RecipeIngredient] = [], graph: RecipeStepGraph = RecipeStepGraph()) throws {
         self.onlineId = onlineId
+        self.isImageUploaded = isImageUploaded
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -139,7 +141,7 @@ extension Recipe: NSCopying {
         do {
             let copy = try Recipe(
                 name: name,
-                servings: servings,
+                isImageUploaded: false, servings: servings, // TODO
                 difficulty: difficulty,
                 ingredients: newIngredients,
                 graph: stepGraph)

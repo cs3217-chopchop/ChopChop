@@ -112,7 +112,7 @@ class RecipeViewModel: ObservableObject {
         }
 
         guard isPublished else {
-            try? storageManager.createOnlineRecipe(recipe: &recipe, userId: userId)
+            try? storageManager.addOnlineRecipe(recipe: &recipe, userId: userId)
             return
         }
         storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)

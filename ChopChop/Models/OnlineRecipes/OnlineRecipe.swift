@@ -13,11 +13,12 @@ struct OnlineRecipe: Identifiable, CachableEntity {
     let ratings: [RecipeRating]
     let createdAt: Date
     let updatedAt: Date
+    let imageUpdatedAt: Date
 
     init(id: String, userId: String, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating],
-         createdAt: Date, updatedAt: Date) throws {
+         createdAt: Date, updatedAt: Date, imageUpdatedAt: Date) throws {
         self.id = id
         self.userId = userId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -37,6 +38,7 @@ struct OnlineRecipe: Identifiable, CachableEntity {
         self.ratings = ratings
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.imageUpdatedAt = imageUpdatedAt
     }
 }
 
@@ -52,6 +54,10 @@ extension OnlineRecipe {
 
         guard let updatedDate = info.updatedAt else {
             throw OnlineRecipeRecordError.missingUpdatedDate
+        }
+
+        guard let imageUpdatedDate = info.updatedAt else {
+            throw OnlineRecipeRecordError.missingImageUpdatedDate
         }
 
         let stepGraphNodes = try record.steps.compactMap({
@@ -100,7 +106,8 @@ extension OnlineRecipe {
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,
             createdAt: createdDate,
-            updatedAt: updatedDate
+            updatedAt: updatedDate,
+            imageUpdatedAt: imageUpdatedDate
         )
     }
 }

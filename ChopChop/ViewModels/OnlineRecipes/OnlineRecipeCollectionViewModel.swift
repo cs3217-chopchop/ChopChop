@@ -20,11 +20,11 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
                 self.recipes = onlineRecipes
             }
         } else if filter == .followees {
-            storageManager.fetchRecipesByUsers(userIds: settings.user?.followees ?? []) { onlineRecipes, _ in
+            storageManager.fetchOnlineRecipes(userIds: settings.user?.followees ?? []) { onlineRecipes, _ in
                 self.recipes = onlineRecipes
             }
         } else if filter == .own {
-            storageManager.fetchRecipesByUsers(userIds: [settings.userId].compactMap { $0 }) { onlineRecipes, _ in
+            storageManager.fetchOnlineRecipes(userIds: [settings.userId].compactMap { $0 }) { onlineRecipes, _ in
                 self.recipes = onlineRecipes
             }
         }

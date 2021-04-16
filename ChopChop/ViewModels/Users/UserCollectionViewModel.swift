@@ -15,7 +15,7 @@ final class UserCollectionViewModel: ObservableObject {
     }
 
     func load() {
-        storageManager.fetchAllUserInfos { users, _ in
+        storageManager.fetchUsers { users, _ in
             self.followees = users.filter { self.isFollowee(user: $0) }
             self.nonFollowees = users.filter { self.isNonFollowee(user: $0) }
         }

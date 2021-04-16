@@ -22,7 +22,7 @@ final class UserSettings: ObservableObject {
             return
         }
         // listener should only be created once
-        storageManager.listenUserById(userId: userId) { user in
+        storageManager.userListener(id: userId) { user in
             self.user = user
         }
     }

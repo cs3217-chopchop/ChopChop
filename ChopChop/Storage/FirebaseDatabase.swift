@@ -9,7 +9,7 @@ struct FirebaseDatabase {
     private let db = Firestore.firestore()
 
     // MARK: - FirebaseDatabase: Create/Update
-    func addRecipe(recipe: OnlineRecipeRecord) throws -> String {
+    func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
         let recipeDocRef = db.collection(recipePath).document()
         let batch = db.batch()
         try batch.setData(from: recipe, forDocument: recipeDocRef)
@@ -18,11 +18,13 @@ struct FirebaseDatabase {
         let recipeInfoRef = db.collection(recipeInfoPath).document(recipeDocRef.documentID)
         try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
 
-        batch.commit()
+        batch.commit { err in
+            completion(err)
+        }
         return recipeDocRef.documentID
     }
 
-    func updateRecipe(recipe: OnlineRecipeRecord) {
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploaded: Bool, completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -40,11 +42,20 @@ struct FirebaseDatabase {
         ], forDocument: recipeDocRef, merge: true)
 
         let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
-        batch.setData([
-            "updatedAt": FieldValue.serverTimestamp()
-        ], forDocument: recipeInfoDocRef, merge: true)
+        if isImageUploaded {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp(),
+                "imageUpdatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        } else {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        }
 
-        batch.commit()
+        batch.commit { err in
+            completion(err)
+        }
     }
 
     func addRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
@@ -68,12 +79,13 @@ struct FirebaseDatabase {
         batch.updateData(["ratings": FieldValue.arrayRemove([oldRating.asDict])], forDocument: docRef)
         batch.updateData(["ratings": FieldValue.arrayUnion([newRating.asDict])], forDocument: docRef)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoDocRef)
+
         batch.commit { err in
             completion(err)
         }
     }
 
-    func addUserRecipeRating(userId: String, rating: UserRating) {
+    func addUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let userRef = db.collection(userPath).document(userId)
         batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: userRef)
@@ -81,20 +93,25 @@ struct FirebaseDatabase {
         let userInfoRef = db.collection(userInfoPath).document(userId)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
 
-        batch.commit()
+        batch.commit { err in
+            completion(err)
+        }
     }
 
-    func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating) {
+    func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating, completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(userPath).document(userId)
         let userInfoDocRef = db.collection(userInfoPath).document(userId)
         let batch = db.batch()
         batch.updateData(["ratings": FieldValue.arrayRemove([oldRating.asDict])], forDocument: docRef)
         batch.updateData(["ratings": FieldValue.arrayUnion([newRating.asDict])], forDocument: docRef)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoDocRef)
-        batch.commit()
+
+        batch.commit { err in
+            completion(err)
+        }
     }
 
-    func addUser(user: UserRecord) throws -> String {
+    func addUser(user: UserRecord, completion: @escaping (Error?) -> Void) throws -> String {
         let userRef = db.collection(userPath).document()
         let batch = db.batch()
         try batch.setData(from: user, forDocument: userRef)
@@ -103,7 +120,9 @@ struct FirebaseDatabase {
         let userInfoRef = db.collection(userInfoPath).document(userRef.documentID)
         try batch.setData(from: userInfo, forDocument: userInfoRef)
 
-        batch.commit()
+        batch.commit { err in
+            completion(err)
+        }
         return userRef.documentID
     }
 
@@ -147,7 +166,7 @@ struct FirebaseDatabase {
         }
     }
 
-    func removeUserRecipeRating(userId: String, rating: UserRating) {
+    func removeUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let userRef = db.collection(userPath).document(userId)
         batch.updateData(["ratings": FieldValue.arrayRemove([rating.asDict])], forDocument: userRef)
@@ -155,18 +174,9 @@ struct FirebaseDatabase {
         let userInfoRef = db.collection(userInfoPath).document(userId)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
 
-        batch.commit()
-    }
-
-    // not used
-    func removeUser(userId: String) throws {
-        let userRef = db.collection(userPath).document(userId)
-        let batch = db.batch()
-        batch.deleteDocument(userRef)
-
-        let userInfoRef = db.collection(userInfoPath).document(userId)
-        batch.deleteDocument(userInfoRef)
-        batch.commit()
+        batch.commit { err in
+            completion(err)
+        }
     }
 
     func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
@@ -176,6 +186,7 @@ struct FirebaseDatabase {
 
         let userInfoRef = db.collection(userInfoPath).document(userId)
         batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
+
         batch.commit { err in
             completion(err)
         }
@@ -183,24 +194,31 @@ struct FirebaseDatabase {
 
     // MARK: - FirebaseDatabase: Read
 
-    func fetchUserInfoById(userId: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
-        db.collection(userInfoPath).document(userId).getDocument { document, err in
+    func fetchUserInfo(id: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
+        db.collection(userInfoPath).document(id).getDocument { document, err in
             guard let userInfo = try? document?.data(as: UserInfoRecord.self) else {
-                assertionFailure("Should have document")
                 completion(nil, err)
                 return
             }
             completion(userInfo, nil)
-            // dont update userInfoCache because updatedAt will be incorrectly too recent
         }
+    }
 
+    func fetchUser(id: String, completion: @escaping (UserRecord?, Error?) -> Void) {
+        db.collection(userPath).document(id).getDocument { document, err in
+            guard let user = try? document?.data(as: UserRecord.self) else {
+                completion(nil, err)
+                return
+            }
+            completion(user, nil)
+        }
     }
 
     // TODO test ALOT
-    func fetchRecipeInfosByUsers(userIds: [String], completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
+    func fetchOnlineRecipeInfos(userIds: [String], completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
 
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
-        var allOnlineRecipeInfoRecords = [String : OnlineRecipeInfoRecord]()
+        var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
 
         let totalUserCount = userIds.count
         let queryLimit = QueryLimiter(max: totalUserCount)
@@ -210,6 +228,8 @@ struct FirebaseDatabase {
             db.collection(recipeInfoPath).whereField("creator", in: range).getDocuments { snapshot, err in
                 guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }) else {
                     completion(allOnlineRecipeInfoRecords, err)
+                    dispatchGroup.leave()
+                    return
                 }
 
                 for recipeInfo in recipeInfoRecords {
@@ -227,6 +247,25 @@ struct FirebaseDatabase {
         }
     }
 
+    func fetchAllOnlineRecipeInfos(completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
+        db.collection(recipeInfoPath).getDocuments { snapshot, err in
+            var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
+
+            guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }) else {
+                completion(allOnlineRecipeInfoRecords, err)
+                return
+            }
+
+            for recipeInfo in recipeInfoRecords {
+                guard let id = recipeInfo.id else {
+                    continue
+                }
+                allOnlineRecipeInfoRecords[id] = recipeInfo
+            }
+            completion(allOnlineRecipeInfoRecords, nil)
+        }
+    }
+
     func fetchOnlineRecipes(ids: [String], completion: @escaping ([OnlineRecipeRecord], Error?) -> Void) {
 
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
@@ -239,6 +278,8 @@ struct FirebaseDatabase {
             db.collection(recipePath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
                 guard let recipeRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeRecord.self) }) else {
                     completion([], err)
+                    dispatchGroup.leave()
+                    return
                 }
 
                 allOnlineRecipeRecords.append(contentsOf: recipeRecords)
@@ -251,70 +292,13 @@ struct FirebaseDatabase {
         }
     }
 
-    func fetchOnlineRecipeInfosHelper(snapshot: QuerySnapshot?, error: Error?,
-                                      completion: @escaping ([OnlineRecipeInfoRecord], Error?) -> Void) {
-        guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }) else {
-            completion([], error)
-        }
-        completion(recipeInfoRecords, nil)
-    }
-
-    // TODO test ALOT
-    func fetchRecipesByUsers(userIds: [String], completion: @escaping ([OnlineRecipeRecord], Error?) -> Void) {
-
-        // recipeInfos of 10 users -> recipes of 10 recipeInfos
-        guard !userIds.isEmpty else {
-            completion([], nil)
-            return
-        }
-
-        let totalUserCount = userIds.count
-        let queryLimit = QueryLimiter(max: totalUserCount)
-        while queryLimit.hasNext {
-            let range = [] + userIds[queryLimit.current..<queryLimit.next()]
-            db.collection(recipeInfoPath).whereField("creator", in: range).getDocuments { snapshot, err in
-                fetchOnlineRecipeHelper(snapshot: snapshot, error: err) {
-
-                }
-            }
-        }
-    }
-
-    // TODO test ALOT
-    func fetchAllRecipes(completion: @escaping ([OnlineRecipe], Error?) -> Void) {
-        var allRecipeInfoRecords = DictionaryWrapper()
-
-        db.collection(recipeInfoPath).getDocuments { snapshot, err in
-            fetchOnlineRecipeHelper(snapshot: snapshot, error: err, completion: completion, allRecipeInfoRecords: allRecipeInfoRecords)
-        }
-    }
-
-    // used for users page
-    func fetchAllUserInfos(completion: @escaping ([UserInfoRecord], Error?) -> Void) {
-        db.collection(userInfoPath).getDocuments { snapshot, _ in
-            guard let documents = snapshot?.documents else {
-                assertionFailure("No user documents")
-                return
-            }
-
-            var userInfos: [UserInfoRecord] = []
-            for document in documents {
-                guard let userInfo = try? document.data(as: UserInfoRecord.self), let userId = userInfo.id else {
-                    continue
-                }
-                userInfos.append(userInfo)
-                cache.userInfoCache.insert(userInfo, forKey: userId)
-            }
-            completion(userInfos, nil)
-        }
-    }
-
     func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipeRecord?, Error?) -> Void) {
         db.collection(recipePath).document(id).getDocument { snapshot, err in
             guard let recipeRecord = try? snapshot?.data(as: OnlineRecipeRecord.self) else {
-                    completion(nil, err)
-                }
-                completion(recipeRecord, nil)
+                completion(nil, err)
+                return
+            }
+            completion(recipeRecord, nil)
         }
     }
 
@@ -322,29 +306,85 @@ struct FirebaseDatabase {
         db.collection(recipeInfoPath).document(id).getDocument { snapshot, err in
             guard let recipeInfoRecord = try? snapshot?.data(as: OnlineRecipeInfoRecord.self) else {
                 completion(nil, err)
-                assertionFailure("Should have recipeInfo")
                 return
             }
             completion(recipeInfoRecord, nil)
         }
     }
 
-    func fetchOnlineRecipeInfo(onlineRecipeId: String, completion: @escaping (OnlineRecipeInfoRecord?, Error?) -> Void) {
-        db.collection(recipeInfoPath).document(onlineRecipeId).getDocument { snapshot, err in
-                guard let recipeInfo = try? snapshot?.data(as: OnlineRecipeInfoRecord.self) else {
-                    completion(nil, err)
+    // used for users page
+    func fetchUserInfos(ids: [String], completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allUserInfoRecords = [String: UserInfoRecord]()
+
+        let totalUserCount = ids.count
+        let queryLimit = QueryLimiter(max: totalUserCount)
+        while queryLimit.hasNext {
+            let range = [] + ids[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(userInfoPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+
+                if let err = err {
+                    completion(allUserInfoRecords, err)
                     return
                 }
-                completion(recipeInfo, nil)
+
+                guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }) else {
+                    completion(allUserInfoRecords, err)
+                    return
+                }
+
+                for userInfo in userInfoRecords {
+                    guard let id = userInfo.id else {
+                        continue
+                    }
+                    allUserInfoRecords[id] = userInfo
+                }
+                dispatchGroup.leave()
             }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            completion(allUserInfoRecords, nil)
+        }
+
+    }
+
+    func fetchUsers(ids: [String], completion: @escaping ([UserRecord], Error?) -> Void) {
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allUserRecords: [UserRecord] = []
+
+        let queryLimit = QueryLimiter(max: ids.count)
+        while queryLimit.hasNext {
+            let range = [] + ids[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(userPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+                if let err = err {
+                    completion([], err)
+                    return
+                }
+
+                guard let userRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserRecord.self) }) else {
+                    completion([], err)
+                    return
+                }
+
+                allUserRecords.append(contentsOf: userRecords) // TODO: dataraces?
+                dispatchGroup.leave()
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            completion(allUserRecords, nil)
+        }
     }
 
     // MARK: - FirebaseDatabase: Listeners
 
-    func listenUserById(userId: String, onChange: @escaping (User) -> Void) {
-        db.collection(userPath).document(userId)
+    func userListener(id: String, onChange: @escaping (UserRecord) -> Void) {
+        db.collection(userPath).document(id)
             .addSnapshotListener { documentSnapshot, _ in
-                guard let user = try? documentSnapshot?.data(as: User.self) else {
+                guard let user = try? documentSnapshot?.data(as: UserRecord.self) else {
                     assertionFailure("No user")
                     return
                 }
@@ -352,39 +392,6 @@ struct FirebaseDatabase {
             }
     }
 
-    private func fetchOnlineRecipeHelper(snapshot: QuerySnapshot?, error: Error?,
-                                         completion: @escaping ([OnlineRecipeInfoRecord], Error?) -> Void) {
-        guard let documents = snapshot?.documents else {
-            completion([], error)
-            return
-        }
-
-        // to find out which recipes to fetch
-        var recipeIdsToFetch: [String] = []
-
-        let recipeInfoRecords = documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }
-    }
-
-    private func shouldFetchOnlineRecipe(recipeInfoRecord: OnlineRecipeInfoRecord) -> Bool {
-        guard let onlineRecipeId = recipeInfoRecord.id,
-              let cachedCopy = cache.onlineRecipeCache[onlineRecipeId],
-              let actualLastUpdatedAt = recipeInfoRecord.updatedAt,
-              cachedCopy.updatedAt >= actualLastUpdatedAt else {
-            return true
-        }
-        return false
-    }
-
-    private func shouldFetchUser(userInfo: UserInfoRecord) -> Bool {
-        guard let userId = userInfo.id,
-              let cachedCopy = cache.userInfoCache[userId],
-              let actualLastUpdatedAt = userInfo.updatedAt,
-              let cachedLastUpdatedAt = cachedCopy.updatedAt,
-              cachedLastUpdatedAt >= actualLastUpdatedAt else {
-            return true
-        }
-        return false
-    }
 }
 
 enum FirebaseError: Error {

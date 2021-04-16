@@ -26,6 +26,21 @@ struct User: Identifiable, CachableEntity {
 
 }
 
+extension User {
+    init?(from record: UserRecord, infoRecord: UserInfoRecord) {
+        guard let id = record.id, let createdAt = infoRecord.createdAt, let updatedAt = infoRecord.updatedAt else {
+            return nil // TODO: or throw errors?
+        }
+
+        self.id = id
+        self.name = record.name
+        self.followees = record.followees
+        self.ratings = record.ratings
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
 enum UserError: Error {
     case emptyName
 }

@@ -22,3 +22,7 @@ struct UserRecord {
     }
 
 }
+
+extension UserRecord: Codable {
+
+}
