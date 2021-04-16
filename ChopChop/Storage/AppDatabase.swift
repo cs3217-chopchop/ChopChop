@@ -596,9 +596,22 @@ extension AppDatabase {
         }
     }
 
-    func fetchRecipeCategory(name: String) throws -> RecipeCategoryRecord? {
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try dbWriter.read { db in
-            try RecipeCategoryRecord.filter(RecipeCategoryRecord.Columns.name == name).fetchOne(db)
+            let request = RecipeCategoryRecord
+                .filter(RecipeCategoryRecord.Columns.name == name)
+
+            return try RecipeCategory.fetchOne(db, request)
+        }
+    }
+
+    func fetchIngredients() throws -> [Ingredient] {
+        try dbWriter.read { db in
+            let request = IngredientRecord
+                .all()
+                .including(all: IngredientRecord.batches)
+
+            return try Ingredient.fetchAll(db, request)
         }
     }
 

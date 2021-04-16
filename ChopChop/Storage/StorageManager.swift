@@ -110,12 +110,16 @@ struct StorageManager {
         try appDatabase.fetchRecipe(onlineId: onlineId)
     }
 
-    func fetchIngredient(id: Int64) throws -> Ingredient? {
-        try appDatabase.fetchIngredient(id: id)
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategory(name: name)
     }
 
-    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategory(name: name).map { try RecipeCategory(id: $0.id, name: $0.name) }
+    func fetchIngredients() throws -> [Ingredient] {
+        try appDatabase.fetchIngredients()
+    }
+
+    func fetchIngredient(id: Int64) throws -> Ingredient? {
+        try appDatabase.fetchIngredient(id: id)
     }
 
     // MARK: - Database Access: Publishers
