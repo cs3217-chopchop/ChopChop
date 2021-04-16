@@ -21,5 +21,16 @@ class DeductibleIngredientViewModel: ObservableObject {
     func updateError(msg: String) {
         errorMsg = msg
     }
+}
 
+extension DeductibleIngredientViewModel: Equatable {
+    static func == (lhs: DeductibleIngredientViewModel, rhs: DeductibleIngredientViewModel) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+}
+
+extension DeductibleIngredientViewModel: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
 }

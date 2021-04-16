@@ -4,23 +4,29 @@ struct CompleteSessionRecipeView: View {
     @ObservedObject var viewModel: CompleteSessionRecipeViewModel
 
     var body: some View {
-        VStack(alignment: .center) {
-            Text("Ingredients to Deduct")
-                .font(.largeTitle)
+        VStack {
+            Text("Deduct Ingredients")
+                .font(.title)
                 .padding()
-            ForEach(viewModel.recipeIngredients, id: \.ingredient.name) { deductibleIngredient in
-                DeductibleIngredientView(viewModel: deductibleIngredient)
+
+            if viewModel.deductibleIngredients.isEmpty {
+                NotFoundView(entityName: "Deductible Ingredients")
+            } else {
+                ScrollView {
+                    ForEach(viewModel.deductibleIngredients, id: \.self) { recipeIngredientViewModel in
+                        DeductibleIngredientView(viewModel: recipeIngredientViewModel)
+                    }
+                }
             }
-            Text(viewModel.recipeIngredients.isEmpty ? "No ingredients to deduct" : "")
-            Button("Submit") {
-                viewModel.submit()
-            }.disabled(viewModel.isSuccess || viewModel.recipeIngredients.isEmpty)
-            .font(.title2)
-            .padding()
-            Text(viewModel.isSuccess ? "Success" : "")
-                .foregroundColor(.green)
-                .padding()
-        }.padding()
+
+            Button("Complete Recipe") {
+                if !viewModel.deductibleIngredients.isEmpty {
+                    viewModel.submit()
+                }
+            }
+        }
+        .padding()
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
     }
 }
 

@@ -2,15 +2,14 @@ import Combine
 import InflectorKit
 
 class CompleteSessionRecipeViewModel: ObservableObject {
-    @Published var recipeIngredients: [DeductibleIngredientViewModel] = []
-    @Published var isSuccess = false
+    @Published var deductibleIngredients: [DeductibleIngredientViewModel] = []
 
     private let storageManager = StorageManager()
 
     init(recipe: Recipe) {
         let ingredients = (try? storageManager.fetchIngredients()) ?? []
 
-        recipeIngredients = recipe.ingredients.compactMap { recipeIngredient in
+        deductibleIngredients = recipe.ingredients.compactMap { recipeIngredient in
             // First check for exact matches, then case-insensitive matches, then plurality-insensitive matches
             let exactMatch = ingredients.first(where: { $0.name == recipeIngredient.name })
             let caseInsensitiveMatch = ingredients.first(where: {
@@ -31,7 +30,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
     func submit() {
         var ingredientsToSave: [Ingredient] = []
         // atomic
-        for ingredientViewModel in recipeIngredients {
+        for ingredientViewModel in deductibleIngredients {
             ingredientViewModel.updateError(msg: "") // reset error
 
             guard let amount = Double(ingredientViewModel.deductBy) else {
@@ -72,7 +71,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
         }
 
-        guard (recipeIngredients.allSatisfy { $0.errorMsg.isEmpty }) else {
+        guard (deductibleIngredients.allSatisfy { $0.errorMsg.isEmpty }) else {
             return
         }
 
@@ -84,7 +83,5 @@ class CompleteSessionRecipeViewModel: ObservableObject {
                 assertionFailure("Couldn't save ingredient")
             }
         }
-
-        isSuccess = recipeIngredients.allSatisfy { $0.errorMsg.isEmpty }
     }
 }
