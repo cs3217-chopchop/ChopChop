@@ -8,15 +8,6 @@ struct EditorNodeView: View {
         selection.isNodeSelected(viewModel.node)
     }
 
-    init(viewModel: EditorNodeViewModel, selection: SelectionHandler<RecipeStepNode>) {
-        self.viewModel = viewModel
-        self.selection = selection
-
-        UITextView.appearance().backgroundColor = .clear
-        UITableView.appearance().backgroundColor = .clear
-        UITableViewCell.appearance().backgroundColor = .clear
-    }
-
     var body: some View {
         TileView(isSelected: isSelected) {
             VStack {
@@ -27,7 +18,6 @@ struct EditorNodeView: View {
 
                 if viewModel.isEditing {
                     TextEditor(text: $viewModel.content)
-                        .background(Color.primary.opacity(0.1))
                         .transition(.scale)
                 } else {
                     ScrollView(isSelected ? [.vertical] : []) {

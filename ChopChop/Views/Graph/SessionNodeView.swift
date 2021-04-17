@@ -8,13 +8,6 @@ import SwiftUI
         selection.isNodeSelected(viewModel.node)
     }
 
-    init(viewModel: SessionNodeViewModel, selection: SelectionHandler<SessionRecipeStepNode>) {
-        self.viewModel = viewModel
-        self.selection = selection
-
-        UITextView.appearance().backgroundColor = .clear
-    }
-
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
