@@ -1,14 +1,21 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model for a view of a collection of non followees.
+ */
 class NonFolloweeCollectionViewModel: ObservableObject {
-    private let storageManager = StorageManager()
+    /// The id of the user who's non followees are displayed.
     private let userId: String
     let settings: UserSettings
 
+    /// The non followees of the user.
     @Published private(set) var nonFollowees: [User] = []
+
+    /// Search bar field
     @Published var query = ""
 
+    private let storageManager = StorageManager()
     private var userCancellable: AnyCancellable?
     private var nonFolloweesCancellable: AnyCancellable?
 

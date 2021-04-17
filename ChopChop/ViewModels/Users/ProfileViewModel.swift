@@ -1,22 +1,26 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model for a view of a user profile.
+ */
 final class ProfileViewModel: ObservableObject {
-    private let storageManager = StorageManager()
+    /// The id of the user displayed in the profile view.
     private let userId: String
-    private let settings: UserSettings
-    @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
+    /// The ids of the followees of the user.
+    private var followeeIds: [String] = []
 
-    private var ownUserCancellable: AnyCancellable?
-    private var userCancellable: AnyCancellable?
-    private var recipesCancellable: AnyCancellable?
-
+    /// User profile details
     @Published private(set) var userName = ""
     @Published private(set) var publishedRecipesCount = 0
     @Published private(set) var followeeCount = 0
-
-    private var followeeIds: [String] = []
     @Published private(set) var isFollowedByUser = false
+
+    private let settings: UserSettings
+    private let storageManager = StorageManager()
+    private var cancellables: Set<AnyCancellable> = []
+
+    @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     init(userId: String, settings: UserSettings) {
         self.userId = userId
@@ -24,28 +28,36 @@ final class ProfileViewModel: ObservableObject {
         self.recipesViewModel = OnlineRecipeCollectionViewModel(
             publisher: ProfileViewModel.getRecipesPublisher(userId: userId))
 
-        ownUserCancellable = ownUserPublisher?
+        ownUserPublisher?
             .sink { [weak self] ownUser in
                 self?.followeeIds = ownUser.followees
                 self?.isFollowedByUser = ownUser.followees.contains(userId)
             }
+            .store(in: &cancellables)
 
-        userCancellable = userPublisher
+        userPublisher
             .sink { [weak self ] user in
                 self?.userName = user.name
                 self?.followeeCount = user.followees.count
             }
+            .store(in: &cancellables)
 
-        recipesCancellable = recipesViewModel.$recipes
+        recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
+            .store(in: &cancellables)
     }
 
+    /// Checks if the profile belongs to the current user.
     var isOwnProfile: Bool {
         userId == settings.userId
     }
 
+    /**
+     Adds the user as a followee of the current user.
+     If the current user is already following the user or if the profile belongs to the current user, do nothing.
+     */
     func addFollowee() {
         guard let ownId = settings.userId, !isOwnProfile, !isFollowedByUser else {
             return
@@ -54,6 +66,10 @@ final class ProfileViewModel: ObservableObject {
         storageManager.addFollowee(userId: ownId, followeeId: userId)
     }
 
+    /**
+     Removes the user as a followee of the current user.
+     If the current user is not following the user or if the profile belongs to the current user, do nothing.
+     */
     func removeFollowee() {
         guard let ownId = settings.userId, !isOwnProfile, isFollowedByUser else {
             return
