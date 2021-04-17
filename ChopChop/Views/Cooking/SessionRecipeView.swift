@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SessionRecipeView: View {
+    @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
@@ -37,8 +38,13 @@ struct SessionRecipeView: View {
                 }
             }
         }
-        .sheet(isPresented: $viewModel.sheetIsPresented) {
-            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: viewModel.sessionRecipe.recipe))
+        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: {
+            if viewModel.isComplete {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }) {
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: viewModel.sessionRecipe.recipe),
+                                      isComplete: $viewModel.isComplete)
         }
     }
 

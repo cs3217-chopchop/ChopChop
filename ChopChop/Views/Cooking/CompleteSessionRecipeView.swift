@@ -3,6 +3,7 @@ import SwiftUI
 struct CompleteSessionRecipeView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: CompleteSessionRecipeViewModel
+    @Binding var isComplete: Bool
 
     var body: some View {
         VStack {
@@ -23,6 +24,7 @@ struct CompleteSessionRecipeView: View {
             Button("Complete Recipe") {
                 if viewModel.deductibleIngredients.isEmpty || viewModel.completeRecipe() {
                     presentationMode.wrappedValue.dismiss()
+                    isComplete = true
                 }
             }
         }
@@ -34,7 +36,8 @@ struct CompleteSessionRecipeView: View {
 struct CompleteSessionView_Previews: PreviewProvider {
     static var previews: some View {
         if let recipe = try? Recipe(name: "Preview") {
-            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: recipe))
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: recipe),
+                                      isComplete: .constant(false))
         }
     }
 }
