@@ -48,27 +48,25 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingCreatedDate
         }
 
-        let stepGraphNodes = try record.steps.compactMap({
-            try RecipeStep($0)
+//        let stepGraphNodes = try record.steps.compactMap({
+//            try RecipeStep($0)
+//        })
+//        .map({
+//            RecipeStepNode($0)
+//        })
+        var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
+        record.steps.forEach({
+            let step = try? RecipeStep($0.content)
+            guard let recipeStep = step else {
+                return
+            }
+            uuidToRecipeStepNodeMap[$0.id] = RecipeStepNode(recipeStep)
         })
-        .map({
-            RecipeStepNode($0)
-        })
-
+        
         var stepGraphEdges = [Edge<RecipeStepNode>]()
         record.stepEdges.forEach {
-            var source: RecipeStepNode?
-            var destination: RecipeStepNode?
-            for node in stepGraphNodes {
-                if source == nil && node.label.content == $0.sourceStep {
-                    source = node
-                } else if destination == nil && node.label.content == $0.destinationStep {
-                    destination = node
-                }
-                if source != nil && destination != nil {
-                    break
-                }
-            }
+            let source = uuidToRecipeStepNodeMap[$0.sourceStepId]
+            let destination = uuidToRecipeStepNodeMap[$0.destinationStepId]
             guard let sourceStepNode = source, let destinationStepNode = destination else {
                 return
             }
@@ -79,7 +77,8 @@ extension OnlineRecipe {
             stepGraphEdges.append(edge)
         }
 
-        let stepGraph = (try? RecipeStepGraph(nodes: stepGraphNodes, edges: stepGraphEdges)) ?? RecipeStepGraph()
+        let stepGraph = (try? RecipeStepGraph(nodes: Array(uuidToRecipeStepNodeMap.values), edges: stepGraphEdges))
+            ?? RecipeStepGraph()
 
         try self.init(
             id: id,

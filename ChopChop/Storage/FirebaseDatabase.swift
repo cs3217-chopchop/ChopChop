@@ -3,7 +3,7 @@ import Combine
 import CombineFirebase
 
 struct FirebaseDatabase {
-    private let recipePath: String = "recipes"
+    private let recipePath: String = "testFork"
     private let userPath: String = "users"
     private let db = Firestore.firestore()
 
@@ -29,7 +29,8 @@ struct FirebaseDatabase {
             "servings": recipe.servings,
             "difficulty": recipe.difficulty?.rawValue,
             "cuisine": recipe.cuisine,
-            "steps": recipe.steps,
+            "steps": recipe.steps.map({ $0.asDict }),
+            "stepEdges": recipe.stepEdges.map({ $0.asDict }),
             "ingredients": recipe.ingredients.map({ $0.asDict })
         ], merge: true)
     }
