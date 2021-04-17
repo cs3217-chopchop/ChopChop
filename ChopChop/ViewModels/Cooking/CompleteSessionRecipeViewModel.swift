@@ -49,7 +49,7 @@ final class CompleteSessionRecipeViewModel: ObservableObject {
             deductibleIngredient.errorMessages = []
 
             guard let value = Double(deductibleIngredient.quantity),
-                  let quantity = try? Quantity(deductibleIngredient.type, value: value) else {
+                  let quantity = try? Quantity(deductibleIngredient.unit, value: value) else {
                 deductibleIngredient.errorMessages.append(QuantityError.invalidQuantity.errorDescription ?? "")
                 hasErrors = true
                 continue

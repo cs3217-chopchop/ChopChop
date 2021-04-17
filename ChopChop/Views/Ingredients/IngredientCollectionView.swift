@@ -16,9 +16,6 @@ struct IngredientCollectionView: View {
                 expiryDatePicker
             }
 
-            Divider()
-                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
-
             if viewModel.ingredients.isEmpty {
                 NotFoundView(entityName: "Ingredients")
             } else {
@@ -58,7 +55,7 @@ struct IngredientCollectionView: View {
             Spacer()
             filterByExpiryDateButton
         }
-        .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+        .padding([.leading, .trailing])
     }
 
     private var addIngredientButton: some View {
@@ -98,6 +95,7 @@ struct IngredientCollectionView: View {
             )
             .fixedSize()
         }
+        .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
     }
 
     // MARK: - Ingredient Image
@@ -168,7 +166,6 @@ struct IngredientCollectionView: View {
             }
             .padding([.bottom, .leading, .trailing])
         }
-        .padding(.top)
     }
 
     @ViewBuilder

@@ -2,14 +2,14 @@ import SwiftUI
 
 final class DeductibleIngredientViewModel: ObservableObject {
     @Published var quantity: String
-    @Published var type: QuantityUnit
+    @Published var unit: QuantityUnit
     @Published var errorMessages: [String] = []
 
     let ingredient: Ingredient
 
     init(ingredient: Ingredient, recipeIngredient: RecipeIngredient) {
         quantity = recipeIngredient.quantity.value.description
-        type = recipeIngredient.quantity.unit
+        unit = recipeIngredient.quantity.unit
         self.ingredient = ingredient
     }
 
@@ -20,13 +20,13 @@ final class DeductibleIngredientViewModel: ObservableObject {
             .joined(separator: ".")
     }
 
-    // TODO: Change when ingredient becomes struct
     func convertToIngredient() throws -> Ingredient {
         guard let value = Double(quantity) else {
             throw QuantityError.invalidQuantity
         }
 
-        try ingredient.use(quantity: Quantity(type, value: value))
+        var ingredient = self.ingredient
+        try ingredient.use(quantity: Quantity(unit, value: value))
 
         return ingredient
     }

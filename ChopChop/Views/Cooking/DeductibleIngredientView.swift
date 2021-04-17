@@ -10,7 +10,7 @@ struct DeductibleIngredientView: View {
                     TextField("Quantity", text: Binding(get: { viewModel.quantity },
                                                         set: viewModel.setQuantity))
                         .keyboardType(.decimalPad)
-                    Picker(viewModel.type.description, selection: $viewModel.type) {
+                    Picker(viewModel.unit.description, selection: $viewModel.unit) {
                         ForEach(QuantityUnit.allCases, id: \.self) {
                             Text($0.description)
                         }
