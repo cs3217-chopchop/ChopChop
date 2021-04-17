@@ -26,12 +26,15 @@ struct SessionRecipeView: View {
             }) {
                 Image(systemName: "checkmark")
             }
-            Button(action: {
-                withAnimation {
-                    viewModel.showDetailsPanel.toggle()
+
+            if !viewModel.sessionRecipe.recipe.ingredients.isEmpty || viewModel.sessionRecipe.stepGraph.hasTimers {
+                Button(action: {
+                    withAnimation {
+                        viewModel.showDetailsPanel.toggle()
+                    }
+                }) {
+                    Image(systemName: "gauge")
                 }
-            }) {
-                Image(systemName: "gauge")
             }
         }
         .sheet(isPresented: $viewModel.sheetIsPresented) {
