@@ -16,10 +16,10 @@ struct OnlineRecipeView: View {
                 Divider()
                 showDetailBar
             }
-            .onAppear {
-                viewModel.load()
-            }
             ProgressView(isShow: $viewModel.isLoading)
+        }
+        .onAppear {
+            viewModel.load()
         }
     }
 

@@ -7,7 +7,12 @@ class OnlineRecipeViewModel: ObservableObject {
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
-    @Published private(set) var creatorName = "No name"
+    @Published private(set) var creatorName = "No name" {
+        didSet {
+            print("im updated!")
+            print(creatorName)
+        }
+    }
 
     @Published private var firstRater = "No name"
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
@@ -47,7 +52,7 @@ class OnlineRecipeViewModel: ObservableObject {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
-    func load() {
+    func reload() {
         isLoading = true
         storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
             guard let onlineRecipe = onlineRecipe else {
@@ -59,6 +64,15 @@ class OnlineRecipeViewModel: ObservableObject {
             self.updateCreatorName()
             self.updateRecipeServingText()
         }
+    }
+
+    func load() {
+        print("Load onlinerecipe view")
+        isLoading = true
+        updateFirstRaterName()
+        updateImage()
+        updateCreatorName()
+        updateRecipeServingText()
     }
 
     func toggleShowDetail() {
@@ -79,6 +93,7 @@ class OnlineRecipeViewModel: ObservableObject {
                 return
             }
             self.creatorName = name
+            self.objectWillChange.send()
         }
     }
 

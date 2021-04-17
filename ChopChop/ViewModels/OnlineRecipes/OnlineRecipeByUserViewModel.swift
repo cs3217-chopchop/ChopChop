@@ -29,7 +29,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
                 guard err == nil else {
                     return
                 }
-                self.load()
+                self.reload()
             }
             return
         }
@@ -38,7 +38,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             guard err == nil else {
                 return
             }
-            self.load()
+            self.reload()
         }
     }
 
@@ -52,7 +52,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             guard err == nil else {
                 return
             }
-            self.load()
+            self.reload()
         }
 
     }

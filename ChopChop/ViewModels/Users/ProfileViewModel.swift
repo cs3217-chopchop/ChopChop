@@ -56,6 +56,8 @@ final class ProfileViewModel: ObservableObject {
     }
 
     func load() {
+        print("Load profile view")
+
         isLoading = true
         guard !isOwnProfile else {
             followeeCount = settings.user?.followees.count ?? 0

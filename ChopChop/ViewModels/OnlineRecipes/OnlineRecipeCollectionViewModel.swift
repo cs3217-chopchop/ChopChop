@@ -39,6 +39,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
     }
 
     func load() {
+        print("Load onlinerecipe collectionviewModel")
         isLoading = true
         if let userIds = userIds {
             storageManager.fetchOnlineRecipes(userIds: userIds) { onlineRecipes, _ in
@@ -46,9 +47,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
                 self.isLoading = false
             }
             return
-        }
-
-        if filter == .everyone {
+        } else if filter == .everyone {
             storageManager.fetchAllOnlineRecipes { onlineRecipes, _ in
                 self.recipes = onlineRecipes
                 self.isLoading = false
