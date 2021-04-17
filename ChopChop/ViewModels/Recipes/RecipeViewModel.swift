@@ -32,7 +32,6 @@ final class RecipeViewModel: ObservableObject {
             }
     }
 
-    // TODO: Properly throw errors
     func publish() {
         guard var recipe = recipe, let userId = settings.userId else {
             assertionFailure()
@@ -40,7 +39,7 @@ final class RecipeViewModel: ObservableObject {
         }
 
         if isPublished {
-            storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
+            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
                 _ in
 
             }

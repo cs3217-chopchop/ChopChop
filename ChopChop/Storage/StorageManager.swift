@@ -19,7 +19,7 @@ struct StorageManager {
 
     func saveRecipe(_ recipe: inout Recipe) throws {
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
-        isImageUploaded: recipe.isImageUploaded,
+                                        isImageUploaded: recipe.isImageUploaded,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -191,7 +191,7 @@ extension StorageManager {
         guard var recipe = try fetchRecipe(id: id) else {
             return
         }
-        recipe.isImageUploaded = false
+        recipe.isImageUploaded = nil
         try saveRecipe(&recipe)
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
@@ -273,15 +273,17 @@ extension StorageManager {
             stepEdges: edgeRecords
         )
         let onlineId = try firebaseDatabase.addOnlineRecipe(recipe: recipeRecord, completion: completion)
-        recipe.onlineId = onlineId
-        recipe.isImageUploaded = true
-        try self.saveRecipe(&recipe)
 
         guard let id = recipe.id else {
+            assertionFailure("Should have id")
             return
         }
 
         let recipeImage = self.fetchRecipeImage(name: String(id))
+
+        recipe.onlineId = onlineId
+        recipe.isImageUploaded = (recipeImage == nil ? nil : true)
+        try self.saveRecipe(&recipe)
 
         guard let fetchedRecipeImage = recipeImage else {
             return
@@ -292,7 +294,7 @@ extension StorageManager {
     }
 
     // update details of published recipe (note that ratings cant be updated here)
-    func updateOnlineRecipe(recipe: Recipe, userId: String, completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipe(recipe: Recipe, userId: String, completion: @escaping (Error?) -> Void) throws {
 
         let cuisine = recipe.category?.name
         let ingredients = recipe.ingredients.map({
@@ -318,22 +320,30 @@ extension StorageManager {
         )
 
         guard let id = recipe.id, let isImageUploaded = (try? fetchRecipe(id: id)?.isImageUploaded) else {
-            // should not happen
+            assertionFailure("Should have id and imagedUploaded")
             return
         }
 
-        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploaded: isImageUploaded, completion: completion)
+        // isImageUploaded -> means no updates to local image -> don't need upload image
+
+        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, willUploadImage: !isImageUploaded, completion: completion)
 
         guard !isImageUploaded, let onlineId = recipe.onlineId else {
             return
         }
 
-        if let fetchedImage = fetchRecipeImage(name: String(id)) {
+        let image = fetchRecipeImage(name: String(id))
+
+        if let fetchedImage = image {
             firebaseStorage.uploadImage(image: fetchedImage, name: onlineId)
         } else {
             firebaseStorage.deleteImage(name: onlineId)
             cache.onlineRecipeImageCache[onlineId] = nil
         }
+
+        var recipe = recipe
+        recipe.isImageUploaded = (image == nil ? nil : true)
+        try saveRecipe(&recipe)
 
         // note: don't update cache because don't know updatedAt timestamps
     }
@@ -385,7 +395,7 @@ extension StorageManager {
             return
         }
         localRecipe.onlineId = nil
-        localRecipe.isImageUploaded = false
+        localRecipe.isImageUploaded = nil
         try self.saveRecipe(&localRecipe)
     }
 
@@ -532,21 +542,23 @@ extension StorageManager {
                 completion(nil, err)
                 return
             }
+
             guard let imageUpdatedAt = recipeInfoRecord.imageUpdatedAt,
                   let lastFetchedImageDate = cache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
                   lastFetchedImageDate >= imageUpdatedAt else {
-                firebaseStorage.fetchImage(name: recipeId) { data, err in
-                    guard let data = data, err == nil else {
-                        completion(nil, err)
-                        return
-                    }
-                    cache.onlineRecipeImageCache[recipeId] = data
-                    completion(data, nil)
-                }
+                let data = cache.onlineRecipeImageCache[recipeId]
+                completion(data, nil)
                 return
             }
-            let data = cache.onlineRecipeImageCache[recipeId]
-            completion(data, nil)
+
+            firebaseStorage.fetchImage(name: recipeId) { data, err in
+                guard let data = data, err == nil else {
+                    completion(nil, err)
+                    return
+                }
+                cache.onlineRecipeImageCache[recipeId] = data
+                completion(data, nil)
+            }
 
         }
 

@@ -27,7 +27,7 @@ struct User: Identifiable, CachableEntity {
 extension User {
     init?(from record: UserRecord, infoRecord: UserInfoRecord) {
         guard let id = record.id, let createdAt = infoRecord.createdAt, let updatedAt = infoRecord.updatedAt else {
-            return nil // TODO: or throw errors?
+            return nil // or throw errors?
         }
 
         self.id = id

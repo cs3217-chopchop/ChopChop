@@ -24,9 +24,9 @@ struct CompleteSessionRecipeView: View {
     }
 }
 
-// struct CompleteSessionView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        // swiftlint:disable force_try
-//        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes", isImageUploaded: false)))
-//    }
-// }
+ struct CompleteSessionView_Previews: PreviewProvider {
+    static var previews: some View {
+        // swiftlint:disable force_try
+        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes")))
+    }
+ }

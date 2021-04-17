@@ -19,7 +19,7 @@ final class CreateUserProfileViewModel: ObservableObject {
             return
         }
 
-        // TODO sth wrong here
+        // Its not possible to create a user with just aname
         guard !name.isEmpty else {
             errorMessage = "Empty name not accepted"
             return
@@ -30,11 +30,6 @@ final class CreateUserProfileViewModel: ObservableObject {
                 assertionFailure()
                 return
             }
-        }
-
-        guard let receivedUserId = userId else {
-            assertionFailure()
-            return
         }
 
         settings.userId = userId

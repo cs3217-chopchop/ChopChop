@@ -4,7 +4,7 @@ import GRDB
 struct Recipe: Equatable {
     var id: Int64?
     var onlineId: String?
-    var isImageUploaded: Bool
+    var isImageUploaded: Bool?
     let name: String
     let category: RecipeCategory?
     let servings: Double
@@ -17,7 +17,7 @@ struct Recipe: Equatable {
     }
 
     // swiftlint:disable function_default_parameter_at_end
-    init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool = false,
+    init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
          stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {

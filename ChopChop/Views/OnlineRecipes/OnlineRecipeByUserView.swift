@@ -45,11 +45,3 @@ struct OnlineRecipeByUserView: View {
         .padding()
     }
 }
-
-// struct OnlineRecipeByUserView_Previews: PreviewProvider {
-//    // swiftlint:disable force_try line_length
-//    static var previews: some View {
-//        OnlineRecipeByUserView(viewModel: OnlineRecipeByUserViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
-//
-//    }
-// }

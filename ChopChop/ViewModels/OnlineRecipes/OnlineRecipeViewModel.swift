@@ -16,6 +16,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
     let settings: UserSettings
     @Published var downloadRecipeViewModel: DownloadRecipeViewModel
+    @Published var isLoading = false
 
     init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         self.recipe = recipe
@@ -47,6 +48,7 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     func load() {
+        isLoading = true
         storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
             guard let onlineRecipe = onlineRecipe else {
                 return
@@ -68,6 +70,10 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func updateCreatorName() {
+        guard recipe.userId != settings.userId  else {
+            creatorName = settings.user?.name ?? "No name"
+            return
+        }
         storageManager.fetchUser(id: recipe.userId) { user, err in
             guard let name = user?.name, err == nil else {
                 return
@@ -82,6 +88,7 @@ class OnlineRecipeViewModel: ObservableObject {
                 return
             }
             self.image = image
+            self.isLoading = false // takes the longest
         }
     }
 

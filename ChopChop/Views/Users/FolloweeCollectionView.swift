@@ -4,27 +4,30 @@ struct FolloweeCollectionView: View {
     @ObservedObject var viewModel: FolloweeCollectionViewModel
 
     var body: some View {
-        VStack {
-            SearchBar(text: $viewModel.query, placeholder: "Search followees...")
-            HStack {
-                NavigationLink(
-                    destination: AddFolloweeView(
-                        viewModel: NonFolloweeCollectionViewModel(
-                            settings: viewModel.settings))) {
-                    Image(systemName: "plus")
+        ZStack {
+            VStack {
+                SearchBar(text: $viewModel.query, placeholder: "Search followees...")
+                HStack {
+                    NavigationLink(
+                        destination: AddFolloweeView(
+                            viewModel: NonFolloweeCollectionViewModel(
+                                settings: viewModel.settings))) {
+                        Image(systemName: "plus")
+                    }
+                    Spacer()
                 }
-                Spacer()
-            }
-            .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
 
-            Divider()
-                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
+                Divider()
+                    .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
 
-            if viewModel.followees.isEmpty {
-                NotFoundView(entityName: "Followees")
-            } else {
-                followeeList
+                if viewModel.followees.isEmpty {
+                    NotFoundView(entityName: "Followees")
+                } else {
+                    followeeList
+                }
             }
+            ProgressView(isShow: $viewModel.isLoading)
         }
         .navigationTitle(Text("Followees"))
         .onAppear {

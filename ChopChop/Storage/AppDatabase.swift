@@ -33,7 +33,6 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                 t.column("isImageUploaded", .boolean)
-                    .notNull()
                 t.column("recipeCategoryId", .integer)
                     .indexed()
                     .references("recipeCategory", onDelete: .setNull)
@@ -197,35 +196,31 @@ extension AppDatabase {
 
         var recipes = [
 
-            RecipeRecord(isImageUploaded: false, recipeCategoryId: categories[2].id,
+            RecipeRecord(recipeCategoryId: categories[2].id,
                          name: "Pancakes",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false, recipeCategoryId: categories[1].id,
+            RecipeRecord(recipeCategoryId: categories[1].id,
                          name: "Carbonara",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false, recipeCategoryId: categories[2].id,
+            RecipeRecord( recipeCategoryId: categories[2].id,
                          name: "Scrambled Eggs",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false,
-                         recipeCategoryId: categories[2].id,
+            RecipeRecord(recipeCategoryId: categories[2].id,
                          name: "Pizza",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false,
-                         recipeCategoryId: categories[0].id,
+            RecipeRecord(recipeCategoryId: categories[0].id,
                          name: "Ramen",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false,
-                         recipeCategoryId: categories[0].id,
+            RecipeRecord(recipeCategoryId: categories[0].id,
                          name: "Katsudon",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(isImageUploaded: false,
-                         name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
+            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
                          servings: Double(Int.random(in: 1...5)))
         ]
 

@@ -3,7 +3,7 @@ import GRDB
 struct RecipeRecord: Equatable {
     var id: Int64?
     var onlineId: String?
-    var isImageUploaded: Bool
+    var isImageUploaded: Bool?
     var recipeCategoryId: Int64?
     var name: String
     var servings: Double

@@ -24,7 +24,7 @@ struct FirebaseDatabase {
         return recipeDocRef.documentID
     }
 
-    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploaded: Bool, completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, willUploadImage: Bool, completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -42,14 +42,14 @@ struct FirebaseDatabase {
         ], forDocument: recipeDocRef, merge: true)
 
         let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
-        if isImageUploaded {
-            batch.setData([
-                "updatedAt": FieldValue.serverTimestamp()
-            ], forDocument: recipeInfoDocRef, merge: true)
-        } else {
+        if willUploadImage {
             batch.setData([
                 "updatedAt": FieldValue.serverTimestamp(),
                 "imageUpdatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        } else {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp()
             ], forDocument: recipeInfoDocRef, merge: true)
         }
 
@@ -380,7 +380,7 @@ struct FirebaseDatabase {
                     return
                 }
 
-                allUserRecords.append(contentsOf: userRecords) // TODO: dataraces?
+                allUserRecords.append(contentsOf: userRecords)
                 dispatchGroup.leave()
             }
         }

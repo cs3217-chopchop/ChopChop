@@ -4,6 +4,7 @@ import Combine
 class NonFolloweeCollectionViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private let settings: UserSettings
+    @Published var isLoading = false
 
     @Published private(set) var nonFollowees: [User] = []
     @Published var query = "" {
@@ -17,6 +18,7 @@ class NonFolloweeCollectionViewModel: ObservableObject {
     }
 
     private func updateNonFollowees() {
+        isLoading = true
         storageManager.fetchAllUsers { users, _ in
             guard let followees = self.settings.user?.followees else {
                 return
@@ -25,10 +27,12 @@ class NonFolloweeCollectionViewModel: ObservableObject {
             self.nonFollowees = users
                 .filter { !followees.contains($0.id) && self.settings.userId != $0.id }
                 .filter { self.query.isEmpty || $0.name.contains(self.query) }
+            self.isLoading = false
         }
     }
 
     func load() {
+        isLoading = true
         updateNonFollowees()
         query = ""
     }

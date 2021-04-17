@@ -5,14 +5,18 @@ struct AddFolloweeView: View {
     @EnvironmentObject var settings: UserSettings
 
     var body: some View {
-        VStack {
-            SearchBar(text: $viewModel.query, placeholder: "Search...")
+        ZStack {
+            VStack {
+                SearchBar(text: $viewModel.query, placeholder: "Search...")
 
-            if viewModel.nonFollowees.isEmpty {
-                NotFoundView(entityName: "Non Followees")
-            } else {
-                nonFolloweeList
+                if viewModel.nonFollowees.isEmpty {
+                    NotFoundView(entityName: "Non Followees")
+                } else {
+                    nonFolloweeList
+                }
+
             }
+            ProgressView(isShow: $viewModel.isLoading)
         }
         .navigationTitle(Text("Add Followees"))
         .onAppear {
