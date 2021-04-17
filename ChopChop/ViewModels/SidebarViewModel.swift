@@ -1,37 +1,48 @@
 import Combine
 import SwiftUI
 
+/**
+ Represents a view model of a view of the sidebar.
+ */
 final class SidebarViewModel: ObservableObject {
+    /// The collection of recipe categories.
     @Published private(set) var recipeCategories: [RecipeCategory] = []
+    /// The collection of ingredient categories.
     @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
-    @Published var sheetIsPresented = false
+    /// Form fields
     @Published var categoryName = ""
     @Published var categoryType: CategoryType?
-
-    private let storageManager = StorageManager()
-    private var recipeCategoriesCancellable: AnyCancellable?
-    private var ingredientCategoriesCancellable: AnyCancellable?
+    @Published var sheetIsPresented = false
 
     private let settings: UserSettings
+    private let storageManager = StorageManager()
+    private var cancellables: Set<AnyCancellable> = []
 
     init(settings: UserSettings) {
         self.settings = settings
-        recipeCategoriesCancellable = recipeCategoriesPublisher()
+
+        recipeCategoriesPublisher
             .sink { [weak self] categories in
                 self?.recipeCategories = categories
             }
+            .store(in: &cancellables)
 
-        ingredientCategoriesCancellable = ingredientCategoriesPublisher()
+        ingredientCategoriesPublisher
             .sink { [weak self] categories in
                 self?.ingredientCategories = categories
             }
+            .store(in: &cancellables)
     }
 
+    /**
+     Adds a new recipe or ingredient category.
+     */
     func addCategory() {
         switch categoryType {
         case .recipe:
@@ -46,7 +57,7 @@ final class SidebarViewModel: ObservableObject {
         categoryType = nil
     }
 
-    func addRecipeCategory(name: String) {
+    private func addRecipeCategory(name: String) {
         do {
             var category = try RecipeCategory(name: name)
             try storageManager.saveRecipeCategory(&category)
@@ -63,7 +74,7 @@ final class SidebarViewModel: ObservableObject {
         }
     }
 
-    func addIngredientCategory(name: String) {
+    private func addIngredientCategory(name: String) {
         do {
             var category = try IngredientCategory(name: name)
             try storageManager.saveIngredientCategory(&category)
@@ -80,6 +91,9 @@ final class SidebarViewModel: ObservableObject {
         }
     }
 
+    /**
+     Deletes the recipe categories at the given indices of the recipe category array.
+     */
     func deleteRecipeCategories(at offsets: IndexSet) {
         do {
             let ids = offsets.compactMap { recipeCategories[$0].id }
@@ -92,6 +106,9 @@ final class SidebarViewModel: ObservableObject {
         }
     }
 
+    /**
+     Deletes the ingredient categories at the given indices of the ingredient category array.
+     */
     func deleteIngredientCategories(at offsets: IndexSet) {
         do {
             let ids = offsets.compactMap { ingredientCategories[$0].id }
@@ -104,7 +121,7 @@ final class SidebarViewModel: ObservableObject {
         }
     }
 
-    private func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
+    private var recipeCategoriesPublisher: AnyPublisher<[RecipeCategory], Never> {
         storageManager.recipeCategoriesPublisher()
             .catch { _ in
                 Just<[RecipeCategory]>([])
@@ -112,7 +129,7 @@ final class SidebarViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Never> {
+    private var ingredientCategoriesPublisher: AnyPublisher<[IngredientCategory], Never> {
         storageManager.ingredientCategoriesPublisher()
             .catch { _ in
                 Just<[IngredientCategory]>([])
@@ -120,15 +137,23 @@ final class SidebarViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    // retrieve publishers from StorageManager
-    var allRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+    // MARK: - Online Recipe Publishers
+
+    /**
+     Returns a publisher that publishes all online recipes.
+     */
+    var allOnlineRecipesPublisher: AnyPublisher<[OnlineRecipe], Error> {
         storageManager.allRecipesPublisher()
     }
 
-    var followeesRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+    /**
+     Returns a publisher that publishes all online recipes by the user's followees.
+     */
+    var followeesOnlineRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
         guard let userId = settings.userId else {
             fatalError("No user id stored")
         }
+
         return storageManager.allFolloweesRecipePublisher(userId: userId)
     }
 }
