@@ -21,12 +21,6 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
-
-        updateCreatorName()
-        updateFirstRaterName()
-        recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
-        updateImage()
-
     }
 
     var averageRating: Double {
@@ -52,7 +46,7 @@ class OnlineRecipeViewModel: ObservableObject {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
-    func reload() {
+    func load() {
         storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
             guard let onlineRecipe = onlineRecipe else {
                 return
@@ -60,6 +54,8 @@ class OnlineRecipeViewModel: ObservableObject {
             self.recipe = onlineRecipe
             self.updateFirstRaterName()
             self.updateImage()
+            self.updateCreatorName()
+            self.updateRecipeServingText()
         }
     }
 
@@ -67,9 +63,13 @@ class OnlineRecipeViewModel: ObservableObject {
         isShowingDetail.toggle()
     }
 
+    private func updateRecipeServingText() {
+        recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
+    }
+
     private func updateCreatorName() {
-        storageManager.fetchUser(id: recipe.userId) { user, _ in
-            guard let name = user?.name else {
+        storageManager.fetchUser(id: recipe.userId) { user, err in
+            guard let name = user?.name, err == nil else {
                 return
             }
             self.creatorName = name
@@ -77,8 +77,8 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func updateImage() {
-        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, _  in
-            guard let data = data, let image = UIImage(data: data) else {
+        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, err  in
+            guard let data = data, let image = UIImage(data: data), err == nil else {
                 return
             }
             self.image = image
@@ -89,8 +89,8 @@ class OnlineRecipeViewModel: ObservableObject {
         guard let firstRaterId = getRaterId(recipe: recipe) else {
             return
         }
-        storageManager.fetchUser(id: firstRaterId) { user, _ in
-            guard let name = user?.name else {
+        storageManager.fetchUser(id: firstRaterId) { user, err in
+            guard let name = user?.name, err == nil else {
                 return
             }
             self.firstRater = (self.settings.userId == firstRaterId ? "You" : name)

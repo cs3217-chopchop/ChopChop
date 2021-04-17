@@ -8,11 +8,11 @@ struct StorageManager {
     let appDatabase: AppDatabase
     let firebaseDatabase = FirebaseDatabase()
     let firebaseStorage = FirebaseCloudStorage()
-    let firebaseCache: FirebaseCache // TODO rename to cache
+    let cache: ChopChopCache
 
     init(appDatabase: AppDatabase = .shared) {
         self.appDatabase = appDatabase
-        firebaseCache = .shared
+        cache = .shared
     }
 
     // MARK: - Storage Manager: Create/Update
@@ -317,14 +317,14 @@ extension StorageManager {
             stepEdges: edgeRecords
         )
 
-        guard let id = recipe.id, let shouldUploadImage = (try? fetchRecipe(id: id)?.isImageUploaded) else {
+        guard let id = recipe.id, let isImageUploaded = (try? fetchRecipe(id: id)?.isImageUploaded) else {
             // should not happen
             return
         }
 
-        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploaded: shouldUploadImage, completion: completion)
+        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploaded: isImageUploaded, completion: completion)
 
-        guard shouldUploadImage, let onlineId = recipe.onlineId else {
+        guard !isImageUploaded, let onlineId = recipe.onlineId else {
             return
         }
 
@@ -332,7 +332,7 @@ extension StorageManager {
             firebaseStorage.uploadImage(image: fetchedImage, name: onlineId)
         } else {
             firebaseStorage.deleteImage(name: onlineId)
-            firebaseCache.onlineRecipeImageCache[onlineId] = nil
+            cache.onlineRecipeImageCache[onlineId] = nil
         }
 
         // note: don't update cache because don't know updatedAt timestamps
@@ -366,7 +366,7 @@ extension StorageManager {
 
     // unpublish a recipe through the online interface
     func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
-        try firebaseDatabase.removeRecipe(recipeId: recipe.id, completion: completion)
+        try firebaseDatabase.removeOnlineRecipe(recipeId: recipe.id, completion: completion)
         for rating in recipe.ratings {
             firebaseDatabase.removeUserRecipeRating(
                 userId: rating.userId,
@@ -376,8 +376,8 @@ extension StorageManager {
         }
         firebaseStorage.deleteImage(name: recipe.id)
 
-        firebaseCache.onlineRecipeCache.removeValue(forKey: recipe.id)
-        firebaseCache.onlineRecipeImageCache[recipe.id] = nil
+        cache.onlineRecipeCache.removeValue(forKey: recipe.id)
+        cache.onlineRecipeImageCache[recipe.id] = nil
 
         // might alr have deleted local recipe
         let fetchedRecipe = try? self.fetchRecipe(onlineId: recipe.id)
@@ -413,7 +413,7 @@ extension StorageManager {
             }
 
             if let updatedAt = recipeInfoRecord.updatedAt,
-               let cachedOnlineRecipe = firebaseCache.onlineRecipeCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
+               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
                 completion(cachedOnlineRecipe, nil)
                 return
             }
@@ -424,7 +424,7 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
-                firebaseCache.onlineRecipeCache[id] = onlineRecipe
+                cache.onlineRecipeCache[id] = onlineRecipe
                 completion(onlineRecipe, nil)
             }
 
@@ -440,7 +440,7 @@ extension StorageManager {
             }
 
             if let updatedAt = userInfoRecord.updatedAt,
-               let cachedUser = firebaseCache.userCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
+               let cachedUser = cache.userCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
                 completion(cachedUser, nil)
                 return
             }
@@ -450,7 +450,7 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
-                firebaseCache.userCache[id] = user
+                cache.userCache[id] = user
                 completion(user, nil)
             }
 
@@ -533,19 +533,19 @@ extension StorageManager {
                 return
             }
             guard let imageUpdatedAt = recipeInfoRecord.imageUpdatedAt,
-                  let lastFetchedImageDate = firebaseCache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
+                  let lastFetchedImageDate = cache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
                   lastFetchedImageDate >= imageUpdatedAt else {
                 firebaseStorage.fetchImage(name: recipeId) { data, err in
                     guard let data = data, err == nil else {
                         completion(nil, err)
                         return
                     }
-                    firebaseCache.onlineRecipeImageCache[recipeId] = data
+                    cache.onlineRecipeImageCache[recipeId] = data
                     completion(data, nil)
                 }
                 return
             }
-            let data = firebaseCache.onlineRecipeImageCache[recipeId]
+            let data = cache.onlineRecipeImageCache[recipeId]
             completion(data, nil)
 
         }
@@ -577,14 +577,14 @@ extension StorageManager {
         // figure out which recipes actually need to fetch
         let recipeIdsToFetch = recipeInfoRecords.keys.filter { recipeInfoId in
             guard let updatedAt = recipeInfoRecords[recipeInfoId]?.updatedAt,
-                  let _ = firebaseCache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId, updatedDate: updatedAt) else {
-                return false
+                  let _ = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId, updatedDate: updatedAt) else {
+                return true
             }
-            return true
+            return false
         }
 
         guard !recipeIdsToFetch.isEmpty else {
-            let recipes = recipeInfoRecords.keys.compactMap { firebaseCache.onlineRecipeCache[$0]
+            let recipes = recipeInfoRecords.keys.compactMap { cache.onlineRecipeCache[$0]
             }
             completion(recipes, nil)
             return
@@ -602,10 +602,10 @@ extension StorageManager {
                       let onlineRecipe = try? OnlineRecipe(from: onlineRecipeRecord, info: recipeInfoRecord) else {
                     continue
                 }
-                firebaseCache.onlineRecipeCache.insert(onlineRecipe, forKey: id)
+                cache.onlineRecipeCache.insert(onlineRecipe, forKey: id)
             }
 
-            let recipes = recipeInfoRecords.keys.compactMap { firebaseCache.onlineRecipeCache[$0] }
+            let recipes = recipeInfoRecords.keys.compactMap { cache.onlineRecipeCache[$0] }
             completion(recipes, nil)
         }
     }
@@ -619,10 +619,16 @@ extension StorageManager {
 
         let userIdsToFetch = userInfoRecords.keys.filter { userInfoId in
             guard let updatedAt = userInfoRecords[userInfoId]?.updatedAt,
-                  let _ = firebaseCache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) else {
-                return false
+                  let _ = cache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) else {
+                return true
             }
-            return true
+            return false
+        }
+
+        guard !userIdsToFetch.isEmpty else {
+            let users = userInfoRecords.keys.compactMap { cache.userCache[$0] }
+            completion(users, nil)
+            return
         }
 
         firebaseDatabase.fetchUsers(ids: userIdsToFetch) { userRecords, err in
@@ -636,10 +642,10 @@ extension StorageManager {
                       let userInfoRecord = userInfoRecords[id], let user = User(from: userRecord, infoRecord: userInfoRecord) else {
                     continue
                 }
-                firebaseCache.userCache.insert(user, forKey: id)
+                cache.userCache.insert(user, forKey: id)
             }
 
-            let users = userInfoRecords.keys.compactMap { firebaseCache.userCache[$0] }
+            let users = userInfoRecords.keys.compactMap { cache.userCache[$0] }
             completion(users, nil)
 
         }

@@ -16,7 +16,7 @@ struct AddFolloweeView: View {
         }
         .navigationTitle(Text("Add Followees"))
         .onAppear {
-            viewModel.query = ""
+            viewModel.load()
         }
     }
 

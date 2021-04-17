@@ -19,6 +19,7 @@ final class CreateUserProfileViewModel: ObservableObject {
             return
         }
 
+        // TODO sth wrong here
         guard !name.isEmpty else {
             errorMessage = "Empty name not accepted"
             return
@@ -36,7 +37,6 @@ final class CreateUserProfileViewModel: ObservableObject {
             return
         }
 
-        UserDefaults.standard.set(receivedUserId, forKey: "userId")
         settings.userId = userId
     }
 

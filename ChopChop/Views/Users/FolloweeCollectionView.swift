@@ -28,7 +28,7 @@ struct FolloweeCollectionView: View {
         }
         .navigationTitle(Text("Followees"))
         .onAppear {
-            viewModel.query = ""
+            viewModel.load()
         }
     }
 

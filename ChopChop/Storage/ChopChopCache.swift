@@ -1,6 +1,6 @@
 import Foundation
 
-class FirebaseCache {
+class ChopChopCache {
 
     let onlineRecipeCache = Cache<String, OnlineRecipe>()
     let userCache = Cache<String, User>()
@@ -8,10 +8,10 @@ class FirebaseCache {
 
 }
 
- extension FirebaseCache {
+ extension ChopChopCache {
     static let shared = makeShared()
 
-    private static func makeShared() -> FirebaseCache {
-        FirebaseCache()
+    private static func makeShared() -> ChopChopCache {
+        ChopChopCache()
     }
  }

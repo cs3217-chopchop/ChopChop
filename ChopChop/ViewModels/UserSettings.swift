@@ -5,6 +5,7 @@ final class UserSettings: ObservableObject {
     @Published var viewType = ViewType.list
     @Published var userId: String? {
         didSet {
+            UserDefaults.standard.set(userId, forKey: "userId")
             setPublisher()
         }
     }

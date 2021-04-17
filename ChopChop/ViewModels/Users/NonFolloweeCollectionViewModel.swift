@@ -14,7 +14,6 @@ class NonFolloweeCollectionViewModel: ObservableObject {
 
     init(settings: UserSettings) {
         self.settings = settings
-        updateNonFollowees()
     }
 
     private func updateNonFollowees() {
@@ -22,10 +21,16 @@ class NonFolloweeCollectionViewModel: ObservableObject {
             guard let followees = self.settings.user?.followees else {
                 return
             }
+
             self.nonFollowees = users
                 .filter { !followees.contains($0.id) && self.settings.userId != $0.id }
-                .filter { $0.name.contains(self.query) }
+                .filter { self.query.isEmpty || $0.name.contains(self.query) }
         }
+    }
+
+    func load() {
+        updateNonFollowees()
+        query = ""
     }
 
 }

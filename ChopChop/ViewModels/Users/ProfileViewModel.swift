@@ -17,10 +17,6 @@ final class ProfileViewModel: ObservableObject {
         self.userId = userId
         self.settings = settings
         self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
-
-        isFollowedByUser = settings.user?.followees.contains(userId) == true
-        updateUser()
-        updateRecipeCount()
     }
 
     var isOwnProfile: Bool {
@@ -32,8 +28,12 @@ final class ProfileViewModel: ObservableObject {
             return
         }
 
-        storageManager.addFollowee(userId: ownId, followeeId: userId) { _ in
-            // ignore
+        storageManager.addFollowee(userId: ownId, followeeId: userId) { err in
+            guard err == nil else {
+                return
+            }
+            self.updateIsFollowedByUser()
+            self.followeeCount += 1
         }
     }
 
@@ -42,9 +42,23 @@ final class ProfileViewModel: ObservableObject {
             return
         }
 
-        storageManager.removeFollowee(userId: ownId, followeeId: userId) { _ in
-            // ignore
+        storageManager.removeFollowee(userId: ownId, followeeId: userId) { err in
+            guard err == nil else {
+                return
+            }
+            self.updateIsFollowedByUser()
+            self.followeeCount -= 1
         }
+    }
+
+    func load() {
+        updateIsFollowedByUser()
+        updateUser()
+        updateRecipeCount()
+    }
+
+    private func updateIsFollowedByUser() {
+        isFollowedByUser = settings.user?.followees.contains(userId) == true
     }
 
     private func updateUser() {

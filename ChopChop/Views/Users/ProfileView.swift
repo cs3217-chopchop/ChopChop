@@ -24,6 +24,8 @@ struct ProfileView: View {
                         .padding()
                 }
             }
+        }.onAppear {
+            viewModel.load()
         }
     }
 

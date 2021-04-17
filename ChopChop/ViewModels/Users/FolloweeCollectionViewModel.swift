@@ -14,13 +14,17 @@ class FolloweeCollectionViewModel: ObservableObject {
 
     init(settings: UserSettings) {
         self.settings = settings
-        updateFollowees()
     }
 
     private func updateFollowees() {
         storageManager.fetchUsers(ids: settings.user?.followees ?? []) { users, _ in
-            self.followees = users.filter { $0.name.contains(self.query) }
+            self.followees = users.filter { self.query.isEmpty || $0.name.contains(self.query) }
         }
+    }
+
+    func load() {
+        updateFollowees()
+        query = ""
     }
 
 }
