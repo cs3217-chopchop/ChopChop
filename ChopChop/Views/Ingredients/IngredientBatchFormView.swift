@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view for the form for adding or editing an ingredient batch.
+ */
 struct IngredientBatchFormView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: IngredientBatchFormViewModel
@@ -14,7 +17,7 @@ struct IngredientBatchFormView: View {
     }
 
     @ViewBuilder
-    var quantitySection: some View {
+    private var quantitySection: some View {
         Section(header: Text("QUANTITY")) {
             HStack {
                 TextField("Quantity", text: $viewModel.inputQuantity)
@@ -45,7 +48,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    var expiryDateSection: some View {
+    private var expiryDateSection: some View {
         Section(header: Text("EXPIRY DATE")) {
             Toggle(isOn: $viewModel.expiryDateEnabled) {
                 Text("Expires")
@@ -59,7 +62,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    var saveButton: some View {
+    private var saveButton: some View {
         Button("Save") {
             do {
                 try viewModel.save()
@@ -78,7 +81,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    func handleAlert(_ alert: IngredientBatchFormViewModel.AlertIdentifier) -> Alert {
+    private func handleAlert(_ alert: IngredientBatchFormViewModel.AlertIdentifier) -> Alert {
         switch alert.id {
         case .invalidQuantity:
             return Alert(

@@ -2,18 +2,23 @@ import SwiftUI
 import UIKit
 import Combine
 
+/**
+ Represents a view model for a view of an ingredient.
+ */
 class IngredientViewModel: ObservableObject {
+    /// The ingredient displayed by the view.
     @Published private(set) var ingredient: Ingredient?
+    /// The image corresponding to the ingredient.
     @Published private(set) var image: UIImage?
 
     @Published var activeFormView: FormView?
     @Published var alertIdentifier: AlertIdentifier?
 
     private let storageManager = StorageManager()
-    private var ingredientCancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(id: Int64) {
-        ingredientCancellable = ingredientPublisher(id: id)
+        ingredientPublisher(id: id)
             .sink { [weak self] ingredient in
                 self?.ingredient = ingredient
 
@@ -21,25 +26,12 @@ class IngredientViewModel: ObservableObject {
                     self?.image = self?.storageManager.fetchIngredientImage(name: String(id))
                 }
             }
+            .store(in: &cancellables)
     }
 
-    private func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Never> {
-        storageManager.ingredientPublisher(id: id)
-            .catch { _ in
-                Just<Ingredient?>(nil)
-            }
-            .eraseToAnyPublisher()
-    }
-
-    func removeBatch(expiryDate: Date?) throws {
-        guard var ingredient = ingredient else {
-            return
-        }
-
-        ingredient.removeBatch(expiryDate: expiryDate)
-        save(&ingredient)
-    }
-
+    /**
+     Adds a batch with the given quantity and expiry date into the ingredient.
+     */
     func add(quantity: Quantity, expiryDate: Date?) throws {
         guard var ingredient = ingredient else {
             return
@@ -49,6 +41,9 @@ class IngredientViewModel: ObservableObject {
         save(&ingredient)
     }
 
+    /**
+     Removes the batch identified by the given expiry date from the ingredient.
+     */
     func deleteBatch(expiryDate: Date?) {
         guard var ingredient = ingredient else {
             return
@@ -58,6 +53,9 @@ class IngredientViewModel: ObservableObject {
         save(&ingredient)
     }
 
+    /**
+     Removes all batches with past expiry dates from the ingredient.
+     */
     func deleteExpiredBatches() {
         guard var ingredient = ingredient else {
             return
@@ -67,6 +65,9 @@ class IngredientViewModel: ObservableObject {
         save(&ingredient)
     }
 
+    /**
+     Removes all batches from the ingredient.
+     */
     func deleteAllBatches() {
         guard var ingredient = ingredient else {
             return
@@ -83,6 +84,14 @@ class IngredientViewModel: ObservableObject {
         } catch {
             setAlertState(.saveError)
         }
+    }
+
+    private func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Never> {
+        storageManager.ingredientPublisher(id: id)
+            .catch { _ in
+                Just<Ingredient?>(nil)
+            }
+            .eraseToAnyPublisher()
     }
 
     struct AlertIdentifier: Identifiable {

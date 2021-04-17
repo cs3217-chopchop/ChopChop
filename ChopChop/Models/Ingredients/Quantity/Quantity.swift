@@ -62,7 +62,8 @@ struct Quantity: Equatable {
      - Returns: The sum of the two quantities.
         - If both quantities have the same type that is not `count`:
             - If both quantities are in metric or non metric units, the sum is expressed in terms of the bigger unit.
-            - If one quantity is in metric units while the other is not, the sum is expressed in terms of the base unit of that type.
+            - If one quantity is in metric units while the other is not,
+            the sum is expressed in terms of the base unit of that type.
         - If both quantities have different types that are not `count`:
             - The sum is expressed in terms of the left operand's units.
      */

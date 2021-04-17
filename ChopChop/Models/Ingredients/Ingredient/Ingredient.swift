@@ -31,7 +31,12 @@ struct Ingredient {
         - ` QuantityError.incompatibleTypes` if the types of the given batches do not match the given type.
      */
     // swiftlint:disable function_default_parameter_at_end
-    init(id: Int64? = nil, name: String, type: QuantityType, batches: [IngredientBatch] = [], category: IngredientCategory? = nil) throws {
+    init(id: Int64? = nil,
+         name: String,
+         type: QuantityType,
+         batches: [IngredientBatch] = [],
+         category: IngredientCategory? = nil) throws {
+
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {

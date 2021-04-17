@@ -79,7 +79,8 @@ struct RecipeParser {
     }
 
     /**
-     Parses a text containing ingredients and their quantities, and returns a map of the name of each ingredient to its quantity.
+     Parses a text containing ingredients and their quantities,
+     and returns a map of the name of each ingredient to its quantity.
      */
     static func parseIngredientText(ingredientText: String) -> [String: Quantity] {
         let trimmedIngredient = ingredientText.trimmingCharacters(in: .whitespacesAndNewlines)

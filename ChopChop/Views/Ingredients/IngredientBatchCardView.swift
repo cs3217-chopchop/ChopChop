@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a batch of an ingredient.
+ */
 struct IngredientBatchCardView: View {
     let viewModel: IngredientBatchViewModel
 

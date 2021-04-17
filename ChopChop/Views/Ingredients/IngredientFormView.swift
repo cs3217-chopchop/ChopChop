@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view for the form for adding or editing an ingredient.
+ */
 struct IngredientFormView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: IngredientFormViewModel
@@ -20,7 +23,7 @@ struct IngredientFormView: View {
         .alert(item: $viewModel.alertIdentifier, content: handleAlert)
     }
 
-    var quantityTypeSection: some View {
+    private var quantityTypeSection: some View {
         Section(header: Text("QUANTITY TYPE")) {
             HStack {
                 Text(viewModel.quantityType.description)
@@ -35,13 +38,13 @@ struct IngredientFormView: View {
         }
     }
 
-    var nameSection: some View {
+    private var nameSection: some View {
         Section(header: Text("NAME")) {
             TextField("Name", text: $viewModel.name)
         }
     }
 
-    var categorySection: some View {
+    private var categorySection: some View {
         Section(header: Text("CATEGORY")) {
             HStack {
                 Text(viewModel.category?.name ?? "Uncategorised")
@@ -60,7 +63,7 @@ struct IngredientFormView: View {
     }
 
     @ViewBuilder
-    var imageSection: some View {
+    private var imageSection: some View {
         Section(header: Text("IMAGE")) {
             if viewModel.image != UIImage() {
                 Image(uiImage: viewModel.image)
@@ -84,7 +87,7 @@ struct IngredientFormView: View {
         }
     }
 
-    var saveButton: some View {
+    private var saveButton: some View {
         Button("Save") {
             do {
                 try viewModel.save()
@@ -99,7 +102,7 @@ struct IngredientFormView: View {
         }
     }
 
-    func handleAlert(_ alert: IngredientFormViewModel.AlertIdentifier) -> Alert {
+    private func handleAlert(_ alert: IngredientFormViewModel.AlertIdentifier) -> Alert {
         switch alert.id {
         case .emptyName:
             return Alert(
@@ -117,14 +120,5 @@ struct IngredientFormView: View {
                 message: Text("An error occurred with saving the ingredient"),
                 dismissButton: .default(Text("OK")))
         }
-    }
-}
-
-struct IngredientFormView_Previews: PreviewProvider {
-    // swiftlint:disable force_try
-    static var previews: some View {
-        IngredientFormView(
-            viewModel: IngredientFormViewModel(
-                edit: try! Ingredient(name: "Apple", type: .count)))
     }
 }
