@@ -48,12 +48,6 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingCreatedDate
         }
 
-//        let stepGraphNodes = try record.steps.compactMap({
-//            try RecipeStep($0)
-//        })
-//        .map({
-//            RecipeStepNode($0)
-//        })
         var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
         record.steps.forEach({
             let step = try? RecipeStep($0.content)
