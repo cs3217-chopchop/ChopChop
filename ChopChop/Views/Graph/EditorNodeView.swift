@@ -122,13 +122,16 @@ struct EditorNodeView: View {
                 .foregroundColor(.secondary)
             Spacer()
         } else {
-            List {
-                ForEach(viewModel.timers, id: \.self) { duration in
-                    HStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(viewModel.timers, id: \.self) { duration in
                         Text(viewModel.timeFormatter.string(from: duration) ?? "")
+                            .padding([.leading, .trailing], 8)
+                        Divider()
+                            .padding([.top, .bottom], 10)
                     }
                 }
-                .listRowBackground(Color.clear)
+                .padding([.leading, .trailing], 8)
             }
         }
     }
