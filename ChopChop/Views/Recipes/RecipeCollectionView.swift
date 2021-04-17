@@ -22,10 +22,7 @@ struct RecipeCollectionView: View {
                                   selections: $viewModel.selectedIngredients,
                                   options: viewModel.recipeIngredients)
             }
-            .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-
-            Divider()
-                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
+            .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
 
             if viewModel.recipes.isEmpty {
                 NotFoundView(entityName: "Recipes")

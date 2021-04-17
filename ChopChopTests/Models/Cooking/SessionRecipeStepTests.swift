@@ -8,9 +8,7 @@ class SessionRecipeStepTests: XCTestCase {
             XCTFail("No steps in recipe")
             return
         }
-        let sessionRecipeStep = SessionRecipeStep(step: lastStep, actionTimeTracker: ActionTimeTracker())
-        XCTAssertFalse(sessionRecipeStep.isCompleted)
-        XCTAssertEqual(sessionRecipeStep.timeTaken, 0)
+        let sessionRecipeStep = SessionRecipeStep(step: lastStep)
         XCTAssertTrue(sessionRecipeStep.step == lastStep)
     }
 }

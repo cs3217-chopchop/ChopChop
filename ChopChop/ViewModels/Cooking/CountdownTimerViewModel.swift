@@ -1,67 +1,30 @@
-import SwiftUI
+import Combine
+import Foundation
 
-class CountdownTimerViewModel: ObservableObject, Identifiable {
-    let countdownTimer: CountdownTimer
-    @Published var displayTime: String
-    @Published var disableIncreaseTime: Bool
-    @Published var disableDecreaseTime: Bool
-    @Published var disableStart: Bool
-    var isDisabled = false
+final class CountdownTimerViewModel: ObservableObject {
+    @Published var timeRemaining: String = ""
+    @Published var status: CountdownTimer.Status = .stopped
 
-    init(countdownTimer: CountdownTimer) {
-        self.countdownTimer = countdownTimer
-        disableStart = countdownTimer.defaultTime == 0
-        disableDecreaseTime = countdownTimer.defaultTime == CountdownTimer.minimumTime
-        disableIncreaseTime = countdownTimer.defaultTime == CountdownTimer.maximumTime
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
+    let timer: CountdownTimer
+    private let timeFormatter: DateComponentsFormatter
 
-    func countdown() {
-        guard !isDisabled else {
-            return
+    private var timeRemainingCancellable: AnyCancellable?
+    private var statusCancellable: AnyCancellable?
+
+    init(timer: CountdownTimer) {
+        self.timer = timer
+
+        timeFormatter = DateComponentsFormatter()
+        timeFormatter.allowedUnits = [.hour, .minute, .second]
+        timeFormatter.zeroFormattingBehavior = .pad
+
+        timeRemainingCancellable = timer.$timeRemaining.sink { [weak self] time in
+            // Truncate the string so that it has at most 2 digits in each unit
+            self?.timeRemaining = String((self?.timeFormatter.string(from: time) ?? "").suffix(8))
         }
-        countdownTimer.countdown()
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
 
-    func start() {
-        guard !disableStart else {
-            return
-        }
-        countdownTimer.start()
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
-
-    func pauseResume() {
-        if countdownTimer.isRunning {
-            countdownTimer.pause()
-        } else {
-            countdownTimer.resume()
-            displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
+        statusCancellable = timer.$status.sink { [weak self] status in
+            self?.status = status
         }
     }
-
-    func restart() {
-        countdownTimer.restart()
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
-
-    func increaseTime() {
-        guard !disableIncreaseTime else {
-            return
-        }
-        try? countdownTimer.updateDefaultTime(defaultTime: countdownTimer.defaultTime + 1)
-        disableIncreaseTime = countdownTimer.defaultTime == CountdownTimer.maximumTime
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
-
-    func decreaseTime() {
-        guard !disableDecreaseTime else {
-            return
-        }
-        try? countdownTimer.updateDefaultTime(defaultTime: countdownTimer.defaultTime - 1)
-        disableDecreaseTime = countdownTimer.defaultTime == CountdownTimer.minimumTime
-        displayTime = get_HHMMSS_Display(seconds: countdownTimer.remainingTime)
-    }
-
 }

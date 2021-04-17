@@ -4,7 +4,7 @@ final class EditorGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
     @Published var linePhase = CGFloat.zero
 
-    var graph: RecipeStepGraph
+    let graph: RecipeStepGraph
     let isEditable: Bool
 
     init(graph: RecipeStepGraph, isEditable: Bool = true) {

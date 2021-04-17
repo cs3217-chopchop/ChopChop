@@ -1,6 +1,6 @@
 import GRDB
 
-struct RecipeIngredientRecord {
+struct RecipeIngredientRecord: Identifiable {
     var id: Int64?
     var recipeId: Int64?
     var name: String

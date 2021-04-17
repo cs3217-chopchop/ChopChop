@@ -7,7 +7,6 @@ import SwiftUI
 
     var body: some View {
         List {
-            cookingSection
             recipesSection
             ingredientsSection
             recipeFeedSection
@@ -87,18 +86,6 @@ import SwiftUI
                     })
                 }
             }
-        }
-    }
-
-    var cookingSection: some View {
-        NavigationLink(
-            destination: CookingSelectionView(viewModel:
-                                                CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
-                                                                            .compactMap { $0.id } + [nil]))
-        ) {
-            Text("Cooking")
-                .font(.title3)
-                .bold()
         }
     }
 

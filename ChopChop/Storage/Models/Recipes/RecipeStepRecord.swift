@@ -1,6 +1,6 @@
 import GRDB
 
-struct RecipeStepRecord {
+struct RecipeStepRecord: Identifiable {
     var id: Int64?
     var graphId: Int64?
     var content: String

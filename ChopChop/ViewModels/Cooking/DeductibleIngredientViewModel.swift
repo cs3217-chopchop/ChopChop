@@ -1,25 +1,45 @@
 import SwiftUI
 
-class DeductibleIngredientViewModel: ObservableObject {
-    let recipeIngredient: RecipeIngredient
-    let ingredient: Ingredient
-    @Published var deductBy: String
+final class DeductibleIngredientViewModel: ObservableObject {
+    @Published var quantity: String
     @Published var unit: QuantityUnit
-    @Published var errorMsg = ""
+    @Published var errorMessages: [String] = []
+
+    let ingredient: Ingredient
 
     init(ingredient: Ingredient, recipeIngredient: RecipeIngredient) {
-        self.ingredient = ingredient
-        self.recipeIngredient = recipeIngredient
-        deductBy = String(recipeIngredient.quantity.value)
+        quantity = recipeIngredient.quantity.value.removeZerosFromEnd()
         unit = recipeIngredient.quantity.unit
+        self.ingredient = ingredient
     }
 
-    func updateUnit(unit: QuantityUnit) {
-        self.unit = unit
+    func setQuantity(_ quantity: String) {
+        self.quantity = String(quantity.filter { "0123456789.".contains($0) })
+            .components(separatedBy: ".")
+            .prefix(2)
+            .joined(separator: ".")
     }
 
-    func updateError(msg: String) {
-        errorMsg = msg
-    }
+    func convertToIngredient() throws -> Ingredient {
+        guard let value = Double(quantity) else {
+            throw QuantityError.invalidQuantity
+        }
 
+        var ingredient = self.ingredient
+        try ingredient.use(quantity: Quantity(unit, value: value))
+
+        return ingredient
+    }
+}
+
+extension DeductibleIngredientViewModel: Equatable {
+    static func == (lhs: DeductibleIngredientViewModel, rhs: DeductibleIngredientViewModel) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+}
+
+extension DeductibleIngredientViewModel: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
 }

@@ -1,32 +1,43 @@
 import SwiftUI
 
 struct CompleteSessionRecipeView: View {
+    @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: CompleteSessionRecipeViewModel
+    @Binding var isComplete: Bool
 
     var body: some View {
-        VStack(alignment: .center) {
-            Text("Ingredients to Deduct")
-                .font(.largeTitle)
+        VStack {
+            Text("Deduct Ingredients")
+                .font(.title)
                 .padding()
-            ForEach(viewModel.deductibleIngredientsViewModels, id: \.ingredient.name) { deductibleIngredient in
-                DeductibleIngredientView(viewModel: deductibleIngredient)
+
+            if viewModel.deductibleIngredients.isEmpty {
+                NotFoundView(entityName: "Ingredients")
+            } else {
+                Form {
+                    ForEach(viewModel.deductibleIngredients, id: \.self) { deductibleIngredientViewModel in
+                        DeductibleIngredientView(viewModel: deductibleIngredientViewModel)
+                    }
+                }
             }
-            Text(viewModel.deductibleIngredientsViewModels.isEmpty ? "No ingredients to deduct" : "")
-            Button("Submit") {
-                viewModel.submit()
-            }.disabled(viewModel.isSuccess || viewModel.deductibleIngredientsViewModels.isEmpty)
-            .font(.title2)
-            .padding()
-            Text(viewModel.isSuccess ? "Success" : "")
-                .foregroundColor(.green)
-                .padding()
-        }.padding()
+
+            Button("Complete Recipe") {
+                if viewModel.deductibleIngredients.isEmpty || viewModel.completeRecipe() {
+                    presentationMode.wrappedValue.dismiss()
+                    isComplete = true
+                }
+            }
+        }
+        .padding()
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
     }
 }
 
- struct CompleteSessionView_Previews: PreviewProvider {
+struct CompleteSessionView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try
-        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes")))
+        if let recipe = try? Recipe(name: "Preview") {
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: recipe),
+                                      isComplete: .constant(false))
+        }
     }
- }
+}

@@ -4,7 +4,7 @@ import GRDB
 /**
  Represents a record of an ingredient batch stored in the local database..
  */
-struct IngredientBatchRecord {
+struct IngredientBatchRecord: Identifiable {
     var id: Int64?
 
     // MARK: - Specification Fields

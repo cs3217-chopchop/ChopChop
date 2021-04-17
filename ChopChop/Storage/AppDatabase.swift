@@ -473,6 +473,36 @@ extension AppDatabase {
         }
     }
 
+    // For saving multiple ingredients in one transaction
+    func saveIngredients(_ ingredients: inout [(IngredientRecord, [IngredientBatchRecord])]) throws {
+        try dbWriter.write { db in
+            for index in ingredients.indices {
+                guard ingredients[index].1.allSatisfy({ $0.quantity.type == ingredients[index].0.quantityType }) else {
+                    throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+                }
+
+                // Save ingredient
+                try ingredients[index].0.save(db)
+
+                guard ingredients[index].1.compactMap({ $0.ingredientId })
+                        .allSatisfy({ $0 == ingredients[index].0.id }) else {
+                    throw DatabaseError(message: "Ingredient batches belong to the wrong ingredient.")
+                }
+
+                // Delete all batches that are not in the array
+                try ingredients[index].0.batches
+                    .filter(!ingredients[index].1.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
+                    .deleteAll(db)
+
+                // Save ingredient batches
+                for batchIndex in ingredients[index].1.indices {
+                    ingredients[index].1[batchIndex].ingredientId = ingredients[index].0.id
+                    try ingredients[index].1[batchIndex].save(db)
+                }
+            }
+        }
+    }
+
     func saveIngredient(_ ingredient: inout IngredientRecord) throws {
         var batches: [IngredientBatchRecord] = []
 
@@ -516,7 +546,7 @@ extension AppDatabase {
 extension AppDatabase {
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeRecord.deleteAll(db, keys: ids)
+            _ = try RecipeRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -528,7 +558,7 @@ extension AppDatabase {
 
     func deleteRecipeCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeCategoryRecord.deleteAll(db, keys: ids)
+            _ = try RecipeCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -540,7 +570,7 @@ extension AppDatabase {
 
     func deleteIngredients(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientRecord.deleteAll(db, keys: ids)
+            _ = try IngredientRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -552,7 +582,7 @@ extension AppDatabase {
 
     func deleteIngredientCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientCategoryRecord.deleteAll(db, keys: ids)
+            _ = try IngredientCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -569,7 +599,7 @@ extension AppDatabase {
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
-                .filter(key: id)
+                .filter(id: id)
                 .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
@@ -596,16 +626,29 @@ extension AppDatabase {
         }
     }
 
-    func fetchRecipeCategory(name: String) throws -> RecipeCategoryRecord? {
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try dbWriter.read { db in
-            try RecipeCategoryRecord.filter(RecipeCategoryRecord.Columns.name == name).fetchOne(db)
+            let request = RecipeCategoryRecord
+                .filter(RecipeCategoryRecord.Columns.name == name)
+
+            return try RecipeCategory.fetchOne(db, request)
+        }
+    }
+
+    func fetchIngredients() throws -> [Ingredient] {
+        try dbWriter.read { db in
+            let request = IngredientRecord
+                .all()
+                .including(all: IngredientRecord.batches)
+
+            return try Ingredient.fetchAll(db, request)
         }
     }
 
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try dbWriter.read { db in
             let request = IngredientRecord
-                .filter(key: id)
+                .filter(id: id)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
@@ -620,7 +663,7 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = RecipeRecord
-                    .filter(key: id)
+                    .filter(id: id)
                     .including(optional: RecipeRecord.category)
                     .including(all: RecipeRecord.ingredients)
                     .including(required: RecipeRecord.stepGraph
@@ -666,7 +709,7 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = IngredientRecord
-                    .filter(key: id)
+                    .filter(id: id)
                     .including(optional: IngredientRecord.category)
                     .including(all: IngredientRecord.batches)
 

@@ -1,104 +1,111 @@
 import SwiftUI
 
 struct SessionRecipeView: View {
+    @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
-        ScrollView {
-            recipeBanner
-            Text("Details")
-                .font(.title2)
-                .bold()
-            Text("""
-                Serves \(viewModel.servings.removeZerosFromEnd()) \(viewModel.servings == 1 ? "person" : "people")
-                """)
-            HStack(spacing: 0) {
-                Text("Difficulty: ")
-                DifficultyView(difficulty: viewModel.difficulty)
-            }
-            Text(viewModel.recipeCategory)
-            Text("Time taken: \(viewModel.totalTimeTaken)")
+        ScrollViewReader { proxy in
+            ZStack(alignment: .trailing) {
+                SessionGraphView(viewModel: SessionGraphViewModel(graph: viewModel.sessionRecipe.stepGraph,
+                                                                  proxy: proxy))
 
-            ingredients
-            steps
-
-            Spacer()
-            completeCookingButton
-        }
-        .background(EmptyView().sheet(isPresented: $viewModel.isShowComplete) {
-            CompleteSessionRecipeView(viewModel: viewModel.completeSessionRecipeViewModel)
-        })
-    }
-
-    var recipeBanner: some View {
-        var bannerOverlay: some View {
-            Rectangle()
-                .foregroundColor(.clear)
-                .background(LinearGradient(gradient: Gradient(colors: [.clear, .clear, .black]),
-                                           startPoint: .top,
-                                           endPoint: .bottom))
-        }
-
-        return ZStack(alignment: .bottomLeading) {
-            Image(uiImage: viewModel.image)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 300)
-                .clipped()
-                .overlay(bannerOverlay)
-            Text(viewModel.name)
-                .font(.largeTitle)
-                .foregroundColor(.white)
-                .padding()
-        }
-    }
-
-    var ingredients: some View {
-        VStack(alignment: .center) {
-            Text("Ingredients")
-                .font(.title2)
-                .bold()
-            ForEach(viewModel.ingredients, id: \.name) { ingredient in
-                Text(ingredient.description)
-            }
-        }.padding()
-    }
-
-    var steps: some View {
-        VStack {
-            Text("Steps")
-                .font(.title2)
-                .bold()
-            HStack {
-                Spacer()
-                NavigationLink(destination: SessionGraphView(viewModel:
-                                                                SessionGraphViewModel(graph: viewModel.stepGraph))) {
-                    Label("View steps", systemImage: "rectangle.expand.vertical")
+                if viewModel.showDetailsPanel {
+                    VStack(spacing: 24) {
+                        ingredientsPanel
+                        timersPanel(proxy: proxy)
+                    }
+                    .frame(width: 250)
+                    .padding()
+                    .transition(.move(edge: .trailing))
                 }
-                Spacer()
             }
-        }.padding([.horizontal], 100)
+        }
+        .toolbar {
+            Button(action: {
+                viewModel.sheetIsPresented = true
+            }) {
+                Image(systemName: "checkmark")
+            }
+
+            if !viewModel.sessionRecipe.recipe.ingredients.isEmpty || viewModel.sessionRecipe.stepGraph.hasTimers {
+                Button(action: {
+                    withAnimation {
+                        viewModel.showDetailsPanel.toggle()
+                    }
+                }) {
+                    Image(systemName: "gauge")
+                }
+            }
+        }
+        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: {
+            if viewModel.isComplete {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }) {
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: viewModel.sessionRecipe.recipe),
+                                      isComplete: $viewModel.isComplete)
+        }
     }
 
-    var completeCookingButton: some View {
-        Button(action: viewModel.toggleShowComplete) {
-            Text("  ✔ Complete cooking  ")
-                .foregroundColor(viewModel.completeSessionRecipeViewModel.isSuccess ? .gray : .black)
-                .background(viewModel.completeSessionRecipeViewModel.isSuccess ? Color.white : Color.green)
-                .font(.title2)
-                .clipShape(Capsule())
-                .padding()
+    @ViewBuilder
+    var ingredientsPanel: some View {
+        if !viewModel.sessionRecipe.recipe.ingredients.isEmpty {
+            VStack {
+                Text("Ingredients")
+                    .font(.headline)
+                ScrollView {
+                    VStack {
+                        ForEach(viewModel.sessionRecipe.recipe.ingredients, id: \.name) { ingredient in
+                            Text(ingredient.description)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                }
+            }
+            .padding()
+            .background(panelBackground)
         }
-        .disabled(viewModel.completeSessionRecipeViewModel.isSuccess)
+    }
+
+    var panelBackground: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color.accentColor)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color(UIColor.systemBackground).opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .stroke(Color.accentColor, lineWidth: 1.5)
+            )
+    }
+
+    @ViewBuilder
+    func timersPanel(proxy: ScrollViewProxy) -> some View {
+        if viewModel.sessionRecipe.stepGraph.hasTimers {
+            ScrollView {
+                VStack {
+                    ForEach(viewModel.sessionRecipe.stepGraph.topologicallySortedNodes) { node in
+                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.sessionRecipe.stepGraph,
+                                                                    node: node,
+                                                                    proxy: proxy))
+                            .id(node)
+                    }
+                }
+                .frame(minWidth: 0, maxWidth: .infinity)
+            }
+            .padding()
+            .background(panelBackground)
+        }
     }
 }
 
 struct SessionRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        SessionRecipeView(viewModel: SessionRecipeViewModel(recipeInfo:
-                                                                RecipeInfo(id: 5,
-                                                                           name: "Pancakes",
-                                                                           servings: 5,
-                                                                           difficulty: Difficulty.easy)))
+        if let recipe = try? Recipe(name: "Sample recipe") {
+            SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe))
+        }
     }
 }
