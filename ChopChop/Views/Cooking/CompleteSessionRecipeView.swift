@@ -12,7 +12,7 @@ struct CompleteSessionRecipeView: View {
                 .padding()
 
             if viewModel.deductibleIngredients.isEmpty {
-                NotFoundView(entityName: "Deductible Ingredients")
+                NotFoundView(entityName: "Ingredients")
             } else {
                 Form {
                     ForEach(viewModel.deductibleIngredients, id: \.self) { deductibleIngredientViewModel in

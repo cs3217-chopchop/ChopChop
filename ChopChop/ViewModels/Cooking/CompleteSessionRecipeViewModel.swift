@@ -43,15 +43,12 @@ final class CompleteSessionRecipeViewModel: ObservableObject {
     }
 
     private func validateIngredients() -> Bool {
-        var hasErrors = false
-
         for deductibleIngredient in deductibleIngredients {
             deductibleIngredient.errorMessages = []
 
             guard let value = Double(deductibleIngredient.quantity),
                   let quantity = try? Quantity(deductibleIngredient.unit, value: value) else {
                 deductibleIngredient.errorMessages.append(QuantityError.invalidQuantity.errorDescription ?? "")
-                hasErrors = true
                 continue
             }
 
@@ -60,16 +57,14 @@ final class CompleteSessionRecipeViewModel: ObservableObject {
                     \(QuantityError.incompatibleTypes.errorDescription ?? "") \
                     Change type to \(quantity.type == .count ? "mass/volume" : "count").
                     """)
-                hasErrors = true
                 continue
             }
 
             if !hasSufficientAmount {
                 deductibleIngredient.errorMessages.append("Insufficient ingredient quantity to deduct ingredient.")
-                hasErrors = true
             }
         }
 
-        return !hasErrors
+        return deductibleIngredients.allSatisfy { $0.errorMessages.isEmpty }
     }
 }

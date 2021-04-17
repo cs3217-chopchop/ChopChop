@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CountdownTimerView: View {
     @ObservedObject var viewModel: CountdownTimerViewModel
-    @State var opacity = true
+    @State var animationState = true
 
     var body: some View {
         HStack(spacing: 0) {
@@ -58,10 +58,10 @@ struct CountdownTimerView: View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
-            .opacity(opacity ? 1 : 0.4)
+            .opacity(animationState ? 1 : 0.4)
             .animation(Animation.linear(duration: .leastNonzeroMagnitude).delay(0.5).repeatForever())
             .onAppear {
-                opacity.toggle()
+                animationState.toggle()
             }
             .onTapGesture(perform: viewModel.timer.resume)
         Button(action: viewModel.timer.resume) {
@@ -79,10 +79,10 @@ struct CountdownTimerView: View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
-            .opacity(opacity ? 1 : 0.4)
+            .opacity(animationState ? 1 : 0.4)
             .animation(Animation.linear(duration: .leastNonzeroMagnitude).delay(0.5).repeatForever())
             .onAppear {
-                opacity.toggle()
+                animationState.toggle()
             }
             .onTapGesture(perform: viewModel.timer.reset)
         Spacer()

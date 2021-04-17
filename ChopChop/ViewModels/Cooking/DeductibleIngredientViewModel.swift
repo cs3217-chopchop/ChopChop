@@ -8,7 +8,7 @@ final class DeductibleIngredientViewModel: ObservableObject {
     let ingredient: Ingredient
 
     init(ingredient: Ingredient, recipeIngredient: RecipeIngredient) {
-        quantity = recipeIngredient.quantity.value.description
+        quantity = recipeIngredient.quantity.value.removeZerosFromEnd()
         unit = recipeIngredient.quantity.unit
         self.ingredient = ingredient
     }

@@ -2,8 +2,6 @@ import SwiftUI
 
 struct RecipeView: View {
     @ObservedObject var viewModel: RecipeViewModel
-    @State private var showSessionRecipe = false
-    @State private var showRecipeForm = false
 
     var body: some View {
         if let recipe = viewModel.recipe {
@@ -19,13 +17,13 @@ struct RecipeView: View {
                 ZStack {
                     NavigationLink(
                         destination: SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe)),
-                        isActive: $showSessionRecipe
+                        isActive: $viewModel.showSessionRecipe
                     ) {
                         EmptyView()
                     }
                     NavigationLink(
                         destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe)),
-                        isActive: $showRecipeForm
+                        isActive: $viewModel.showRecipeForm
                     ) {
                         EmptyView()
                     }
@@ -33,13 +31,13 @@ struct RecipeView: View {
             )
             .toolbar {
                 Button(action: {
-                    showSessionRecipe = true
+                    viewModel.showSessionRecipe = true
                 }) {
                     Image(systemName: "flame")
                 }
                 .disabled(viewModel.isCookingDisabled)
                 Button(action: {
-                    showRecipeForm = true
+                    viewModel.showRecipeForm = true
                 }) {
                     Image(systemName: "square.and.pencil")
                 }

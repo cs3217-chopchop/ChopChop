@@ -5,6 +5,9 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
+    @Published var showSessionRecipe = false
+    @Published var showRecipeForm = false
+
     var isPublished: Bool {
         recipe?.onlineId != nil
     }
