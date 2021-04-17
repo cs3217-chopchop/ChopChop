@@ -1,12 +1,18 @@
 import SwiftUI
 
+/**
+ Represents a picker component with which a user can pick multiple selections in a set of options.
+ */
 struct MultiselectPicker<SelectionValue: StringProtocol & Hashable>: View {
+    /// The currently selected options.
     @Binding private var selections: Set<SelectionValue>
+    /// The available options for the user to select.
     private let options: Set<SelectionValue>
-    private let title: String
+    /// The name of the collection of options.
+    private let collectionName: String
 
-    init(_ title: String, selections: Binding<Set<SelectionValue>>, options: Set<SelectionValue>) {
-        self.title = title
+    init(_ collectionName: String, selections: Binding<Set<SelectionValue>>, options: Set<SelectionValue>) {
+        self.collectionName = collectionName
         self._selections = selections
         self.options = options
     }
@@ -31,7 +37,7 @@ struct MultiselectPicker<SelectionValue: StringProtocol & Hashable>: View {
                 }
             }
         } label: {
-            Text("\(title): \(selections.isEmpty ? "All" : selections.sorted().joined(separator: ", "))")
+            Text("\(collectionName): \(selections.isEmpty ? "All" : selections.sorted().joined(separator: ", "))")
                 .lineLimit(1)
         }
     }

@@ -1,7 +1,13 @@
 import UIKit
 import SwiftUI
 
-// https://www.appcoda.com/swiftui-camera-photo-library/
+/**
+ Represents a component that allows users to:
+ - pick images from their photo library
+ - take a photo with the camera
+ 
+ Reference: https://www.appcoda.com/swiftui-camera-photo-library/
+ */
 struct ImagePicker: UIViewControllerRepresentable {
     var sourceType: UIImagePickerController.SourceType = .photoLibrary
 
@@ -46,31 +52,6 @@ extension ImagePicker {
             if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 parent.selectedImage = image
             }
-        }
-    }
-}
-
-extension UIImage.Orientation {
-    var description: String {
-        switch self {
-        case .up:
-            return "up"
-        case .down:
-            return "down"
-        case .left:
-            return "left"
-        case .right:
-            return "right"
-        case .upMirrored:
-            return "upM"
-        case .downMirrored:
-            return "downM"
-        case .leftMirrored:
-            return "leftM"
-        case .rightMirrored:
-            return "rightM"
-        @unknown default:
-            return ""
         }
     }
 }

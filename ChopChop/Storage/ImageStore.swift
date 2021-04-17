@@ -1,6 +1,8 @@
 import UIKit
 
-// https://gist.github.com/TheCodedSelf/7ff3a4fb64f8f6131925fa3e6e21efbe
+/**
+ Reference: https://gist.github.com/TheCodedSelf/7ff3a4fb64f8f6131925fa3e6e21efbe
+ */
 struct ImageStore {
     static let fileManager = FileManager.default
 
