@@ -41,7 +41,7 @@ class Graph<N: Node> {
      Initialises a directed or undirected graph containing the given nodes and edges.
      Fails if the given nodes and edges do not result in a valid graph.
      */
-    convenience init?(isDirected: Bool, nodes: [N], edges: [E]) {
+    convenience init(isDirected: Bool, nodes: [N], edges: [E]) throws {
         self.init(isDirected: isDirected)
 
         for node in nodes {
@@ -49,7 +49,7 @@ class Graph<N: Node> {
         }
 
         for edge in edges {
-            try? self.addEdge(edge)
+            try self.addEdge(edge)
         }
 
         assert(checkRepresentation())

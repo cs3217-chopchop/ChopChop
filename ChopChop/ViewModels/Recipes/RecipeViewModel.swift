@@ -5,8 +5,14 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
+    @Published var showSessionRecipe = false
+    @Published var showRecipeForm = false
+
     var isPublished: Bool {
         recipe?.onlineId != nil
+    }
+    var isCookingDisabled: Bool {
+        (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
     }
 
     let timeFormatter: DateComponentsFormatter

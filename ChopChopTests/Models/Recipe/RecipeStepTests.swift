@@ -16,6 +16,6 @@ Allow 10 minutes for pressure to build.
 
         let recipeStepWithWhiteSpaces = try RecipeStep(contentWithWhiteSpace)
         XCTAssertEqual(recipeStepWithWhiteSpaces.content, content)
-        XCTAssertEqual(recipeStep.timeTaken, RecipeStepParser.defaultTime)
+        XCTAssertEqual(recipeStep.timeTaken, TimeInterval(RecipeStepParser.defaultTime))
     }
 }

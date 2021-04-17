@@ -8,15 +8,6 @@ struct EditorNodeView: View {
         selection.isNodeSelected(viewModel.node)
     }
 
-    init(viewModel: EditorNodeViewModel, selection: SelectionHandler<RecipeStepNode>) {
-        self.viewModel = viewModel
-        self.selection = selection
-
-        UITextView.appearance().backgroundColor = .clear
-        UITableView.appearance().backgroundColor = .clear
-        UITableViewCell.appearance().backgroundColor = .clear
-    }
-
     var body: some View {
         TileView(isSelected: isSelected) {
             VStack {
@@ -27,10 +18,7 @@ struct EditorNodeView: View {
 
                 if viewModel.isEditing {
                     TextEditor(text: $viewModel.content)
-                        .background(Color.primary.opacity(0.1))
                         .transition(.scale)
-                        // Prevent taps from propogating
-                        .onTapGesture {}
                 } else {
                     ScrollView(isSelected ? [.vertical] : []) {
                         Text(viewModel.node.label.content.isEmpty
@@ -55,7 +43,7 @@ struct EditorNodeView: View {
     }
 
     var detailView: some View {
-        HStack {
+        HStack(spacing: 16) {
             if viewModel.isEditing {
                 Button(action: viewModel.saveAction) {
                     Text("Save")
@@ -134,13 +122,16 @@ struct EditorNodeView: View {
                 .foregroundColor(.secondary)
             Spacer()
         } else {
-            List {
-                ForEach(viewModel.timers, id: \.self) { duration in
-                    HStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(viewModel.timers, id: \.self) { duration in
                         Text(viewModel.timeFormatter.string(from: duration) ?? "")
+                            .padding([.leading, .trailing], 8)
+                        Divider()
+                            .padding([.top, .bottom], 10)
                     }
                 }
-                .listRowBackground(Color.clear)
+                .padding([.leading, .trailing], 8)
             }
         }
     }
@@ -148,7 +139,7 @@ struct EditorNodeView: View {
 
 struct EditorNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep("#") {
+        if let step = try? RecipeStep("Preview") {
             EditorNodeView(viewModel: EditorNodeViewModel(graph: RecipeStepGraph(),
                                                           node: RecipeStepNode(step)),
                            selection: SelectionHandler())

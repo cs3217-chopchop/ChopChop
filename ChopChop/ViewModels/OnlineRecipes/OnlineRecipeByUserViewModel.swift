@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
-    @Published var isShowingRating: Bool = false
+    @Published var isShowingRating = false
 
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)

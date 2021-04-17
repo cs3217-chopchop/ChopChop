@@ -1,25 +1,26 @@
-import Combine
 import CoreGraphics
 import Foundation
 
-final class SessionRecipeStepNode: Node, ObservableObject {
+final class SessionRecipeStepNode: Node {
     let id = UUID()
     var label: SessionRecipeStep
     var position: CGPoint?
-    @Published var isCompletable = false
-    @Published var isCompleted = false
 
-    init(_ node: RecipeStepNode, actionTimeTracker: ActionTimeTracker, position: CGPoint? = nil) {
-        self.label = SessionRecipeStep(step: node.label, actionTimeTracker: actionTimeTracker)
-        self.position = position
+    var isCompletable = false
+    var isCompleted = false
+
+    init(node: RecipeStepNode) {
+        self.label = SessionRecipeStep(step: node.label)
+    }
+}
+
+extension SessionRecipeStepNode: Equatable {
+    static func == (lhs: SessionRecipeStepNode, rhs: SessionRecipeStepNode) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
     }
 }
 
 extension SessionRecipeStepNode: Hashable {
-    static func == (lhs: SessionRecipeStepNode, rhs: SessionRecipeStepNode) -> Bool {
-        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
-    }
-
     func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }

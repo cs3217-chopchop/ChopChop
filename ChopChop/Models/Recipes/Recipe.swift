@@ -11,7 +11,7 @@ struct Recipe: Equatable {
     let ingredients: [RecipeIngredient]
     let stepGraph: RecipeStepGraph
 
-    var totalTimeTaken: Int {
+    var totalTimeTaken: TimeInterval {
         stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 

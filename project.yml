@@ -8,13 +8,16 @@ options:
 packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift
-    from: 5.6.0
+    from: 5.7.4
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
     from: 7.9.1
   CombineFirebase:
     url: https://github.com/rever-ai/CombineFirebase
     branch: 02bc159531795b98bf7ff83dfe8c794cf805945e
+  InflectorKit:
+    url: https://github.com/mattt/InflectorKit
+    from: 1.0.0
 targets:
   ChopChop:
     type: application
@@ -27,6 +30,7 @@ targets:
       - package: Firebase
         product: FirebaseStorage
       - package: CombineFirebase
+      - package: InflectorKit
     preBuildScripts:
       - script: |
           if which swiftlint >/dev/null; then

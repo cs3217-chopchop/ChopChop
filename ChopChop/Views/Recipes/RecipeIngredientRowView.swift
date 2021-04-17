@@ -9,12 +9,13 @@ struct RecipeIngredientRowView: View {
             HStack {
                 TextField("Quantity", text: Binding(get: { viewModel.quantity },
                                                     set: viewModel.setQuantity))
-                    .keyboardType(.numberPad)
+                    .keyboardType(.decimalPad)
                 Picker(viewModel.unit.description, selection: $viewModel.unit) {
                     ForEach(QuantityUnit.allCases, id: \.self) {
                         Text($0.description)
                     }
                 }
+                .frame(width: 60, alignment: .leading)
                 .pickerStyle(MenuPickerStyle())
             }
             .frame(width: 120)

@@ -3,29 +3,18 @@ import SwiftUI
 struct TimerNodeView: View {
     @ObservedObject var viewModel: TimerNodeViewModel
 
-    let rows = [
-        GridItem(),
-        GridItem()
-    ]
-
     var body: some View {
         if viewModel.hasTimers {
-            HStack {
+            VStack {
                 if let index = viewModel.index {
-                    TileView(normalSize: CGSize(width: 80, height: 134)) {
-                        VStack {
-                            Text("Step")
-                            Text("\(index + 1)")
-                        }
+                    Text("Step \(index + 1)")
                         .font(.headline)
-                    }
+                        .padding([.top, .bottom], 8)
                 }
 
-                LazyHGrid(rows: rows) {
-                    ForEach(viewModel.node.label.timers, id: \.self) { timer in
-                        CountdownTimerView(viewModel: CountdownTimerViewModel(countdownTimer: timer))
-                            .padding()
-                    }
+                ForEach(viewModel.node.label.timers, id: \.self) { timer in
+                    CountdownTimerView(viewModel: CountdownTimerViewModel(timer: timer))
+                        .id(timer)
                 }
             }
         } else {
@@ -36,11 +25,10 @@ struct TimerNodeView: View {
 
  struct TimerNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStep("#") {
+        if let step = try? RecipeStep("Preview") {
             TimerNodeView(viewModel:
                             TimerNodeViewModel(graph: SessionRecipeStepGraph(),
-                                               node: SessionRecipeStepNode(RecipeStepNode(step),
-                                                                           actionTimeTracker: ActionTimeTracker())))
+                                               node: SessionRecipeStepNode(node: RecipeStepNode(step))))
         }
     }
  }

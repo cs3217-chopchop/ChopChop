@@ -13,22 +13,42 @@ struct RecipeView: View {
                 }
             }
             .navigationTitle(recipe.name)
-            .toolbar {
-                // Workaround for placing NavigationLink in toolbar
-                HStack {
+            .background(
+                ZStack {
                     NavigationLink(
-                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe))
+                        destination: SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe)),
+                        isActive: $viewModel.showSessionRecipe
                     ) {
-                        Image(systemName: "square.and.pencil")
+                        EmptyView()
                     }
+                    NavigationLink(
+                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe)),
+                        isActive: $viewModel.showRecipeForm
+                    ) {
+                        EmptyView()
+                    }
+                }
+            )
+            .toolbar {
+                Button(action: {
+                    viewModel.showSessionRecipe = true
+                }) {
+                    Image(systemName: "flame")
+                }
+                .disabled(viewModel.isCookingDisabled)
+                Button(action: {
+                    viewModel.showRecipeForm = true
+                }) {
+                    Image(systemName: "square.and.pencil")
                 }
                 Menu {
                     Button(action: viewModel.publish) {
                         Label(viewModel.isPublished ? "Publish changes" : "Publish", systemImage: "icloud.and.arrow.up")
                     }
-                }
-                label: {
+                } label: {
                     Image(systemName: "paperplane")
+                        .imageScale(.large)
+                        .padding(.leading, 8)
                 }
             }
         } else {
@@ -79,7 +99,7 @@ struct RecipeView: View {
             Divider()
 
             if recipe.totalTimeTaken != 0 {
-                Text(viewModel.timeFormatter.string(from: TimeInterval(recipe.totalTimeTaken)) ?? "")
+                Text(viewModel.timeFormatter.string(from: recipe.totalTimeTaken) ?? "")
                 Divider()
             }
 
@@ -112,8 +132,12 @@ struct RecipeView: View {
                 .font(.title)
                 .padding(.bottom, 4)
             VStack(alignment: .leading) {
-                ForEach(recipe.ingredients, id: \.name) { ingredient in
-                    Text(ingredient.description)
+                if recipe.ingredients.isEmpty {
+                    Text("No ingredients")
+                } else {
+                    ForEach(recipe.ingredients, id: \.name) { ingredient in
+                        Text(ingredient.description)
+                    }
                 }
             }
             .padding(.bottom)
@@ -126,26 +150,30 @@ struct RecipeView: View {
                 .font(.title)
                 .padding(.bottom, 4)
             VStack(alignment: .leading) {
-                ForEach(0..<recipe.stepGraph.nodes.count, id: \.self) { idx in
-                    HStack(alignment: .top) {
-                        Text("Step \(idx + 1):")
-                            .bold()
-                        Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                if recipe.stepGraph.nodes.isEmpty {
+                    Text("No steps")
+                } else {
+                    ForEach(0..<recipe.stepGraph.nodes.count, id: \.self) { idx in
+                        HStack(alignment: .top) {
+                            Text("Step \(idx + 1):")
+                                .bold()
+                            Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                        }
+                    }
+                    HStack {
+                        Spacer()
+                        NavigationLink(
+                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
+                                                                                         isEditable: false))
+                        ) {
+                            Label("View detailed steps", systemImage: "rectangle.expand.vertical")
+                        }
+                        .padding()
+                        Spacer()
                     }
                 }
             }
             .padding(.bottom)
-            HStack {
-                Spacer()
-                NavigationLink(
-                    destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
-                                                                                 isEditable: false))
-                ) {
-                    Label("View detailed steps", systemImage: "rectangle.expand.vertical")
-                }
-                .padding()
-                Spacer()
-            }
         }
     }
 }

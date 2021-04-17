@@ -4,38 +4,42 @@ struct DeductibleIngredientView: View {
     @ObservedObject var viewModel: DeductibleIngredientViewModel
 
     var body: some View {
-        VStack {
-            HStack(alignment: .center) {
-                Spacer()
-                Text(viewModel.ingredient.name)
-                    .frame(width: 100, height: 30)
-                TextField(viewModel.ingredient.name, text: $viewModel.deductBy)
-                    .keyboardType(.decimalPad)
-                    .foregroundColor(viewModel.errorMsg.isEmpty ? .primary : .red)
-                    .frame(width: 100, height: 50, alignment: .center)
-                    .border(Color.primary, width: 1)
-                    .multilineTextAlignment(.center)
-                Menu(viewModel.unit.description) {
-                    ForEach(QuantityUnit.allCases, id: \.description) { type in
-                        Button(action: {
-                            viewModel.updateUnit(unit: type)
-                        }) {
-                            Text(type.description)
+        Section(footer: errorMessage) {
+            HStack {
+                HStack {
+                    TextField("Quantity", text: Binding(get: { viewModel.quantity },
+                                                        set: viewModel.setQuantity))
+                        .keyboardType(.decimalPad)
+                    Picker(viewModel.unit.description, selection: $viewModel.unit) {
+                        ForEach(QuantityUnit.allCases, id: \.self) {
+                            Text($0.description)
                         }
                     }
-                }.frame(width: 100, height: 30)
-                Spacer()
+                    .frame(width: 60, alignment: .leading)
+                    .pickerStyle(MenuPickerStyle())
+                }
+                .frame(width: 140)
+                Text(viewModel.ingredient.name)
             }
-            Text(viewModel.errorMsg)
+        }
+    }
+
+    @ViewBuilder
+    var errorMessage: some View {
+        if !viewModel.errorMessages.isEmpty {
+            Text(viewModel.errorMessages.joined(separator: "\n"))
                 .foregroundColor(.red)
-                .frame(width: 400, height: 20)
         }
     }
 }
 
 struct DeductibleIngredientView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try line_length
-        DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: try! Ingredient(name: "Butter", type: .count, batches: []), recipeIngredient: try! RecipeIngredient(name: "Butter", quantity: try! Quantity(.count, value: 2))))
+        if let ingredient = try? Ingredient(name: "Butter", type: .count),
+           let quantity = try? Quantity(.count, value: 2),
+           let recipeIngredient = try? RecipeIngredient(name: "Butter", quantity: quantity) {
+                DeductibleIngredientView(viewModel: DeductibleIngredientViewModel(ingredient: ingredient,
+                                                                                  recipeIngredient: recipeIngredient))
+        }
     }
 }

@@ -1,6 +1,6 @@
 import GRDB
 
-struct RecipeRecord: Equatable {
+struct RecipeRecord: Identifiable, Equatable {
     var id: Int64?
     var onlineId: String?
     var recipeCategoryId: Int64?
@@ -50,9 +50,9 @@ extension DerivableRequest where RowDecoder == RecipeRecord {
         if ids == [nil] {
             return filter(RecipeRecord.Columns.recipeCategoryId == nil)
         } else if ids.contains(nil) {
-            return joining(optional: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(optional: RecipeRecord.category.filter(ids: ids.compactMap { $0 }))
         } else {
-            return joining(required: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(required: RecipeRecord.category.filter(ids: ids.compactMap { $0 }))
         }
     }
 

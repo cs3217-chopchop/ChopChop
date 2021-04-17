@@ -8,13 +8,6 @@ import SwiftUI
         selection.isNodeSelected(viewModel.node)
     }
 
-    init(viewModel: SessionNodeViewModel, selection: SelectionHandler<SessionRecipeStepNode>) {
-        self.viewModel = viewModel
-        self.selection = selection
-
-        UITextView.appearance().backgroundColor = .clear
-    }
-
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
             VStack {
@@ -51,10 +44,10 @@ import SwiftUI
     }
 
     var detailView: some View {
-        HStack {
+        HStack(spacing: 16) {
             Button(action: {
                 withAnimation {
-                    viewModel.graph.toggleStep(viewModel.node)
+                    viewModel.graph.toggleNode(viewModel.node)
                     selection.deselectNode(viewModel.node)
                 }
             }) {
@@ -73,6 +66,16 @@ import SwiftUI
             }
 
             Spacer()
+
+            if !viewModel.node.label.timers.isEmpty {
+                Button(action: {
+                    withAnimation {
+                        viewModel.proxy?.scrollTo(viewModel.node, anchor: .top)
+                    }
+                }) {
+                    Image(systemName: "timer")
+                }
+            }
         }
         .padding(.top, 6)
     }
@@ -80,14 +83,12 @@ import SwiftUI
 
 struct SessionNodeView_Previews: PreviewProvider {
     static var previews: some View {
-        if let step = try? RecipeStepNode(RecipeStep("#")),
-           let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
+        if let node = try? RecipeStepNode(RecipeStep("Preview")),
+           let graph = try? SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionNodeView(
                 viewModel: SessionNodeViewModel(
                     graph: graph,
-                    node: SessionRecipeStepNode(
-                        step,
-                        actionTimeTracker: ActionTimeTracker())),
+                    node: SessionRecipeStepNode(node: node)),
                         selection: SelectionHandler())
         }
     }

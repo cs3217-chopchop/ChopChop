@@ -26,6 +26,8 @@ class RecipeFormViewModel: ObservableObject {
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
+    @Published var formErrors: [String: [String]] = [:]
+
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
     var isEditing: Bool {
         recipe != nil
@@ -42,7 +44,7 @@ class RecipeFormViewModel: ObservableObject {
         self.category = recipe?.category
 
         if let servings = recipe?.servings {
-            self.servings = String(servings)
+            self.servings = servings.removeZerosFromEnd()
         } else {
             self.servings = ""
         }
@@ -50,7 +52,7 @@ class RecipeFormViewModel: ObservableObject {
         self.difficulty = recipe?.difficulty
         self.ingredients = recipe?.ingredients.map {
             RecipeIngredientRowViewModel(name: $0.name,
-                                         quantity: $0.quantity.value.description,
+                                         quantity: $0.quantity.value.removeZerosFromEnd(),
                                          unit: $0.quantity.unit)
 
         } ?? []
@@ -122,6 +124,10 @@ class RecipeFormViewModel: ObservableObject {
     }
 
     func saveRecipe() -> Bool {
+        guard validateRecipe() else {
+            return false
+        }
+
         do {
             guard let servings = Double(servings) else {
                 throw RecipeError.invalidServings
@@ -160,6 +166,46 @@ class RecipeFormViewModel: ObservableObject {
 
             return false
         }
+    }
+
+    private func validateRecipe() -> Bool {
+        formErrors = [:]
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmedName.isEmpty {
+            formErrors["name", default: []].append(RecipeError.invalidName.errorDescription ?? "")
+        }
+
+        if Double(servings) ?? 0 <= 0 {
+            formErrors["servings", default: []].append(RecipeError.invalidServings.errorDescription ?? "")
+        }
+
+        if ingredients.count > Set(ingredients.map { $0.name }).count {
+            formErrors["ingredients", default: []].append(RecipeError.duplicateIngredients.errorDescription ?? "")
+        }
+
+        if !ingredients.allSatisfy({ ingredient in
+            guard let quantity = Double(ingredient.quantity) else {
+                return false
+            }
+
+            return quantity >= 0
+        }) {
+            formErrors["ingredients", default: []].append(QuantityError.invalidQuantity.errorDescription ?? "")
+        }
+
+        if !ingredients.allSatisfy({ !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            formErrors["ingredients", default: []].append(RecipeIngredientError.invalidName.errorDescription ?? "")
+        }
+
+        if !formErrors.isEmpty {
+            alertTitle = "Error"
+            alertMessage = "Recipe could not be added due to errors."
+            alertIsPresented = true
+        }
+
+        return formErrors.isEmpty
     }
 
     private func categoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {

@@ -149,7 +149,7 @@ final class SidebarViewModel: ObservableObject {
     /**
      Returns a publisher that publishes all online recipes by the user's followees.
      */
-    var followeesOnlineRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
+    var followeesOnlineRecipesPublisher: AnyPublisher<[OnlineRecipe], Error> {
         guard let userId = settings.userId else {
             fatalError("No user id stored")
         }

@@ -19,7 +19,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
-    @Published var isShowingDetail: Bool = false
+    @Published var isShowingDetail = false
 
     let settings: UserSettings
 
