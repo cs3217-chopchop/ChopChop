@@ -314,6 +314,8 @@ enum QuantityError: LocalizedError {
         switch self {
         case .negativeQuantity, .invalidQuantity:
             return "Ingredient quantity should be a non-negative number."
+        case .incompatibleTypes:
+            return "Ingredient unit types are incompatible."
         default:
             return ""
         }

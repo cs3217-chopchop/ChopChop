@@ -40,7 +40,7 @@ struct RecipeFormView: View {
         Section(header: Text("Serving size"), footer: formError("servings")) {
             TextField("Serving size", text: Binding(get: { viewModel.servings },
                                                     set: viewModel.setServings))
-                .keyboardType(.numberPad)
+                .keyboardType(.decimalPad)
         }
     }
 
