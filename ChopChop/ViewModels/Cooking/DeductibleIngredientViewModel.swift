@@ -1,25 +1,34 @@
 import SwiftUI
 
-class DeductibleIngredientViewModel: ObservableObject {
-    let recipeIngredient: RecipeIngredient
+final class DeductibleIngredientViewModel: ObservableObject {
+    @Published var quantity: String
+    @Published var type: QuantityUnit
+    @Published var errorMessages: [String] = []
+
     let ingredient: Ingredient
-    @Published var deductBy: String
-    @Published var unit: QuantityUnit
-    @Published var errorMsg = ""
 
     init(ingredient: Ingredient, recipeIngredient: RecipeIngredient) {
+        quantity = recipeIngredient.quantity.value.description
+        type = recipeIngredient.quantity.unit
         self.ingredient = ingredient
-        self.recipeIngredient = recipeIngredient
-        deductBy = String(recipeIngredient.quantity.value)
-        unit = recipeIngredient.quantity.unit
     }
 
-    func updateUnit(unit: QuantityUnit) {
-        self.unit = unit
+    func setQuantity(_ quantity: String) {
+        self.quantity = String(quantity.filter { "0123456789.".contains($0) })
+            .components(separatedBy: ".")
+            .prefix(2)
+            .joined(separator: ".")
     }
 
-    func updateError(msg: String) {
-        errorMsg = msg
+    // TODO: Change when ingredient becomes struct
+    func convertToIngredient() throws -> Ingredient {
+        guard let value = Double(quantity) else {
+            throw QuantityError.invalidQuantity
+        }
+
+        try ingredient.use(quantity: Quantity(type, value: value))
+
+        return ingredient
     }
 }
 

@@ -37,6 +37,28 @@ struct StorageManager {
         recipeCategory.id = recipeCategoryRecord.id
     }
 
+    func saveIngredients(_ ingredients: inout [Ingredient]) throws {
+        var records: [(IngredientRecord, [IngredientBatchRecord])] = ingredients.map { ingredient in
+            let ingredientRecord = IngredientRecord(id: ingredient.id,
+                                                    ingredientCategoryId: ingredient.ingredientCategoryId,
+                                                    name: ingredient.name,
+                                                    quantityType: ingredient.quantityType)
+            let batchRecords = ingredient.batches.map { batch in
+                IngredientBatchRecord(ingredientId: ingredient.id,
+                                      expiryDate: batch.expiryDate,
+                                      quantity: batch.quantity.record)
+            }
+
+            return (ingredientRecord, batchRecords)
+        }
+
+        try appDatabase.saveIngredients(&records)
+
+        for index in ingredients.indices {
+            ingredients[index].id = records[index].0.id
+        }
+    }
+
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.category?.id,

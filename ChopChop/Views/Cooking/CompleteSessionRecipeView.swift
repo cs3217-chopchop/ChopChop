@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CompleteSessionRecipeView: View {
+    @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: CompleteSessionRecipeViewModel
 
     var body: some View {
@@ -12,16 +13,16 @@ struct CompleteSessionRecipeView: View {
             if viewModel.deductibleIngredients.isEmpty {
                 NotFoundView(entityName: "Deductible Ingredients")
             } else {
-                ScrollView {
-                    ForEach(viewModel.deductibleIngredients, id: \.self) { recipeIngredientViewModel in
-                        DeductibleIngredientView(viewModel: recipeIngredientViewModel)
+                Form {
+                    ForEach(viewModel.deductibleIngredients, id: \.self) { deductibleIngredientViewModel in
+                        DeductibleIngredientView(viewModel: deductibleIngredientViewModel)
                     }
                 }
             }
 
             Button("Complete Recipe") {
-                if !viewModel.deductibleIngredients.isEmpty {
-                    viewModel.submit()
+                if viewModel.deductibleIngredients.isEmpty || viewModel.completeRecipe() {
+                    presentationMode.wrappedValue.dismiss()
                 }
             }
         }
@@ -32,7 +33,8 @@ struct CompleteSessionRecipeView: View {
 
 struct CompleteSessionView_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable force_try
-        CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: try! Recipe(name: "Pancakes")))
+        if let recipe = try? Recipe(name: "Preview") {
+            CompleteSessionRecipeView(viewModel: CompleteSessionRecipeViewModel(recipe: recipe))
+        }
     }
 }

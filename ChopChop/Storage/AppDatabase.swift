@@ -473,6 +473,36 @@ extension AppDatabase {
         }
     }
 
+    // For saving multiple ingredients in one transaction
+    func saveIngredients(_ ingredients: inout [(IngredientRecord, [IngredientBatchRecord])]) throws {
+        try dbWriter.write { db in
+            for index in ingredients.indices {
+                guard ingredients[index].1.allSatisfy({ $0.quantity.type == ingredients[index].0.quantityType }) else {
+                    throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+                }
+
+                // Save ingredient
+                try ingredients[index].0.save(db)
+
+                guard ingredients[index].1.compactMap({ $0.ingredientId })
+                        .allSatisfy({ $0 == ingredients[index].0.id }) else {
+                    throw DatabaseError(message: "Ingredient batches belong to the wrong ingredient.")
+                }
+
+                // Delete all batches that are not in the array
+                try ingredients[index].0.batches
+                    .filter(!ingredients[index].1.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
+                    .deleteAll(db)
+
+                // Save ingredient batches
+                for batchIndex in ingredients[index].1.indices {
+                    ingredients[index].1[batchIndex].ingredientId = ingredients[index].0.id
+                    try ingredients[index].1[batchIndex].save(db)
+                }
+            }
+        }
+    }
+
     func saveIngredient(_ ingredient: inout IngredientRecord) throws {
         var batches: [IngredientBatchRecord] = []
 

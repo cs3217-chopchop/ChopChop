@@ -188,7 +188,8 @@ struct RecipeFormView: View {
     @ViewBuilder
     func formError(_ key: String) -> some View {
         if let errors = viewModel.formErrors[key] {
-            Text(errors.joined(separator: "\n")).foregroundColor(.red)
+            Text(errors.joined(separator: "\n"))
+                .foregroundColor(.red)
         }
     }
 }

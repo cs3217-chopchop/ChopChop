@@ -1,7 +1,7 @@
 import Combine
 import InflectorKit
 
-class CompleteSessionRecipeViewModel: ObservableObject {
+final class CompleteSessionRecipeViewModel: ObservableObject {
     @Published var deductibleIngredients: [DeductibleIngredientViewModel] = []
 
     private let storageManager = StorageManager()
@@ -27,61 +27,49 @@ class CompleteSessionRecipeViewModel: ObservableObject {
         }
     }
 
-    func submit() {
-        var ingredientsToSave: [Ingredient] = []
-        // atomic
-        for ingredientViewModel in deductibleIngredients {
-            ingredientViewModel.updateError(msg: "") // reset error
+    func completeRecipe() -> Bool {
+        guard validateIngredients() else {
+            return false
+        }
 
-            guard let amount = Double(ingredientViewModel.deductBy) else {
-                ingredientViewModel.updateError(msg: "Not a valid number")
+        do {
+            var ingredients = try deductibleIngredients.map { try $0.convertToIngredient() }
+            try storageManager.saveIngredients(&ingredients)
+
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func validateIngredients() -> Bool {
+        var hasErrors = false
+
+        for deductibleIngredient in deductibleIngredients {
+            deductibleIngredient.errorMessages = []
+
+            guard let value = Double(deductibleIngredient.quantity),
+                  let quantity = try? Quantity(deductibleIngredient.type, value: value) else {
+                deductibleIngredient.errorMessages.append(QuantityError.invalidQuantity.errorDescription ?? "")
+                hasErrors = true
                 continue
             }
 
-            guard let id = ingredientViewModel.ingredient.id,
-                  var ingredient = try? storageManager.fetchIngredient(id: id) else {
-                // publisher would have updated viewModels otherwise
-                assertionFailure("Ingredient should exist in store")
-                continue
-            }
-
-            guard let quantityUsed = try? Quantity(ingredientViewModel.unit, value: amount) else {
-                ingredientViewModel.updateError(msg: "Not a valid number")
-                continue
-            }
-
-            guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
-                ingredientViewModel.updateError(msg: """
-                    Not a valid unit. Change to \(quantityUsed.type == .count ? "mass/volume" : "count" )
+            guard let hasSufficientAmount = try? deductibleIngredient.ingredient.contains(quantity: quantity) else {
+                deductibleIngredient.errorMessages.append("""
+                    \(QuantityError.incompatibleTypes.errorDescription ?? "") \
+                    Change type to \(quantity.type == .count ? "mass/volume" : "count").
                     """)
+                hasErrors = true
                 continue
             }
 
-            guard sufficientAmount else {
-                ingredientViewModel.updateError(msg: "Insufficient quantity in ingredient store")
-                continue
-            }
-
-            do {
-                try ingredient.use(quantity: quantityUsed)
-                ingredientsToSave.append(ingredient)
-            } catch {
-                assertionFailure("Ingredient should have sufficient quantity")
-                continue
+            if !hasSufficientAmount {
+                deductibleIngredient.errorMessages.append("Insufficient ingredient quantity to deduct ingredient.")
+                hasErrors = true
             }
         }
 
-        guard (deductibleIngredients.allSatisfy { $0.errorMsg.isEmpty }) else {
-            return
-        }
-
-        // only do database operations here
-        for var ingredient in ingredientsToSave {
-            do {
-                try storageManager.saveIngredient(&ingredient)
-            } catch {
-                assertionFailure("Couldn't save ingredient")
-            }
-        }
+        return !hasErrors
     }
 }
