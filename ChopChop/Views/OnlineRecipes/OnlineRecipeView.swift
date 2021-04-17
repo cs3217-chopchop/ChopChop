@@ -19,7 +19,10 @@ struct OnlineRecipeView: View {
 
     var userBar: some View {
         NavigationLink(
-            destination: ProfileView(viewModel: ProfileViewModel(userId: viewModel.recipe.userId, settings: viewModel.settings))
+            destination: ProfileView(
+                viewModel: ProfileViewModel(
+                    userId: viewModel.recipe.userId,
+                    settings: viewModel.settings))
         ) {
             HStack {
                 Image("default-user")

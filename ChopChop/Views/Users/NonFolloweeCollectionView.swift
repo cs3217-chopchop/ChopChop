@@ -1,6 +1,9 @@
 import SwiftUI
 
-struct AddFolloweeView: View {
+/**
+ Represents a view of a collection of non followees.
+ */
+struct NonFolloweeCollectionView: View {
     @ObservedObject var viewModel: NonFolloweeCollectionViewModel
 
     var body: some View {
@@ -8,7 +11,7 @@ struct AddFolloweeView: View {
             SearchBar(text: $viewModel.query, placeholder: "Search...")
 
             if viewModel.nonFollowees.isEmpty {
-                NotFoundView(entityName: "Non Followees")
+                NotFoundView(entityName: "Users")
             } else {
                 nonFolloweeList
             }
@@ -19,16 +22,16 @@ struct AddFolloweeView: View {
         }
     }
 
-    var nonFolloweeList: some View {
+    private var nonFolloweeList: some View {
         List {
             ForEach(viewModel.nonFollowees) { nonFollowee in
-                AddFolloweeRow(followee: nonFollowee)
+                NonFolloweeRow(followee: nonFollowee)
             }
         }
     }
 
     @ViewBuilder
-    func AddFolloweeRow(followee: User) -> some View {
+    private func NonFolloweeRow(followee: User) -> some View {
         if let id = followee.id {
             NavigationLink(
                 destination: ProfileView(viewModel: ProfileViewModel(userId: id, settings: viewModel.settings))

@@ -1,10 +1,21 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a collection of recipes.
+ */
 struct RecipeCategory: Identifiable, Hashable {
     var id: Int64?
+
+    // MARK: - Specification Fields
+    /// The name of the category. Cannot be empty.
     let name: String
 
+    /**
+     Instantiates a recipe category with the given name.
+
+     - Throws:`RecipeCategoryError.invalidName` if the given name trimmed is empty.
+     */
     // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil, name: String) throws {
         self.id = id

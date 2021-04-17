@@ -39,7 +39,7 @@ struct StorageManager {
 
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
-                                                ingredientCategoryId: ingredient.ingredientCategoryId,
+                                                ingredientCategoryId: ingredient.category?.id,
                                                 name: ingredient.name,
                                                 quantityType: ingredient.quantityType)
         var batchRecords = ingredient.batches.map { batch in
@@ -202,19 +202,6 @@ extension StorageManager {
 
     func deleteIngredientImage(name: String) {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
-    }
-
-    func renameIngredientImage(from oldName: String, to newName: String) throws {
-        guard oldName != newName else {
-            return
-        }
-
-        guard let image = fetchIngredientImage(name: oldName) else {
-            return
-        }
-
-        try saveIngredientImage(image, name: newName)
-        deleteIngredientImage(name: oldName)
     }
 
     func fetchIngredientImage(name: String) -> UIImage? {

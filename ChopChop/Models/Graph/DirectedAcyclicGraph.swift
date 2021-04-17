@@ -1,16 +1,23 @@
 /**
- The `DirectedAcyclicGraph` ADT is able to represent a simple, directed, acyclic graph.
+ Represents a simple, directed, acyclic graph.
  
- The representation invariants for a DAG g are:
- - g is a simple graph (multiple edges with the same source and destination node not allowed)
- - g is a directed graph
- - g is acyclic (does not contain a cycle)
+ Representation Invariants
+ - There is at most one edge between any two nodes.
+ - All edges are directed.
+ - There are no cycles in the graph.
  */
 class DirectedAcyclicGraph<N: Node>: Graph<N> {
+    /**
+     Initialises an empty DAG.
+     */
     init() {
         super.init(isDirected: true)
     }
 
+    /**
+     Initialises a DAG with the given nodes and edges.
+     Fails if the given nodes and edges do not result in a valid DAG.
+     */
     init(nodes: [N], edges: [E]) throws {
         super.init(isDirected: true)
 
@@ -25,6 +32,11 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         assert(checkRepresentation())
     }
 
+    // MARK: - Edge Operations
+
+    /**
+     Checks whether the DAG contains an edge with the same source and destination node as the given edge.
+     */
     override func containsEdge(_ targetEdge: E) -> Bool {
         let sourceNode = targetEdge.source
         let destinationNode = targetEdge.destination
@@ -38,6 +50,14 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         }
     }
 
+    /**
+     Adds the given edge into the DAG, and its source and/or destination nodes if they do not exist in the DAG.
+
+     - Throws:
+        - `GraphError.repeatedEdge` if the given edge already exists in the DAG.
+        - `DirectedAcyclicGraphError.addedEdgeFormsCycle`
+            if the given edge would result in a cycle if added into the DAG.
+     */
     override func addEdge(_ addedEdge: E) throws {
         guard !containsEdge(addedEdge) else {
             throw GraphError.repeatedEdge
@@ -52,7 +72,7 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         assert(checkRepresentation())
     }
 
-    func isValidEdge(_ addedEdge: E) -> Bool {
+    private func isValidEdge(_ addedEdge: E) -> Bool {
         guard !containsEdge(addedEdge) else {
             return false
         }
@@ -73,11 +93,13 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
             adjacencyList[sourceNode] = edgesFromSourceNode
         }
 
-        return !containsCycle()
+        return !containsCycle
     }
 
-    // MARK: - Cycles
-    private func containsCycle() -> Bool {
+    // MARK: - Invariance Checks
+
+    /// Checks whether the current DAG contains a cycle.
+    private var containsCycle: Bool {
         let stableNodes = nodes
         let n = stableNodes.count
 
@@ -99,36 +121,62 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         visitedNodes: inout [Bool],
         nodesInPath: inout [Bool]) -> Bool {
 
-        // If current node is already in the path, cycle found.
+        /// If current node is already in the path, there is a cycle.
         if nodesInPath[currentIdx] {
             return true
         }
 
-        // If current node is not in path but has been visited, there is no cycle.
+        /// If current node is not in the path but has been visited, there is no cycle.
         if visitedNodes[currentIdx] {
             return false
         }
 
-        // Visit the current node
+        /// Else the current node is not in the path and has not been visited. Continue traversal from the current node.
+        /// Visit the current node
         visitedNodes[currentIdx] = true
 
-        // Add the current node into the path
+        /// Add the current node into the path
         nodesInPath[currentIdx] = true
 
-        // Traverse depth first and check for cycles
+        /// Traverse depth first and check for cycles
         for idx in getIndexOfNodesAdjacent(to: nodes[currentIdx], nodes: nodes) {
             if containsCycleHelper(idx, nodes: nodes, visitedNodes: &visitedNodes, nodesInPath: &nodesInPath) {
                 return true
             }
         }
 
-        // After traversing all nodes in the path starting from the current node, remove it from the path.
+        /// After traversing all nodes in the path starting from the current node, remove it from the path.
         nodesInPath[currentIdx] = false
 
         return false
     }
 
+    /// Checks whether the current DAG is a simple graph.
+    private var isSimpleGraph: Bool {
+        var isSimpleGraph = true
+        let stableEdges = edges
+
+        for i in 0..<stableEdges.count {
+            for j in i + 1..<stableEdges.count {
+                isSimpleGraph = isSimpleGraph && !(stableEdges[i] ~= stableEdges[j])
+            }
+        }
+
+        return isSimpleGraph
+    }
+
+    override internal func checkRepresentation() -> Bool {
+        let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
+            edges.allSatisfy { $0.source == node }
+        }
+
+        return allEdgesInCorrectList && isSimpleGraph && !containsCycle
+    }
+
     // MARK: - Topological Sort
+
+    /// The nodes in the graph sorted in topological order.
+    /// - Important: The computed result of this property is not stable if there are multiple valid topological orders.
     var topologicallySortedNodes: [N] {
         let stableNodes = nodes
         let n = stableNodes.count
@@ -140,7 +188,7 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
             topologicalSortHelper(currentIdx, nodes: stableNodes, visitedNodes: &visitedNodes, nodeStack: &nodeStack)
         }
 
-        // Nodes must be reversed because post order DFS is used
+        /// Nodes must be reversed because post order DFS was used
         return nodeStack.reversed()
     }
 
@@ -148,14 +196,15 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
                                        visitedNodes: inout [Bool], nodeStack: inout [N]) {
         let currentNode = nodes[currentIdx]
 
-        // Mark current node as visited
+        /// Mark current node as visited
         visitedNodes[currentIdx] = true
 
+        /// Traverse depth first
         for idx in getIndexOfNodesAdjacent(to: currentNode, nodes: nodes) where !visitedNodes[idx] {
             topologicalSortHelper(idx, nodes: nodes, visitedNodes: &visitedNodes, nodeStack: &nodeStack)
         }
 
-        // After all children are traversed, push current node into stack
+        /// After all children have been traversed, push current node into stack
         nodeStack.append(currentNode)
     }
 
@@ -166,6 +215,9 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
     }
 
     // MARK: - Layers
+
+    /// An array of layers of nodes ordered such that all edges point from a higher to a lower layer.
+    /// - Important: The computed result of this property is not stable if there are multiple valid layerings.
     var nodeLayers: [[N]] {
         var nodeLayers: [[N]] = []
 
@@ -183,30 +235,9 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
         return nodeLayers
     }
 
-    func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
+    private func getNodesWithoutIncomingEdges(nodes: Set<N>, edges: Set<E>) -> Set<N> {
         let destinationNodes = Set(edges.map { $0.destination })
         return nodes.filter { !destinationNodes.contains($0) }
-    }
-
-    override internal func checkRepresentation() -> Bool {
-        let allEdgesInCorrectList = adjacencyList.allSatisfy { node, edges in
-            edges.allSatisfy { $0.source == node }
-        }
-
-        return allEdgesInCorrectList && isSimpleGraph() && !containsCycle()
-    }
-
-    private func isSimpleGraph() -> Bool {
-        var isSimpleGraph = true
-        let stableEdges = edges
-
-        for i in 0..<stableEdges.count {
-            for j in i + 1..<stableEdges.count {
-                isSimpleGraph = isSimpleGraph && !(stableEdges[i] ~= stableEdges[j])
-            }
-        }
-
-        return isSimpleGraph
     }
 }
 

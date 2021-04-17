@@ -37,7 +37,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
             }
 
             guard let id = ingredientViewModel.ingredient.id,
-                  let ingredient = try? storageManager.fetchIngredient(id: id) else {
+                  var ingredient = try? storageManager.fetchIngredient(id: id) else {
                 // publisher would have updated viewModels otherwise
                 assertionFailure("Ingredient should exist in store")
                 continue
@@ -50,7 +50,7 @@ class CompleteSessionRecipeViewModel: ObservableObject {
 
             guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
                 ingredientViewModel.updateError(msg: """
-                    Not a valid unit. Change to \(quantityUsed.baseType == .count ? "mass/volume" : "count" )
+                    Not a valid unit. Change to \(quantityUsed.type == .count ? "mass/volume" : "count" )
                     """)
                 continue
             }

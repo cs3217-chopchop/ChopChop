@@ -152,16 +152,10 @@ struct RecipeCollectionView: View {
     func GridTileOverlay(recipe: RecipeInfo) -> some View {
         ZStack(alignment: .bottomLeading) {
             Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: Color.black.opacity(0), location: 0.3),
-                            .init(color: .black, location: 0.6)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundColor(.clear)
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, .black]),
+                                           startPoint: .top,
+                                           endPoint: .bottom))
                 .cornerRadius(10)
                 .opacity(0.8)
             VStack(alignment: .leading) {
@@ -169,7 +163,7 @@ struct RecipeCollectionView: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
                 RecipeCaption(recipe: recipe)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
             }
             .padding()
         }

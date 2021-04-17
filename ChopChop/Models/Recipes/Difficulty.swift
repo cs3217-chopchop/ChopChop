@@ -1,5 +1,8 @@
 import GRDB
 
+/**
+ Represents the difficulty of making some recipe.
+ */
 enum Difficulty: Int, Codable, CaseIterable, DatabaseValueConvertible {
     case veryEasy = 1
     case easy

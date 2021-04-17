@@ -1,87 +1,92 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents the view model for a view of a form for adding or editing an ingredient.
+ */
 class IngredientFormViewModel: ObservableObject {
-    private(set) var ingredient: Ingredient?
+    /// Is true if the form edits an existing ingredient, and is false if the form adds a new ingredient.
     let isEdit: Bool
+    /// The ingredient edited by the form, or `nil` if the form adds a new ingredient.
+    private let ingredient: Ingredient?
 
-    @Published var selectedType: BaseQuantityType
-    @Published var inputName: String
-    @Published var selectedCategory: IngredientCategory?
+    /// Form fields
+    @Published var quantityType: QuantityType
+    @Published var name: String
+    @Published var categories: [IngredientCategory] = []
+    @Published var category: IngredientCategory?
     @Published var image: UIImage
-    @Published private(set) var ingredientCategories: [IngredientCategory] = []
 
     @Published var alertIdentifier: AlertIdentifier?
-
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
     private let storageManager = StorageManager()
-    private var ingredientCategoriesCancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(edit ingredient: Ingredient) {
-        self.ingredient = ingredient
         self.isEdit = true
+        self.ingredient = ingredient
 
-        self.selectedType = ingredient.quantityType
-        self.inputName = ingredient.name
-        self.image = storageManager.fetchIngredientImage(name: ingredient.name) ?? UIImage()
+        self.quantityType = ingredient.quantityType
+        self.name = ingredient.name
+        self.category = ingredient.category
 
-        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
-            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
-                self?.ingredientCategories = categories
-                self?.selectedCategory = categories.first(where: { $0.id == ingredient.ingredientCategoryId })
-            })
+        if let id = ingredient.id {
+            self.image = storageManager.fetchIngredientImage(name: String(id)) ?? UIImage()
+        } else {
+            self.image = UIImage()
+        }
+
+        categoriesPublisher
+            .sink { [weak self] categories in
+                self?.categories = categories
+            }
+            .store(in: &cancellables)
     }
 
     init(addToCategory categoryId: Int64?) {
-        self.ingredient = nil
         self.isEdit = false
+        self.ingredient = nil
 
-        self.selectedType = .count
-        self.inputName = ""
+        self.quantityType = .count
+        self.name = ""
         self.image = UIImage()
 
-        ingredientCategoriesCancellable = storageManager.ingredientCategoriesPublisher()
-            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] categories in
-                self?.ingredientCategories = categories
-                self?.selectedCategory = categories.first(where: { $0.id == categoryId })
-            })
-    }
-
-    func save() throws {
-        if isEdit {
-            try ingredient?.rename(inputName)
-
-            if image != UIImage() {
-                try storageManager.saveIngredientImage(image, name: inputName)
+        categoriesPublisher
+            .sink { [weak self] categories in
+                self?.categories = categories
             }
-        } else {
-            ingredient = try Ingredient(name: inputName, type: selectedType)
-        }
-
-        guard var savedIngredient = ingredient else {
-            return
-        }
-
-        if let category = selectedCategory {
-            try category.add(savedIngredient)
-        } else {
-            savedIngredient.ingredientCategoryId = nil
-        }
-
-        if image != UIImage() {
-            try storageManager.saveIngredientImage(image, name: inputName)
-        }
-
-        try storageManager.saveIngredient(&savedIngredient)
+            .store(in: &cancellables)
     }
 
-    func reset() {
-        self.selectedType = .count
-        self.inputName = ""
-        self.selectedCategory = nil
-        self.image = UIImage()
+    /**
+     Saves the ingredient to local storage.
+     */
+    func save() throws {
+        var updatedIngredient = try Ingredient(id: ingredient?.id,
+                                               name: name,
+                                               type: quantityType,
+                                               batches: ingredient?.batches ?? [],
+                                               category: category)
+
+        try storageManager.saveIngredient(&updatedIngredient)
+
+        if let id = updatedIngredient.id {
+            if image == UIImage() {
+                storageManager.deleteIngredientImage(name: String(id))
+            } else {
+                try storageManager.saveIngredientImage(image, name: String(id))
+            }
+        }
+    }
+
+    private var categoriesPublisher: AnyPublisher<[IngredientCategory], Never> {
+        storageManager.ingredientCategoriesPublisher()
+            .catch { _ in
+                Just<[IngredientCategory]>([])
+            }
+            .eraseToAnyPublisher()
     }
 
     struct AlertIdentifier: Identifiable {

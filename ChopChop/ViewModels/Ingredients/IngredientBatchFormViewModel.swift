@@ -1,10 +1,20 @@
 import SwiftUI
 
+/**
+ Represents a view model for a view for the form for adding or editing an ingredient batch.
+ */
 class IngredientBatchFormViewModel: ObservableObject {
-    let batch: IngredientBatch
-    var ingredient: Ingredient
+    /// Is true if the form edits an existing ingredient batch, and is false if the form adds a new ingredient batch.
     let isEdit: Bool
 
+    /// The ingredient batch edited by the form, or an empty batch if the form adds a new ingredient batch.
+    let batch: IngredientBatch
+    /// The quantity type of the ingredient batch.
+    let quantityType: QuantityType
+
+    private let ingredientViewModel: IngredientViewModel
+
+    /// Form fields
     @Published var selectedUnit: String
     @Published var inputQuantity: String
     @Published var expiryDateEnabled: Bool
@@ -12,12 +22,13 @@ class IngredientBatchFormViewModel: ObservableObject {
 
     @Published var alertIdentifier: AlertIdentifier?
 
-    init(edit batch: IngredientBatch, in ingredient: Ingredient) {
+    init(edit batch: IngredientBatch, quantityType: QuantityType, ingredientViewModel: IngredientViewModel) {
         self.batch = batch
-        self.ingredient = ingredient
+        self.quantityType = quantityType
+        self.ingredientViewModel = ingredientViewModel
         self.isEdit = true
 
-        self.selectedUnit = batch.quantity.type.description
+        self.selectedUnit = batch.quantity.unit.description
         self.inputQuantity = String(batch.quantity.value)
 
         if let expiryDate = batch.expiryDate {
@@ -31,10 +42,10 @@ class IngredientBatchFormViewModel: ObservableObject {
         }
     }
 
-    init(addBatchTo ingredient: Ingredient) throws {
+    init(addBatchTo ingredientViewModel: IngredientViewModel, quantityType: QuantityType) throws {
         var quantity: Quantity
 
-        switch ingredient.quantityType {
+        switch quantityType {
         case .count:
             quantity = try Quantity(.count, value: 0)
         case .mass:
@@ -44,15 +55,19 @@ class IngredientBatchFormViewModel: ObservableObject {
         }
 
         self.batch = IngredientBatch(quantity: quantity)
-        self.ingredient = ingredient
+        self.quantityType = quantityType
+        self.ingredientViewModel = ingredientViewModel
         self.isEdit = false
 
-        self.selectedUnit = batch.quantity.type.description
+        self.selectedUnit = batch.quantity.unit.description
         self.inputQuantity = String(batch.quantity.value)
         self.expiryDateEnabled = false
         self.selectedDate = Date()
     }
 
+    /**
+     Saves the ingredient batch to local storage.
+     */
     func save() throws {
         guard let convertedValue = Double(inputQuantity) else {
             throw QuantityError.invalidQuantity
@@ -60,7 +75,7 @@ class IngredientBatchFormViewModel: ObservableObject {
 
         var newQuantity: Quantity
 
-        switch ingredient.quantityType {
+        switch quantityType {
         case .count:
             newQuantity = try Quantity(.count, value: convertedValue)
         case .mass:
@@ -80,22 +95,20 @@ class IngredientBatchFormViewModel: ObservableObject {
         let newExpiryDate: Date? = expiryDateEnabled ? selectedDate : nil
 
         if isEdit {
-            ingredient.removeBatch(expiryDate: batch.expiryDate)
+            ingredientViewModel.deleteBatch(expiryDate: batch.expiryDate)
         }
 
-        try ingredient.add(quantity: newQuantity, expiryDate: newExpiryDate)
-
-        try StorageManager().saveIngredient(&ingredient)
+        try ingredientViewModel.add(quantity: newQuantity, expiryDate: newExpiryDate)
     }
 
-    let massUnitMap: [String: MassUnit] = [
+    private let massUnitMap: [String: MassUnit] = [
         "kg": .kilogram,
         "g": .gram,
         "lb": .pound,
         "oz": .ounce
     ]
 
-    let volumeUnitMap: [String: VolumeUnit] = [
+    private let volumeUnitMap: [String: VolumeUnit] = [
         "L": .liter,
         "ml": .milliliter,
         "cups": .cup,
