@@ -302,8 +302,6 @@ extension AppDatabase {
             return
         }
 
-        print(ingredients)
-
         var categoryRecords = Set(ingredients.map { $0.category }).map { IngredientCategoryRecord(name: $0) }
 
         for index in categoryRecords.indices {
@@ -318,6 +316,18 @@ extension AppDatabase {
 
         for index in ingredientRecords.indices {
             try ingredientRecords[index].save(db)
+        }
+
+        for ingredient in ingredientRecords {
+            guard let id = ingredient.id else {
+                continue
+            }
+
+            try? ImageStore.save(image: UIImage(imageLiteralResourceName: ingredient.name.lowercased()
+                                                    .components(separatedBy: .whitespaces)
+                                                    .joined(separator: "-")),
+                                 name: String(id),
+                                 inFolderNamed: StorageManager.ingredientFolderName)
         }
 
         var batchRecords = ingredients.flatMap { ingredient in
