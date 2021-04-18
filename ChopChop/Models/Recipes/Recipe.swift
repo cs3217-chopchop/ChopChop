@@ -52,8 +52,8 @@ struct Recipe: Equatable {
 extension Recipe: FetchableRecord {
     init(row: Row) {
         id = row[RecipeRecord.Columns.id]
-        parentOnlineRecipeId = row[RecipeRecord.Columns.parentOnlineRecipeId]
         onlineId = row[RecipeRecord.Columns.onlineId]
+        parentOnlineRecipeId = row[RecipeRecord.Columns.parentOnlineRecipeId]
         category = row["recipeCategory"]
         name = row[RecipeRecord.Columns.name]
         servings = row[RecipeRecord.Columns.servings]
