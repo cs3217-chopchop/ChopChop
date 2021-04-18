@@ -84,4 +84,28 @@ extension MassUnit: CustomStringConvertible {
 }
 
 extension MassUnit: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let description = try container.decode(String.self)
+
+        switch description {
+        case "oz":
+            self = .ounce
+        case "lb":
+            self = .pound
+        case "g":
+            self = .gram
+        case "kg":
+            self = .kilogram
+        default:
+            throw DecodingError.valueNotFound(String.self,
+                                              DecodingError.Context(codingPath: container.codingPath,
+                                                                    debugDescription: "Unable to decode unit."))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
 }

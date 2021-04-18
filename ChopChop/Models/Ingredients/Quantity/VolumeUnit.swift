@@ -104,4 +104,36 @@ extension VolumeUnit: CustomStringConvertible {
 }
 
 extension VolumeUnit: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let description = try container.decode(String.self)
+
+        switch description {
+        case "pints":
+            self = .pint
+        case "quarts":
+            self = .quart
+        case "gallons":
+            self = .gallon
+        case "tsp":
+            self = .teaspoon
+        case "tbsp":
+            self = .tablespoon
+        case "cups":
+            self = .cup
+        case "ml":
+            self = .milliliter
+        case "L":
+            self = .liter
+        default:
+            throw DecodingError.valueNotFound(String.self,
+                                              DecodingError.Context(codingPath: container.codingPath,
+                                                                    debugDescription: "Unable to decode unit."))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
 }

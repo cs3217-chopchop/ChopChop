@@ -185,30 +185,35 @@ extension AppDatabase {
     }
 
     private func createPreloadedRecipes(_ db: Database) throws {
-        var categories = ["American", "Italian", "Japanese"].map { RecipeCategoryRecord(name: $0) }
-
-        for index in categories.indices {
-            try categories[index].save(db)
+        guard let path = Bundle.main.path(forResource: "recipes", ofType: "json"),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
+            return
         }
 
-        var recipes: [RecipeRecord] = [
-            "American": ["Pancakes", "Scrambled Eggs", "Pizza"],
-            "Italian": ["Carbonara"],
-            "Japanese": ["Ramen", "Katsudon"]
-        ].reduce(into: []) { recipes, entry in
-            for name in entry.value {
-                recipes.append(RecipeRecord(recipeCategoryId: categories.first(where: { $0.name == entry.key })?.id,
-                                            name: name,
-                                            servings: Double(Int.random(in: 1...5)),
-                                            difficulty: Difficulty.allCases.randomElement()))
-            }
+        let decoder = JSONDecoder()
+
+        guard let recipes = try? decoder.decode([RecipeData].self, from: data) else {
+            return
         }
 
-        for index in recipes.indices {
-            try recipes[index].save(db)
+        var categoryRecords = Set(recipes.map { $0.category }).map { RecipeCategoryRecord(name: $0) }
+
+        for index in categoryRecords.indices {
+            try categoryRecords[index].save(db)
         }
 
-        for recipe in recipes {
+        var recipeRecords = recipes.map { recipe in
+            RecipeRecord(recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+                         name: recipe.name,
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement())
+        }
+
+        for index in recipeRecords.indices {
+            try recipeRecords[index].save(db)
+        }
+
+        for recipe in recipeRecords {
             guard let id = recipe.id else {
                 continue
             }
@@ -220,133 +225,57 @@ extension AppDatabase {
                                  inFolderNamed: StorageManager.recipeFolderName)
         }
 
-        var ingredients: [RecipeIngredientRecord] = [
-            "Pancakes": [
-                ("flour", QuantityRecord.volume(0.5, unit: .cup)),
-                ("baking powder", QuantityRecord.volume(1.5, unit: .teaspoon)),
-                ("salt", QuantityRecord.volume(1, unit: .teaspoon)),
-                ("milk", QuantityRecord.volume(1, unit: .cup)),
-                ("sugar", QuantityRecord.volume(1, unit: .tablespoon))
-            ],
-            "Katsudon": [
-                ("pork chops", QuantityRecord.count(2)),
-                ("salt", QuantityRecord.volume(1, unit: .teaspoon)),
-                ("pepper", QuantityRecord.volume(1, unit: .teaspoon)),
-                ("eggs", QuantityRecord.count(5)),
-                ("panko", QuantityRecord.volume(1, unit: .cup)),
-                ("soup stock", QuantityRecord.volume(1.25, unit: .cup)),
-                ("soy sauce", QuantityRecord.volume(0.3, unit: .cup)),
-                ("mirin", QuantityRecord.volume(2, unit: .tablespoon)),
-                ("onion", QuantityRecord.count(1)),
-                ("rice", QuantityRecord.volume(4, unit: .cup))
-            ]
-        ].reduce(into: []) { ingredients, entry in
-            for ingredient in entry.value {
-                ingredients.append(RecipeIngredientRecord(recipeId: recipes.first(where: { $0.name == entry.key })?.id,
-                                                          name: ingredient.0,
-                                                          quantity: ingredient.1))
+        var ingredientRecords = recipes.flatMap { recipe in
+            recipe.ingredients.map { ingredient in
+                RecipeIngredientRecord(recipeId: recipeRecords.first(where: { $0.name == recipe.name })?.id,
+                                       name: ingredient.name,
+                                       quantity: ingredient.quantity)
             }
         }
 
-        for index in ingredients.indices {
-            try ingredients[index].save(db)
+        for index in ingredientRecords.indices {
+            try ingredientRecords[index].save(db)
         }
 
-        var graphs = recipes.map { RecipeStepGraphRecord(recipeId: $0.id) }
+        var graphRecords = recipeRecords.map { RecipeStepGraphRecord(recipeId: $0.id) }
 
-        for index in graphs.indices {
-            try graphs[index].save(db)
+        for index in graphRecords.indices {
+            try graphRecords[index].save(db)
         }
 
-        var steps: [RecipeStepRecord] = [
-            "Pancakes": [
-                "In a large bowl, mix dry ingredients together until well-blended.",
-                "Add milk and mix well until smooth.",
-                "Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.",
-                "Beat whites until stiff and then fold into batter gently.",
-                "Pour ladles of the mixture into a non-stick pan, one at a time.",
-                """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. \
-                Yields 12 to 14 pancakes.
-                """
-            ],
-            "Katsudon": [
-                "Gather the ingredients.",
-                "Season the pounded pork chops with salt and pepper.",
-                "Dust with a light, even coating of flour.",
-                "In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.",
-                """
-                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat. \
-                The oil is ready when you drop a panko breadcrumb into it and it sizzles.
-                """,
-                "Dip the flour-dusted pork into the egg to coat both sides.",
-                "Transfer the pork to the panko and press it evenly into the meat to get a good coating.",
-                """
-                Carefully lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, \
-                until golden brown.
-                """,
-                """
-                Flip and cook the other side for another 5 to 6 minutes, or until browned, crispy, \
-                and cooked through.
-                """,
-                "Drain on a plate lined with a paper towel.",
-                "Slice your tonkatsu into pieces.",
-                "Put the dashi soup stock in a pan and heat on medium heat.",
-                "Add the soy sauce, mirin, and sugar to the soup and bring to a boil. Remove from the heat.",
-                """
-                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
-                Simmer for a few minutes on medium heat.
-                """,
-                """
-                Add 1 serving of tonkatsu pieces (half of 1 pork cutlet) to the pan and simmer on low heat for \
-                2 or 3 minutes.
-                """,
-                """
-                Beat another one of the eggs in a bowl. Bring the soup to a boil and pour the egg over \
-                the tonkatsu and onion.
-                """,
-                """
-                Turn the heat down to low and cover with a lid. Cook until the egg has set and remove it from the heat.
-                The egg should be cooked through.
-                """,
-                """
-                Serve by placing 1 serving of steamed rice in a large rice bowl. \
-                Top with the simmered tonkatsu on top of the rice. Repeat to make 3 more servings.
-                """
-            ]
-        ].reduce(into: []) { steps, entry in
-            for step in entry.value {
-                steps.append(RecipeStepRecord(graphId: recipes.first(where: { $0.name == entry.key })?.id,
-                                              content: step))
+        var stepRecords = recipes.flatMap { recipe in
+            recipe.steps.map { content in
+                RecipeStepRecord(graphId: recipeRecords.first(where: { $0.name == recipe.name })?.id,
+                                 content: content)
             }
         }
 
-        for index in steps.indices {
-            try steps[index].save(db)
+        for index in stepRecords.indices {
+            try stepRecords[index].save(db)
 
-            let timers = RecipeStepParser.parseTimeStrings(step: steps[index].content).map {
+            let timers = RecipeStepParser.parseTimeStrings(step: stepRecords[index].content).map {
                 TimeInterval(RecipeStepParser.parseDuration(timeString: $0))
             }
 
             for timer in timers {
-                var timer = RecipeStepTimerRecord(stepId: steps[index].id, duration: timer)
+                var timer = RecipeStepTimerRecord(stepId: stepRecords[index].id, duration: timer)
 
                 try timer.save(db)
             }
         }
 
-        var edges: [RecipeStepEdgeRecord] = steps.indices.dropLast().compactMap { index in
-            guard steps[index].graphId == steps[index + 1].graphId else {
+        var edgeRecords: [RecipeStepEdgeRecord] = stepRecords.indices.dropLast().compactMap { index in
+            guard stepRecords[index].graphId == stepRecords[index + 1].graphId else {
                 return nil
             }
 
-            return RecipeStepEdgeRecord(graphId: steps[index].graphId,
-                                        sourceId: steps[index].id,
-                                        destinationId: steps[index + 1].id)
+            return RecipeStepEdgeRecord(graphId: stepRecords[index].graphId,
+                                        sourceId: stepRecords[index].id,
+                                        destinationId: stepRecords[index + 1].id)
         }
 
-        for index in edges.indices {
-            try edges[index].save(db)
+        for index in edgeRecords.indices {
+            try edgeRecords[index].save(db)
         }
     }
 }
@@ -505,7 +434,8 @@ extension AppDatabase {
         try dbWriter.write { db in
             for index in ingredients.indices {
                 guard ingredients[index].1.allSatisfy({ $0.quantity.type == ingredients[index].0.quantityType }) else {
-                    throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+                    throw DatabaseError(message:
+                                            "Ingredient and ingredient batches do not have the same quantity type.")
                 }
 
                 // Save ingredient
