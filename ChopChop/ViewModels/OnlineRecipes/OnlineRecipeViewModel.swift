@@ -40,7 +40,7 @@ class OnlineRecipeViewModel: ObservableObject {
         }
 
         if let parentOnlineRecipeId = recipe.parentOnlineRecipeId {
-            parentRecipeCancellable = storageManager.fetchOnlineRecipe(id: parentOnlineRecipeId)
+            parentRecipeCancellable = storageManager.onlineRecipePublisher(id: parentOnlineRecipeId)
                 .sink(receiveCompletion: { completion in
                     switch completion {
                     case .finished:
