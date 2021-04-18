@@ -34,13 +34,13 @@ class OnlineRecipeViewModel: ObservableObject {
         self.settings = settings
 
         do {
-            self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentId: recipe.id)
+            self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentOnlineRecipeId: recipe.id)
         } catch {
             self.downloadedRecipes = []
         }
 
-        if let parentId = recipe.parentId {
-            parentRecipeCancellable = storageManager.fetchOnlineRecipe(id: parentId)
+        if let parentOnlineRecipeId = recipe.parentOnlineRecipeId {
+            parentRecipeCancellable = storageManager.fetchOnlineRecipe(id: parentOnlineRecipeId)
                 .sink(receiveCompletion: { completion in
                     switch completion {
                     case .finished:

@@ -17,7 +17,7 @@ struct StorageManager {
 
     func saveRecipe(_ recipe: inout Recipe) throws {
 
-        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, parentId: recipe.parentId,
+        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, parentOnlineRecipeId: recipe.parentOnlineRecipeId,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -145,8 +145,8 @@ struct StorageManager {
         try appDatabase.fetchIngredient(id: id)
     }
 
-    func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
-        try appDatabase.fetchDownloadedRecipes(parentId: parentId)
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
+        try appDatabase.fetchDownloadedRecipes(parentOnlineRecipeId: parentOnlineRecipeId)
     }
 
     // MARK: - Database Access: Publishers
@@ -267,7 +267,7 @@ extension StorageManager {
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
-            parentId: recipe.parentId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -312,7 +312,7 @@ extension StorageManager {
             id: recipe.onlineId,
             name: recipe.name,
             creator: userId,
-            parentId: recipe.parentId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -477,7 +477,7 @@ extension StorageManager {
 
         var localRecipe = try Recipe(
             onlineId: newOnlineId,
-            parentId: isRecipeOwner ? nil : recipe.id,
+            parentOnlineRecipeId: isRecipeOwner ? nil : recipe.id,
             name: newName,
             category: cuisine,
             servings: recipe.servings,
@@ -512,7 +512,7 @@ extension StorageManager {
         var localRecipe = try Recipe(
             id: forked.id,
             onlineId: forked.onlineId,
-            parentId: forked.parentId,
+            parentOnlineRecipeId: forked.parentOnlineRecipeId,
             name: forked.name,
             category: cuisineCategory,
             servings: original.servings,

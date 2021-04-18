@@ -32,7 +32,7 @@ struct AppDatabase {
                 t.column("onlineId", .text)
                     .unique()
                     .check { $0 != "" }
-                t.column("parentId", .text)
+                t.column("parentOnlineRecipeId", .text)
                     .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
                     .indexed()
@@ -628,10 +628,10 @@ extension AppDatabase {
         }
     }
 
-    func fetchDownloadedRecipes(parentId: String) throws -> [Recipe] {
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
         try dbWriter.read { db in
             let request = RecipeRecord
-                .filter(RecipeRecord.Columns.parentId == parentId)
+                .filter(RecipeRecord.Columns.parentOnlineRecipeId == parentOnlineRecipeId)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps)

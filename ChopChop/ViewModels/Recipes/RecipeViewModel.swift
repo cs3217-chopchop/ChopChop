@@ -20,10 +20,10 @@ final class RecipeViewModel: ObservableObject {
         if parentRecipe != nil {
             return
         }
-        guard let parentId = recipe?.parentId else {
+        guard let parentOnlineRecipeId = recipe?.parentOnlineRecipeId else {
             return
         }
-        storageManager.fetchOnlineRecipe(id: parentId)
+        storageManager.fetchOnlineRecipe(id: parentOnlineRecipeId)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
