@@ -58,7 +58,7 @@ extension OnlineRecipe {
             }
             uuidToRecipeStepNodeMap[$0.id] = RecipeStepNode(recipeStep)
         })
-        
+
         var stepGraphEdges = [Edge<RecipeStepNode>]()
         record.stepEdges.forEach {
             let source = uuidToRecipeStepNodeMap[$0.sourceStepId]
