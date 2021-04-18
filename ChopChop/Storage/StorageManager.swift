@@ -17,7 +17,8 @@ struct StorageManager {
 
     func saveRecipe(_ recipe: inout Recipe) throws {
 
-        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, parentOnlineRecipeId: recipe.parentOnlineRecipeId,
+        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
+                                        parentOnlineRecipeId: recipe.parentOnlineRecipeId,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -366,7 +367,7 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func fetchOnlineRecipe(id: String) -> AnyPublisher<OnlineRecipe, Error> {
+    func onlineRecipePublisher(id: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeOnceById(onlineRecipeId: id)
             .compactMap({
                 try? OnlineRecipe(from: $0)

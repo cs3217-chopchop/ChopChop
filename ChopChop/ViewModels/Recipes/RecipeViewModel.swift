@@ -5,8 +5,6 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
-    private var cancellables = Set<AnyCancellable>()
-
     @Published var parentRecipe: OnlineRecipe?
     @Published var showSessionRecipe = false
     @Published var showRecipeForm = false
@@ -16,27 +14,6 @@ final class RecipeViewModel: ObservableObject {
         recipe?.onlineId != nil
     }
 
-    func fetchParentRecipe() {
-        if parentRecipe != nil {
-            return
-        }
-        guard let parentOnlineRecipeId = recipe?.parentOnlineRecipeId else {
-            return
-        }
-        storageManager.fetchOnlineRecipe(id: parentOnlineRecipeId)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished:
-                    break
-                case .failure:
-                    self.parentRecipe = nil
-                }
-            }, receiveValue: { value in
-                self.parentRecipe = value
-            })
-            .store(in: &cancellables)
-    }
-
     var isCookingDisabled: Bool {
         (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
     }
@@ -44,6 +21,7 @@ final class RecipeViewModel: ObservableObject {
     let timeFormatter: DateComponentsFormatter
     private let storageManager = StorageManager()
     private var recipeCancellable: AnyCancellable?
+    private var parentRecipeCancellable: AnyCancellable?
     private let settings: UserSettings
 
     init(id: Int64, settings: UserSettings) {
@@ -62,6 +40,20 @@ final class RecipeViewModel: ObservableObject {
                     self?.image = self?.storageManager.fetchRecipeImage(name: String(id))
                 }
             }
+
+        if let id = recipe?.parentOnlineRecipeId {
+            parentRecipeCancellable = storageManager.onlineRecipePublisher(id: id)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .finished:
+                        break
+                    case .failure:
+                        self.parentRecipe = nil
+                    }
+                }, receiveValue: { value in
+                    self.parentRecipe = value
+                })
+        }
     }
 
     // TODO: Properly throw errors
