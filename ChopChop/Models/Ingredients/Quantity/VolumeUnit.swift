@@ -104,4 +104,24 @@ extension VolumeUnit: CustomStringConvertible {
 }
 
 extension VolumeUnit: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let description = try container.decode(String.self)
+        let cases = VolumeUnit.allCases.reduce(into: [:]) { cases, unit in
+            cases[unit.description] = unit
+        }
+
+        guard let unit = cases[description] else {
+            throw DecodingError.valueNotFound(String.self,
+                                              DecodingError.Context(codingPath: container.codingPath,
+                                                                    debugDescription: "Unable to decode unit."))
+        }
+
+        self = unit
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.description)
+    }
 }

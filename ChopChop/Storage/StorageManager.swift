@@ -261,7 +261,6 @@ extension StorageManager {
         let nodes = stepGraph.nodes.map({
             OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
-        
 
         let edgeRecords = stepGraph.edges.map({
             OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
@@ -308,7 +307,7 @@ extension StorageManager {
         let nodes = stepGraph.nodes.map({
             OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
-        
+
         let edgeRecords = stepGraph.edges.map({
             OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })

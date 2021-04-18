@@ -20,6 +20,7 @@ struct RecipeIngredientRowView: View {
             }
             .frame(width: 120)
             TextField("Name", text: $viewModel.name)
+                .autocapitalization(.none)
         }
     }
 }

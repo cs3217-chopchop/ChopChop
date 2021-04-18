@@ -59,7 +59,7 @@ struct FolloweeCollectionView: View {
                 destination: ProfileView(viewModel: ProfileViewModel(userId: id, settings: viewModel.settings))
             ) {
                 HStack {
-                    Image("default-user")
+                    Image("user")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 50, height: 50)
