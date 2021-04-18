@@ -216,12 +216,6 @@ import SwiftUI
             ) {
                 Label("Followees", systemImage: "person.2")
             }
-
-            NavigationLink(
-                destination: NotFoundView(entityName: "Settings")
-            ) {
-                Label("Settings", systemImage: "gear")
-            }
         }
     }
 
