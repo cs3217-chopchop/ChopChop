@@ -181,20 +181,24 @@ struct RecipeView: View {
                             Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
                         }
                     }
-                    HStack {
-                        Spacer()
-                        NavigationLink(
-                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
-                                                                                         isEditable: false))
-                        ) {
-                            Label("View detailed steps", systemImage: "rectangle.expand.vertical")
-                        }
-                        .padding()
-                        Spacer()
-                    }
+                    detailedStepsButton(recipe)
                 }
             }
             .padding(.bottom)
+        }
+    }
+
+    func detailedStepsButton(_ recipe: Recipe) -> some View {
+        HStack {
+            Spacer()
+            NavigationLink(
+                destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
+                                                                             isEditable: false))
+            ) {
+                Label("View detailed steps", systemImage: "rectangle.expand.vertical")
+            }
+            .padding()
+            Spacer()
         }
     }
 }

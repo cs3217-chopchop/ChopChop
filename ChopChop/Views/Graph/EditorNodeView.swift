@@ -42,42 +42,54 @@ struct EditorNodeView: View {
         }
     }
 
+    @ViewBuilder
     var detailView: some View {
+        if viewModel.isEditing {
+            isEditingDetailView
+        } else {
+            isNotEditingDetailView
+        }
+    }
+
+    var isEditingDetailView: some View {
         HStack(spacing: 16) {
-            if viewModel.isEditing {
-                Button(action: viewModel.saveAction) {
-                    Text("Save")
-                }
-                Spacer()
-                Button(action: {
-                    viewModel.content = viewModel.node.label.content
-                    viewModel.isEditing = false
-                }) {
-                    Text("Cancel")
-                }
-            } else {
-                if viewModel.isEditable {
-                    Button(action: {
-                        viewModel.isEditing = true
-                    }) {
-                        Image(systemName: "square.and.pencil")
-                    }
-                }
+            Button(action: viewModel.saveAction) {
+                Text("Save")
+            }
+            Spacer()
+            Button(action: {
+                viewModel.content = viewModel.node.label.content
+                viewModel.isEditing = false
+            }) {
+                Text("Cancel")
+            }
+        }
+        .padding(.top, 6)
+    }
 
+    var isNotEditingDetailView: some View {
+        HStack(spacing: 16) {
+            if viewModel.isEditable {
                 Button(action: {
-                    viewModel.showTimers.toggle()
+                    viewModel.isEditing = true
                 }) {
-                    Image(systemName: "timer")
+                    Image(systemName: "square.and.pencil")
                 }
-                Spacer()
+            }
 
-                if viewModel.isEditable {
-                    Button(action: {
-                        viewModel.removeNode()
-                        selection.toggleNode(viewModel.node)
-                    }) {
-                        Image(systemName: "trash")
-                    }
+            Button(action: {
+                viewModel.showTimers.toggle()
+            }) {
+                Image(systemName: "timer")
+            }
+            Spacer()
+
+            if viewModel.isEditable {
+                Button(action: {
+                    viewModel.removeNode()
+                    selection.toggleNode(viewModel.node)
+                }) {
+                    Image(systemName: "trash")
                 }
             }
         }

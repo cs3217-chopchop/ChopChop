@@ -1,10 +1,9 @@
-// swiftlint:disable line_length function_body_length
+// swiftlint:disable line_length function_body_length type_body_length
 
 import XCTest
 @testable import ChopChop
 
 class OnlineRecipeTests: XCTestCase {
-
     func testConstruct() throws {
         let onlineRecipe = try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.easy, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date())
 

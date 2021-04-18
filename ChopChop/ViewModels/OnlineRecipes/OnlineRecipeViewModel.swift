@@ -67,7 +67,8 @@ class OnlineRecipeViewModel: ObservableObject {
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
-                self?.recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
+                let servings = recipe.servings.removeZerosFromEnd()
+                self?.recipeServingText = "\(servings) \(recipe.servings == 1 ? "person" : "people")"
 
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return

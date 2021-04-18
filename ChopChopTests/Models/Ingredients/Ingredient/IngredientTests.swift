@@ -1,5 +1,3 @@
-// swiftlint:disable file_length
-
 import XCTest
 
 @testable import ChopChop
