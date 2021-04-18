@@ -25,7 +25,7 @@ extension VolumeUnitTests {
         for volumeUnit in VolumeUnit.allCases {
             for massUnit in MassUnit.allCases {
                 let convertedValue = VolumeUnit.convertToMass(testValue, from: volumeUnit, to: massUnit)
-                let expectedValue = (testValue * volumeUnit.ratioToLiter / QuantityType.massToVolumeBaseRatio) / massUnit.ratioToKilogram
+                let expectedValue = (testValue * volumeUnit.ratioToLiter / QuantityUnit.massToVolumeBaseRatio) / massUnit.ratioToKilogram
 
                 XCTAssertEqual(convertedValue, expectedValue)
             }

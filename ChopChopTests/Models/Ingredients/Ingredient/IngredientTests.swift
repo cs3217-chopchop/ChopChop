@@ -44,25 +44,6 @@ extension IngredientTests {
     }
 }
 
-// MARK: - Rename
-extension IngredientTests {
-    func testRename_validName_nameTrimmed() {
-        let validName = "  Sugar\n"
-        XCTAssertNoThrow(try ingredient.rename(validName))
-
-        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
-        XCTAssertEqual(ingredient.name, trimmedName)
-    }
-
-    func testRename_emptyName_throwsError() {
-        let emptyName = ""
-        XCTAssertThrowsError(try ingredient.rename(emptyName))
-
-        let nameWithOnlyWhitespace = " "
-        XCTAssertThrowsError(try ingredient.rename(nameWithOnlyWhitespace))
-    }
-}
-
 // MARK: - Add
 extension IngredientTests {
     func testAdd_sameQuantityTypeNewExpiryDate_newBatchAdded() throws {
@@ -284,72 +265,6 @@ extension IngredientTests {
     }
 }
 
-// MARK: - Combine
-extension IngredientTests {
-    func testCombine_sameIngredientAndQuantityType_success() throws {
-        guard let combinedIngredient = try? Ingredient(name: ingredient.name, type: ingredient.quantityType) else {
-            XCTFail("Ingredient should be successfully constructed")
-            return
-        }
-
-        let expiredDate = Date(timeInterval: -86_400, since: .now)
-        let combinedDate = Date(timeInterval: 86_400, since: .now)
-        let existingDate = Date(timeInterval: 86_400 * 2, since: .now)
-        let newDate = Date(timeInterval: 86_400 * 3, since: .now)
-        try addTestQuantity(1, expiryDate: expiredDate)
-        try addTestQuantity(2, expiryDate: combinedDate)
-        try addTestQuantity(3, expiryDate: existingDate)
-
-        let addedQuantity1 = try Quantity(.count, value: 4)
-        let addedQuantity2 = try Quantity(.count, value: 5)
-        let addedQuantity3 = try Quantity(.count, value: 6)
-
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity1, expiryDate: expiredDate))
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity2, expiryDate: combinedDate))
-        XCTAssertNoThrow(try combinedIngredient.add(quantity: addedQuantity3, expiryDate: newDate))
-
-        XCTAssertNoThrow(try ingredient.combine(with: combinedIngredient))
-
-        let expiredBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: expiredDate),
-                                          "Expired batch should be in the ingredient")
-        XCTAssertEqual(expiredBatch?.quantity, try? Quantity(.count, value: 5),
-                       "Expired batch quantities should be combined")
-
-        let combinedBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: combinedDate),
-                                           "Combined batch should be in the ingredient")
-        XCTAssertEqual(combinedBatch?.quantity, try? Quantity(.count, value: 7),
-                       "Combined batch quantities should be combined")
-
-        let existingBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: existingDate),
-                                           "Existing batch should be in the ingredient")
-        XCTAssertEqual(existingBatch?.quantity, try? Quantity(.count, value: 3),
-                       "Existing batch quantities should not be changed")
-
-        let newBatch = try? XCTUnwrap(ingredient.getBatch(expiryDate: newDate),
-                                      "New batch should be appended to the ingredient")
-        XCTAssertEqual(newBatch?.quantity, try? Quantity(.count, value: 6),
-                       "New batch quantities should be added correctly")
-    }
-
-    func testCombine_differentIngredientName_throwsError() {
-        guard let combinedIngredient = try? Ingredient(name: "Apple", type: ingredient.quantityType) else {
-            XCTFail("Ingredient should be successfully constructed")
-            return
-        }
-
-        XCTAssertThrowsError(try ingredient.combine(with: combinedIngredient))
-    }
-
-    func testCombine_differentQuantityType_throwsError() {
-        guard let combinedIngredient = try? Ingredient(name: ingredient.name, type: .volume) else {
-            XCTFail("Ingredient should be successfully constructed")
-            return
-        }
-
-        XCTAssertThrowsError(try ingredient.combine(with: combinedIngredient))
-    }
-}
-
 // MARK: - Get and remove batches
 extension IngredientTests {
     func testGetBatch_existingBatch_success() throws {
@@ -431,6 +346,18 @@ extension IngredientTests {
                         "Not expired batch should not be removed")
         XCTAssertNotNil(ingredient.getBatch(expiryDate: nil),
                         "Not expiring batch should not be removed")
+    }
+
+    func testRemoveAllBatches_success() throws {
+        let expiredDate = Date(timeInterval: -86_400, since: .now)
+        let notExpiredDate = Date(timeInterval: 86_400, since: .now)
+        try addTestQuantity(5, expiryDate: expiredDate)
+        try addTestQuantity(5, expiryDate: notExpiredDate)
+        try addTestQuantity(5, expiryDate: nil)
+
+        ingredient.removeAllBatches()
+
+        XCTAssertTrue(ingredient.batches.isEmpty)
     }
 }
 

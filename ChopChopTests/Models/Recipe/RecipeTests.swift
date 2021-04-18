@@ -4,7 +4,6 @@ import XCTest
 @testable import ChopChop
 
 class RecipeTests: XCTestCase {
-
     static func generateSteps() -> [RecipeStep] {
         do {
             return [
