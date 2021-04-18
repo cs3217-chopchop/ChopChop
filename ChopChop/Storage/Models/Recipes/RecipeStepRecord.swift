@@ -1,6 +1,6 @@
 import GRDB
 
-struct RecipeStepRecord {
+struct RecipeStepRecord: Identifiable {
     var id: Int64?
     var graphId: Int64?
     var content: String
@@ -14,6 +14,11 @@ extension RecipeStepRecord: Codable, FetchableRecord, MutablePersistableRecord {
     }
 
     static let databaseTableName = "recipeStep"
+
+    static let timers = hasMany(RecipeStepTimerRecord.self)
+    var timers: QueryInterfaceRequest<RecipeStepTimerRecord> {
+        request(for: RecipeStepRecord.timers)
+    }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
         id = rowID

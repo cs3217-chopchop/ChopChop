@@ -1,112 +1,70 @@
-import SwiftUI
 import Combine
+import InflectorKit
 
-class CompleteSessionRecipeViewModel: ObservableObject {
-    @Published var deductibleIngredientsViewModels: [DeductibleIngredientViewModel] = []
-    @Published var isSuccess = false
-    private var recipe: Recipe
+final class CompleteSessionRecipeViewModel: ObservableObject {
+    @Published var deductibleIngredients: [DeductibleIngredientViewModel] = []
 
     private let storageManager = StorageManager()
-    private(set) var ingredientsInStore: [IngredientInfo] = []
-    private var ingredientsCancellable: AnyCancellable?
 
     init(recipe: Recipe) {
-        self.recipe = recipe
+        let ingredients = (try? storageManager.fetchIngredients()) ?? []
 
-        ingredientsCancellable = ingredientsPublisher()
-            .sink { [weak self] ingredients in
-                self?.ingredientsInStore = ingredients
-                guard self?.isSuccess == false else {
-                    return
-                }
-                self?.deductibleIngredientsViewModels =
-                    self?.convertToDeductibleIngredientViewModels(recipeIngredients: recipe.ingredients)
-                    ?? []
+        deductibleIngredients = recipe.ingredients.compactMap { recipeIngredient in
+            // First check for exact matches, then case-insensitive matches, then plurality-insensitive matches
+            let exactMatch = ingredients.first(where: { $0.name == recipeIngredient.name })
+            let caseInsensitiveMatch = ingredients.first(where: {
+                $0.name.localizedCaseInsensitiveCompare(recipeIngredient.name) == .orderedSame
+            })
+            let pluralityInsensitiveMatch = ingredients.first(where: {
+                $0.name.singularized.localizedCaseInsensitiveCompare(recipeIngredient.name.singularized) == .orderedSame
+            })
+
+            guard let ingredient = exactMatch ?? caseInsensitiveMatch ?? pluralityInsensitiveMatch else {
+                return nil
             }
+
+            return DeductibleIngredientViewModel(ingredient: ingredient, recipeIngredient: recipeIngredient)
+        }
     }
 
-    func submit() {
-        var ingredientsToSave: [Ingredient] = []
-        // atomic
-        for ingredientViewModel in deductibleIngredientsViewModels {
-            ingredientViewModel.updateError(msg: "") // reset error
+    func completeRecipe() -> Bool {
+        guard validateIngredients() else {
+            return false
+        }
 
-            guard let amount = Double(ingredientViewModel.deductBy) else {
-                ingredientViewModel.updateError(msg: "Not a valid number")
+        do {
+            var ingredients = try deductibleIngredients.map { try $0.convertToIngredient() }
+            try storageManager.saveIngredients(&ingredients)
+
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func validateIngredients() -> Bool {
+        for deductibleIngredient in deductibleIngredients {
+            deductibleIngredient.errorMessages = []
+
+            guard let value = Double(deductibleIngredient.quantity),
+                  let quantity = try? Quantity(deductibleIngredient.unit, value: value) else {
+                deductibleIngredient.errorMessages.append(QuantityError.invalidQuantity.errorDescription ?? "")
                 continue
             }
 
-            guard let id = ingredientViewModel.ingredient.id,
-                  let ingredient = try? storageManager.fetchIngredient(id: id) else {
-                // publisher would have updated viewModels otherwise
-                assertionFailure("Ingredient should exist in store")
-                continue
-            }
-
-            guard let quantityUsed = try? Quantity(ingredientViewModel.unit, value: amount) else {
-                ingredientViewModel.updateError(msg: "Not a valid number")
-                continue
-            }
-
-            guard let sufficientAmount = try? ingredient.contains(quantity: quantityUsed) else {
-                ingredientViewModel.updateError(msg: """
-                    Not a valid unit. Change to \(quantityUsed.baseType == .count ? "mass/volume" : "count" )
+            guard let hasSufficientAmount = try? deductibleIngredient.ingredient.contains(quantity: quantity) else {
+                deductibleIngredient.errorMessages.append("""
+                    \(QuantityError.incompatibleTypes.errorDescription ?? "") \
+                    Change type to \(quantity.type == .count ? "mass/volume" : "count").
                     """)
                 continue
             }
 
-            guard sufficientAmount else {
-                ingredientViewModel.updateError(msg: "Insufficient quantity in ingredient store")
-                continue
-            }
-
-            do {
-                try ingredient.use(quantity: quantityUsed)
-                ingredientsToSave.append(ingredient)
-            } catch {
-                assertionFailure("Ingredient should have sufficient quantity")
-                continue
+            if !hasSufficientAmount {
+                deductibleIngredient.errorMessages.append("Insufficient ingredient quantity to deduct ingredient.")
             }
         }
 
-        guard (deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }) else {
-            return
-        }
-
-        // only do database operations here
-        for var ingredient in ingredientsToSave {
-            do {
-                try storageManager.saveIngredient(&ingredient)
-            } catch {
-                assertionFailure("Couldn't save ingredient")
-            }
-        }
-
-        isSuccess = deductibleIngredientsViewModels.allSatisfy { $0.errorMsg.isEmpty }
+        return deductibleIngredients.allSatisfy { $0.errorMessages.isEmpty }
     }
-
-    private func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Never> {
-        storageManager.ingredientsPublisher()
-            .catch { _ in
-                Just<[IngredientInfo]>([])
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func convertToDeductibleIngredientViewModels(recipeIngredients: [RecipeIngredient]) ->
-    [DeductibleIngredientViewModel] {
-
-        recipeIngredients.compactMap { recipeIngredient -> DeductibleIngredientViewModel? in
-            guard let mappedIngredientId =
-                    (ingredientsInStore.first { $0.name == recipeIngredient.name })?.id else {
-                return nil
-            }
-            guard let mappedIngredient = try? storageManager.fetchIngredient(id: mappedIngredientId) else {
-                return nil
-            }
-
-            return DeductibleIngredientViewModel(ingredient: mappedIngredient, recipeIngredient: recipeIngredient)
-        }
-    }
-
 }

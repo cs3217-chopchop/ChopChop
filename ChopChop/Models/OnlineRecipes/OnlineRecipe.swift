@@ -51,7 +51,7 @@ extension OnlineRecipe {
         }
 
         let stepGraphNodes = try record.steps.compactMap({
-            try RecipeStep(content: $0)
+            try RecipeStep($0)
         })
         .map({
             RecipeStepNode($0)

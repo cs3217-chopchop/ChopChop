@@ -1,20 +1,16 @@
 import SwiftUI
 
+/**
+ Represents a view of a collection of ingredients.
+ */
 struct IngredientCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: IngredientCollectionViewModel
 
-    let columns = [
-        GridItem(),
-        GridItem(),
-        GridItem(),
-        GridItem()
-    ]
-
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search ingredients...")
-            toolbar
+            ingredientToolbar
 
             if viewModel.filterByExpiryDate {
                 expiryDatePicker
@@ -33,46 +29,55 @@ struct IngredientCollectionView: View {
         }
         .navigationTitle(Text(viewModel.title))
         .toolbar {
-            HStack {
-                Text("View type:")
-                Picker("View by", selection: $settings.viewType) {
-                    Text("List").tag(UserSettings.ViewType.list)
-                    Text("Grid").tag(UserSettings.ViewType.grid)
-                }
-            }
+            viewPicker
         }
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear {
-            viewModel.query = ""
-            viewModel.filterByExpiryDate = false
-            viewModel.expiryDateStart = .today
-            viewModel.expiryDateEnd = .today
+        .onAppear(perform: viewModel.resetSearchFields)
+    }
+
+    // MARK: - Toolbars
+
+    private var viewPicker: some View {
+        HStack {
+            Text("View type:")
+            Picker("View by", selection: $settings.viewType) {
+                Text("List").tag(UserSettings.ViewType.list)
+                Text("Grid").tag(UserSettings.ViewType.grid)
+            }
         }
     }
 
-    var toolbar: some View {
+    private var ingredientToolbar: some View {
         HStack {
-            NavigationLink(
-                destination: IngredientFormView(
-                    viewModel: IngredientFormViewModel(
-                        addToCategory: viewModel.categoryId))) {
-                Image(systemName: "plus")
-            }
+            addIngredientButton
             Spacer()
-            Button(action: {
-                withAnimation {
-                    viewModel.filterByExpiryDate.toggle()
-                }
-            }) {
-                Text("Filter by expiry date")
-            }
+            filterByExpiryDateButton
         }
         .padding([.leading, .trailing])
     }
 
-    var expiryDatePicker: some View {
+    private var addIngredientButton: some View {
+        NavigationLink(
+            destination: IngredientFormView(
+                viewModel: IngredientFormViewModel(
+                    addToCategory: viewModel.categoryId))) {
+            Image(systemName: "plus")
+        }
+    }
+
+    private var filterByExpiryDateButton: some View {
+        Button(action: {
+            withAnimation {
+                viewModel.filterByExpiryDate.toggle()
+            }
+        }) {
+            Text("Filter by expiry date")
+        }
+    }
+
+    private var expiryDatePicker: some View {
         HStack {
             Spacer()
             DatePicker(
@@ -90,40 +95,42 @@ struct IngredientCollectionView: View {
             )
             .fixedSize()
         }
-        .padding([.leading, .trailing])
+        .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
     }
 
-    var listView: some View {
+    // MARK: - Ingredient Image
+
+    @ViewBuilder
+    private func IngredientImage(ingredient: IngredientInfo) -> some View {
+        if let image = viewModel.getIngredientImage(ingredient: ingredient) {
+            Image(uiImage: image)
+                .resizable()
+        } else {
+            Image("ingredient")
+                .resizable()
+        }
+    }
+
+    // MARK: - Ingredient List View
+
+    private var listView: some View {
         List {
             ForEach(viewModel.ingredients) { ingredient in
-                IngredientRow(info: ingredient)
+                IngredientRow(ingredient: ingredient)
             }
             .onDelete(perform: viewModel.deleteIngredients)
             .animation(.none)
         }
     }
 
-    var gridView: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 24) {
-                ForEach(viewModel.ingredients) { ingredient in
-                    GridTile(info: ingredient)
-                }
-            }
-            .padding([.bottom, .leading, .trailing])
-        }
-        .padding(.top)
-    }
-
     @ViewBuilder
-    func IngredientRow(info: IngredientInfo) -> some View {
-        if let ingredient = viewModel.getIngredient(info: info) {
+    private func IngredientRow(ingredient: IngredientInfo) -> some View {
+        if let id = ingredient.id {
             NavigationLink(
-                destination: IngredientDetail(ingredient: ingredient)
+                destination: IngredientView(viewModel: IngredientViewModel(id: id))
             ) {
                 HStack(alignment: .top) {
-                    Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
-                        .resizable()
+                    IngredientImage(ingredient: ingredient)
                         .scaledToFill()
                         .frame(width: 48, height: 48)
                         .cornerRadius(10)
@@ -131,7 +138,7 @@ struct IngredientCollectionView: View {
                     VStack(alignment: .leading) {
                         Text(ingredient.name)
                             .lineLimit(1)
-                        Text("Quantity: \(ingredient.totalQuantityDescription)")
+                        Text("Quantity: \(ingredient.quantity)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -141,25 +148,37 @@ struct IngredientCollectionView: View {
         }
     }
 
+    // MARK: - Ingredient Grid View
+
+    private var gridView: some View {
+        let columns = [
+            GridItem(),
+            GridItem(),
+            GridItem(),
+            GridItem()
+        ]
+
+        return ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.ingredients) { ingredient in
+                    GridTile(ingredient: ingredient)
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+    }
+
     @ViewBuilder
-    func GridTile(info: IngredientInfo) -> some View {
-        if let ingredient = viewModel.getIngredient(info: info) {
+    private func GridTile(ingredient: IngredientInfo) -> some View {
+        if let id = ingredient.id {
             NavigationLink(
-                destination: IngredientDetail(ingredient: ingredient)
+                destination: IngredientView(viewModel: IngredientViewModel(id: id))
             ) {
-                Image(uiImage: viewModel.getIngredientImage(ingredient: ingredient))
-                    .resizable()
-                    .scaledToFill()
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    .aspectRatio(1, contentMode: .fill)
-                    .cornerRadius(10)
-                    .clipped()
-                    .overlay(gridOverlay(ingredient))
-                    .padding([.leading, .trailing], 8)
+                GridTileImage(ingredient: ingredient)
             }
             .contextMenu {
                 Button(action: {
-                    guard let index = viewModel.ingredients.firstIndex(where: { $0 == info }) else {
+                    guard let index = viewModel.ingredients.firstIndex(where: { $0 == ingredient }) else {
                         return
                     }
 
@@ -171,41 +190,38 @@ struct IngredientCollectionView: View {
         }
     }
 
-    private func gridOverlay(_ ingredient: Ingredient) -> some View {
+    @ViewBuilder
+    private func GridTileImage(ingredient: IngredientInfo) -> some View {
+        IngredientImage(ingredient: ingredient)
+            .scaledToFill()
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .aspectRatio(1, contentMode: .fill)
+            .cornerRadius(10)
+            .clipped()
+            .overlay(
+                GridTileOverlay(ingredient: ingredient)
+            )
+            .padding([.leading, .trailing], 8)
+    }
+
+    private func GridTileOverlay(ingredient: IngredientInfo) -> some View {
         ZStack(alignment: .bottomLeading) {
             Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .clear, location: 0),
-                            .init(color: .black, location: 0.5)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundColor(.clear)
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, .black]),
+                                           startPoint: .top,
+                                           endPoint: .bottom))
                 .cornerRadius(10)
                 .opacity(0.8)
             VStack(alignment: .leading) {
                 Text(ingredient.name)
                     .foregroundColor(.white)
                     .lineLimit(1)
-                Text("Quantity: \(ingredient.totalQuantityDescription)")
+                Text("Quantity: \(ingredient.quantity)")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
             }
             .padding()
         }
-    }
-
-    func IngredientDetail(ingredient: Ingredient) -> some View {
-        let ingredientViewModel = IngredientViewModel(ingredient: ingredient)
-        return IngredientDetailView(viewModel: ingredientViewModel)
-    }
-}
-
-struct IngredientCollectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: ""))
     }
 }

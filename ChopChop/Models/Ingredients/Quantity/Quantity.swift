@@ -1,30 +1,41 @@
+import Foundation
 import GRDB
 
 /**
  Represents the quantity of an ingredient.
  
- Invariants:
- - Quantities are non negative.
+ Representation Invariants:
+ - Value of the quantity is non negative.
  */
 struct Quantity: Equatable {
-    let type: QuantityType
+    // MARK: - Specification Fields
+    /// The unit of the quantity, which can be of three types: count, mass or volume.
+    let unit: QuantityUnit
+    /// The magnitude of the quantity. Must be non negative.
     var value: Double
 
-    init(_ type: QuantityType, value: Double) throws {
+    /**
+     Instantiates a quantity with the given value, expressed in terms of the given unit.
+
+     - Throws:`QuantityError.negativeQuantity` if the given quantity is negative.
+     */
+    init(_ unit: QuantityUnit, value: Double) throws {
         guard value >= 0 else {
             throw QuantityError.negativeQuantity
         }
 
-        self.type = type
+        self.unit = unit
         self.value = value
     }
 
-    var baseType: BaseQuantityType {
-        type.baseType
+    /// The type of the unit of the quantity.
+    var type: QuantityType {
+        unit.type
     }
 
+    /// The value of the quantity converted to the base unit of its type.
     var baseValue: Double {
-        switch type {
+        switch unit {
         case .count:
             return value
         case .mass(let unit):
@@ -33,15 +44,28 @@ struct Quantity: Equatable {
             return VolumeUnit.convert(value, from: unit, to: .baseUnit)
         }
     }
-}
 
-// MARK: - Arithmetic operations
-extension Quantity {
+    // MARK: - Arithmetic Operations
+
     /**
-     Returns the sum of two quantities if they are of the same type.
+     Returns the sum of two quantities.
+
+     - Requires:
+        - Either quantity has 0 value
+        - OR Both quantities have type `count`.
+        - OR Both quantities do not have type `count`.
+
      - Throws:
-        - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
-        - `QuantityError.negativeQuantity`: if the result is negative.
+        - `QuantityError.incompatibleTypes`: if the types of the quantities are not compatible.
+        - `QuantityError.negativeQuantity`: if the resultant quantity is negative.
+
+     - Returns: The sum of the two quantities.
+        - If both quantities have the same type that is not `count`:
+            - If both quantities are in metric or non metric units, the sum is expressed in terms of the bigger unit.
+            - If one quantity is in metric units while the other is not,
+            the sum is expressed in terms of the base unit of that type.
+        - If both quantities have different types that are not `count`:
+            - The sum is expressed in terms of the left operand's units.
      */
     static func + (left: Quantity, right: Quantity) throws -> Quantity {
         guard left.value != 0 else {
@@ -52,7 +76,7 @@ extension Quantity {
             return left
         }
 
-        switch (left.type, right.type) {
+        switch (left.unit, right.unit) {
         case (.count, .count):
             let sum = left.value + right.value
             return try Quantity(.count, value: sum)
@@ -99,18 +123,31 @@ extension Quantity {
         }
     }
 
+    static func += (left: inout Quantity, right: Quantity) throws {
+        let sum = try left + right
+        left = sum
+    }
+
     /**
-     Returns the result of the right quantity subtracted from the left if they are of the same type.
+     Returns the result of the right quantity subtracted from the left.
+
+     - Requires:
+        - Either quantity has 0 value
+        - OR Both quantities have type `count`.
+        - OR Both quantities do not have type `count`.
+
      - Throws:
-        - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+        - `QuantityError.incompatibleTypes`: if the types of the quantities are not compatible.
         - `QuantityError.negativeQuantity`: if the result is negative.
+
+     - Returns: The difference of the two quantities, expressed in terms of the left operand's units.
      */
     static func - (left: Quantity, right: Quantity) throws -> Quantity {
         guard right.value != 0 else {
             return left
         }
 
-        switch (left.type, right.type) {
+        switch (left.unit, right.unit) {
         case (.count, .count):
             let difference = left.value - right.value
             return try Quantity(.count, value: difference)
@@ -139,18 +176,30 @@ extension Quantity {
         }
     }
 
+    static func -= (left: inout Quantity, right: Quantity) throws {
+        let difference = try left - right
+        left = difference
+    }
+
     /**
-     Returns the quantity scaled with a given factor.
+     Returns the quantity scaled with the given factor.
+
      - Throws:
         - `QuantityError.negativeQuantity`: if the result is negative.
      */
     static func * (left: Quantity, right: Double) throws -> Quantity {
         let product = left.value * right
-        return try Quantity(left.type, value: product)
+        return try Quantity(left.unit, value: product)
+    }
+
+    static func *= (left: inout Quantity, right: Double) throws {
+        let product = try left * right
+        left = product
     }
 
     /**
      Returns the quantity divided by a given factor.
+
      - Throws:
         - `QuantityError.divisionByZero`: if the given factor is 0.
         - `QuantityError.negativeQuantity`: if the result is negative.
@@ -161,22 +210,7 @@ extension Quantity {
         }
 
         let quotient = left.value / right
-        return try Quantity(left.type, value: quotient)
-    }
-
-    static func += (left: inout Quantity, right: Quantity) throws {
-        let sum = try left + right
-        left = sum
-    }
-
-    static func -= (left: inout Quantity, right: Quantity) throws {
-        let difference = try left - right
-        left = difference
-    }
-
-    static func *= (left: inout Quantity, right: Double) throws {
-        let product = try left * right
-        left = product
+        return try Quantity(left.unit, value: quotient)
     }
 
     static func /= (left: inout Quantity, right: Double) throws {
@@ -185,9 +219,15 @@ extension Quantity {
     }
 
     /**
-     Returns whether the left quantity is smaller than the right, if they are of the same type.
+     Returns whether the left quantity is strictly lesser than the right, if they are of compatible types.
+
+     - Requires:
+        - Either quantity has 0 value
+        - OR Both quantities have type `count`.
+        - OR Both quantities do not have type `count`.
+
      - Throws:
-        - `QuantityError.differentQuantityTypes`: if the types of the quantities do not match.
+        - `QuantityError.incompatibleTypes`: if the types of the quantities do not match.
      */
     static func < (left: Quantity, right: Quantity) throws -> Bool {
         guard right.value != 0 else {
@@ -200,7 +240,7 @@ extension Quantity {
 
         var rightValue: Double
 
-        switch (left.type, right.type) {
+        switch (left.unit, right.unit) {
         case (.count, .count):
             rightValue = right.value
 
@@ -226,7 +266,7 @@ extension Quantity {
 // MARK: - CustomStringConvertible
 extension Quantity: CustomStringConvertible {
     var description: String {
-        switch type {
+        switch unit {
         case .count:
             if value == 0 {
                 return "None"
@@ -234,12 +274,12 @@ extension Quantity: CustomStringConvertible {
                 return value.removeZerosFromEnd()
             }
         default:
-            return "\(value.removeZerosFromEnd()) \(type.description)"
+            return "\(value.removeZerosFromEnd()) \(unit.description)"
         }
     }
 }
 
- extension Quantity {
+extension Quantity {
     init(from record: QuantityRecord) throws {
         switch record {
         case let .count(value):
@@ -252,7 +292,7 @@ extension Quantity: CustomStringConvertible {
     }
 
     var record: QuantityRecord {
-        switch type {
+        switch unit {
         case .count:
             return .count(value)
         case .mass(let unit):
@@ -261,12 +301,23 @@ extension Quantity: CustomStringConvertible {
             return .volume(value, unit: unit)
         }
     }
- }
+}
 
-enum QuantityError: Error {
+enum QuantityError: LocalizedError {
     case negativeQuantity
     case divisionByZero
     case incompatibleTypes
     case invalidUnit
     case invalidQuantity
+
+    var errorDescription: String? {
+        switch self {
+        case .negativeQuantity, .invalidQuantity:
+            return "Ingredient quantity should be a non-negative number."
+        case .incompatibleTypes:
+            return "Ingredient unit types are incompatible."
+        default:
+            return ""
+        }
+    }
 }

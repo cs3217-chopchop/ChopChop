@@ -1,33 +1,40 @@
 import SwiftUI
 
-class RecipeIngredientRowViewModel: ObservableObject {
-    @Published var amount: String = "" {
-        didSet {
-            ensureValidAmount()
-        }
-    }
-    @Published var unit: QuantityType = .count
-    @Published var ingredientName: String = ""
+final class RecipeIngredientRowViewModel: ObservableObject {
+    @Published var name: String
+    @Published var quantity: String
+    @Published var unit: QuantityUnit
 
-    init(amount: String, unit: QuantityType, ingredientName: String) {
-        self.amount = amount
+    init(name: String = "", quantity: String = "", unit: QuantityUnit = .count) {
+        self.name = name
+        self.quantity = quantity
         self.unit = unit
-        self.ingredientName = ingredientName
     }
 
-    init() {}
-
-    func ensureValidAmount() {
-        let filtered = amount.filter { "0123456789.".contains($0) }
-        if filtered != amount {
-            amount = filtered
-        }
+    func setQuantity(_ quantity: String) {
+        self.quantity = String(quantity.filter { "0123456789.".contains($0) })
+            .components(separatedBy: ".")
+            .prefix(2)
+            .joined(separator: ".")
     }
 
     func convertToIngredient() throws -> RecipeIngredient {
-        guard let quantity = Double(amount) else {
-            throw RecipeFormError.invalidIngredientQuantity
+        guard let value = Double(quantity) else {
+            throw QuantityError.invalidQuantity
         }
-        return try RecipeIngredient(name: ingredientName, quantity: Quantity(unit, value: quantity))
+
+        return try RecipeIngredient(name: name, quantity: Quantity(unit, value: value))
+    }
+}
+
+extension RecipeIngredientRowViewModel: Equatable {
+    static func == (lhs: RecipeIngredientRowViewModel, rhs: RecipeIngredientRowViewModel) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+}
+
+extension RecipeIngredientRowViewModel: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
     }
 }

@@ -89,6 +89,19 @@ struct AppDatabase {
             }
         }
 
+        migrator.registerMigration("CreateRecipeStepTimer") { db in
+            try db.create(table: "recipeStepTimer") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("stepId", .integer)
+                    .notNull()
+                    .indexed()
+                    .references("recipeStep", onDelete: .cascade)
+                t.column("duration", .double)
+                    .notNull()
+                    .check { $0 > 0 }
+            }
+        }
+
         migrator.registerMigration("CreateRecipeStepEdge") { db in
             try db.create(table: "recipeStepEdge") { t in
                 t.autoIncrementedPrimaryKey("id")
@@ -132,7 +145,7 @@ struct AppDatabase {
                     .collate(.localizedStandardCompare)
                 t.column("quantityType", .text)
                     .notNull()
-                    .check { BaseQuantityType.allCases.map { $0.rawValue }.contains($0) }
+                    .check { QuantityType.allCases.map { $0.rawValue }.contains($0) }
             }
         }
 
@@ -183,7 +196,10 @@ extension AppDatabase {
         }
 
         var recipes = [
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pancakes", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Pancakes",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
             RecipeRecord(recipeCategoryId: categories[1].id,
                          name: "Carbonara",
                          servings: Double(Int.random(in: 1...5)),
@@ -192,9 +208,18 @@ extension AppDatabase {
                          name: "Scrambled Eggs",
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id, name: "Pizza", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Ramen", servings: Double(Int.random(in: 1...5))),
-            RecipeRecord(recipeCategoryId: categories[0].id, name: "Katsudon", servings: Double(Int.random(in: 1...5))),
+            RecipeRecord(recipeCategoryId: categories[2].id,
+                         name: "Pizza",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[0].id,
+                         name: "Ramen",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
+            RecipeRecord(recipeCategoryId: categories[0].id,
+                         name: "Katsudon",
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement()),
             RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
                          servings: Double(Int.random(in: 1...5)))
         ]
@@ -288,11 +313,11 @@ extension AppDatabase {
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[2].id, destinationId: steps[3].id),
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[3].id, destinationId: steps[4].id),
             RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[4].id, destinationId: steps[5].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[6].id, destinationId: steps[7].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[7].id, destinationId: steps[8].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[8].id, destinationId: steps[9].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[9].id, destinationId: steps[10].id),
-            RecipeStepEdgeRecord(graphId: graphs[1].id, sourceId: steps[10].id, destinationId: steps[11].id)
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[6].id, destinationId: steps[7].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[7].id, destinationId: steps[8].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[8].id, destinationId: steps[9].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[9].id, destinationId: steps[10].id),
+            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[10].id, destinationId: steps[11].id)
         ]
 
         for index in edges.indices {
@@ -385,16 +410,14 @@ extension AppDatabase {
 extension AppDatabase {
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
-        var graph = RecipeStepGraph()
+        var stepGraph = RecipeStepGraph()
 
-        try saveRecipe(
-            &recipe,
-            ingredients: &ingredients,
-            graph: &graph)
+        try saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &stepGraph)
     }
 
     func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
-                    graph: inout RecipeStepGraph) throws {
+                    stepGraph: inout RecipeStepGraph) throws {
+        // swiftlint:disable closure_body_length
         try dbWriter.write { db in
             try recipe.save(db)
 
@@ -404,13 +427,11 @@ extension AppDatabase {
                 throw DatabaseError(message: "Recipe ingredients belong to the wrong recipe.")
             }
 
-            // Delete all ingredients that are not in the array and existing different graphs
+            // Delete all ingredients that are not in the array and the existing graph
             try recipe.ingredients
                 .filter(!ingredients.compactMap { $0.id }.contains(RecipeIngredientRecord.Columns.id))
                 .deleteAll(db)
-            try recipe.stepGraph
-                .filter(RecipeStepGraphRecord.Columns.id != graph.id)
-                .deleteAll(db)
+            try recipe.stepGraph.deleteAll(db)
 
             // Save recipe ingredients
             for index in ingredients.indices {
@@ -418,33 +439,69 @@ extension AppDatabase {
                 try ingredients[index].save(db)
             }
 
-            var graphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
-            try graphRecord.save(db)
-            graph.id = graphRecord.id
+            var stepGraphRecord = RecipeStepGraphRecord(recipeId: recipe.id)
+            try stepGraphRecord.save(db)
 
-            // Delete all steps and edges
-            try graphRecord.steps.deleteAll(db)
-            try graphRecord.edges.deleteAll(db)
+            var nodeIds: [UUID: Int64?] = [:]
 
-            for node in graph.nodes {
+            for node in stepGraph.nodes {
                 let step = node.label
-                var stepRecord = RecipeStepRecord(graphId: graph.id, content: step.content)
+                var stepRecord = RecipeStepRecord(graphId: stepGraphRecord.id, content: step.content)
                 try stepRecord.save(db)
-                step.id = stepRecord.id
+
+                nodeIds[node.id] = stepRecord.id
+
+                for timer in step.timers {
+                    var timerRecord = RecipeStepTimerRecord(stepId: stepRecord.id, duration: timer)
+                    try timerRecord.save(db)
+                }
             }
 
-            for edge in graph.edges {
-                let sourceId = edge.source.label.id
-                let destinationId = edge.destination.label.id
-                var edgeRecord = RecipeStepEdgeRecord(graphId: graph.id, sourceId: sourceId, destinationId: destinationId)
+            for edge in stepGraph.edges {
+                let sourceId = nodeIds[edge.source.id, default: nil]
+                let destinationId = nodeIds[edge.destination.id, default: nil]
+                var edgeRecord = RecipeStepEdgeRecord(graphId: stepGraphRecord.id,
+                                                      sourceId: sourceId,
+                                                      destinationId: destinationId)
                 try edgeRecord.save(db)
             }
         }
+        // swiftlint:enable closure_body_length
     }
 
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategoryRecord) throws {
         try dbWriter.write { db in
             try recipeCategory.save(db)
+        }
+    }
+
+    // For saving multiple ingredients in one transaction
+    func saveIngredients(_ ingredients: inout [(IngredientRecord, [IngredientBatchRecord])]) throws {
+        try dbWriter.write { db in
+            for index in ingredients.indices {
+                guard ingredients[index].1.allSatisfy({ $0.quantity.type == ingredients[index].0.quantityType }) else {
+                    throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+                }
+
+                // Save ingredient
+                try ingredients[index].0.save(db)
+
+                guard ingredients[index].1.compactMap({ $0.ingredientId })
+                        .allSatisfy({ $0 == ingredients[index].0.id }) else {
+                    throw DatabaseError(message: "Ingredient batches belong to the wrong ingredient.")
+                }
+
+                // Delete all batches that are not in the array
+                try ingredients[index].0.batches
+                    .filter(!ingredients[index].1.compactMap { $0.id }.contains(IngredientBatchRecord.Columns.id))
+                    .deleteAll(db)
+
+                // Save ingredient batches
+                for batchIndex in ingredients[index].1.indices {
+                    ingredients[index].1[batchIndex].ingredientId = ingredients[index].0.id
+                    try ingredients[index].1[batchIndex].save(db)
+                }
+            }
         }
     }
 
@@ -491,7 +548,7 @@ extension AppDatabase {
 extension AppDatabase {
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeRecord.deleteAll(db, keys: ids)
+            _ = try RecipeRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -503,7 +560,7 @@ extension AppDatabase {
 
     func deleteRecipeCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try RecipeCategoryRecord.deleteAll(db, keys: ids)
+            _ = try RecipeCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -515,7 +572,7 @@ extension AppDatabase {
 
     func deleteIngredients(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientRecord.deleteAll(db, keys: ids)
+            _ = try IngredientRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -527,7 +584,7 @@ extension AppDatabase {
 
     func deleteIngredientCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
-            _ = try IngredientCategoryRecord.deleteAll(db, keys: ids)
+            _ = try IngredientCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
@@ -544,23 +601,27 @@ extension AppDatabase {
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
-                .filter(key: id)
+                .filter(id: id)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
-                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.steps
+                                .including(all: RecipeStepRecord.timers))
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
         }
     }
 
-    func fetchRecipeByOnlineId(onlineId: String) throws -> Recipe? {
+    func fetchRecipe(onlineId: String) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.onlineId == onlineId)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
-                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.steps
+                                .including(all: RecipeStepRecord.timers))
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
@@ -579,26 +640,29 @@ extension AppDatabase {
         }
     }
 
-    func fetchRecipeCategory(id: Int64) throws -> RecipeCategory? {
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try dbWriter.read { db in
             let request = RecipeCategoryRecord
-                .filter(key: id)
+                .filter(RecipeCategoryRecord.Columns.name == name)
+
             return try RecipeCategory.fetchOne(db, request)
         }
     }
 
-    func fetchRecipeCategoryByName(name: String) throws -> RecipeCategory? {
+    func fetchIngredients() throws -> [Ingredient] {
         try dbWriter.read { db in
-            let request = RecipeCategoryRecord
-                .filter(key: ["name": name])
-            return try RecipeCategory.fetchOne(db, request)
+            let request = IngredientRecord
+                .all()
+                .including(all: IngredientRecord.batches)
+
+            return try Ingredient.fetchAll(db, request)
         }
     }
 
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try dbWriter.read { db in
             let request = IngredientRecord
-                .filter(key: id)
+                .filter(id: id)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
@@ -613,10 +677,12 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = RecipeRecord
-                    .filter(key: id)
+                    .filter(id: id)
+                    .including(optional: RecipeRecord.category)
                     .including(all: RecipeRecord.ingredients)
                     .including(required: RecipeRecord.stepGraph
-                        .including(all: RecipeStepGraphRecord.steps)
+                        .including(all: RecipeStepGraphRecord.steps
+                                    .including(all: RecipeStepRecord.timers))
                         .including(all: RecipeStepGraphRecord.edges))
 
                 return try Recipe.fetchOne(db, request)
@@ -657,7 +723,8 @@ extension AppDatabase {
         ValueObservation
             .tracking({ db in
                 let request = IngredientRecord
-                    .filter(key: id)
+                    .filter(id: id)
+                    .including(optional: IngredientRecord.category)
                     .including(all: IngredientRecord.batches)
 
                 return try Ingredient.fetchOne(db, request)

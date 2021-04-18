@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a batch of an ingredient.
+ */
 struct IngredientBatchCardView: View {
     let viewModel: IngredientBatchViewModel
 
@@ -9,11 +12,6 @@ struct IngredientBatchCardView: View {
             Spacer()
             expiryDateLabel
         }
-        .padding()
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.secondary, lineWidth: 1)
-        )
     }
 
     @ViewBuilder

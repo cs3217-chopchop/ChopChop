@@ -5,6 +5,8 @@ class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
     private(set) var parentRecipe: OnlineRecipe?
     private(set) var downloadedRecipes: [Recipe]
+    private var creatorCancellable: AnyCancellable?
+
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
@@ -12,10 +14,15 @@ class OnlineRecipeViewModel: ObservableObject {
     private var parentRecipeCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
+    @Published private(set) var recipeServingText = ""
+    @Published private(set) var creatorName = "No name"
+
     @Published private var firstRater = "No name"
     private var followeeIds: [String] = []
 
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
+
+    @Published var isShowingDetail = false
 
     let settings: UserSettings
 
@@ -46,14 +53,21 @@ class OnlineRecipeViewModel: ObservableObject {
                 })
         }
 
-        followeesCancellable = followeesPublisher()
+        creatorCancellable = creatorPublisher
+            .sink { [weak self] user in
+                self?.creatorName = user.name
+            }
+
+        followeesCancellable = followeesPublisher
             .sink { [weak self] followees in
                 self?.followeeIds = followees.compactMap { $0.id }
             }
 
-        recipeCancellable = onlineRecipePublisher()
+        recipeCancellable = onlineRecipePublisher
             .sink { [weak self] recipe in
                 self?.recipe = recipe
+
+                self?.recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
 
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return
@@ -65,7 +79,7 @@ class OnlineRecipeViewModel: ObservableObject {
                     }
             }
 
-        imageCancellable = imagePublisher()
+        imageCancellable = imagePublisher
             .sink { [weak self] image in
                 self?.image = image
             }
@@ -98,7 +112,17 @@ class OnlineRecipeViewModel: ObservableObject {
         downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
-    private func onlineRecipePublisher() -> AnyPublisher<OnlineRecipe, Never> {
+    func toggleShowDetail() {
+        isShowingDetail.toggle()
+    }
+
+    private var creatorPublisher: AnyPublisher<User, Never> {
+        storageManager.userByIdPublisher(userId: recipe.userId)
+            .assertNoFailure()
+            .eraseToAnyPublisher()
+    }
+
+    private var onlineRecipePublisher: AnyPublisher<OnlineRecipe, Never> {
         storageManager.onlineRecipeByIdPublisher(recipeId: recipe.id)
             .assertNoFailure()
             .eraseToAnyPublisher()
@@ -110,19 +134,19 @@ class OnlineRecipeViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
 
-    private func followeesPublisher() -> AnyPublisher<[User], Never> {
+    private var followeesPublisher: AnyPublisher<[User], Never> {
         guard let userId = settings.userId else {
             fatalError("No user id stored")
         }
 
-        return storageManager.allFolloweesPublisher(userId: userId)
+        return storageManager.followeesPublisher(userId: userId)
             .catch { _ in
                 Just<[User]>([])
             }
             .eraseToAnyPublisher()
     }
 
-    private func imagePublisher() -> AnyPublisher<UIImage, Never> {
+    private var imagePublisher: AnyPublisher<UIImage, Never> {
         storageManager.onlineRecipeImagePublisher(recipeId: recipe.id)
             .catch { _ in
                 Just<UIImage>(UIImage(imageLiteralResourceName: "recipe"))

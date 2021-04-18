@@ -32,6 +32,20 @@ final class SidebarViewModel: ObservableObject {
             }
     }
 
+    func addCategory() {
+        switch categoryType {
+        case .recipe:
+            addRecipeCategory(name: categoryName)
+        case .ingredient:
+            addIngredientCategory(name: categoryName)
+        case .none:
+            return
+        }
+
+        categoryName = ""
+        categoryType = nil
+    }
+
     func addRecipeCategory(name: String) {
         do {
             var category = try RecipeCategory(name: name)
@@ -117,14 +131,6 @@ final class SidebarViewModel: ObservableObject {
         }
         return storageManager.allFolloweesRecipePublisher(userId: userId)
     }
-
-    var ownRecipePublisher: AnyPublisher<[OnlineRecipe], Error> {
-        guard let userId = settings.userId else {
-            fatalError("No user id stored")
-        }
-        return storageManager.allRecipesByUsersPublisher(userIds: [userId])
-    }
-
 }
 
 extension SidebarViewModel {

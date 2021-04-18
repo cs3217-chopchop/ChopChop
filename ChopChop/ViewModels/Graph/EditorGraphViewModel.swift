@@ -4,7 +4,7 @@ final class EditorGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
     @Published var linePhase = CGFloat.zero
 
-    var graph: RecipeStepGraph
+    let graph: RecipeStepGraph
     let isEditable: Bool
 
     init(graph: RecipeStepGraph, isEditable: Bool = true) {
@@ -27,7 +27,7 @@ final class EditorGraphViewModel: ObservableObject {
     }
 
     func onLongPressPortal(_ value: DragGesture.Value) {
-        guard let step = try? RecipeStep(content: "Add step details..."), isEditable else {
+        guard let step = try? RecipeStep("Add step details..."), isEditable else {
             return
         }
 

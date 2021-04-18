@@ -1,4 +1,4 @@
-// swiftlint:disable line_length
+// swiftlint:disable line_length function_body_length
 
 import XCTest
 @testable import ChopChop
@@ -27,7 +27,7 @@ class OnlineRecipeTests: XCTestCase {
 
     func testConstruct_allFieldsFilled_success() throws {
         let steps = ["First step", "Second step", "Third Step"]
-        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep(content: $0)) })
+        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep($0)) })
         let stepEdges = [
             Edge<RecipeStepNode>(source: stepNodes[0], destination: stepNodes[1]),
             Edge<RecipeStepNode>(source: stepNodes[1], destination: stepNodes[2])
@@ -69,7 +69,7 @@ class OnlineRecipeTests: XCTestCase {
 
     func testConstruct_optionalFieldsNotFilled_success() throws {
         let steps = ["First step", "Second step", "Third Step"]
-        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep(content: $0)) })
+        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep($0)) })
         let stepEdges = [
             Edge<RecipeStepNode>(source: stepNodes[0], destination: stepNodes[1]),
             Edge<RecipeStepNode>(source: stepNodes[1], destination: stepNodes[2])
@@ -111,7 +111,7 @@ class OnlineRecipeTests: XCTestCase {
 
     func testConstruct_emptyName_fail() throws {
         let steps = ["First step", "Second step", "Third Step"]
-        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep(content: $0)) })
+        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep($0)) })
         let stepEdges = [
             Edge<RecipeStepNode>(source: stepNodes[0], destination: stepNodes[1]),
             Edge<RecipeStepNode>(source: stepNodes[1], destination: stepNodes[2])
@@ -143,7 +143,7 @@ class OnlineRecipeTests: XCTestCase {
 
     func testConstruct_servingBelowZero_fail() throws {
         let steps = ["First step", "Second step", "Third Step"]
-        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep(content: $0)) })
+        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep($0)) })
         let stepEdges = [
             Edge<RecipeStepNode>(source: stepNodes[0], destination: stepNodes[1]),
             Edge<RecipeStepNode>(source: stepNodes[1], destination: stepNodes[2])
@@ -175,7 +175,7 @@ class OnlineRecipeTests: XCTestCase {
 
     func testConvenienceInitializer_success() throws {
         let steps = ["First step", "Second step", "Third Step"]
-        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep(content: $0)) })
+        let stepNodes = try steps.map({ RecipeStepNode(try RecipeStep($0)) })
         let stepEdges = [
             Edge<RecipeStepNode>(source: stepNodes[0], destination: stepNodes[1]),
             Edge<RecipeStepNode>(source: stepNodes[1], destination: stepNodes[2])
@@ -236,8 +236,8 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.servings, 2)
         XCTAssertEqual(onlineRecipe.ingredients, [try RecipeIngredient(name: "Butter", quantity: Quantity(.count, value: 2))])
 
-        let node1 = RecipeStepNode(try RecipeStep(content: "Cook the pancakes"))
-        let node2 = RecipeStepNode(try RecipeStep(content: "Make the pancakes"))
+        let node1 = RecipeStepNode(try RecipeStep("Cook the pancakes"))
+        let node2 = RecipeStepNode(try RecipeStep("Make the pancakes"))
         let edges = [Edge(source: node1, destination: node2)].compactMap { $0 }
         XCTAssertEqual(onlineRecipe.stepGraph, try RecipeStepGraph(nodes: [node1, node2], edges: edges))
     }

@@ -7,11 +7,10 @@ import SwiftUI
 
     var body: some View {
         List {
-            cookingSection
             recipesSection
             ingredientsSection
             recipeFeedSection
-            usersSection
+            accountSection
         }
         .listStyle(SidebarListStyle())
         .toolbar {
@@ -38,19 +37,7 @@ import SwiftUI
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: {
-            switch viewModel.categoryType {
-            case .recipe:
-                viewModel.addRecipeCategory(name: viewModel.categoryName)
-            case .ingredient:
-                viewModel.addIngredientCategory(name: viewModel.categoryName)
-            case .none:
-                return
-            }
-
-            viewModel.categoryName = ""
-            viewModel.categoryType = nil
-        }) {
+        .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: viewModel.addCategory) {
             switch viewModel.categoryType {
             case .recipe:
                 addRecipeCategorySheet
@@ -63,41 +50,42 @@ import SwiftUI
         .environment(\.editMode, $editMode)
     }
 
+    @ViewBuilder
     var addRecipeCategorySheet: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Add Recipe Category")
-                .font(.title)
-            TextField("Category", text: $viewModel.categoryName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            Button("Done", action: {
-                viewModel.sheetIsPresented = false
-            })
+                .font(.largeTitle)
+                .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Recipe Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
         }
     }
 
     var addIngredientCategorySheet: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Add Ingredient Category")
-                .font(.title)
-            TextField("Category", text: $viewModel.categoryName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-            Button("Done", action: {
-                viewModel.sheetIsPresented = false
-            })
-        }
-    }
-
-    var cookingSection: some View {
-        NavigationLink(
-            destination: CookingSelectionView(viewModel:
-                                                CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
-                                                                            .compactMap { $0.id } + [nil]))
-        ) {
-            Text("Cooking")
-                .font(.title3)
+                .font(.largeTitle)
                 .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Ingredient Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
         }
     }
 
@@ -191,43 +179,67 @@ import SwiftUI
         }
     }
 
-    var usersSection: some View {
-        NavigationLink(
-            destination: UserCollectionView(viewModel: UserCollectionViewModel(settings: settings))
-        ) {
-            Text("Users")
-                .font(.title3)
-                .bold()
-        }
-    }
-
     var recipeFeedSection: some View {
         Section(header: Text("Recipe Feed")) {
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher))
-                    .navigationTitle("All Recipes")
+                destination: OnlineRecipeCollectionView(
+                    viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.followeesRecipePublisher)) {
+                    EmptyView()
+                }
+                    .navigationTitle("Recipes by Followees")
             ) {
-                Label("All Recipes", systemImage: "tray.2")
+                Label("Recipes by Followees", systemImage: "tray.2")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher:
-                                                                    viewModel.followeesRecipePublisher))
-                    .navigationTitle("Recipes from followees")
+                destination: OnlineRecipeCollectionView(
+                    viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.allRecipePublisher)) {
+                    EmptyView()
+                }
+                    .navigationTitle("Discover")
             ) {
-                Label("Recipes from followees", systemImage: "folder")
+                Label("Discover", systemImage: "magnifyingglass")
+            }
+        }
+    }
+
+    var accountSection: some View {
+        Section(header: Text("Account")) {
+            NavigationLink(
+                destination: ownProfileView
+            ) {
+                Label("Profile", systemImage: "person")
             }
 
             NavigationLink(
-                destination: OnlineRecipeCollectionView(viewModel:
-                                OnlineRecipeCollectionViewModel(publisher: viewModel.ownRecipePublisher))
-                    .navigationTitle("My Published Recipes")
+                destination: followeesView
             ) {
-                Label("My Published Recipes", systemImage: "folder")
+                Label("Followees", systemImage: "person.2")
             }
 
+            NavigationLink(
+                destination: NotFoundView(entityName: "Settings")
+            ) {
+                Label("Settings", systemImage: "gear")
+            }
+        }
+    }
+
+    @ViewBuilder
+    var ownProfileView: some View {
+        if let userId = settings.userId {
+            ProfileView(viewModel: ProfileViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "User")
+        }
+    }
+
+    @ViewBuilder
+    var followeesView: some View {
+        if let userId = settings.userId {
+            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "User")
         }
     }
 

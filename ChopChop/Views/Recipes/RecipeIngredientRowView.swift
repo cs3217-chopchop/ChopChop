@@ -6,21 +6,21 @@ struct RecipeIngredientRowView: View {
 
     var body: some View {
         HStack {
-            quantity
-            Picker("Unit", selection: $viewModel.unit) {
-                ForEach(QuantityType.allCases, id: \.self) {
-                    Text($0.description)
+            HStack {
+                TextField("Quantity", text: Binding(get: { viewModel.quantity },
+                                                    set: viewModel.setQuantity))
+                    .keyboardType(.decimalPad)
+                Picker(viewModel.unit.description, selection: $viewModel.unit) {
+                    ForEach(QuantityUnit.allCases, id: \.self) {
+                        Text($0.description)
+                    }
                 }
+                .frame(width: 60, alignment: .leading)
+                .pickerStyle(MenuPickerStyle())
             }
-            .pickerStyle(MenuPickerStyle())
-            Spacer()
-            Text(viewModel.unit.description)
-            TextField("Ingredient", text: $viewModel.ingredientName)
+            .frame(width: 120)
+            TextField("Name", text: $viewModel.name)
         }
-    }
-
-    var quantity: some View {
-        TextField("Quantity", text: $viewModel.amount)
     }
 }
 

@@ -1,7 +1,6 @@
 import Foundation
 
 class DownloadRecipeViewModel: ObservableObject {
-
     @Published var recipeNameToSave = ""
     @Published var recipeToDownload: OnlineRecipe?
     @Published var isShow = false
@@ -11,10 +10,9 @@ class DownloadRecipeViewModel: ObservableObject {
     var forkedRecipesCheckList: CheckListViewModel<Recipe>?
 
     func setRecipe(recipe: OnlineRecipe) {
-        print("yo")
         recipeToDownload = recipe
         isShow = true
-        recipeNameToSave = ""
+        recipeNameToSave = recipe.name
         errorMessage = ""
         isNewDownload = true
     }
@@ -26,10 +24,7 @@ class DownloadRecipeViewModel: ObservableObject {
                 return
             }
             try storageManager.downloadRecipe(newName: recipeNameToSave, recipe: recipe)
-            recipeToDownload = nil
-            isShow = false
-            recipeNameToSave = ""
-            errorMessage = ""
+            resetFields()
         } catch {
             errorMessage = "Invalid name"
         }
@@ -61,4 +56,10 @@ class DownloadRecipeViewModel: ObservableObject {
         isNewDownload = false
     }
 
+    private func resetFields() {
+        recipeToDownload = nil
+        isShow = false
+        recipeNameToSave = ""
+        errorMessage = ""
+    }
 }

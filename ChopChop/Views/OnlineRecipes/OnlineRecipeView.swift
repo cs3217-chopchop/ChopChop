@@ -4,104 +4,181 @@ struct OnlineRecipeView: View {
     @ObservedObject var viewModel: OnlineRecipeViewModel
 
     var body: some View {
-        VStack {
-            Image(uiImage: viewModel.image)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 200)
-                .clipped()
-            Text(viewModel.recipe.name)
-                .font(.largeTitle)
-                .bold()
-                .padding()
-                .foregroundColor(.white)
-                .background(Color.blue)
-                .clipShape(Capsule())
-            recipeDetails
+        VStack(spacing: 0) {
+            userBar
             Divider()
-            Button(action: {
-                viewModel.setRecipe()
-            }) {
-                Label("Download new copy", systemImage: "square.and.arrow.down")
+            recipeImage
+            averageRating
+            if viewModel.isShowingDetail {
+                recipeDetails
             }
-            if !viewModel.downloadedRecipes.isEmpty {
-                Button(action: {
-                    viewModel.updateForkedRecipes()
-                }) {
-                    Label("Update downloaded copies", systemImage: "square.and.arrow.down")
+            Divider()
+            showDetailBar
+        }
+    }
+
+    var userBar: some View {
+        NavigationLink(
+            destination: ProfileView(
+                viewModel: ProfileViewModel(
+                    userId: viewModel.recipe.userId,
+                    settings: viewModel.settings))
+        ) {
+            HStack {
+                Image("default-user")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+                Text(viewModel.creatorName)
+                Spacer()
+            }
+            .padding()
+        }
+        .zIndex(1)
+    }
+
+    var recipeImage: some View {
+        Image(uiImage: viewModel.image)
+            .resizable()
+            .scaledToFill()
+            .frame(height: 300)
+            .clipped()
+            .overlay(recipeImageOverlay)
+    }
+
+    var recipeImageOverlay: some View {
+        var recipeName: some View {
+            VStack {
+                Text(viewModel.recipe.name)
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                if let parentRecipe = viewModel.parentRecipe {
+                    getLinkToParentRecipe(parentRecipe: parentRecipe)
                 }
             }
-            averageRating
         }
 
+        var recipeDetails: some View {
+            VStack(alignment: .leading) {
+                Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
+                HStack {
+                    Text("Difficulty: ")
+                    DifficultyView(difficulty: viewModel.recipe.difficulty)
+                }
+                HStack {
+                    Text("Cuisine: ")
+                    Text(viewModel.recipe.cuisine ?? "Unspecified")
+                }
+            }
+            .font(.caption)
+            .foregroundColor(.white)
+        }
+
+        return ZStack(alignment: .bottomLeading) {
+            Rectangle()
+                .foregroundColor(.clear)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .clear, .black]),
+                        startPoint: .top,
+                        endPoint: .bottom))
+            HStack {
+                recipeName
+                Spacer()
+                recipeDetails
+            }
+            .padding()
+        }
+    }
+
+    var averageRating: some View {
+        HStack {
+            Text("Rating: ")
+            StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
+                .frame(width: 150, height: 30)
+            Text(viewModel.ratingDetails)
+            Spacer()
+            downloadButton
+            if !viewModel.downloadedRecipes.isEmpty {
+                updateButton
+            }
+        }.padding()
     }
 
     var recipeDetails: some View {
-        VStack(alignment: .center) {
-            if let parentRecipe = viewModel.parentRecipe {
-                NavigationLink(
-                    destination: OnlineRecipeCollectionView(
-                        viewModel: OnlineRecipeCollectionViewModel(
-                            recipe: parentRecipe
-                        )
-                    )
-                ) {
-                    Text("Adapted from here")
-                }
+        HStack {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Ingredients").font(.title).underline()
+                ingredient
+                Spacer()
+                Text("Instructions").font(.title).underline()
+                instruction
             }
-            Text("General").font(.title).underline()
-            general
-            Spacer()
-            Text("Ingredients").font(.title).underline()
-            ingredient
-            Spacer()
-            Text("Instructions").font(.title).underline()
-            instruction
-        }
-        .padding()
-    }
+            .padding()
 
-    var general: some View {
-        VStack {
-            Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
-            HStack {
-                Text("Difficulty: ")
-                DifficultyView(difficulty: viewModel.recipe.difficulty)
-            }
-            HStack {
-                Text("Cuisine: ")
-                Text(viewModel.recipe.cuisine ?? "Unspecified")
-            }
-        }.font(.body)
+            Spacer()
+        }
     }
 
     var ingredient: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .leading) {
             ForEach(viewModel.recipe.ingredients, id: \.self.description) { ingredient in
-                Text(ingredient.description)
+                Text("• \(ingredient.description)")
             }
         }.font(.body)
     }
 
     var instruction: some View {
-        ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
-            HStack(alignment: .top) {
-                Text("Step \(idx + 1):")
-                    .bold()
-                Text(viewModel.recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
+                HStack(alignment: .top) {
+                    Text("Step \(idx + 1):")
+                        .bold()
+                    Text(viewModel.recipe.stepGraph.topologicallySortedNodes[idx].label.content)
+                }
+            }.font(.body)
+        }
+    }
+
+    var showDetailBar: some View {
+        Button(action: viewModel.toggleShowDetail) {
+            HStack {
+                Image(systemName: viewModel.isShowingDetail ? "chevron.up" : "chevron.down")
+                Text(viewModel.isShowingDetail ? "Hide Details" : "Show Details")
             }
-        }.font(.body)
+        }
+        .padding()
     }
 
-    var averageRating: some View {
-        HStack {
-            Text("Average rating: ")
-            StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
-                .frame(width: 200, height: 40, alignment: .center)
-            Text(viewModel.ratingDetails)
-        }.padding()
+    var downloadButton: some View {
+        Button(action: viewModel.setRecipe) {
+            Label("Download New Copy", systemImage: "square.and.arrow.down")
+        }
     }
 
+    var updateButton: some View {
+        Button(action: {
+            viewModel.updateForkedRecipes()
+        }) {
+            Label("Update Downloaded Copies", systemImage: "square.and.arrow.down")
+        }
+    }
+
+    private func getLinkToParentRecipe(parentRecipe: OnlineRecipe) -> some View {
+        NavigationLink(
+            destination: OnlineRecipeCollectionView(
+                viewModel: OnlineRecipeCollectionViewModel(
+                    recipe: parentRecipe
+                )
+            ) {
+                EmptyView()
+            }
+        ) {
+            Text("Adapted from here")
+        }
+    }
 }
 
 struct OnlineRecipeView_Previews: PreviewProvider {

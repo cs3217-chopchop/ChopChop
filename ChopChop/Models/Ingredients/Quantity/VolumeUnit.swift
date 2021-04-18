@@ -1,10 +1,17 @@
+/**
+ Represents a unit of the volume type.
+ 
+ - Important: The cases are ordered in ascending size within each group (metric/imperial)
+ */
 enum VolumeUnit: Int, CaseIterable {
     static let baseUnit: VolumeUnit = .liter
 
+    /// Imperial units
     case pint
     case quart
     case gallon
 
+    /// Metric units
     case teaspoon
     case tablespoon
     case cup
@@ -20,6 +27,7 @@ enum VolumeUnit: Int, CaseIterable {
         }
     }
 
+    /// The conversion ratio from the unit to liter.
     var ratioToLiter: Double {
         switch self {
         case .pint:
@@ -41,12 +49,28 @@ enum VolumeUnit: Int, CaseIterable {
         }
     }
 
+    /**
+     Converts the given value represented in `currentUnit` to the equivalent value represented in `newUnit`
+
+     - Parameters:
+        - `value`: The value to be converted.
+        - `currentUnit`: The current unit in which the given value is expressed.
+        - `newUnit`: The unit to which the given value is to be converted.
+     */
     static func convert(_ value: Double, from currentUnit: VolumeUnit, to newUnit: VolumeUnit) -> Double {
         (value * currentUnit.ratioToLiter) / newUnit.ratioToLiter
     }
 
+    /**
+     Converts the given value represented in `volumeUnit` to the equivalent value represented in `massUnit`
+
+     - Parameters:
+        - `value`: The value to be converted.
+        - `volumeUnit`: The volume unit in which the given value is expressed.
+        - `massUnit`: The mass unit to which the given value is to be converted.
+     */
     static func convertToMass(_ value: Double, from volumeUnit: VolumeUnit, to massUnit: MassUnit) -> Double {
-        (value * volumeUnit.ratioToLiter / QuantityType.massToVolumeBaseRatio) / massUnit.ratioToKilogram
+        (value * volumeUnit.ratioToLiter / QuantityUnit.massToVolumeBaseRatio) / massUnit.ratioToKilogram
     }
 }
 

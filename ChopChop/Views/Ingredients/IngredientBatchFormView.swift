@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view for the form for adding or editing an ingredient batch.
+ */
 struct IngredientBatchFormView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: IngredientBatchFormViewModel
@@ -14,7 +17,7 @@ struct IngredientBatchFormView: View {
     }
 
     @ViewBuilder
-    var quantitySection: some View {
+    private var quantitySection: some View {
         Section(header: Text("QUANTITY")) {
             HStack {
                 TextField("Quantity", text: $viewModel.inputQuantity)
@@ -22,7 +25,8 @@ struct IngredientBatchFormView: View {
                     .frame(width: 100)
                 Text(viewModel.selectedUnit)
                 Spacer()
-                switch viewModel.ingredient.quantityType {
+
+                switch viewModel.quantityType {
                 case .count:
                     EmptyView()
                 case .mass:
@@ -44,7 +48,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    var expiryDateSection: some View {
+    private var expiryDateSection: some View {
         Section(header: Text("EXPIRY DATE")) {
             Toggle(isOn: $viewModel.expiryDateEnabled) {
                 Text("Expires")
@@ -58,7 +62,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    var saveButton: some View {
+    private var saveButton: some View {
         Button("Save") {
             do {
                 try viewModel.save()
@@ -77,7 +81,7 @@ struct IngredientBatchFormView: View {
         }
     }
 
-    func handleAlert(_ alert: IngredientBatchFormViewModel.AlertIdentifier) -> Alert {
+    private func handleAlert(_ alert: IngredientBatchFormViewModel.AlertIdentifier) -> Alert {
         switch alert.id {
         case .invalidQuantity:
             return Alert(
@@ -104,38 +108,5 @@ struct IngredientBatchFormView: View {
                 message: Text("An error occurred with saving the batch"),
                 dismissButton: .default(Text("OK")))
         }
-    }
-}
-
-struct IngredientBatchEditView_Previews: PreviewProvider {
-    // swiftlint:disable force_try
-    static var previews: some View {
-        IngredientBatchFormView(
-            viewModel: IngredientBatchFormViewModel(
-                edit: IngredientBatch(
-                    quantity: try! Quantity(.count, value: 3),
-                    expiryDate: Date().addingTimeInterval(100_000)),
-                in: try! Ingredient(
-                    name: "Apple",
-                    type: .count,
-                    batches: [
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date()),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(100_000)),
-                        IngredientBatch(
-                            quantity: try! Quantity(.count, value: 3),
-                            expiryDate: Date().addingTimeInterval(200_000))
-                    ])))
-    }
-}
-
-extension View {
-    func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

@@ -1,8 +1,7 @@
+import Foundation
 import GRDB
 
-class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
-    var id: Int64?
-
+final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode> {
     override init() {
         super.init()
     }
@@ -20,42 +19,66 @@ class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode>, FetchableRecord {
 
         assert(checkRepresentation())
     }
+}
 
-    required init(row: Row) {
-        let stepRecords = row.prefetchedRows["recipeSteps"]?.compactMap {
-            RecipeStepRecord(row: $0)
-        }
+extension RecipeStepGraph: FetchableRecord {
+    convenience init(row: Row) {
+        self.init()
 
-        let steps = stepRecords?.compactMap {
-            try? RecipeStep(content: $0.content, id: $0.id)
-        } ?? []
+        let nodes: [Int64?: RecipeStepNode] = row.prefetchedRows["recipeSteps"]?.reduce(into: [:], { nodes, row in
+            let record = RecipeStepRecord(row: row)
+            let timers: [TimeInterval] = row.prefetchedRows["recipeStepTimers"]?.map {
+                let record = RecipeStepTimerRecord(row: $0)
 
-        let nodes = steps.map { RecipeStepNode($0) }
+                return record.duration
+            } ?? []
+
+            guard let step = try? RecipeStep(record.content, timers: timers) else {
+                return
+            }
+
+            nodes?[record.id] = RecipeStepNode(step)
+        }) ?? [:]
 
         let edges: [Edge<RecipeStepNode>] = row.prefetchedRows["recipeStepEdges"]?.compactMap {
             let record = RecipeStepEdgeRecord(row: $0)
 
-            guard let sourceNode = nodes.first(where: { $0.label.id == record.sourceId }),
-                  let destinationNode = nodes.first(where: { $0.label.id == record.destinationId }) else {
+            guard let sourceNode = nodes[record.sourceId], let destinationNode = nodes[record.destinationId] else {
                 return nil
             }
 
-            return Edge<RecipeStepNode>(source: sourceNode, destination: destinationNode)
+            return Edge(source: sourceNode, destination: destinationNode)
         } ?? []
 
-        super.init()
-
-        for node in nodes {
+        for node in nodes.values {
             adjacencyList[node] = []
         }
 
         for edge in edges {
-            if var edgesFromSourceNode = adjacencyList[edge.source] {
-                edgesFromSourceNode.append(edge)
-                adjacencyList[edge.source] = edgesFromSourceNode
-            }
+            adjacencyList[edge.source, default: []].append(edge)
         }
 
         assert(checkRepresentation())
+    }
+}
+
+extension RecipeStepGraph {
+    func copy() -> RecipeStepGraph? {
+        // [Original: Copied]
+        let copiedNodes: [RecipeStepNode: RecipeStepNode] = nodes.reduce(into: [:], { nodes, node in
+            let copiedNode = RecipeStepNode(node.label)
+
+            nodes[node] = copiedNode
+        })
+
+        let copiedEdges: [Edge<RecipeStepNode>] = edges.compactMap {
+            guard let sourceNode = copiedNodes[$0.source], let destinationNode = copiedNodes[$0.destination] else {
+                return nil
+            }
+
+            return Edge(source: sourceNode, destination: destinationNode)
+        }
+
+        return try? RecipeStepGraph(nodes: Array(copiedNodes.values), edges: copiedEdges)
     }
 }

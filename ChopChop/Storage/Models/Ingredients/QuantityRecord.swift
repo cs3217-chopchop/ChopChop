@@ -1,5 +1,8 @@
 import FirebaseFirestoreSwift
 
+/**
+ Represents a record of a quantity of an ingredient.
+ */
 enum QuantityRecord: Equatable {
     case count(Double)
     case mass(Double, unit: MassUnit)
@@ -11,7 +14,7 @@ extension QuantityRecord: Codable {
         case count, mass, volume, unit
     }
 
-    var type: BaseQuantityType {
+    var type: QuantityType {
         switch self {
         case .count:
             return .count
