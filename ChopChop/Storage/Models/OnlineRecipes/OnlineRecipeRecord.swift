@@ -9,7 +9,7 @@ struct OnlineRecipeRecord {
     @ExplicitNull var cuisine: String?
     @ExplicitNull var difficulty: Difficulty?
     var ingredients: [OnlineIngredientRecord]
-    var steps: [String]
+    var steps: [OnlineStepRecord]
     var stepEdges: [OnlineStepEdgeRecord]
     var ratings: [RecipeRating] = []
     @ServerTimestamp var created: Date?

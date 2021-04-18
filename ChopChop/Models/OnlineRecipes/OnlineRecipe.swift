@@ -48,40 +48,31 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingCreatedDate
         }
 
-        let stepGraphNodes = try record.steps.compactMap({
-            try RecipeStep($0)
+        var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
+        record.steps.forEach({
+            let step = try? RecipeStep($0.content)
+            guard let recipeStep = step else {
+                return
+            }
+            uuidToRecipeStepNodeMap[$0.id] = RecipeStepNode(recipeStep)
         })
-        .map({
-            RecipeStepNode($0)
-        })
-
+        
         var stepGraphEdges = [Edge<RecipeStepNode>]()
         record.stepEdges.forEach {
-            var source: RecipeStep?
-            var destination: RecipeStep?
-            for node in stepGraphNodes {
-                if source == nil && node.label.content == $0.sourceStep {
-                    source = node.label
-                } else if destination == nil && node.label.content == $0.destinationStep {
-                    destination = node.label
-                }
-                if source != nil && destination != nil {
-                    break
-                }
-            }
-            guard let sourceStep = source, let destinationStep = destination else {
+            let source = uuidToRecipeStepNodeMap[$0.sourceStepId]
+            let destination = uuidToRecipeStepNodeMap[$0.destinationStepId]
+            guard let sourceStepNode = source, let destinationStepNode = destination else {
                 return
             }
 
-            let stepNodeSource = RecipeStepNode(sourceStep)
-            let stepNodeDestination = RecipeStepNode(destinationStep)
-            guard let edge = Edge<RecipeStepNode>(source: stepNodeSource, destination: stepNodeDestination) else {
+            guard let edge = Edge<RecipeStepNode>(source: sourceStepNode, destination: destinationStepNode) else {
                 return
             }
             stepGraphEdges.append(edge)
         }
 
-        let stepGraph = (try? RecipeStepGraph(nodes: stepGraphNodes, edges: stepGraphEdges)) ?? RecipeStepGraph()
+        let stepGraph = (try? RecipeStepGraph(nodes: Array(uuidToRecipeStepNodeMap.values), edges: stepGraphEdges))
+            ?? RecipeStepGraph()
 
         try self.init(
             id: id,

@@ -29,7 +29,8 @@ struct FirebaseDatabase {
             "servings": recipe.servings,
             "difficulty": recipe.difficulty?.rawValue,
             "cuisine": recipe.cuisine,
-            "steps": recipe.steps,
+            "steps": recipe.steps.map({ $0.asDict }),
+            "stepEdges": recipe.stepEdges.map({ $0.asDict }),
             "ingredients": recipe.ingredients.map({ $0.asDict })
         ], merge: true)
     }

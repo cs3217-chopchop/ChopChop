@@ -254,11 +254,14 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+        
+
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
@@ -297,11 +300,13 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+        
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             id: recipe.onlineId,
             name: recipe.name,
@@ -457,7 +462,7 @@ extension StorageManager {
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
         let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
-        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) == nil
+        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
