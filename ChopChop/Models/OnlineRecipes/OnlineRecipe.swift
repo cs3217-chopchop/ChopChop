@@ -15,6 +15,7 @@ class OnlineRecipe: Identifiable {
     private(set) var ratings: [RecipeRating]
     private(set) var created: Date
 
+    // swiftlint:disable function_default_parameter_at_end
     init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
@@ -38,6 +39,7 @@ class OnlineRecipe: Identifiable {
         self.ratings = ratings
         self.created = created
     }
+    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension OnlineRecipe {

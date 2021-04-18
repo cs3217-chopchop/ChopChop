@@ -184,6 +184,7 @@ extension AppDatabase {
         }
     }
 
+    // swiftlint:disable cyclomatic_complexity
     private func createPreloadedRecipes(_ db: Database) throws {
         guard let path = Bundle.main.path(forResource: "recipes", ofType: "json"),
               let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
@@ -278,6 +279,7 @@ extension AppDatabase {
             try edgeRecords[index].save(db)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 // MARK: - Database: Preloaded Ingredients
