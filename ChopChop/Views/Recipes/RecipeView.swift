@@ -72,7 +72,6 @@ struct RecipeView: View {
                 }
             }
             .onAppear {
-                viewModel.showRecipeForm = false
                 viewModel.fetchParentRecipe()
             }
         } else {

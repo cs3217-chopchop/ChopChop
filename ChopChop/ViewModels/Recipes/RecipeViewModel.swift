@@ -5,42 +5,9 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
-//<<<<<<< HEAD
     private var cancellables = Set<AnyCancellable>()
-//    private let storageManager = StorageManager()
-//
-//    private(set) var hasError = false
 
     @Published var parentRecipe: OnlineRecipe?
-//    @Published var isShowingForm = false
-//    @Published var isShowingPhotoLibrary = false
-//    @Published private(set) var recipeName: String = ""
-//    @Published private(set) var serving: Double = 1
-//    @Published private(set) var recipeCategory: String = ""
-//    @Published private(set) var difficulty: Difficulty?
-//    @Published var image: UIImage
-//    @Published private(set) var errorMessage = ""
-//    @Published private(set) var ingredients = [String]()
-//    @Published private(set) var stepGraph = RecipeStepGraph()
-//    @Published private(set) var isPublished = false
-//    let totalTimeTaken: String
-//
-//    private let settings: UserSettings
-//
-//    init(recipe: Recipe, settings: UserSettings) {
-//        self.recipe = recipe
-//        self.settings = settings
-//        image = storageManager.fetchRecipeImage(name: recipe.name) ?? UIImage()
-//        totalTimeTaken = get_HHMMSS_Display(seconds: recipe.totalTimeTaken)
-//
-//        bindName()
-//        bindServing()
-//        bindRecipeCategory()
-//        bindDifficulty()
-//        bindInstructions()
-//        bindPublished()
-//        bindStepGraph()
-//=======
     @Published var showSessionRecipe = false
     @Published var showRecipeForm = false
     @Published var showParentRecipe = false
