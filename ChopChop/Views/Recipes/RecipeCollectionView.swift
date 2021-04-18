@@ -48,10 +48,7 @@ struct RecipeCollectionView: View {
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear {
-            viewModel.query = ""
-            viewModel.selectedIngredients.removeAll()
-        }
+        .onAppear(perform: viewModel.resetSearchFields)
     }
 
     var listView: some View {

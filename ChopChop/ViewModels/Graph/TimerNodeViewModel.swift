@@ -20,7 +20,11 @@ final class TimerNodeViewModel: ObservableObject {
         self.proxy = proxy
 
         for timer in node.label.timers {
-            timer.$status
+            // The status publisher publishes the initial state upon first subscription,
+            // so if the first status is not dropped, it will try to scroll to the timer
+            // if it has ended, leading to a crash as it tries to scroll while the timer
+            // panel is being animated in.
+            timer.$status.dropFirst()
                 .sink { [weak self] status in
                     guard status == .ended else {
                         return
