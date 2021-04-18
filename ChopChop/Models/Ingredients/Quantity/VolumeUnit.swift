@@ -107,29 +107,17 @@ extension VolumeUnit: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let description = try container.decode(String.self)
+        let cases = VolumeUnit.allCases.reduce(into: [:]) { cases, unit in
+            cases[unit.description] = unit
+        }
 
-        switch description {
-        case "pints":
-            self = .pint
-        case "quarts":
-            self = .quart
-        case "gallons":
-            self = .gallon
-        case "tsp":
-            self = .teaspoon
-        case "tbsp":
-            self = .tablespoon
-        case "cups":
-            self = .cup
-        case "ml":
-            self = .milliliter
-        case "L":
-            self = .liter
-        default:
+        guard let unit = cases[description] else {
             throw DecodingError.valueNotFound(String.self,
                                               DecodingError.Context(codingPath: container.codingPath,
                                                                     debugDescription: "Unable to decode unit."))
         }
+
+        self = unit
     }
 
     func encode(to encoder: Encoder) throws {

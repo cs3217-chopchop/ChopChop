@@ -291,70 +291,45 @@ extension AppDatabase {
     }
 
     private func createPreloadedIngredients(_ db: Database) throws {
-        var categories = [
-            IngredientCategoryRecord(name: "Spices"),
-            IngredientCategoryRecord(name: "Dairy"),
-            IngredientCategoryRecord(name: "Grains")
-        ]
-
-        for index in categories.indices {
-            try categories[index].save(db)
+        guard let path = Bundle.main.path(forResource: "ingredients", ofType: "json"),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
+            return
         }
 
-        var ingredients = [
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
-            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Egg", quantityType: .count),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Salt", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Oil", quantityType: .volume)
-        ]
+        let decoder = JSONDecoder()
 
-        for index in ingredients.indices {
-            try ingredients[index].save(db)
+        guard let ingredients = try? decoder.decode([IngredientData].self, from: data) else {
+            return
         }
 
-        var batches = [
-            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(500, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(200, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: .today,
-                                  quantity: .volume(2, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7).startOfDay,
-                                  quantity: .volume(1.5, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .volume(3, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[3].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(1, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[4].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(2, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[6].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(20, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[6].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .mass(0.05, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[7].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .count(3)),
-            IngredientBatchRecord(ingredientId: ingredients[8].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(20, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[9].id,
-                                  expiryDate: .today,
-                                  quantity: .volume(20, unit: .pint))
-        ]
+        print(ingredients)
 
-        for index in batches.indices {
-            try batches[index].save(db)
+        var categoryRecords = Set(ingredients.map { $0.category }).map { IngredientCategoryRecord(name: $0) }
+
+        for index in categoryRecords.indices {
+            try categoryRecords[index].save(db)
+        }
+
+        var ingredientRecords = ingredients.map { ingredient in
+            IngredientRecord(ingredientCategoryId: categoryRecords.first(where: { $0.name == ingredient.category })?.id,
+                             name: ingredient.name,
+                             quantityType: ingredient.type)
+        }
+
+        for index in ingredientRecords.indices {
+            try ingredientRecords[index].save(db)
+        }
+
+        var batchRecords = ingredients.flatMap { ingredient in
+            ingredient.quantities.indices.map { index in
+                IngredientBatchRecord(ingredientId: ingredientRecords.first(where: { $0.name == ingredient.name })?.id,
+                                      expiryDate: Date(timeIntervalSinceNow: 86_400 * TimeInterval(index + 1)),
+                                      quantity: ingredient.quantities[index])
+            }
+        }
+
+        for index in batchRecords.indices {
+            try batchRecords[index].save(db)
         }
     }
 }
