@@ -4,6 +4,7 @@ import FirebaseFirestoreSwift
 class OnlineRecipe: Identifiable {
     private(set) var id: String
     private(set) var userId: String
+    private(set) var parentOnlineRecipeId: String?
 
     private(set) var name: String
     private(set) var servings: Double
@@ -14,11 +15,12 @@ class OnlineRecipe: Identifiable {
     private(set) var ratings: [RecipeRating]
     private(set) var created: Date
 
-    init(id: String, userId: String, name: String, servings: Double,
+    init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
         self.id = id
         self.userId = userId
+        self.parentOnlineRecipeId = parentOnlineRecipeId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -77,6 +79,7 @@ extension OnlineRecipe {
         try self.init(
             id: id,
             userId: record.creator,
+            parentOnlineRecipeId: record.parentOnlineRecipeId,
             name: record.name,
             servings: record.servings,
             difficulty: record.difficulty,

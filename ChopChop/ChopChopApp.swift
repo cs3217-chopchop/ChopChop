@@ -4,6 +4,7 @@ import Firebase
 @main
 struct ChopChopApp: App {
     @StateObject var settings = UserSettings()
+    // swiftlint:disable weak_delegate
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
 
     var body: some Scene {

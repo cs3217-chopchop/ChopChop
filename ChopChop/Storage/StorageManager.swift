@@ -16,7 +16,8 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
+
+        var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId, parentOnlineRecipeId: recipe.parentOnlineRecipeId,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -144,6 +145,10 @@ struct StorageManager {
         try appDatabase.fetchIngredient(id: id)
     }
 
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
+        try appDatabase.fetchDownloadedRecipes(parentOnlineRecipeId: parentOnlineRecipeId)
+    }
+
     // MARK: - Database Access: Publishers
 
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
@@ -265,6 +270,7 @@ extension StorageManager {
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -311,6 +317,7 @@ extension StorageManager {
             id: recipe.onlineId,
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -354,6 +361,14 @@ extension StorageManager {
     // fetch the details of a single recipe
     func onlineRecipeByIdPublisher(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
+            .compactMap({
+                try? OnlineRecipe(from: $0)
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func fetchOnlineRecipe(id: String) -> AnyPublisher<OnlineRecipe, Error> {
+        firebase.fetchOnlineRecipeOnceById(onlineRecipeId: id)
             .compactMap({
                 try? OnlineRecipe(from: $0)
             })
@@ -467,6 +482,7 @@ extension StorageManager {
 
         var localRecipe = try Recipe(
             onlineId: newOnlineId,
+            parentOnlineRecipeId: isRecipeOwner ? nil : recipe.id,
             name: newName,
             category: cuisine,
             servings: recipe.servings,
@@ -490,6 +506,27 @@ extension StorageManager {
             }
             try? self.saveRecipeImage(fetchedImage, name: String(id))
         }
+    }
+
+    func updateForkedRecipes(forked: Recipe, original: OnlineRecipe) throws {
+        var cuisineCategory: RecipeCategory?
+        if let cuisine = original.cuisine {
+            cuisineCategory = try? self.fetchRecipeCategory(name: cuisine)
+        }
+
+        var localRecipe = try Recipe(
+            id: forked.id,
+            onlineId: forked.onlineId,
+            parentOnlineRecipeId: forked.parentOnlineRecipeId,
+            name: forked.name,
+            category: cuisineCategory,
+            servings: original.servings,
+            difficulty: original.difficulty,
+            ingredients: original.ingredients,
+            stepGraph: original.stepGraph
+        )
+
+        try self.saveRecipe(&localRecipe)
     }
 
     func onlineRecipeImagePublisher(recipeId: String) -> AnyPublisher<UIImage, Error> {

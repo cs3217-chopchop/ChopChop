@@ -1,4 +1,4 @@
-import Combine
+import SwiftUI
 
 final class RecipeIngredientRowViewModel: ObservableObject {
     @Published var name: String

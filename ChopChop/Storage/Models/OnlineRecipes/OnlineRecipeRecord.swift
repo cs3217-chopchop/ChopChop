@@ -5,6 +5,7 @@ struct OnlineRecipeRecord {
     @DocumentID var id: String?
     var name: String
     var creator: String
+    @ExplicitNull var parentOnlineRecipeId: String?
     var servings: Double
     @ExplicitNull var cuisine: String?
     @ExplicitNull var difficulty: Difficulty?

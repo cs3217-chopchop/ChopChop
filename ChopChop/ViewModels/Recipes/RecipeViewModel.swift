@@ -5,12 +5,38 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
+    private var cancellables = Set<AnyCancellable>()
+
+    @Published var parentRecipe: OnlineRecipe?
     @Published var showSessionRecipe = false
     @Published var showRecipeForm = false
+    @Published var showParentRecipe = false
 
     var isPublished: Bool {
         recipe?.onlineId != nil
     }
+
+    func fetchParentRecipe() {
+        if parentRecipe != nil {
+            return
+        }
+        guard let parentOnlineRecipeId = recipe?.parentOnlineRecipeId else {
+            return
+        }
+        storageManager.fetchOnlineRecipe(id: parentOnlineRecipeId)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure:
+                    self.parentRecipe = nil
+                }
+            }, receiveValue: { value in
+                self.parentRecipe = value
+            })
+            .store(in: &cancellables)
+    }
+
     var isCookingDisabled: Bool {
         (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
     }

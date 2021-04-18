@@ -4,6 +4,7 @@ import GRDB
 struct Recipe: Equatable {
     var id: Int64?
     var onlineId: String?
+    var parentOnlineRecipeId: String?
     let name: String
     let category: RecipeCategory?
     let servings: Double
@@ -16,9 +17,11 @@ struct Recipe: Equatable {
     }
 
     // swiftlint:disable function_default_parameter_at_end
-    init(id: Int64? = nil, onlineId: String? = nil, name: String, category: RecipeCategory? = nil, servings: Double = 1,
+    init(id: Int64? = nil, onlineId: String? = nil, parentOnlineRecipeId: String? = nil,
+         name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
          stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
+
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
@@ -35,6 +38,7 @@ struct Recipe: Equatable {
 
         self.id = id
         self.onlineId = onlineId
+        self.parentOnlineRecipeId = parentOnlineRecipeId
         self.name = trimmedName
         self.category = category
         self.servings = servings
@@ -48,6 +52,7 @@ struct Recipe: Equatable {
 extension Recipe: FetchableRecord {
     init(row: Row) {
         id = row[RecipeRecord.Columns.id]
+        parentOnlineRecipeId = row[RecipeRecord.Columns.parentOnlineRecipeId]
         onlineId = row[RecipeRecord.Columns.onlineId]
         category = row["recipeCategory"]
         name = row[RecipeRecord.Columns.name]
