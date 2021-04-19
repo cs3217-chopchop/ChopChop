@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of an ingredient.
  */
 struct IngredientView: View {
-    @ObservedObject var viewModel: IngredientViewModel
+    @StateObject var viewModel: IngredientViewModel
 
     var body: some View {
         if let ingredient = viewModel.ingredient {

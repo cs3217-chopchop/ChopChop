@@ -1123,7 +1123,8 @@ class AppDatabaseTests: XCTestCase {
                 IngredientBatch(
                     quantity: try Quantity(from: $0.quantity),
                     expiryDate: $0.expiryDate)
-            })
+            },
+            category: IngredientCategory(name: categoryRecord.name, id: categoryRecord.id))
 
         guard let id = ingredientRecord.id else {
             XCTFail("Ingredients should have a non-nil ID after insertion into database")

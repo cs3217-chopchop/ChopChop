@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct SessionRecipeView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: SessionRecipeViewModel
+    @StateObject var viewModel: SessionRecipeViewModel
 
     var body: some View {
         ScrollViewReader { proxy in

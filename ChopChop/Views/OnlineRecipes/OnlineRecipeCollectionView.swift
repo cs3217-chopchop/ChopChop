@@ -21,25 +21,7 @@ struct OnlineRecipeCollectionView<Content: View>: View {
                     NotFoundView(entityName: "Recipes")
                         .padding()
                 } else {
-                    VStack(spacing: 20) {
-                        ForEach(viewModel.recipes) { recipe in
-                            if recipe.creatorId == settings.userId {
-                                OnlineRecipeBySelfView(
-                                    viewModel: OnlineRecipeBySelfViewModel(
-                                        recipe: recipe,
-                                        downloadRecipeViewModel: downloadRecipeViewModel,
-                                        settings: settings,
-                                        reload: viewModel.load
-                                        ))
-                            } else {
-                                OnlineRecipeByUserView(
-                                    viewModel: OnlineRecipeByUserViewModel(
-                                        recipe: recipe,
-                                        downloadRecipeViewModel: downloadRecipeViewModel,
-                                        settings: settings))
-                            }
-                        }
-                    }
+                    onlineRecipesView
                 }
             }
             ProgressView(isShow: $viewModel.isLoading)
@@ -47,6 +29,28 @@ struct OnlineRecipeCollectionView<Content: View>: View {
             DownloadRecipeView(viewModel: downloadRecipeViewModel)
         }.onAppear {
             viewModel.load()
+        }
+    }
+
+    var onlineRecipesView: some View {
+        VStack(spacing: 20) {
+            ForEach(viewModel.recipes) { recipe in
+                if recipe.creatorId == settings.userId {
+                    OnlineRecipeBySelfView(
+                        viewModel: OnlineRecipeBySelfViewModel(
+                            recipe: recipe,
+                            downloadRecipeViewModel: downloadRecipeViewModel,
+                            settings: settings,
+                            reload: viewModel.load
+                            ))
+                } else {
+                    OnlineRecipeByUserView(
+                        viewModel: OnlineRecipeByUserViewModel(
+                            recipe: recipe,
+                            downloadRecipeViewModel: downloadRecipeViewModel,
+                            settings: settings))
+                }
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct CompleteSessionRecipeView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: CompleteSessionRecipeViewModel
+    @StateObject var viewModel: CompleteSessionRecipeViewModel
     @Binding var isComplete: Bool
 
     var body: some View {

@@ -4,9 +4,9 @@ import SwiftUI
  Represents a view of the sidebar.
  */
  struct Sidebar: View {
-    @ObservedObject var viewModel: SidebarViewModel
-    @Binding var editMode: EditMode
     @EnvironmentObject var settings: UserSettings
+    @StateObject var viewModel: SidebarViewModel
+    @Binding var editMode: EditMode
 
     var body: some View {
         List {

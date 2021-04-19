@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of an ingredient to be deducted from the ingredient inventory after a recipe has been completed.
  */
 struct DeductibleIngredientView: View {
-    @ObservedObject var viewModel: DeductibleIngredientViewModel
+    @StateObject var viewModel: DeductibleIngredientViewModel
 
     var body: some View {
         Section(footer: errorMessage) {

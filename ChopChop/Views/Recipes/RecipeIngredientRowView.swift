@@ -5,7 +5,7 @@ import Combine
  Represents a view of an ingredient required to make a recipe.
  */
 struct RecipeIngredientRowView: View {
-    @ObservedObject var viewModel: RecipeIngredientRowViewModel
+    @StateObject var viewModel: RecipeIngredientRowViewModel
 
     var body: some View {
         HStack {

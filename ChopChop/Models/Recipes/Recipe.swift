@@ -49,7 +49,6 @@ struct Recipe: Equatable {
         - `RecipeError.invalidServings` if the given serving size is non positive.
         - `RecipeError.duplicateIngredients` if the given ingredients contain duplicates.
      */
-    // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool = false, parentOnlineRecipeId: String? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
@@ -80,7 +79,6 @@ struct Recipe: Equatable {
         self.ingredients = ingredients
         self.stepGraph = stepGraph
     }
-    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension Recipe: FetchableRecord {

@@ -8,6 +8,8 @@ import UIKit
 class RecipeFormViewModel: ObservableObject {
     /// The recipe edited by the form, or `nil` if the form adds a new recipe.
     private let recipe: Recipe?
+    /// The original image of the recipe edited by the form, or a default `UIImage` if the form adds a new recipe.
+    private let originalImage: UIImage
 
     /// A collection of recipe categories.
     @Published var categories: [RecipeCategory] = []
@@ -33,20 +35,23 @@ class RecipeFormViewModel: ObservableObject {
     @Published var ingredientActionSheetIsPresented = false
     @Published var stepActionSheetIsPresented = false
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
+
+    /// Image picker fields
     @Published var imagePickerIsPresented = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
     private let storageManager = StorageManager()
     private var cancellables: Set<AnyCancellable> = []
 
-    init(recipe: Recipe? = nil) {
+    init(recipe: Recipe? = nil, category: RecipeCategory? = nil) {
         self.recipe = recipe
 
         self.name = recipe?.name ?? ""
-        self.category = recipe?.category
+        self.category = recipe?.category ?? category
 
         if let servings = recipe?.servings {
             self.servings = servings.removeZerosFromEnd()
@@ -63,10 +68,12 @@ class RecipeFormViewModel: ObservableObject {
         } ?? []
         self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
 
-        if let id = recipe?.id {
-            self.image = storageManager.fetchRecipeImage(name: String(id)) ?? UIImage()
+        if let id = recipe?.id, let image = storageManager.fetchRecipeImage(name: String(id)) {
+            self.image = image
+            self.originalImage = image
         } else {
             self.image = UIImage()
+            self.originalImage = UIImage()
         }
 
         categoriesPublisher
@@ -156,15 +163,9 @@ class RecipeFormViewModel: ObservableObject {
                 throw RecipeError.invalidServings
             }
 
-            var isImageUploaded = false
-            if let id = recipe?.id, storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData() {
-                // image no change or image is still null
-                isImageUploaded = true
-            }
-
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
-                                           isImageUploaded: isImageUploaded,
+                                           isImageUploaded: image.pngData() == originalImage.pngData(),
                                            parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,

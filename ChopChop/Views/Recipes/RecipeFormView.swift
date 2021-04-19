@@ -6,7 +6,7 @@ import Combine
  */
 struct RecipeFormView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: RecipeFormViewModel
+    @StateObject var viewModel: RecipeFormViewModel
 
     var body: some View {
         Form {

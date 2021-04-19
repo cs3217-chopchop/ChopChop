@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a timer.
  */
 struct CountdownTimerView: View {
-    @ObservedObject var viewModel: CountdownTimerViewModel
+    @StateObject var viewModel: CountdownTimerViewModel
     @State var animationState = true
 
     var body: some View {

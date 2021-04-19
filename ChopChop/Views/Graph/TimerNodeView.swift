@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a collection of timers in an instruction step.
  */
 struct TimerNodeView: View {
-    @ObservedObject var viewModel: TimerNodeViewModel
+    @StateObject var viewModel: TimerNodeViewModel
 
     var body: some View {
         if viewModel.hasTimers {

@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct RecipeStepTimersView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: RecipeStepTimersViewModel
+    @StateObject var viewModel: RecipeStepTimersViewModel
 
     var body: some View {
         Form {

@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct RecipeCollectionView: View {
     @EnvironmentObject var settings: UserSettings
-    @ObservedObject var viewModel: RecipeCollectionViewModel
+    @StateObject var viewModel: RecipeCollectionViewModel
 
     var body: some View {
         VStack {
@@ -30,7 +30,6 @@ struct RecipeCollectionView: View {
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear(perform: viewModel.resetSearchFields)
     }
 
     // MARK: - Toolbars

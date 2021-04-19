@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a timer of a step in the recipe instructions.
  */
 struct RecipeStepTimerRowView: View {
-    @ObservedObject var viewModel: RecipeStepTimerRowViewModel
+    @StateObject var viewModel: RecipeStepTimerRowViewModel
 
     var body: some View {
         HStack {

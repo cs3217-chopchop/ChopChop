@@ -4,8 +4,8 @@ import SwiftUI
  Represents a view of the graph display of the instructions of a recipe being made.
  */
 struct SessionGraphView: View {
-    @ObservedObject var viewModel: SessionGraphViewModel
-    @ObservedObject var selection = SelectionHandler<SessionRecipeStepNode>()
+    @StateObject var viewModel: SessionGraphViewModel
+    @StateObject var selection = SelectionHandler<SessionRecipeStepNode>()
 
     @GestureState var portalDragOffset = CGVector.zero
 

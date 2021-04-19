@@ -19,7 +19,6 @@ struct RecipeCategory: Identifiable, Hashable {
 
      - Throws:`RecipeCategoryError.invalidName` if the given name trimmed is empty.
      */
-    // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil, name: String) throws {
         self.id = id
 
@@ -30,7 +29,6 @@ struct RecipeCategory: Identifiable, Hashable {
 
         self.name = trimmedName
     }
-    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension RecipeCategory: FetchableRecord {

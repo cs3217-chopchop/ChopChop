@@ -46,6 +46,16 @@ final class RecipeCollectionViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+    /// Returns the category represented by the view model,
+    /// or `nil` if it represents all recipes or uncategorised recipes.
+    var category: RecipeCategory? {
+        guard categoryIds.compactMap({ $0 }).count == 1 else {
+            return nil
+        }
+
+        return try? RecipeCategory(id: categoryIds.compactMap({ $0 }).first, name: title)
+    }
+
     /**
      Deletes the recipes at the given indices of the recipe array.
      */
@@ -70,14 +80,6 @@ final class RecipeCollectionViewModel: ObservableObject {
         }
 
         return storageManager.fetchRecipeImage(name: String(id))
-    }
-
-    /**
-     Resets the search fields to their default values.
-     */
-    func resetSearchFields() {
-        query = ""
-        selectedIngredients.removeAll()
     }
 
     private var recipesPublisher: AnyPublisher<[RecipeInfo], Never> {

@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct IngredientFormView: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: IngredientFormViewModel
+    @StateObject var viewModel: IngredientFormViewModel
 
     var body: some View {
         Form {

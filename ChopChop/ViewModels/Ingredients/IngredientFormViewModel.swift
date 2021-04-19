@@ -19,7 +19,10 @@ class IngredientFormViewModel: ObservableObject {
     @Published var category: IngredientCategory?
     @Published var image: UIImage
 
+    /// Alert fields
     @Published var alertIdentifier: AlertIdentifier?
+
+    /// Image picker fields
     @Published var isShowingPhotoLibrary = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
 
@@ -47,9 +50,10 @@ class IngredientFormViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    init(addToCategory categoryId: Int64?) {
+    init(addToCategory category: IngredientCategory?) {
         self.isEdit = false
         self.ingredient = nil
+        self.category = category
 
         self.quantityType = .count
         self.name = ""

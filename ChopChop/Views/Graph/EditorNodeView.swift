@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a step in the recipe instructions being edited.
  */
 struct EditorNodeView: View {
-    @ObservedObject var viewModel: EditorNodeViewModel
+    @StateObject var viewModel: EditorNodeViewModel
     @ObservedObject var selection: SelectionHandler<RecipeStepNode>
 
     var body: some View {
