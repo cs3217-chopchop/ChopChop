@@ -137,33 +137,33 @@ extension StorageManagerTests {
         XCTAssertNil(storageManager.fetchIngredientImage(name: imageName))
     }
 
-    func testRecipeImagePersistence() {
+    func testRecipeImagePersistence() throws {
         let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let imageName = "Apple Pie"
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, id: 1, name: imageName))
         let persistedImage = storageManager.fetchRecipeImage(name: imageName)
         XCTAssertNotNil(persistedImage)
         XCTAssertEqual(persistedImage?.pngData(), image.pngData())
 
-        storageManager.deleteRecipeImage(name: imageName)
+        try storageManager.deleteRecipeImage(name: imageName, id: 1)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 
-    func testOverwriteExistingRecipeImage() {
+    func testOverwriteExistingRecipeImage() throws {
         let existingImage = UIImage(imageLiteralResourceName: "apple-pie")
         let newImage = UIImage(imageLiteralResourceName: "apple-pie-slice")
 
         let imageName = "Apple Pie"
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, id: 1, name: imageName))
 
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, id: 1, name: imageName))
         let persistedImage = storageManager.fetchRecipeImage(name: imageName)
         XCTAssertNotNil(persistedImage)
         XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
         XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
 
-        storageManager.deleteRecipeImage(name: imageName)
+        try storageManager.deleteRecipeImage(name: imageName, id: 1)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 }

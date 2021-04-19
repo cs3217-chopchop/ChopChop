@@ -7,6 +7,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
 
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
+        _ = self.objectWillChange.append(super.objectWillChange)
     }
 
     var ownRating: RecipeRating? {

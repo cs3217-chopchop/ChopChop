@@ -6,7 +6,7 @@ import XCTest
 class OnlineRecipeTests: XCTestCase {
 
     func testConstruct() throws {
-        let onlineRecipe = try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.easy, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date())
+        let onlineRecipe = try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.easy, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], createdAt: Date(), updatedAt: Date(), imageUpdatedAt: Date())
 
         XCTAssertEqual(onlineRecipe.id, "1")
         XCTAssertEqual(onlineRecipe.userId, "1")
@@ -20,9 +20,9 @@ class OnlineRecipeTests: XCTestCase {
     }
 
     func testConstruct_fail() throws {
-        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "        ", servings: 2, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
+        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "        ", servings: 2, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], createdAt: Date(), updatedAt: Date(), imageUpdatedAt: Date()))
 
-        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 0, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()))
+        XCTAssertThrowsError(try OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 0, difficulty: nil, cuisine: nil, stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], createdAt: Date(), updatedAt: Date(), imageUpdatedAt: Date()))
     }
 
     func testConstruct_allFieldsFilled_success() throws {
@@ -52,7 +52,9 @@ class OnlineRecipeTests: XCTestCase {
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
-            created: currentDate
+            createdAt: currentDate,
+            updatedAt: currentDate,
+            imageUpdatedAt: currentDate
         )
 
         XCTAssertEqual(onlineRecipe.id, "TestId")
@@ -64,7 +66,7 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
-        XCTAssertEqual(onlineRecipe.created, currentDate)
+        XCTAssertEqual(onlineRecipe.createdAt, currentDate)
     }
 
     func testConstruct_optionalFieldsNotFilled_success() throws {
@@ -94,7 +96,9 @@ class OnlineRecipeTests: XCTestCase {
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
-            created: currentDate
+            createdAt: currentDate,
+            updatedAt: currentDate,
+            imageUpdatedAt: currentDate
         )
 
         XCTAssertEqual(onlineRecipe.id, "TestId")
@@ -106,7 +110,7 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
-        XCTAssertEqual(onlineRecipe.created, currentDate)
+        XCTAssertEqual(onlineRecipe.createdAt, currentDate)
     }
 
     func testConstruct_emptyName_fail() throws {
@@ -137,7 +141,9 @@ class OnlineRecipeTests: XCTestCase {
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
-            created: currentDate
+            createdAt: currentDate,
+            updatedAt: currentDate,
+            imageUpdatedAt: currentDate
         ))
     }
 
@@ -169,7 +175,9 @@ class OnlineRecipeTests: XCTestCase {
             stepGraph: stepGraph,
             ingredients: ingredients,
             ratings: ratings,
-            created: currentDate
+            createdAt: currentDate,
+            updatedAt: currentDate,
+            imageUpdatedAt: currentDate
         ))
     }
 
@@ -210,11 +218,12 @@ class OnlineRecipeTests: XCTestCase {
             ingredients: ingredientRecord,
             steps: steps,
             stepEdges: stepEdgeRecords,
-            ratings: ratings,
-            created: currentDate
+            ratings: ratings
         )
 
-        let onlineRecipe = try OnlineRecipe(from: onlineRecipeRecord)
+        let onlineRecipeInfoRecord = OnlineRecipeInfoRecord(id: "TestId", creator: "TestUserId", createdAt: Date(), updatedAt: Date(), imageUpdatedAt: Date())
+
+        let onlineRecipe = try OnlineRecipe(from: onlineRecipeRecord, info: onlineRecipeInfoRecord)
 
         XCTAssertEqual(onlineRecipe.id, "TestId")
         XCTAssertEqual(onlineRecipe.userId, "TestUserId")
@@ -225,12 +234,12 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.stepGraph, stepGraph)
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
-        XCTAssertEqual(onlineRecipe.created, currentDate)
+        XCTAssertEqual(onlineRecipe.createdAt, currentDate)
 
     }
 
     func testConvenienceInitializer() throws {
-        let onlineRecipe = try OnlineRecipe(from: OnlineRecipeRecord(id: "1", name: "Pancakes", creator: "1", servings: 2, ingredients: [OnlineIngredientRecord(name: "Butter", quantity: .count(2))], steps: ["Cook the pancakes", "Make the pancakes"], stepEdges: [OnlineStepEdgeRecord(sourceStep: "Cook the pancakes", destinationStep: "Make the pancakes")], created: Date()))
+        let onlineRecipe = try OnlineRecipe(from: OnlineRecipeRecord(id: "1", name: "Pancakes", creator: "1", servings: 2, ingredients: [OnlineIngredientRecord(name: "Butter", quantity: .count(2))], steps: ["Cook the pancakes", "Make the pancakes"], stepEdges: [OnlineStepEdgeRecord(sourceStep: "Cook the pancakes", destinationStep: "Make the pancakes")]), info: OnlineRecipeInfoRecord(id: "1", creator: "1", createdAt: nil, updatedAt: nil, imageUpdatedAt: nil))
 
         XCTAssertEqual(onlineRecipe.name, "Pancakes")
         XCTAssertEqual(onlineRecipe.servings, 2)

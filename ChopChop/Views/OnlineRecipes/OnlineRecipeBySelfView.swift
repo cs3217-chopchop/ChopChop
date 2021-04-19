@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnlineRecipeBySelfView: View {
-    @ObservedObject var viewModel: OnlineRecipeBySelfViewModel
+    let viewModel: OnlineRecipeBySelfViewModel
 
     var body: some View {
         VStack(spacing: 0) {

@@ -7,6 +7,7 @@ class OnlineRecipeBySelfViewModel: OnlineRecipeViewModel {
     init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings, editor: OnlineRecipeCollectionEditor) {
         self.onlineRecipeCollectionEditor = editor
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
+        _ = self.objectWillChange.append(super.objectWillChange)
     }
 
     func onDelete() {

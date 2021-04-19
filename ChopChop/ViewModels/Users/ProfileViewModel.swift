@@ -23,6 +23,7 @@ final class ProfileViewModel: ObservableObject {
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
+        load()
     }
 
     var isOwnProfile: Bool {

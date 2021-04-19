@@ -15,7 +15,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategory") { db in
+        migrator.registerMigration("CreateReecipeCategory") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)

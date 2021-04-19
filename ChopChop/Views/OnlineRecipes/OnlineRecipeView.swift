@@ -18,9 +18,6 @@ struct OnlineRecipeView: View {
             }
             ProgressView(isShow: $viewModel.isLoading)
         }
-        .onAppear {
-            viewModel.load()
-        }
     }
 
     var userBar: some View {

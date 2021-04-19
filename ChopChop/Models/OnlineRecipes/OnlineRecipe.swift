@@ -13,7 +13,7 @@ struct OnlineRecipe: Identifiable, CachableEntity {
     let ratings: [RecipeRating]
     let createdAt: Date
     let updatedAt: Date
-    let imageUpdatedAt: Date
+    var imageUpdatedAt: Date
 
     init(id: String, userId: String, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
@@ -107,7 +107,7 @@ extension OnlineRecipe {
             ratings: record.ratings,
             createdAt: createdDate,
             updatedAt: updatedDate,
-            imageUpdatedAt: imageUpdatedDate
+            imageUpdatedAt: Date(timeIntervalSinceReferenceDate: 0)
         )
     }
 }

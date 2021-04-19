@@ -203,11 +203,22 @@ extension StorageManager {
     func saveRecipeImage(_ image: UIImage, id: Int64, name: String) throws {
         do {
             let originalImage = fetchRecipeImage(name: name)
-            guard originalImage?.pngData() != image.pngData(), var recipe = try fetchRecipe(id: id) else {
+            let isSameImage = originalImage?.pngData() == image.pngData()
+            guard var recipe = try fetchRecipe(id: id) else {
                 return
             }
-            recipe.isImageUploaded = false
+            let isPublished = recipe.onlineId != nil
+
+            if isPublished && isSameImage {
+                recipe.isImageUploaded = true
+            } else if isPublished && !isSameImage {
+                recipe.isImageUploaded = false
+            } else if !isPublished {
+                recipe.isImageUploaded = false
+            }
+
             try saveRecipe(&recipe)
+
             try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
         } catch {
             throw StorageError.saveImageFailure
@@ -319,30 +330,28 @@ extension StorageManager {
             stepEdges: edgeRecords
         )
 
-        guard let id = recipe.id, let isImageUploaded = (try? fetchRecipe(id: id)?.isImageUploaded) else {
-            assertionFailure("Should have id and imagedUploaded")
+        guard let id = recipe.id, let onlineId = recipe.onlineId else {
             return
         }
 
-        // isImageUploaded -> means no updates to local image -> don't need upload image
+        let isImageUploaded = recipe.isImageUploaded
 
-        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, willUploadImage: !isImageUploaded, completion: completion)
+        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploadedAlready: isImageUploaded, completion: completion)
 
-        guard !isImageUploaded, let onlineId = recipe.onlineId else {
-            return
-        }
-
-        let image = fetchRecipeImage(name: String(id))
-
-        if let fetchedImage = image {
-            firebaseStorage.uploadImage(image: fetchedImage, name: onlineId)
-        } else {
+        guard let imageAlreadyUpdated = isImageUploaded else {
             firebaseStorage.deleteImage(name: onlineId)
             cache.onlineRecipeImageCache[onlineId] = nil
+            return
         }
 
+        guard !imageAlreadyUpdated, let image = fetchRecipeImage(name: String(id)) else {
+            return
+        }
+
+        firebaseStorage.uploadImage(image: image, name: onlineId)
+
         var recipe = recipe
-        recipe.isImageUploaded = (image == nil ? nil : true)
+        recipe.isImageUploaded = true
         try saveRecipe(&recipe)
 
         // note: don't update cache because don't know updatedAt timestamps
@@ -543,22 +552,29 @@ extension StorageManager {
                 return
             }
 
-            guard let imageUpdatedAt = recipeInfoRecord.imageUpdatedAt,
-                  let lastFetchedImageDate = cache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
-                  lastFetchedImageDate >= imageUpdatedAt else {
-                let data = cache.onlineRecipeImageCache[recipeId]
-                completion(data, nil)
+            guard let imageUpdatedAt = recipeInfoRecord.imageUpdatedAt else {
+                completion(nil, err)
+                cache.onlineRecipeImageCache[recipeId] = nil
                 return
             }
 
-            firebaseStorage.fetchImage(name: recipeId) { data, err in
-                guard let data = data, err == nil else {
-                    completion(nil, err)
-                    return
+            guard let lastFetchedImageDate = cache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
+                  lastFetchedImageDate >= imageUpdatedAt else {
+                firebaseStorage.fetchImage(name: recipeId) { data, err in
+                    guard let data = data, err == nil else {
+                        completion(nil, err)
+                        return
+                    }
+                    cache.onlineRecipeImageCache[recipeId] = data
+                    cache.onlineRecipeCache[recipeId]?.imageUpdatedAt = imageUpdatedAt
+                    completion(data, nil)
                 }
-                cache.onlineRecipeImageCache[recipeId] = data
-                completion(data, nil)
+                return
             }
+
+            let data = cache.onlineRecipeImageCache[recipeId]
+            completion(data, nil)
+            return
 
         }
 

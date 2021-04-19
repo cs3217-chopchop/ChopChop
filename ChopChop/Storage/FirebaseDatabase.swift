@@ -24,7 +24,7 @@ struct FirebaseDatabase {
         return recipeDocRef.documentID
     }
 
-    func updateOnlineRecipe(recipe: OnlineRecipeRecord, willUploadImage: Bool, completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool?, completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -42,14 +42,21 @@ struct FirebaseDatabase {
         ], forDocument: recipeDocRef, merge: true)
 
         let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
-        if willUploadImage {
-            batch.setData([
-                "updatedAt": FieldValue.serverTimestamp(),
-                "imageUpdatedAt": FieldValue.serverTimestamp()
-            ], forDocument: recipeInfoDocRef, merge: true)
+        if let isImageUploadedAlready = isImageUploadedAlready {
+            if isImageUploadedAlready {
+                batch.setData([
+                    "updatedAt": FieldValue.serverTimestamp()
+                ], forDocument: recipeInfoDocRef, merge: true)
+            } else {
+                batch.setData([
+                    "updatedAt": FieldValue.serverTimestamp(),
+                    "imageUpdatedAt": FieldValue.serverTimestamp()
+                ], forDocument: recipeInfoDocRef, merge: true)
+            }
         } else {
             batch.setData([
-                "updatedAt": FieldValue.serverTimestamp()
+                "updatedAt": FieldValue.serverTimestamp(),
+                "imageUpdatedAt": nil
             ], forDocument: recipeInfoDocRef, merge: true)
         }
 

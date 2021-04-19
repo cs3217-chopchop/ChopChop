@@ -7,12 +7,7 @@ class OnlineRecipeViewModel: ObservableObject {
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
-    @Published private(set) var creatorName = "No name" {
-        didSet {
-            print("im updated!")
-            print(creatorName)
-        }
-    }
+    @Published private(set) var creatorName = "No name"
 
     @Published private var firstRater = "No name"
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
@@ -27,6 +22,7 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
+        load()
     }
 
     var averageRating: Double {
@@ -93,13 +89,13 @@ class OnlineRecipeViewModel: ObservableObject {
                 return
             }
             self.creatorName = name
-            self.objectWillChange.send()
         }
     }
 
     private func updateImage() {
         storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, err  in
             guard let data = data, let image = UIImage(data: data), err == nil else {
+                self.isLoading = false // takes the longest
                 return
             }
             self.image = image
