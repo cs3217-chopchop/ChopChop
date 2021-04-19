@@ -50,6 +50,8 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
                 self.recipes = onlineRecipes
                 self.isLoading = false
             }
+        } else {
+            self.isLoading = false
         }
     }
 
