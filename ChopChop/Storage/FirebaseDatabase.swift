@@ -13,7 +13,7 @@ struct FirebaseDatabase {
     // MARK: - FirebaseDatabase: Create/Update
 
     /**
-     Creates OnlineRecipeRecord and OnlineRecipeInfoRecord in Firebase
+     Creates OnlineRecipeRecord and OnlineRecipeInfoRecord
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
@@ -32,7 +32,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Updates OnlineRecipeRecord and timestamps in OnlineRecipeInfoRecord in Firebase
+     Updates OnlineRecipeRecord and timestamps in OnlineRecipeInfoRecord
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool,
@@ -113,7 +113,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Add a UserRating to the User and updates timestamp in the UserRecord.
+     Add a UserRating to the User and updates timestamp in the UserInfoRecord.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func addUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
@@ -130,7 +130,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Updates a UserRating of the User and updates timestamp in the UserRecord.
+     Updates a UserRating of the User and updates timestamp in the UserInfoRecord.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating,
@@ -256,7 +256,7 @@ struct FirebaseDatabase {
     // MARK: - FirebaseDatabase: Read
 
     /**
-     Fetches UserInfo of that id
+     Fetches UserInfoRecord of that id
      Signals completion via a completion handler and returns the UserInfoRecord and error in completion handler if any.
      */
     func fetchUserInfo(id: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
@@ -270,7 +270,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches user of that id
+     Fetches UserRecord of that id
      Signals completion via a completion handler and returns the UserRecord and error in completion handler if any.
      */
     func fetchUser(id: String, completion: @escaping (UserRecord?, Error?) -> Void) {
@@ -284,9 +284,9 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches OnlineRecipeInfos whose creatorId is included in userIds
+     Fetches OnlineRecipeInfoRecords whose creatorId is included in userIds
      Signals completion via a completion handler and returns:
-     - the OnlineRecipeInfoRecords
+     - a dictionary of id of OnlineRecipeInfoRecord  to OnlineRecipeInfoRecord
      - error in completion handler if any
      */
     func fetchOnlineRecipeInfos(userIds: [String],
@@ -325,9 +325,9 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches all OnlineRecipeInfos
+     Fetches all OnlineRecipeInfoRecords
      Signals completion via a completion handler and returns:
-     - the OnlineRecipeInfoRecords
+     - a dictionary of id of OnlineRecipeInfoRecord  to OnlineRecipeInfoRecord
      - error in completion handler if any.
      */
     func fetchAllOnlineRecipeInfos(completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
@@ -386,7 +386,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches OnlineRecipe of that id
+     Fetches OnlineRecipeRecord of that id
      Signals completion via a completion handler and returns:
      - the OnlineRecipeRecord
      - error in completion handler if any
@@ -402,7 +402,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches OnlineRecipeInfo of that id
+     Fetches OnlineRecipeInfoRecord of that id
      Signals completion via a completion handler and returns:
      - the OnlineRecipeInfoRecord
      - error in completion handler if any
@@ -418,7 +418,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches all UserInfos
+     Fetches all UserInfoRecords
      Signals completion via a completion handler and returns the UserInfoRecords and error in completion handler if any.
      */
     func fetchAllUserInfos(completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
@@ -442,7 +442,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches UserInfos whose ids are in ids
+     Fetches UserInfoRecords whose ids are in ids
      Signals completion via a completion handler and returns the UserInfoRecords and error in completion handler if any.
      */
     func fetchUserInfos(ids: [String], completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
@@ -480,7 +480,7 @@ struct FirebaseDatabase {
     }
 
     /**
-     Fetches all Users whos ids are in ids
+     Fetches all UserRecords whos ids are in ids
      Signals completion via a completion handler and returns the UserRecords and error in completion handler if any.
      */
     func fetchUsers(ids: [String], completion: @escaping ([UserRecord], Error?) -> Void) {

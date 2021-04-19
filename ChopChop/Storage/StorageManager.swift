@@ -352,7 +352,7 @@ extension StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     /**
-     Creates OnlineRecipe in Firebase and uploads Recipe's image if any.
+     Creates OnlineRecipe and uploads Recipe's image if any.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func addOnlineRecipe(recipe: inout Recipe, userId: String, completion: @escaping (Error?) -> Void) throws {
@@ -400,7 +400,7 @@ extension StorageManager {
     }
 
     /**
-     Updates OnlineRecipe in Firebase
+     Updates OnlineRecipe
      Uploads Recipe's image only if necessary
      Deletes OnlineRecipe's image if local Recipe's image is deleted
      Signals completion via a completion handler and returns error in completion handler if any.
@@ -552,7 +552,7 @@ extension StorageManager {
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
-        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "creatorId")
+        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "userId")
         let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
