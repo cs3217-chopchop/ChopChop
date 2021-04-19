@@ -133,9 +133,15 @@ class RecipeFormViewModel: ObservableObject {
                 throw RecipeError.invalidServings
             }
 
+            var isImageUploaded = false
+            if let id = recipe?.id, storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData() {
+                // image no change or image is still null
+                isImageUploaded = true
+            }
+
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
-                                           isImageUploaded: recipe?.isImageUploaded,
+                                           isImageUploaded: isImageUploaded,
                                            parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,
@@ -148,9 +154,9 @@ class RecipeFormViewModel: ObservableObject {
 
             if let id = updatedRecipe.id {
                 if image == UIImage() {
-                    try storageManager.deleteRecipeImage(name: String(id), id: id)
+                    try storageManager.deleteRecipeImage(name: String(id))
                 } else {
-                    try storageManager.saveRecipeImage(image, id: id, name: String(id))
+                    try storageManager.saveRecipeImage(image, name: String(id))
                 }
             }
 

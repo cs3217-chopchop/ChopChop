@@ -16,7 +16,7 @@ struct AppDatabase {
         #endif
 
         // swiftlint:disable empty_string
-        migrator.registerMigration("CreateRecipeCategory") { db in
+        migrator.registerMigration("CreateeRecipeCategory") { db in
             try db.create(table: "recipeCategory") { t in
                 t.autoIncrementedPrimaryKey("id")
                 t.column("name", .text)
@@ -34,6 +34,7 @@ struct AppDatabase {
                     .unique()
                     .check { $0 != "" }
                 t.column("isImageUploaded", .boolean)
+                    .notNull()
                 t.column("parentOnlineRecipeId", .text)
                     .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
@@ -205,7 +206,7 @@ extension AppDatabase {
         }
 
         var recipeRecords = recipes.map { recipe in
-            RecipeRecord(recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+            RecipeRecord(isImageUploaded: false, recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
                          name: recipe.name,
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement())

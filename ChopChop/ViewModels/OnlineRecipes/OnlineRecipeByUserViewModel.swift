@@ -14,12 +14,10 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
 
     func tapRating(_ ratingValue: Int) {
         guard let userId = settings.userId else {
-            assertionFailure()
             return
         }
 
         guard let rating = RatingScore(rawValue: ratingValue + 1) else {
-            assertionFailure()
             return
         }
 
@@ -43,7 +41,6 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
 
     func removeRating() {
         guard let ownRating = ownRating else {
-            assertionFailure()
             return
         }
 

@@ -125,12 +125,12 @@ extension StorageManagerTests {
         let imageName = "1"
         var recipe = try Recipe(id: 1, name: "apple pie")
         try storageManager.saveRecipe(&recipe)
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, id: 1, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
         let persistedImage = storageManager.fetchRecipeImage(name: imageName)
         XCTAssertNotNil(persistedImage)
         XCTAssertEqual(persistedImage?.pngData(), image.pngData())
 
-        try storageManager.deleteRecipeImage(name: imageName, id: 1)
+        try storageManager.deleteRecipeImage(name: imageName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 
@@ -142,15 +142,15 @@ extension StorageManagerTests {
         try storageManager.saveRecipe(&recipe)
 
         let imageName = "1"
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, id: 1, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))
 
-        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, id: 1, name: imageName))
+        XCTAssertNoThrow(try storageManager.saveRecipeImage(newImage, name: imageName))
         let persistedImage = storageManager.fetchRecipeImage(name: imageName)
         XCTAssertNotNil(persistedImage)
         XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
         XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
 
-        try storageManager.deleteRecipeImage(name: imageName, id: 1)
+        try storageManager.deleteRecipeImage(name: imageName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 }

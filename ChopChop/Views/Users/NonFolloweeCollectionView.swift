@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a collection of non followees.
  */
 struct NonFolloweeCollectionView: View {
-    @ObservedObject var viewModel: NonFolloweeCollectionViewModel
+    @StateObject var viewModel: NonFolloweeCollectionViewModel
     @EnvironmentObject var settings: UserSettings
 
     var body: some View {

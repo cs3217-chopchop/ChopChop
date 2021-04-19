@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a collection of followees.
  */
 struct FolloweeCollectionView: View {
-    @ObservedObject var viewModel: FolloweeCollectionViewModel
+    @StateObject var viewModel: FolloweeCollectionViewModel
 
     var body: some View {
         VStack {

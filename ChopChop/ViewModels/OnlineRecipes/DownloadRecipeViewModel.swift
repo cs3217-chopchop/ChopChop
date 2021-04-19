@@ -20,7 +20,6 @@ class DownloadRecipeViewModel: ObservableObject {
     func downloadRecipe() {
         do {
             guard let recipe = recipeToDownload else {
-                assertionFailure()
                 return
             }
             try storageManager.downloadRecipe(newName: recipeNameToSave, recipe: recipe) { _ in
@@ -35,7 +34,7 @@ class DownloadRecipeViewModel: ObservableObject {
 
     func updateRecipes() {
         guard let recipe = recipeToDownload, let checkList = forkedRecipesCheckList else {
-            assertionFailure()
+
             return
         }
         do {

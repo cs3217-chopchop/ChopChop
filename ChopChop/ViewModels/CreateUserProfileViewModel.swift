@@ -15,23 +15,20 @@ final class CreateUserProfileViewModel: ObservableObject {
 
     func onClick() {
         guard settings.userId == nil else {
-            assertionFailure()
             return
         }
 
-        // Its not possible to create a user with just aname
-        guard !name.isEmpty else {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
             errorMessage = "Empty name not accepted"
             return
         }
 
-        let userId = try? storageManager.addUser(name: name) { err in
-            if err != nil {
-                assertionFailure()
+        try? storageManager.addUser(name: trimmedName) { userId, err in
+            guard let userId = userId, err == nil else {
                 return
             }
+            self.settings.userId = userId
         }
-
-        settings.userId = userId
     }
 }

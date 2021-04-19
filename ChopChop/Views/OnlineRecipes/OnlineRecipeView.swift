@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnlineRecipeView: View {
-    @ObservedObject var viewModel: OnlineRecipeViewModel
+    @StateObject var viewModel: OnlineRecipeViewModel
     @EnvironmentObject var settings: UserSettings
 
     var body: some View {
@@ -25,7 +25,7 @@ struct OnlineRecipeView: View {
         NavigationLink(
             destination: ProfileView(
                 viewModel: ProfileViewModel(
-                    userId: viewModel.recipe.userId,
+                    userId: viewModel.recipe.creatorId,
                     settings: viewModel.settings))
         ) {
             HStack {

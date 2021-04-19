@@ -4,7 +4,7 @@ import FirebaseFirestoreSwift
 struct OnlineRecipeRecord {
     @DocumentID var id: String?
     var name: String
-    var creator: String
+    var creatorId: String
     @ExplicitNull var parentOnlineRecipeId: String?
     var servings: Double
     @ExplicitNull var cuisine: String?

@@ -10,16 +10,13 @@ class OnlineRecipeBySelfViewModel: OnlineRecipeViewModel {
     }
 
     func onDelete() {
-        do {
-            try storageManager.removeOnlineRecipe(recipe: recipe) { err in
-                guard err == nil else {
-                    return
-                }
-                self.onlineRecipeCollectionEditor.onlineRecipeToDelete = self.recipe
+        try? storageManager.removeOnlineRecipe(recipe: recipe) { err in
+            guard err == nil else {
+                return
             }
-        } catch {
-            assertionFailure("Could not remove recipe from online")
+            self.onlineRecipeCollectionEditor.onlineRecipeToDelete = self.recipe
         }
+
     }
 
 }

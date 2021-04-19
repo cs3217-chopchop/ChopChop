@@ -13,7 +13,7 @@ final class ProfileViewModel: ObservableObject {
     @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     /// User profile details
-    @Published private(set) var userName = "No name"
+    @Published private(set) var userName = ""
     @Published private(set) var publishedRecipesCount = 0
     @Published private(set) var followeeCount = 0
     @Published private(set) var isFollowedByUser = false
@@ -74,7 +74,7 @@ final class ProfileViewModel: ObservableObject {
         isLoading = true
         guard !isOwnProfile else {
             followeeCount = settings.user?.followees.count ?? 0
-            userName = settings.user?.name ?? "No name"
+            userName = settings.user?.name ?? ""
             updateRecipeCount()
             return
         }

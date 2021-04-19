@@ -52,7 +52,6 @@ final class RecipeViewModel: ObservableObject {
 
     func publish() {
         guard var recipe = recipe, let userId = settings.userId else {
-            assertionFailure()
             return
         }
 

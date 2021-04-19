@@ -23,7 +23,7 @@ struct OnlineRecipeCollectionView<Content: View>: View {
                 } else {
                     VStack(spacing: 20) {
                         ForEach(viewModel.recipes) { recipe in
-                            if recipe.userId == settings.userId {
+                            if recipe.creatorId == settings.userId {
                                 OnlineRecipeBySelfView(
                                     viewModel: OnlineRecipeBySelfViewModel(
                                         recipe: recipe,

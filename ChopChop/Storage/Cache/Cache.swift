@@ -32,7 +32,6 @@ final class Cache<Key: Hashable, Value: CachableEntity> {
         }
     }
 
-    // NOTE: No type safety here because can compare any idss
     func getEntityIfCachedAndValid(id: Key, updatedDate: Date) -> Value? {
         guard let entity = value(forKey: id), entity.updatedAt >= updatedDate else {
             return nil

@@ -2,7 +2,7 @@ import Foundation
 
 struct OnlineRecipe: Identifiable, CachableEntity {
     let id: String
-    let userId: String
+    let creatorId: String
     let parentOnlineRecipeId: String?
     let name: String
     let servings: Double
@@ -13,15 +13,14 @@ struct OnlineRecipe: Identifiable, CachableEntity {
     let ratings: [RecipeRating]
     let createdAt: Date
     let updatedAt: Date
-    var imageUpdatedAt: Date
 
     // swiftlint:disable function_default_parameter_at_end
     init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating],
-         createdAt: Date, updatedAt: Date, imageUpdatedAt: Date) throws {
+         createdAt: Date, updatedAt: Date) throws {
         self.id = id
-        self.userId = userId
+        self.creatorId = userId
         self.parentOnlineRecipeId = parentOnlineRecipeId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
@@ -40,7 +39,6 @@ struct OnlineRecipe: Identifiable, CachableEntity {
         self.ratings = ratings
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.imageUpdatedAt = imageUpdatedAt
     }
     // swiftlint:enable function_default_parameter_at_end
 }
@@ -87,7 +85,7 @@ extension OnlineRecipe {
 
         try self.init(
             id: id,
-            userId: record.creator,
+            userId: record.creatorId,
             parentOnlineRecipeId: record.parentOnlineRecipeId,
             name: record.name,
             servings: record.servings,
@@ -97,8 +95,7 @@ extension OnlineRecipe {
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,
             createdAt: createdDate,
-            updatedAt: updatedDate,
-            imageUpdatedAt: Date(timeIntervalSinceReferenceDate: 0)
+            updatedAt: updatedDate
         )
     }
 }

@@ -219,12 +219,7 @@ extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
 
-    func deleteRecipeImage(name: String, id: Int64) throws {
-        guard var recipe = try fetchRecipe(id: id) else {
-            return
-        }
-        recipe.isImageUploaded = nil
-        try saveRecipe(&recipe)
+    func deleteRecipeImage(name: String) throws {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
@@ -232,16 +227,8 @@ extension StorageManager {
         ImageStore.fetch(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 
-    func saveRecipeImage(_ image: UIImage, id: Int64, name: String) throws {
+    func saveRecipeImage(_ image: UIImage, name: String) throws {
         do {
-            let originalImage = fetchRecipeImage(name: name)
-            let isSameImage = originalImage?.pngData() == image.pngData()
-            guard var recipe = try fetchRecipe(id: id), !isSameImage else {
-                return
-            }
-            recipe.isImageUploaded = false
-            try saveRecipe(&recipe)
-
             try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
         } catch {
             throw StorageError.saveImageFailure
@@ -287,7 +274,7 @@ extension StorageManager {
 
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
-            creator: userId,
+            creatorId: userId,
             parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
@@ -298,24 +285,21 @@ extension StorageManager {
         )
 
         guard let id = recipe.id else {
-            assertionFailure("Should have id")
             return
         }
 
         let recipeImage = self.fetchRecipeImage(name: String(id))
 
-        let onlineId = try firebaseDatabase.addOnlineRecipe(recipe: recipeRecord, isImageExist: recipeImage != nil, completion: completion)
+        let onlineId = try firebaseDatabase.addOnlineRecipe(recipe: recipeRecord, completion: completion)
 
         recipe.onlineId = onlineId
-        recipe.isImageUploaded = (recipeImage == nil ? nil : true)
+        recipe.isImageUploaded = true
         try self.saveRecipe(&recipe)
 
         guard let fetchedRecipeImage = recipeImage else {
             return
         }
         firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId)
-
-        // note: don't update cache because don't know onlineRecipeId
     }
 
     // update details of published recipe (note that ratings cant be updated here)
@@ -337,7 +321,7 @@ extension StorageManager {
         let recipeRecord = OnlineRecipeRecord(
             id: recipe.onlineId,
             name: recipe.name,
-            creator: userId,
+            creatorId: userId,
             parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
@@ -351,28 +335,25 @@ extension StorageManager {
             return
         }
 
-        let isImageUploaded = recipe.isImageUploaded
+        let isImageUploaded = recipe.isImageUploaded // true if dont need upload image, false if need upload/update image
+        let image = fetchRecipeImage(name: String(id))
 
         firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploadedAlready: isImageUploaded, completion: completion)
 
-        if isImageUploaded == nil {
-            firebaseStorage.deleteImage(name: onlineId)
-            cache.onlineRecipeImageCache[onlineId] = nil
+        guard !isImageUploaded else {
             return
-        } else if isImageUploaded == false {
-            return
-        } else {
-            guard let image = fetchRecipeImage(name: String(id)) else {
-                return
-            }
-
-            firebaseStorage.uploadImage(image: image, name: onlineId)
-            var recipe = recipe
-            recipe.isImageUploaded = true
-            try saveRecipe(&recipe)
         }
 
-        // note: don't update cache because don't know updatedAt timestamps
+        if image == nil {
+            firebaseStorage.deleteImage(name: onlineId)
+            cache.onlineRecipeImageCache.removeValue(forKey: onlineId)
+        } else if let image = image {
+            firebaseStorage.uploadImage(image: image, name: onlineId)
+        }
+
+        var recipe = recipe
+        recipe.isImageUploaded = true
+        try saveRecipe(&recipe)
     }
 
     // rate a recipe
@@ -390,7 +371,7 @@ extension StorageManager {
     }
 
     // this should only be called once when the app first launched
-    func addUser(name: String, completion: @escaping (Error?) -> Void) throws -> String {
+    func addUser(name: String, completion: @escaping (String?, Error?) -> Void) throws {
         try firebaseDatabase.addUser(user: UserRecord(name: name, followees: [], ratings: []), completion: completion)
     }
 
@@ -422,7 +403,7 @@ extension StorageManager {
             return
         }
         localRecipe.onlineId = nil
-        localRecipe.isImageUploaded = nil
+        localRecipe.isImageUploaded = false
         try self.saveRecipe(&localRecipe)
     }
 
@@ -553,13 +534,13 @@ extension StorageManager {
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
-        let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
+        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "userId")
         let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
             onlineId: newOnlineId,
-            isImageUploaded: false, // TODO check
+            isImageUploaded: false,
             parentOnlineRecipeId: isRecipeOwner ? nil : recipe.id,
             name: newName,
             category: cuisine,
@@ -568,7 +549,7 @@ extension StorageManager {
             ingredients: recipe.ingredients,
             stepGraph: recipe.stepGraph
         )
-        try self.saveRecipe(&localRecipe)
+        try? self.saveRecipe(&localRecipe)
 
         firebaseStorage.fetchImage(name: recipe.id) { data, err in
             guard let data = data, err == nil else {
@@ -579,8 +560,8 @@ extension StorageManager {
             guard let fetchedImage = image, let id = localRecipe.id else {
                 return
             }
-            try? self.saveRecipeImage(fetchedImage, id: id, name: String(id))
-
+            try? self.saveRecipeImage(fetchedImage, name: String(id))
+            completion(err)
         }
     }
 
@@ -597,24 +578,20 @@ extension StorageManager {
                 return
             }
 
-            guard let lastFetchedImageDate = cache.onlineRecipeCache[recipeId]?.imageUpdatedAt,
-                  lastFetchedImageDate >= imageUpdatedAt else {
-                firebaseStorage.fetchImage(name: recipeId) { data, err in
-                    guard let data = data, err == nil else {
-                        completion(nil, err)
-                        return
-                    }
-                    cache.onlineRecipeImageCache[recipeId] = data
-                    cache.onlineRecipeCache[recipeId]?.imageUpdatedAt = imageUpdatedAt
-                    completion(data, nil)
-                }
+            if let data = cache.onlineRecipeImageCache.getEntityIfCachedAndValid(id: recipeId, updatedDate: imageUpdatedAt) {
+                completion(data.data, nil)
                 return
             }
 
-            let data = cache.onlineRecipeImageCache[recipeId]
-            completion(data, nil)
-            return
-
+            firebaseStorage.fetchImage(name: recipeId) { data, err in
+                guard let data = data, err == nil else {
+                    cache.onlineRecipeImageCache.removeValue(forKey: recipeId)
+                    completion(nil, err)
+                    return
+                }
+                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data), forKey: recipeId)
+                completion(data, nil)
+            }
         }
 
     }

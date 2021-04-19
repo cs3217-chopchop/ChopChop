@@ -10,9 +10,9 @@ class OnlineRecipeViewModel: ObservableObject {
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
-    @Published private(set) var creatorName = "No name"
+    @Published private(set) var creatorName = ""
 
-    @Published private var firstRater = "No name"
+    @Published private var firstRater = ""
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
     @Published var isShowingDetail = false
@@ -25,7 +25,6 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
-
         load()
     }
 
@@ -102,11 +101,11 @@ class OnlineRecipeViewModel: ObservableObject {
     }
 
     private func updateCreatorName() {
-        guard recipe.userId != settings.userId  else {
-            creatorName = settings.user?.name ?? "No name"
+        guard recipe.creatorId != settings.userId  else {
+            creatorName = settings.user?.name ?? ""
             return
         }
-        storageManager.fetchUser(id: recipe.userId) { user, err in
+        storageManager.fetchUser(id: recipe.creatorId) { user, err in
             guard let name = user?.name, err == nil else {
                 return
             }
@@ -117,6 +116,7 @@ class OnlineRecipeViewModel: ObservableObject {
     private func updateImage() {
         storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, err  in
             guard let data = data, let image = UIImage(data: data), err == nil else {
+                self.image = UIImage(imageLiteralResourceName: "recipe")
                 self.isLoading = false // takes the longest
                 return
             }
@@ -139,7 +139,6 @@ class OnlineRecipeViewModel: ObservableObject {
 
     private func getRaterId(recipe: OnlineRecipe) -> String? {
         guard let userId = settings.userId, let followees = settings.user?.followees else {
-            assertionFailure()
             return nil
         }
         if let raterId = (recipe.ratings.first { followees.contains($0.userId) })?.userId {

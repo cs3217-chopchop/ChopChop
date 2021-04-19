@@ -9,19 +9,14 @@ struct FirebaseDatabase {
     private let db = Firestore.firestore()
 
     // MARK: - FirebaseDatabase: Create/Update
-    func addOnlineRecipe(recipe: OnlineRecipeRecord, isImageExist: Bool, completion: @escaping (Error?) -> Void) throws -> String {
+    func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
         let recipeDocRef = db.collection(recipePath).document()
         let batch = db.batch()
         try batch.setData(from: recipe, forDocument: recipeDocRef)
 
         let recipeInfoRef = db.collection(recipeInfoPath).document(recipeDocRef.documentID)
-        if isImageExist {
-            let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creator: recipe.creator) // sets to timestamp
-            try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
-        } else {
-            let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creator: recipe.creator, imageUpdatedAt: nil) // sets to null
-            try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
-        }
+        let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creatorId: recipe.creatorId) // sets to timestamp
+        try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
 
         batch.commit { err in
             completion(err)
@@ -29,7 +24,7 @@ struct FirebaseDatabase {
         return recipeDocRef.documentID
     }
 
-    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool?, completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool, completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -38,7 +33,7 @@ struct FirebaseDatabase {
         let recipeDocRef = db.collection(recipePath).document(recipeId)
         batch.setData([
             "name": recipe.name,
-            "creator": recipe.creator,
+            "creatorId": recipe.creatorId,
             "servings": recipe.servings,
             "difficulty": recipe.difficulty?.rawValue as Any,
             "cuisine": recipe.cuisine as Any,
@@ -48,12 +43,7 @@ struct FirebaseDatabase {
         ], forDocument: recipeDocRef, merge: true)
 
         let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
-        if isImageUploadedAlready == nil {
-            batch.setData([
-                "updatedAt": FieldValue.serverTimestamp(),
-                "imageUpdatedAt": nil
-            ], forDocument: recipeInfoDocRef, merge: true)
-        } else if isImageUploadedAlready == true {
+        if isImageUploadedAlready {
             batch.setData([
                 "updatedAt": FieldValue.serverTimestamp()
             ], forDocument: recipeInfoDocRef, merge: true)
@@ -124,7 +114,7 @@ struct FirebaseDatabase {
         }
     }
 
-    func addUser(user: UserRecord, completion: @escaping (Error?) -> Void) throws -> String {
+    func addUser(user: UserRecord, completion: @escaping (String?, Error?) -> Void) throws {
         let userRef = db.collection(userPath).document()
         let batch = db.batch()
         try batch.setData(from: user, forDocument: userRef)
@@ -134,9 +124,8 @@ struct FirebaseDatabase {
         try batch.setData(from: userInfo, forDocument: userInfoRef)
 
         batch.commit { err in
-            completion(err)
+            completion(userRef.documentID, err)
         }
-        return userRef.documentID
     }
 
     func addFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
@@ -237,7 +226,7 @@ struct FirebaseDatabase {
         while queryLimit.hasNext {
             let range = [] + userIds[queryLimit.current..<queryLimit.next()]
             dispatchGroup.enter()
-            db.collection(recipeInfoPath).whereField("creator", in: range).getDocuments { snapshot, err in
+            db.collection(recipeInfoPath).whereField("creatorId", in: range).getDocuments { snapshot, err in
                 guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }), err == nil else {
                     completion(allOnlineRecipeInfoRecords, err)
                     dispatchGroup.leave()
