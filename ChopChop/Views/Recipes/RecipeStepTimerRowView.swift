@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecipeStepTimerRowView: View {
-    @ObservedObject var viewModel: RecipeStepTimerRowViewModel
+    @StateObject var viewModel: RecipeStepTimerRowViewModel
 
     var body: some View {
         HStack {

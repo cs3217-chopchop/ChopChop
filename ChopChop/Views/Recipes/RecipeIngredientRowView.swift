@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct RecipeIngredientRowView: View {
-    @ObservedObject var viewModel: RecipeIngredientRowViewModel
+    @StateObject var viewModel: RecipeIngredientRowViewModel
 
     var body: some View {
         HStack {

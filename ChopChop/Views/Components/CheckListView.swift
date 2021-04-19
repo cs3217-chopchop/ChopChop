@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct CheckListView<T>: View {
-    @ObservedObject var viewModel: CheckListViewModel<T>
+    @StateObject var viewModel: CheckListViewModel<T>
+
     var body: some View {
         List {
             ForEach(viewModel.checkList) { item in

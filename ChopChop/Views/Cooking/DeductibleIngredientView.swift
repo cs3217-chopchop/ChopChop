@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DeductibleIngredientView: View {
-    @ObservedObject var viewModel: DeductibleIngredientViewModel
+    @StateObject var viewModel: DeductibleIngredientViewModel
 
     var body: some View {
         Section(footer: errorMessage) {

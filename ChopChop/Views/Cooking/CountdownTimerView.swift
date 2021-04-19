@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CountdownTimerView: View {
-    @ObservedObject var viewModel: CountdownTimerViewModel
+    @StateObject var viewModel: CountdownTimerViewModel
     @State var animationState = true
 
     var body: some View {

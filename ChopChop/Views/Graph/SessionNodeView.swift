@@ -1,7 +1,7 @@
 import SwiftUI
 
  struct SessionNodeView: View {
-    @ObservedObject var viewModel: SessionNodeViewModel
+    @StateObject var viewModel: SessionNodeViewModel
     @ObservedObject var selection: SelectionHandler<SessionRecipeStepNode>
 
     var isSelected: Bool {
