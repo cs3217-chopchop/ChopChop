@@ -58,6 +58,7 @@ class OnlineRecipeViewModel: ObservableObject {
         updateCreatorName()
         updateRecipeServingText()
         updateParentOnlineRecipe()
+        updateDownloadedRecipes()
     }
 
     func reload() {
@@ -72,10 +73,12 @@ class OnlineRecipeViewModel: ObservableObject {
             self.updateCreatorName()
             self.updateRecipeServingText()
             self.updateParentOnlineRecipe()
+            self.updateDownloadedRecipes()
         }
     }
 
     func updateForkedRecipes() {
+        updateDownloadedRecipes()
         downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
