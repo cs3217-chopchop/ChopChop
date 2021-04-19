@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnlineRecipeByUserView: View {
-    @ObservedObject var viewModel: OnlineRecipeByUserViewModel
+    @StateObject var viewModel: OnlineRecipeByUserViewModel
 
     var body: some View {
         VStack(spacing: 0) {

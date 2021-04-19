@@ -22,7 +22,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         }
 
         guard let ownRating = ownRating else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating) { err in
+            storageManager.addOnlineRecipeRating(recipeId: recipe.id, userId: userId, rating: rating) { err in
                 guard err == nil else {
                     return
                 }
@@ -30,7 +30,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             }
             return
         }
-        storageManager.rerateRecipe(recipeId: recipe.id, oldRating: ownRating,
+        storageManager.updateOnlineRecipeRating(recipeId: recipe.id, oldRating: ownRating,
                                     newRating: RecipeRating(userId: userId, score: rating)) { err in
             guard err == nil else {
                 return
@@ -44,7 +44,7 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             return
         }
 
-        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating) { err in
+        storageManager.removeOnlineRecipeRating(recipeId: recipe.id, rating: ownRating) { err in
             guard err == nil else {
                 return
             }

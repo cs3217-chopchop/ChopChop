@@ -1,19 +1,25 @@
 import Foundation
 
 // https://www.swiftbysundell.com/articles/caching-in-swift/
+/**
+ Wrapper around NSCache.
+ */
 final class Cache<Key: Hashable, Value: CachableEntity> {
     private let wrapped = NSCache<WrappedKey, Entry>()
 
+    /// Adds or updates entity at that key
     func insert(_ value: Value, forKey key: Key) {
         let entry = Entry(value: value)
         wrapped.setObject(entry, forKey: WrappedKey(key))
     }
 
+    /// Returns entity at that key if present, nil if not present
     func value(forKey key: Key) -> Value? {
         let entry = wrapped.object(forKey: WrappedKey(key))
         return entry?.value
     }
 
+    /// Removes entity at that key if entity exists
     func removeValue(forKey key: Key) {
         wrapped.removeObject(forKey: WrappedKey(key))
     }
@@ -32,6 +38,7 @@ final class Cache<Key: Hashable, Value: CachableEntity> {
         }
     }
 
+    /// Returns entity at that key if entity exists and is updated 
     func getEntityIfCachedAndValid(id: Key, updatedDate: Date) -> Value? {
         guard let entity = value(forKey: id), entity.updatedAt >= updatedDate else {
             return nil
@@ -42,7 +49,7 @@ final class Cache<Key: Hashable, Value: CachableEntity> {
 }
 
 extension Cache {
-    final class WrappedKey: NSObject {
+    private final class WrappedKey: NSObject {
         let key: Key
 
         init(_ key: Key) { self.key = key }
@@ -60,7 +67,7 @@ extension Cache {
 }
 
 extension Cache {
-    final class Entry {
+    private final class Entry {
         let value: Value
 
         init(value: Value) {

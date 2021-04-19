@@ -136,9 +136,15 @@ class RecipeFormViewModel: ObservableObject {
                 throw RecipeError.invalidServings
             }
 
+            var isImageUploaded = false
+            if let id = recipe?.id, storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData(), recipe?.isImageUploaded == true {
+                // image no change or image is still null
+                isImageUploaded = true
+            }
+
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
-                                           isImageUploaded: image.pngData() == originalImage.pngData(),
+                                           isImageUploaded: isImageUploaded,
                                            parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,

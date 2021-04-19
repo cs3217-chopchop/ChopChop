@@ -153,7 +153,7 @@ struct StorageManager {
      */
     func deleteIngredients(ids: [Int64]) throws {
         try appDatabase.deleteIngredients(ids: ids)
-        
+
         ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.ingredientFolderName)
     }
 
@@ -162,7 +162,7 @@ struct StorageManager {
      */
     func deleteAllIngredients() throws {
         try appDatabase.deleteAllIngredients()
-        
+
         ImageStore.deleteAll(inFolderNamed: StorageManager.ingredientFolderName)
     }
 
@@ -350,7 +350,10 @@ extension StorageManager {
 
     // MARK: - Storage Manager: Create/Update
 
-    // publish your local recipe online
+    /**
+     Creates OnlineRecipe in Firebase and uploads Recipe's image if any.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func addOnlineRecipe(recipe: inout Recipe, userId: String, completion: @escaping (Error?) -> Void) throws {
         let cuisine = recipe.category?.name
         let ingredients = recipe.ingredients.map({
@@ -395,7 +398,12 @@ extension StorageManager {
         firebaseStorage.uploadImage(image: fetchedRecipeImage, name: onlineId)
     }
 
-    // update details of published recipe (note that ratings cant be updated here)
+    /**
+     Updates OnlineRecipe in Firebase
+     Uploads Recipe's image only if necessary
+     Deletes OnlineRecipe's image if local Recipe's image is deleted
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func updateOnlineRecipe(recipe: Recipe, userId: String, completion: @escaping (Error?) -> Void) throws {
 
         let cuisine = recipe.category?.name
@@ -451,20 +459,26 @@ extension StorageManager {
         try saveRecipe(&recipe)
     }
 
-    // rate a recipe
-    func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
+    /**
+     Add a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
+    func addOnlineRecipeRating(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.addUserRecipeRating(userId: userId,
                                              rating: UserRating(recipeOnlineId: recipeId, score: rating),
                                              completion: completion)
-        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId,
+        firebaseDatabase.addOnlineRecipeRating(onlineRecipeId: recipeId,
                                          rating: RecipeRating(userId: userId, score: rating),
                                          completion: completion)
     }
 
-    // change the rating of a recipe you have rated before
-    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+    /**
+     Updates a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
+    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
                       completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.updateRecipeRating(recipeId: recipeId,
+        firebaseDatabase.updateOnlineRecipeRating(recipeId: recipeId,
                                             oldRating: oldRating,
                                             newRating: newRating,
                                             completion: completion)
@@ -474,56 +488,25 @@ extension StorageManager {
                                           completion: completion)
     }
 
-    // this should only be called once when the app first launched
+    /**
+     Adds a user of that name.
+     Signals completion via a completion handler and returns the userId of the new user and error in completion handler if any.
+     */
     func addUser(name: String, completion: @escaping (String?, Error?) -> Void) throws {
         try firebaseDatabase.addUser(user: UserRecord(name: name, followees: [], ratings: []), completion: completion)
     }
 
-    // follow someone
+    /**
+     Adds a followee of that followeeId to the user of that userId
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
     func addFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
         firebaseDatabase.addFollowee(userId: userId, followeeId: followeeId, completion: completion)
     }
 
-    // MARK: - Storage Manager: Delete
-
-    // unpublish a recipe through the online interface
-    func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
-        try firebaseDatabase.removeOnlineRecipe(recipeId: recipe.id, completion: completion)
-        for rating in recipe.ratings {
-            firebaseDatabase.removeUserRecipeRating(
-                userId: rating.userId,
-                rating: UserRating(recipeOnlineId: recipe.id, score: rating.score),
-                completion: completion
-            )
-        }
-        firebaseStorage.deleteImage(name: recipe.id)
-
-        cache.onlineRecipeCache.removeValue(forKey: recipe.id)
-        cache.onlineRecipeImageCache[recipe.id] = nil
-
-        // might alr have deleted local recipe
-        let fetchedRecipe = try? self.fetchRecipe(onlineId: recipe.id)
-        guard var localRecipe = fetchedRecipe else {
-            return
-        }
-        localRecipe.onlineId = nil
-        localRecipe.isImageUploaded = false
-        try self.saveRecipe(&localRecipe)
-    }
-
-    // unfollow someone
-    func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId, completion: completion)
-    }
-
-    // remove rating of a recipe you rated
-    func unrateRecipe(recipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating, completion: completion)
-        firebaseDatabase.removeUserRecipeRating(
-            userId: rating.userId,
-            rating: UserRating(recipeOnlineId: recipeId, score: rating.score), completion: completion)
-    }
-
+    /**
+     Overwrites forked local Recipe with parent OnlineRecipe
+     */
     func updateForkedRecipes(forked: Recipe, original: OnlineRecipe) throws {
         var cuisineCategory: RecipeCategory?
         if let cuisine = original.cuisine {
@@ -545,92 +528,10 @@ extension StorageManager {
         try self.saveRecipe(&localRecipe)
     }
 
-    // MARK: - Storage Manager: Fetch
-
-    // fetch the details of a single recipe
-    func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
-        firebaseDatabase.fetchOnlineRecipeInfo(id: id) { recipeInfoRecord, err in
-            guard let recipeInfoRecord = recipeInfoRecord, err == nil else {
-                completion(nil, err)
-                return
-            }
-
-            if let updatedAt = recipeInfoRecord.updatedAt,
-               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id,
-                                                                                          updatedDate: updatedAt) {
-                completion(cachedOnlineRecipe, nil)
-                return
-            }
-
-            firebaseDatabase.fetchOnlineRecipe(id: id) { onlineRecipeRecord, err in
-                guard let recipeRecord = onlineRecipeRecord,
-                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord),
-                      err == nil else {
-                    completion(nil, err)
-                    return
-                }
-                cache.onlineRecipeCache[id] = onlineRecipe
-                completion(onlineRecipe, nil)
-            }
-        }
-    }
-
-    // fetch the details of a single user
-    func fetchUser(id: String, completion: @escaping (User?, Error?) -> Void) {
-        firebaseDatabase.fetchUserInfo(id: id) { userInfoRecord, err in
-            guard let userInfoRecord = userInfoRecord, err == nil else {
-                completion(nil, err)
-                return
-            }
-
-            if let updatedAt = userInfoRecord.updatedAt,
-               let cachedUser = cache.userCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
-                completion(cachedUser, nil)
-                return
-            }
-
-            firebaseDatabase.fetchUser(id: id) { userRecord, err in
-                guard let userRecord = userRecord,
-                      let user = User(from: userRecord, infoRecord: userInfoRecord),
-                      err == nil else {
-                    completion(nil, err)
-                    return
-                }
-                cache.userCache[id] = user
-                completion(user, nil)
-            }
-        }
-    }
-
-    // fetch all recipes published by everyone
-    func fetchAllOnlineRecipes(completion: @escaping ([OnlineRecipe], Error?) -> Void) {
-        firebaseDatabase.fetchAllOnlineRecipeInfos { recipeInfoRecords, err in
-            fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
-        }
-    }
-
-    // Can be used to fetch all your own recipes or recipes of several selected users
-    func fetchOnlineRecipes(userIds: [String], completion: @escaping ([OnlineRecipe], Error?) -> Void) {
-        firebaseDatabase.fetchOnlineRecipeInfos(userIds: userIds) { recipeInfoRecords, err in
-            fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
-        }
-    }
-
-    // Fetch details of all users in the system
-    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
-        firebaseDatabase.fetchAllUserInfos { userInfoRecords, err in
-            fetchUsers(userInfoRecords: userInfoRecords, err: err, completion: completion)
-        }
-    }
-
-    // Fetch details of all users in the system
-    func fetchUsers(ids: [String], completion: @escaping ([User], Error?) -> Void) {
-        firebaseDatabase.fetchUserInfos(ids: ids) { userInfoRecords, err in
-            fetchUsers(userInfoRecords: userInfoRecords, err: err, completion: completion)
-        }
-    }
-
-    // download an online recipe to local
+    /**
+     Save OnlineRecipe to local database.
+     Signals completion via a completion handler and returns the error in completion handler if any.
+     */
     func downloadRecipe(newName: String, recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
         var cuisine: RecipeCategory?
         if let cuisineName = recipe.cuisine {
@@ -639,7 +540,7 @@ extension StorageManager {
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
-        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "userId")
+        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "creatorId")
         let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
@@ -670,6 +571,158 @@ extension StorageManager {
         }
     }
 
+    // MARK: - Storage Manager: Delete
+
+    /**
+     Delete an OnlineRecipe, effectively unpublishing the recipe. Removes the link from the respective local Recipe to the OnlineRecipe, if any.
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
+    func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
+        try firebaseDatabase.removeOnlineRecipe(recipeId: recipe.id, completion: completion)
+        for rating in recipe.ratings {
+            firebaseDatabase.removeUserRecipeRating(
+                userId: rating.userId,
+                rating: UserRating(recipeOnlineId: recipe.id, score: rating.score),
+                completion: completion
+            )
+        }
+        firebaseStorage.deleteImage(name: recipe.id)
+
+        cache.onlineRecipeCache.removeValue(forKey: recipe.id)
+        cache.onlineRecipeImageCache[recipe.id] = nil
+
+        // might alr have deleted local recipe
+        let fetchedRecipe = try? self.fetchRecipe(onlineId: recipe.id)
+        guard var localRecipe = fetchedRecipe else {
+            return
+        }
+        localRecipe.onlineId = nil
+        localRecipe.isImageUploaded = false
+        try self.saveRecipe(&localRecipe)
+    }
+
+    /**
+     Removes a followee of that followeeId from user of that userId
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
+    func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
+        firebaseDatabase.removeFollowee(userId: userId, followeeId: followeeId, completion: completion)
+    }
+
+    /**
+     Removes a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
+    func removeOnlineRecipeRating(recipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
+        firebaseDatabase.removeRecipeRating(onlineRecipeId: recipeId, rating: rating, completion: completion)
+        firebaseDatabase.removeUserRecipeRating(
+            userId: rating.userId,
+            rating: UserRating(recipeOnlineId: recipeId, score: rating.score), completion: completion)
+    }
+
+    // MARK: - Storage Manager: Fetch
+
+    /**
+     Fetches OnlineRecipe of that id
+     Signals completion via a completion handler and returns the OnlineRecipe and error in completion handler if any.
+     */
+    func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipe?, Error?) -> Void) {
+        firebaseDatabase.fetchOnlineRecipeInfo(id: id) { recipeInfoRecord, err in
+            guard let recipeInfoRecord = recipeInfoRecord, err == nil else {
+                completion(nil, err)
+                return
+            }
+
+            if let updatedAt = recipeInfoRecord.updatedAt,
+               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id,
+                                                                                          updatedDate: updatedAt) {
+                completion(cachedOnlineRecipe, nil)
+                return
+            }
+
+            firebaseDatabase.fetchOnlineRecipe(id: id) { onlineRecipeRecord, err in
+                guard let recipeRecord = onlineRecipeRecord,
+                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord),
+                      err == nil else {
+                    completion(nil, err)
+                    return
+                }
+                cache.onlineRecipeCache[id] = onlineRecipe
+                completion(onlineRecipe, nil)
+            }
+        }
+    }
+
+    /**
+     Fetches user of that id
+     Signals completion via a completion handler and returns the User and error in completion handler if any.
+     */
+    func fetchUser(id: String, completion: @escaping (User?, Error?) -> Void) {
+        firebaseDatabase.fetchUserInfo(id: id) { userInfoRecord, err in
+            guard let userInfoRecord = userInfoRecord, err == nil else {
+                completion(nil, err)
+                return
+            }
+
+            if let updatedAt = userInfoRecord.updatedAt,
+               let cachedUser = cache.userCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
+                completion(cachedUser, nil)
+                return
+            }
+
+            firebaseDatabase.fetchUser(id: id) { userRecord, err in
+                guard let userRecord = userRecord,
+                      let user = User(from: userRecord, infoRecord: userInfoRecord),
+                      err == nil else {
+                    completion(nil, err)
+                    return
+                }
+                cache.userCache[id] = user
+                completion(user, nil)
+            }
+        }
+    }
+
+    /**
+     Fetches all OnlineRecipes
+     Signals completion via a completion handler and returns the OnlineRecipes and error in completion handler if any.
+     */
+    func fetchAllOnlineRecipes(completion: @escaping ([OnlineRecipe], Error?) -> Void) {
+        firebaseDatabase.fetchAllOnlineRecipeInfos { recipeInfoRecords, err in
+            fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
+        }
+    }
+
+    /**
+     Fetches OnlineRecipe whose creatorId is included in userIds
+     Signals completion via a completion handler and returns the OnlineRecipes and error in completion handler if any.
+     */
+    func fetchOnlineRecipes(userIds: [String], completion: @escaping ([OnlineRecipe], Error?) -> Void) {
+        firebaseDatabase.fetchOnlineRecipeInfos(userIds: userIds) { recipeInfoRecords, err in
+            fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
+        }
+    }
+
+    /**
+     Fetches all Users
+     Signals completion via a completion handler and returns the users and error in completion handler if any.
+     */
+    func fetchAllUsers(completion: @escaping ([User], Error?) -> Void) {
+        firebaseDatabase.fetchAllUserInfos { userInfoRecords, err in
+            fetchUsers(userInfoRecords: userInfoRecords, err: err, completion: completion)
+        }
+    }
+
+    /**
+     Fetches all Users whos ids are in ids
+     Signals completion via a completion handler and returns the users and error in completion handler if any.
+     */
+    func fetchUsers(ids: [String], completion: @escaping ([User], Error?) -> Void) {
+        firebaseDatabase.fetchUserInfos(ids: ids) { userInfoRecords, err in
+            fetchUsers(userInfoRecords: userInfoRecords, err: err, completion: completion)
+        }
+    }
+
     func fetchOnlineRecipeImage(recipeId: String, completion: @escaping (Data?, Error?) -> Void) {
         firebaseDatabase.fetchOnlineRecipeInfo(id: recipeId) { recipeInfoRecord, err in
             guard let recipeInfoRecord = recipeInfoRecord, err == nil else {
@@ -695,7 +748,7 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
-                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data),
+                cache.onlineRecipeImageCache.insert(CachableData(updatedAt: imageUpdatedAt, data: data),
                                                     forKey: recipeId)
                 completion(data, nil)
             }
@@ -704,8 +757,10 @@ extension StorageManager {
 
     // MARK: - Storage Manager: Listen
 
-    // listen to the details of a single user
-    // use case: own user object
+    /**
+     Listens to the details of a single user.
+     This operation is expensive as it fetches the user whenever there is a change, and should be used selectively.
+     */
     func userListener(id: String, onChange: @escaping (User) -> Void) {
         firebaseDatabase.userListener(id: id) { userRecord in
             // Note: cannot use UserRecord because UserInfoRecord is not fetched
@@ -717,6 +772,12 @@ extension StorageManager {
         }
     }
 
+    /**
+     Fetches the OnlineRecipes whose ids are in recipeInfoRecords.
+     Each OnlineRecipeInfoRecord is checked against the corresponding OnlineRecipe in cache,
+     and only OnlineRecipes that are not in cache or are outdated are fetched from Firebase.
+     Signals completion via a completion handler and returns the OnlineRecipes and error in completion handler if any.
+     */
     private func fetchOnlineRecipes(recipeInfoRecords: [String: OnlineRecipeInfoRecord], err: Error?,
                                     completion: @escaping ([OnlineRecipe], Error?) -> Void) {
         guard !recipeInfoRecords.isEmpty, err == nil else {
@@ -734,6 +795,7 @@ extension StorageManager {
             return false
         }
 
+        // if no recipes to fetch, just collate from cache and return from function
         guard !recipeIdsToFetch.isEmpty else {
             let recipes = recipeInfoRecords.keys.compactMap { cache.onlineRecipeCache[$0]
             }
@@ -761,6 +823,12 @@ extension StorageManager {
         }
     }
 
+    /**
+     Fetches the Users whose ids are in userInfoRecords.
+     Each UserInfoRecord is checked against the corresponding User in cache,
+     and only Users that are not in cache or are outdated are fetched from Firebase.
+     Signals completion via a completion handler and returns the Users and error in completion handler if any.
+     */
     private func fetchUsers(userInfoRecords: [String: UserInfoRecord], err: Error?,
                             completion: @escaping ([User], Error?) -> Void) {
         guard !userInfoRecords.isEmpty, err == nil else {
