@@ -22,10 +22,7 @@ struct RecipeCollectionView: View {
                                   selections: $viewModel.selectedIngredients,
                                   options: viewModel.recipeIngredients)
             }
-            .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-
-            Divider()
-                .padding(EdgeInsets(top: 1, leading: 16, bottom: 0, trailing: 16))
+            .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
 
             if viewModel.recipes.isEmpty {
                 NotFoundView(entityName: "Recipes")
@@ -51,10 +48,7 @@ struct RecipeCollectionView: View {
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear {
-            viewModel.query = ""
-            viewModel.selectedIngredients.removeAll()
-        }
+        .onAppear(perform: viewModel.resetSearchFields)
     }
 
     var listView: some View {
@@ -152,16 +146,10 @@ struct RecipeCollectionView: View {
     func GridTileOverlay(recipe: RecipeInfo) -> some View {
         ZStack(alignment: .bottomLeading) {
             Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: Color.black.opacity(0), location: 0.3),
-                            .init(color: .black, location: 0.6)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundColor(.clear)
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, .black]),
+                                           startPoint: .top,
+                                           endPoint: .bottom))
                 .cornerRadius(10)
                 .opacity(0.8)
             VStack(alignment: .leading) {
@@ -169,7 +157,7 @@ struct RecipeCollectionView: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
                 RecipeCaption(recipe: recipe)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
             }
             .padding()
         }

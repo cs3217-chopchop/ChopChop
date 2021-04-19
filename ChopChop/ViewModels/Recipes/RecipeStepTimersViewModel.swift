@@ -23,8 +23,8 @@ final class RecipeStepTimersViewModel: ObservableObject {
     }
 
     func parseTimers(shouldOverwrite: Bool = false) {
-        let timers = RecipeStepParser.parseTimerDurations(step: node.label.content).map {
-            TimeInterval(RecipeStepParser.parseToTime(timeString: $0))
+        let timers = RecipeStepParser.parseTimeStrings(step: node.label.content).map {
+            TimeInterval(RecipeStepParser.parseDuration(timeString: $0))
         }
 
         if shouldOverwrite {

@@ -1,7 +1,13 @@
 import GRDB
 
-struct IngredientCategoryRecord: Equatable {
+/**
+ Represents a record of an ingredient category stored in the local database.
+ */
+struct IngredientCategoryRecord: Identifiable, Equatable {
     var id: Int64?
+
+    // MARK: - Specification Fields
+    /// The name of the category.
     var name: String
 }
 

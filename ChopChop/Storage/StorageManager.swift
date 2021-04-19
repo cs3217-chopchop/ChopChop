@@ -18,8 +18,10 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
+
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
                                         isImageUploaded: recipe.isImageUploaded,
+                                        parentOnlineRecipeId: recipe.parentOnlineRecipeId,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -40,9 +42,31 @@ struct StorageManager {
         recipeCategory.id = recipeCategoryRecord.id
     }
 
+    func saveIngredients(_ ingredients: inout [Ingredient]) throws {
+        var records: [(IngredientRecord, [IngredientBatchRecord])] = ingredients.map { ingredient in
+            let ingredientRecord = IngredientRecord(id: ingredient.id,
+                                                    ingredientCategoryId: ingredient.category?.id,
+                                                    name: ingredient.name,
+                                                    quantityType: ingredient.quantityType)
+            let batchRecords = ingredient.batches.map { batch in
+                IngredientBatchRecord(ingredientId: ingredient.id,
+                                      expiryDate: batch.expiryDate,
+                                      quantity: batch.quantity.record)
+            }
+
+            return (ingredientRecord, batchRecords)
+        }
+
+        try appDatabase.saveIngredients(&records)
+
+        for index in ingredients.indices {
+            ingredients[index].id = records[index].0.id
+        }
+    }
+
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
-                                                ingredientCategoryId: ingredient.ingredientCategoryId,
+                                                ingredientCategoryId: ingredient.category?.id,
                                                 name: ingredient.name,
                                                 quantityType: ingredient.quantityType)
         var batchRecords = ingredient.batches.map { batch in
@@ -113,12 +137,20 @@ struct StorageManager {
         try appDatabase.fetchRecipe(onlineId: onlineId)
     }
 
+    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
+        try appDatabase.fetchRecipeCategory(name: name)
+    }
+
+    func fetchIngredients() throws -> [Ingredient] {
+        try appDatabase.fetchIngredients()
+    }
+
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try appDatabase.fetchIngredient(id: id)
     }
 
-    func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
-        try appDatabase.fetchRecipeCategory(name: name).map { try RecipeCategory(id: $0.id, name: $0.name) }
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
+        try appDatabase.fetchDownloadedRecipes(parentOnlineRecipeId: parentOnlineRecipeId)
     }
 
     // MARK: - Database Access: Publishers
@@ -204,19 +236,10 @@ extension StorageManager {
         do {
             let originalImage = fetchRecipeImage(name: name)
             let isSameImage = originalImage?.pngData() == image.pngData()
-            guard var recipe = try fetchRecipe(id: id) else {
+            guard var recipe = try fetchRecipe(id: id), !isSameImage else {
                 return
             }
-            let isPublished = recipe.onlineId != nil
-
-            if isPublished && isSameImage {
-                recipe.isImageUploaded = true
-            } else if isPublished && !isSameImage {
-                recipe.isImageUploaded = false
-            } else if !isPublished {
-                recipe.isImageUploaded = false
-            }
-
+            recipe.isImageUploaded = false
             try saveRecipe(&recipe)
 
             try ImageStore.save(image: image, name: name, inFolderNamed: StorageManager.recipeFolderName)
@@ -227,19 +250,6 @@ extension StorageManager {
 
     func deleteIngredientImage(name: String) {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.ingredientFolderName)
-    }
-
-    func renameIngredientImage(from oldName: String, to newName: String) throws {
-        guard oldName != newName else {
-            return
-        }
-
-        guard let image = fetchIngredientImage(name: oldName) else {
-            return
-        }
-
-        try saveIngredientImage(image, name: newName)
-        deleteIngredientImage(name: oldName)
     }
 
     func fetchIngredientImage(name: String) -> UIImage? {
@@ -268,14 +278,17 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -283,7 +296,6 @@ extension StorageManager {
             steps: nodes,
             stepEdges: edgeRecords
         )
-        let onlineId = try firebaseDatabase.addOnlineRecipe(recipe: recipeRecord, completion: completion)
 
         guard let id = recipe.id else {
             assertionFailure("Should have id")
@@ -291,6 +303,8 @@ extension StorageManager {
         }
 
         let recipeImage = self.fetchRecipeImage(name: String(id))
+
+        let onlineId = try firebaseDatabase.addOnlineRecipe(recipe: recipeRecord, isImageExist: recipeImage != nil, completion: completion)
 
         recipe.onlineId = onlineId
         recipe.isImageUploaded = (recipeImage == nil ? nil : true)
@@ -313,15 +327,18 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             id: recipe.onlineId,
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -338,21 +355,22 @@ extension StorageManager {
 
         firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploadedAlready: isImageUploaded, completion: completion)
 
-        guard let imageAlreadyUpdated = isImageUploaded else {
+        if isImageUploaded == nil {
             firebaseStorage.deleteImage(name: onlineId)
             cache.onlineRecipeImageCache[onlineId] = nil
             return
-        }
-
-        guard !imageAlreadyUpdated, let image = fetchRecipeImage(name: String(id)) else {
+        } else if isImageUploaded == false {
             return
+        } else {
+            guard let image = fetchRecipeImage(name: String(id)) else {
+                return
+            }
+
+            firebaseStorage.uploadImage(image: image, name: onlineId)
+            var recipe = recipe
+            recipe.isImageUploaded = true
+            try saveRecipe(&recipe)
         }
-
-        firebaseStorage.uploadImage(image: image, name: onlineId)
-
-        var recipe = recipe
-        recipe.isImageUploaded = true
-        try saveRecipe(&recipe)
 
         // note: don't update cache because don't know updatedAt timestamps
     }
@@ -419,6 +437,27 @@ extension StorageManager {
         firebaseDatabase.removeUserRecipeRating(
             userId: rating.userId,
             rating: UserRating(recipeOnlineId: recipeId, score: rating.score), completion: completion)
+    }
+
+    func updateForkedRecipes(forked: Recipe, original: OnlineRecipe) throws {
+        var cuisineCategory: RecipeCategory?
+        if let cuisine = original.cuisine {
+            cuisineCategory = try? self.fetchRecipeCategory(name: cuisine)
+        }
+
+        var localRecipe = try Recipe(
+            id: forked.id,
+            onlineId: forked.onlineId,
+            parentOnlineRecipeId: forked.parentOnlineRecipeId,
+            name: forked.name,
+            category: cuisineCategory,
+            servings: original.servings,
+            difficulty: original.difficulty,
+            ingredients: original.ingredients,
+            stepGraph: original.stepGraph
+        )
+
+        try self.saveRecipe(&localRecipe)
     }
 
     // MARK: - Storage Manager: Fetch
@@ -506,7 +545,6 @@ extension StorageManager {
     }
 
     // download an online recipe to local
-    // TODO not checked for throughness becuase of fork changes
     func downloadRecipe(newName: String, recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {
         var cuisine: RecipeCategory?
         if let cuisineName = recipe.cuisine {
@@ -516,12 +554,13 @@ extension StorageManager {
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
         let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
-        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) == nil
+        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
             onlineId: newOnlineId,
-            isImageUploaded: false,
+            isImageUploaded: false, // TODO check
+            parentOnlineRecipeId: isRecipeOwner ? nil : recipe.id,
             name: newName,
             category: cuisine,
             servings: recipe.servings,

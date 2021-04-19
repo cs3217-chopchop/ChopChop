@@ -1,39 +1,47 @@
 /**
- The `Graph` ADT consists of:
+ Represents a graph that consists of:
  - objects conforming to `Node`
  - zero or more `Edge`s joining the `Node`s
  
  It can represent the following graph types with corresponding constraints:
  - Undirected graph
-   + An undirected edge is represented by 2 directed edges
+   - An undirected edge is represented by 2 directed edges
  - Directed graph
  - Simple graph
  - Multigraph
-   + Edges from the same source to the same destination should have
- different weight
+   - Edges from the same source to the same destination should have different weight
  - Unweighted graph
-   + Edges' weights are to set to 1.0
+   - Edges' weights are to set to 1.0
  - Weighted graph
 
- The representation invariants for every Graph g:
- - g is either directed or undirected
- - All nodes in g must have unique labels
- - Multiple edges from the same source to the same destination must
- not have the same weight
+ Representation Invariants:
+ - The graph is either directed or undirected
+    - In an undirected graph, edges should come in pairs (their reverse)) except for loops.
+ - All nodes must have unique labels.
+ - Multiple edges with the same source and destination nodes must not have the same weight.
  */
 class Graph<N: Node> {
     typealias E = Edge<N>
 
+    // MARK: - Specification Fields
+    /// Represents whether the graph is directed or undirected.
     let isDirected: Bool
 
     internal var adjacencyList: [N: [E]]
 
+    /**
+     Initialises an empty directed or undirected graph according to the given flag.
+     */
     init(isDirected: Bool) {
         self.isDirected = isDirected
         self.adjacencyList = [:]
     }
 
-    convenience init?(isDirected: Bool, nodes: [N], edges: [E]) {
+    /**
+     Initialises a directed or undirected graph containing the given nodes and edges.
+     Fails if the given nodes and edges do not result in a valid graph.
+     */
+    convenience init(isDirected: Bool, nodes: [N], edges: [E]) throws {
         self.init(isDirected: isDirected)
 
         for node in nodes {
@@ -41,21 +49,30 @@ class Graph<N: Node> {
         }
 
         for edge in edges {
-            try? self.addEdge(edge)
+            try self.addEdge(edge)
         }
 
         assert(checkRepresentation())
     }
 
-    // MARK: - Nodes
+    // MARK: - Node Operations
+
+    /// The nodes in the graph.
     var nodes: [N] {
         Array(adjacencyList.keys)
     }
 
+    /**
+     Checks whether the graph contains the given node.
+     */
     func containsNode(_ targetNode: N) -> Bool {
         adjacencyList[targetNode] != nil
     }
 
+    /**
+     Adds the given node into the graph.
+     If the node already exists, do nothing.
+     */
     func addNode(_ addedNode: N) {
         guard !containsNode(addedNode) else {
             return
@@ -64,6 +81,10 @@ class Graph<N: Node> {
         adjacencyList[addedNode] = []
     }
 
+    /**
+     Removes the given node from the graph, removing all incoming and outgoing edges.
+     If the graph does not contain the node, do nothing.
+     */
     func removeNode(_ removedNode: N) {
         adjacencyList[removedNode] = nil
 
@@ -74,6 +95,10 @@ class Graph<N: Node> {
         assert(checkRepresentation())
     }
 
+    /**
+     Returns the nodes adjacent to the given node.
+     If the graph does not contain the node, returns an empty array.
+     */
     func getNodesAdjacent(to sourceNode: N) -> [N] {
         guard let edgesFromNode = adjacencyList[sourceNode] else {
             return []
@@ -96,11 +121,16 @@ class Graph<N: Node> {
         return adjacentNodes
     }
 
-    // MARK: - Edges
+    // MARK: - Edge Operations
+
+    /// The edges in the graph.
     var edges: [E] {
         adjacencyList.values.reduce(into: [], +=)
     }
 
+    /**
+     Checks whether the graph contains the given edge.
+     */
     func containsEdge(_ targetEdge: E) -> Bool {
         let sourceNode = targetEdge.source
 
@@ -111,11 +141,15 @@ class Graph<N: Node> {
         return edgesFromSourceNode.contains(targetEdge)
     }
 
+    /**
+     Removes the given edge from the graph.
+     If the graph does not contain the edge, do nothing.
+     */
     func removeEdge(_ removedEdge: E) {
         removeSingleEdge(removedEdge)
 
         if !isDirected {
-            let reversedEdge = removedEdge.reversed()
+            let reversedEdge = removedEdge.reversed
             removeSingleEdge(reversedEdge)
         }
     }
@@ -123,7 +157,7 @@ class Graph<N: Node> {
     private func removeSingleEdge(_ removedEdge: E) {
         let sourceNode = removedEdge.source
 
-        // If the source node is not a key in the adjacency list, the edge does not exist in the graph.
+        /// If the source node is not a key in the adjacency list, the edge does not exist in the graph.
         guard var edgesFromSourceNode = adjacencyList[sourceNode] else {
             return
         }
@@ -134,6 +168,11 @@ class Graph<N: Node> {
         assert(checkRepresentation())
     }
 
+    /**
+     Adds the given edge into the graph, and its source and/or destination nodes if they do not exist in the graph.
+
+     - Throws: `GraphError.repeatedEdge` if the given edge already exists in the graph.
+     */
     func addEdge(_ addedEdge: E) throws {
         guard !containsEdge(addedEdge) else {
             throw GraphError.repeatedEdge
@@ -150,9 +189,9 @@ class Graph<N: Node> {
         }
 
         if !isDirected {
-            let reversedEdge = addedEdge.reversed()
+            let reversedEdge = addedEdge.reversed
 
-            // This guards against adding duplicate edges when added edge is a loop.
+            /// Do not add duplicate edges when added edge is a loop.
             guard !containsEdge(reversedEdge) else {
                 return
             }
@@ -185,15 +224,25 @@ extension Graph: Equatable {
     }
 
     static func == (lhs: Graph<N>, rhs: Graph<N>) -> Bool {
-        Set(lhs.nodes.map { $0.label }) == Set(rhs.nodes.map { $0.label })
-            && Set(lhs.edges.map { EquatableEdge(source: $0.source.label,
-                                                 destination: $0.destination.label,
-                                                 weight: $0.weight)
-            })
-            == Set(rhs.edges.map { EquatableEdge(source: $0.source.label,
-                                                 destination: $0.destination.label,
-                                                 weight: $0.weight)
-            })
+        let leftNodes = Set(lhs.nodes.map { $0.label })
+        let rightNodes = Set(rhs.nodes.map { $0.label })
+        let areNodesEqual = leftNodes == rightNodes
+
+        let leftEdges = Set(lhs.edges.map {
+            EquatableEdge(
+                source: $0.source.label,
+                destination: $0.destination.label,
+                weight: $0.weight)
+        })
+        let rightEdges = Set(rhs.edges.map {
+            EquatableEdge(
+                source: $0.source.label,
+                destination: $0.destination.label,
+                weight: $0.weight)
+        })
+        let areEdgesEqual = leftEdges == rightEdges
+
+        return areNodesEqual && areEdgesEqual
     }
 }
 

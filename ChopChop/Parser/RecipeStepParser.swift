@@ -1,11 +1,21 @@
+/**
+ Represents a parser that parses text into recipe steps.
+ */
 struct RecipeStepParser {
-
+    /// Delimiters
     static let delimiters = ["-", "–", "to", "or"]
     static let incRangeDelimiters = ["-", "–", "to"]
+    static let specialAndDelimiter = " {0,6}(and|&)? {0,6}"
+
+    /// Time units
     static let minUnits = ["minute[s]?", "min[s]?", "m"] // put strict ones first
     static let hourUnits = ["hour[s]?", "h"]
     static let secondUnits = ["second[s]?", "sec[s]?", "s"]
-    static let digitNames = [
+    static let timeUnitsJoined = "(" + joinWithPipeSymbol(arr: minUnits + hourUnits + secondUnits) + ")"
+    static let defaultTime = 0
+
+    /// Numbers
+    static let digitWordMap = [
         "zero": 0,
         "one": 1,
         "two": 2,
@@ -21,30 +31,32 @@ struct RecipeStepParser {
         "twenty": 20,
         "half": 0.5
     ]
-
     static let intDecimalFraction = "\\d+" + optional(str: "(\\.|/)\\d+")
+
+    /// Miscellaneous
     static let randomShortString = "[a-z\\d\\-_\\s]{0,6}" // any <=6 chars
     static let randomShortStringBetweenMagnitudeAndUnit = optional(str: "[a-z\\d\\-_\\s]{0,5} ")
-    static let specialAndDelimiter = " {0,6}(and|&)? {0,6}"
-    static let excludeCharacters = "(?=([^a-z]|$))" // or end of line
+    static let excludedCharacters = "(?=([^a-z]|$))" // or end of line
 
-    static let defaultTime = 0
+    /**
+     Parses durations in a step string and returns the sum of the durations in seconds.
 
-    static let timeUnitsJoined = "(" + joinWithPipeSymbol(arr: minUnits + hourUnits + secondUnits) + ")"
-
-    /// Given a step, sum up all time words
-    /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes"
-    /// returns 210 seconds
-    static func parseTimeTaken(step: String) -> Int {
-        parseTimerDurations(step: step).map { parseToTime(timeString: $0) }.reduce(0, +)
+     - Example: "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes"
+        returns 210
+    */
+    static func parseTotalDuration(step: String) -> Int {
+        parseTimeStrings(step: step).map { parseDuration(timeString: $0) }.reduce(0, +)
     }
 
-    /// Given a step, returns an array of time duration words
-    /// E.g. "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes"
-    /// returns ["2 minutes", "1-2 minutes"]
-    static func parseTimerDurations(step: String) -> [String] {
+    /**
+     Parses duration words in a step string and returns an array of time strings.
+
+     - Example: "cook for about 2 minutes. Turn ribs and cook until second side is golden brown, 1–2 minutes"
+        returns ["2 minutes", "1-2 minutes"]
+     */
+    static func parseTimeStrings(step: String) -> [String] {
         var delimitersJoined = joinWithPipeSymbol(arr: delimiters)
-        var numbersJoined = joinWithPipeSymbol(arr: Array(digitNames.keys))
+        var numbersJoined = joinWithPipeSymbol(arr: Array(digitWordMap.keys))
         numbersJoined += "|" + intDecimalFraction // zero|one|...|[0-9]
         numbersJoined = "(" + numbersJoined + ")"
         numbersJoined += optional(str: specialAndDelimiter + numbersJoined) // 1 and a half min
@@ -54,9 +66,9 @@ struct RecipeStepParser {
 
         let mostBasicTimeWithOptionalUnit = numbersJoined +
             optional(str: randomShortStringBetweenMagnitudeAndUnit +
-                        timeUnitsJoined + excludeCharacters)
+                        timeUnitsJoined + excludedCharacters)
         let mostBasicTimeWithCompulsoryUnit = numbersJoined + randomShortStringBetweenMagnitudeAndUnit +
-            timeUnitsJoined + excludeCharacters
+            timeUnitsJoined + excludedCharacters
         let optionalRangeString = optional(str: mostBasicTimeWithOptionalUnit +
                                             optional(str: randomShortString + mostBasicTimeWithOptionalUnit)
                                             + randomShortString + delimitersJoined + randomShortString) // 1h 30mins to
@@ -69,10 +81,13 @@ struct RecipeStepParser {
         return trimmed
     }
 
-    /// converts time represented in String to seconds
-    /// E.g. "1 minutes" returns 60, "30 sec" returns 30
-    static func parseToTime(timeString: String) -> Int {
-        var numbersJoined = joinWithPipeSymbol(arr: Array(digitNames.keys))
+    /**
+     Parses time strings and returns the duration described by the string in seconds.
+
+     - Example: "1 minutes" returns 60, "30 sec" returns 30
+     */
+    static func parseDuration(timeString: String) -> Int {
+        var numbersJoined = joinWithPipeSymbol(arr: Array(digitWordMap.keys))
         numbersJoined += "|" + intDecimalFraction
         numbersJoined = "(" + numbersJoined + ")" // (1|2|3...one|two|...)
         let matchedNumbers = matchesWithIndex(for: numbersJoined, in: timeString)
@@ -121,13 +136,13 @@ struct RecipeStepParser {
     }
 
     private static func parseNumber(number: String) -> Double? {
-        var numbersJoined = joinWithPipeSymbol(arr: Array(digitNames.keys))
+        var numbersJoined = joinWithPipeSymbol(arr: Array(digitWordMap.keys))
         numbersJoined += "|" + intDecimalFraction
         guard number ~= numbersJoined else {
             return nil
         }
 
-        if let str = digitNames[number] {
+        if let str = digitWordMap[number] {
             return str
         }
 
@@ -141,7 +156,6 @@ struct RecipeStepParser {
 
         // regular Int or decimal
         return Double(number)
-
     }
 
     /// Convert time unit to scale

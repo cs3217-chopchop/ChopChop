@@ -4,6 +4,9 @@ import Combine
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
 
+    private(set) var parentRecipe: OnlineRecipe?
+    private(set) var downloadedRecipes: [Recipe] = []
+
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
@@ -12,7 +15,7 @@ class OnlineRecipeViewModel: ObservableObject {
     @Published private var firstRater = "No name"
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
-    @Published var isShowingDetail: Bool = false
+    @Published var isShowingDetail = false
 
     let settings: UserSettings
     @Published var downloadRecipeViewModel: DownloadRecipeViewModel
@@ -22,6 +25,7 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
+
         load()
     }
 
@@ -48,6 +52,15 @@ class OnlineRecipeViewModel: ObservableObject {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
+    func load() {
+        isLoading = true
+        updateFirstRaterName()
+        updateImage()
+        updateCreatorName()
+        updateRecipeServingText()
+        updateParentOnlineRecipe()
+    }
+
     func reload() {
         isLoading = true
         storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
@@ -59,20 +72,29 @@ class OnlineRecipeViewModel: ObservableObject {
             self.updateImage()
             self.updateCreatorName()
             self.updateRecipeServingText()
+            self.updateParentOnlineRecipe()
         }
     }
 
-    func load() {
-        print("Load onlinerecipe view")
-        isLoading = true
-        updateFirstRaterName()
-        updateImage()
-        updateCreatorName()
-        updateRecipeServingText()
+    func updateForkedRecipes() {
+        downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
     func toggleShowDetail() {
         isShowingDetail.toggle()
+    }
+
+    private func updateDownloadedRecipes() {
+        downloadedRecipes = (try? storageManager.fetchDownloadedRecipes(parentOnlineRecipeId: recipe.id)) ?? []
+    }
+
+    private func updateParentOnlineRecipe() {
+        guard let parentId = recipe.parentOnlineRecipeId else {
+            return
+        }
+        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+            self.parentRecipe = onlineRecipe
+        }
     }
 
     private func updateRecipeServingText() {

@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-struct RecipeStepTimerRecord {
+struct RecipeStepTimerRecord: Identifiable {
     var id: Int64?
     var stepId: Int64?
     var duration: TimeInterval

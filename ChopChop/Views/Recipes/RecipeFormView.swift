@@ -31,16 +31,16 @@ struct RecipeFormView: View {
     }
 
     var nameField: some View {
-        Section(header: Text("Name")) {
+        Section(header: Text("Name"), footer: formError("name")) {
             TextField("Name", text: $viewModel.name)
         }
     }
 
     var servingsField: some View {
-        Section(header: Text("Serving size")) {
+        Section(header: Text("Serving size"), footer: formError("servings")) {
             TextField("Serving size", text: Binding(get: { viewModel.servings },
                                                     set: viewModel.setServings))
-                .keyboardType(.numberPad)
+                .keyboardType(.decimalPad)
         }
     }
 
@@ -98,7 +98,7 @@ struct RecipeFormView: View {
     }
 
     var ingredientsSection: some View {
-        Section(header: Text("Ingredients")) {
+        Section(header: Text("Ingredients"), footer: formError("ingredients")) {
             ForEach(viewModel.ingredients, id: \.self) { ingredientRowViewModel in
                 HStack {
                     RecipeIngredientRowView(viewModel: ingredientRowViewModel)
@@ -182,6 +182,14 @@ struct RecipeFormView: View {
                     presentationMode.wrappedValue.dismiss()
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    func formError(_ key: String) -> some View {
+        if let errors = viewModel.formErrors[key] {
+            Text(errors.joined(separator: "\n"))
+                .foregroundColor(.red)
         }
     }
 }

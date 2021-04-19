@@ -9,16 +9,18 @@ struct RecipeIngredientRowView: View {
             HStack {
                 TextField("Quantity", text: Binding(get: { viewModel.quantity },
                                                     set: viewModel.setQuantity))
-                    .keyboardType(.numberPad)
-                Picker(viewModel.type.description, selection: $viewModel.type) {
-                    ForEach(QuantityType.allCases, id: \.self) {
+                    .keyboardType(.decimalPad)
+                Picker(viewModel.unit.description, selection: $viewModel.unit) {
+                    ForEach(QuantityUnit.allCases, id: \.self) {
                         Text($0.description)
                     }
                 }
+                .frame(width: 60, alignment: .leading)
                 .pickerStyle(MenuPickerStyle())
             }
             .frame(width: 120)
             TextField("Name", text: $viewModel.name)
+                .autocapitalization(.none)
         }
     }
 }

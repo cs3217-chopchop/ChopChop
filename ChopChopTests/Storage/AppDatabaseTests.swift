@@ -32,7 +32,7 @@ class AppDatabaseTests: XCTestCase {
             let columns = try db.columns(in: "recipe")
             let columnNames = Set(columns.map { $0.name })
 
-            XCTAssertEqual(columnNames, ["id", "recipeCategoryId", "name", "servings", "difficulty", "onlineId"])
+            XCTAssertEqual(columnNames, ["name", "servings", "onlineId", "difficulty", "id", "parentOnlineRecipeId", "recipeCategoryId"])
         }
     }
 
@@ -270,7 +270,7 @@ class AppDatabaseTests: XCTestCase {
                 return
             }
 
-            for step in try stepRecords {
+            for step in stepRecords {
                 XCTAssertTrue(steps.contains(where: { $0.content == step.content }))
             }
         }
@@ -837,17 +837,13 @@ class AppDatabaseTests: XCTestCase {
     // MARK: - Ingredients Publisher Tests
 
     func testIngredientsPublisher_publishesRightOnSubscription() throws {
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         _ = appDatabase.ingredientsPublisher().sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
             }
         } receiveValue: {
-            ingredients = $0.map { IngredientRecord(id: $0.id,
-                                                    ingredientCategoryId: $0.ingredientCategoryId,
-                                                    name: $0.name,
-                                                    quantityType: $0.quantityType)
-            }
+            ingredients = $0
         }
 
         XCTAssertNotNil(ingredients)
@@ -863,17 +859,13 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher().sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
             }
         } receiveValue: {
-            ingredients = $0.map { IngredientRecord(id: $0.id,
-                                                    ingredientCategoryId: $0.ingredientCategoryId,
-                                                    name: $0.name,
-                                                    quantityType: $0.quantityType)
-            }
+            ingredients = $0
             exp.fulfill()
         }
 
@@ -881,7 +873,16 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
-        XCTAssertEqual(ingredients, [ingredient2, ingredient1])
+        let expectedIngredients = [
+            try? Ingredient(
+                name: "Salt",
+                type: .mass),
+            try? Ingredient(
+                name: "Sugar",
+                type: .mass)
+        ].compactMap { $0 }
+
+        XCTAssertEqual(ingredients, expectedIngredients)
     }
 
     func testIngredientsPublisher_filteredByCategoryOrderedByName_publishesFilteredOrderedIngredients() throws {
@@ -914,18 +915,14 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher(categoryIds: [id])
             .sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
             }
         } receiveValue: {
-            ingredients = $0.map { IngredientRecord(id: $0.id,
-                                                    ingredientCategoryId: $0.ingredientCategoryId,
-                                                    name: $0.name,
-                                                    quantityType: $0.quantityType)
-            }
+            ingredients = $0
             exp.fulfill()
             }
 
@@ -933,7 +930,16 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
-        XCTAssertEqual(ingredients, [ingredient4, ingredient3])
+        let expectedIngredients = [
+            try? Ingredient(
+                name: "Egg",
+                type: .count),
+            try? Ingredient(
+                name: "Milk",
+                type: .volume)
+        ].compactMap { $0 }
+
+        XCTAssertEqual(ingredients, expectedIngredients)
     }
 
     func testIngredientsPublisher_filteredByName_publishesFilteredIngredients() throws {
@@ -948,17 +954,13 @@ class AppDatabaseTests: XCTestCase {
         }
 
         let exp = expectation(description: "Ingredients")
-        var ingredients: [IngredientRecord]?
+        var ingredients: [Ingredient]?
         let cancellable = appDatabase.ingredientsPublisher(query: "baking").sink { completion in
             if case let .failure(error) = completion {
                 XCTFail("Unexpected error \(error)")
             }
         } receiveValue: {
-            ingredients = $0.map { IngredientRecord(id: $0.id,
-                                                    ingredientCategoryId: $0.ingredientCategoryId,
-                                                    name: $0.name,
-                                                    quantityType: $0.quantityType)
-            }
+            ingredients = $0
             exp.fulfill()
         }
 
@@ -966,7 +968,16 @@ class AppDatabaseTests: XCTestCase {
             waitForExpectations(timeout: 1, handler: nil)
         }
 
-        XCTAssertEqual(ingredients, [ingredient1, ingredient2])
+        let expectedIngredients = [
+            try? Ingredient(
+                name: "Baking Powder",
+                type: .mass),
+            try? Ingredient(
+                name: "Baking Soda",
+                type: .mass)
+        ].compactMap { $0 }
+
+        XCTAssertEqual(ingredients, expectedIngredients)
     }
 
     // MARK: - Model Fetch Tests
@@ -1104,22 +1115,25 @@ class AppDatabaseTests: XCTestCase {
             }
         }
 
-        let ingredient = try Ingredient(name: ingredientRecord.name,
-                                        type: .count,
-                                        batches: batchRecords.map {
-                                            IngredientBatch(
-                                                quantity: try Quantity(from: $0.quantity),
-                                                expiryDate: $0.expiryDate)
-                                        })
-        ingredient.id = ingredientRecord.id
-        ingredient.ingredientCategoryId = categoryRecord.id
+        let ingredient = try Ingredient(
+            id: ingredientRecord.id,
+            name: ingredientRecord.name,
+            type: .count,
+            batches: batchRecords.map {
+                IngredientBatch(
+                    quantity: try Quantity(from: $0.quantity),
+                    expiryDate: $0.expiryDate)
+            })
 
         guard let id = ingredientRecord.id else {
             XCTFail("Ingredients should have a non-nil ID after insertion into database")
             return
         }
 
-        try XCTAssertEqual(appDatabase.fetchIngredient(id: id), ingredient)
+        let fetchedIngredient = try appDatabase.fetchIngredient(id: id)
+        XCTAssertEqual(fetchedIngredient, ingredient)
+        XCTAssertEqual(fetchedIngredient?.batches, ingredient.batches)
+        XCTAssertEqual(fetchedIngredient?.category, ingredient.category)
     }
 
     func testFetchRecipeCategoryByName() throws {

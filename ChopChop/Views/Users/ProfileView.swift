@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a user profile.
+ */
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @ObservedObject var recipesViewModel: OnlineRecipeCollectionViewModel
@@ -32,23 +35,10 @@ struct ProfileView: View {
         }
     }
 
-    @ViewBuilder
-    var followUnfollowButton: some View {
-        if viewModel.isFollowedByUser {
-            Button(action: viewModel.removeFollowee) {
-                Label("Unfollow", systemImage: "person.badge.minus")
-            }
-        } else {
-            Button(action: viewModel.addFollowee) {
-                Label("Follow", systemImage: "person.badge.plus")
-            }
-        }
-    }
-
-    var profileHeader: some View {
+    private var profileHeader: some View {
         HStack {
             VStack {
-                Image("default-user")
+                Image("user")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 100, height: 100)
@@ -73,5 +63,18 @@ struct ProfileView: View {
             }
         }
         .padding([.leading, .trailing], 50)
+    }
+
+    @ViewBuilder
+    private var followUnfollowButton: some View {
+        if viewModel.isFollowedByUser {
+            Button(action: viewModel.removeFollowee) {
+                Label("Unfollow", systemImage: "person.badge.minus")
+            }
+        } else {
+            Button(action: viewModel.addFollowee) {
+                Label("Follow", systemImage: "person.badge.plus")
+            }
+        }
     }
 }

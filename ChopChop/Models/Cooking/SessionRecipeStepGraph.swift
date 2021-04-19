@@ -1,6 +1,5 @@
-class SessionRecipeStepGraph {
+final class SessionRecipeStepGraph {
     private let graph: DirectedAcyclicGraph<SessionRecipeStepNode>
-    private let actionTimeTracker: ActionTimeTracker
 
     var nodes: [SessionRecipeStepNode] {
         graph.nodes
@@ -8,53 +7,6 @@ class SessionRecipeStepGraph {
 
     var edges: [Edge<SessionRecipeStepNode>] {
         graph.edges
-    }
-
-    var completableNodes: Set<SessionRecipeStepNode> {
-        let notCompletedDestinationNodes = Set(graph.edges
-            .filter { !$0.source.isCompleted }
-            .map { $0.destination })
-
-        return Set(
-            graph.nodes.filter { node in
-                !notCompletedDestinationNodes.contains(node)
-            }
-        )
-    }
-
-    init() {
-        graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
-        actionTimeTracker = ActionTimeTracker()
-    }
-
-    init?(graph: RecipeStepGraph) {
-        let actionTimeTracker = ActionTimeTracker()
-
-        let sessionNodes = graph.nodes.map { SessionRecipeStepNode($0, actionTimeTracker: actionTimeTracker) }
-        let sessionEdges = graph.edges.compactMap { edge -> Edge<SessionRecipeStepNode>? in
-            guard let sessionSourceNode = sessionNodes.first(where: { $0.label.step == edge.source.label }),
-                  let sessionDestinationNode = sessionNodes.first(where: { $0.label.step == edge.destination.label }),
-                  let sessionEdge = Edge<SessionRecipeStepNode>(source: sessionSourceNode,
-                                                                destination: sessionDestinationNode) else {
-                return nil
-            }
-
-            return sessionEdge
-        }
-
-        guard sessionEdges.count == graph.edges.count else {
-            return nil
-        }
-
-        guard let sessionGraph = try?
-                DirectedAcyclicGraph<SessionRecipeStepNode>(nodes: sessionNodes, edges: sessionEdges) else {
-            return nil
-        }
-
-        self.actionTimeTracker = actionTimeTracker
-        self.graph = sessionGraph
-
-        updateCompletableNodes()
     }
 
     var topologicallySortedNodes: [SessionRecipeStepNode] {
@@ -65,26 +17,55 @@ class SessionRecipeStepGraph {
         graph.nodeLayers
     }
 
-    private func updateCompletableNodes() {
-        for node in graph.topologicallySortedNodes {
-            let sourcesAreCompleted = edges.filter({ $0.destination == node }).allSatisfy({ $0.source.isCompleted })
-
-            node.isCompletable = sourcesAreCompleted
-            node.isCompleted = sourcesAreCompleted ? node.isCompleted : false
-        }
+    var hasTimers: Bool {
+        !nodes.allSatisfy { $0.label.timers.isEmpty }
     }
 
-    func resetSteps() {
-        graph.nodes.forEach { node in
-            node.isCompletable = false
-            node.isCompleted = false
-        }
-
-        updateCompletableNodes()
+    var isCompleted: Bool {
+        nodes.allSatisfy { $0.isCompleted }
     }
 
-    func toggleStep(_ node: SessionRecipeStepNode) {
+    init() {
+        graph = DirectedAcyclicGraph<SessionRecipeStepNode>()
+    }
+
+    init(graph: RecipeStepGraph) throws {
+        let sessionNodes: [RecipeStepNode: SessionRecipeStepNode] = graph.nodes.reduce(into: [:], { nodes, node in
+            let sessionNode = SessionRecipeStepNode(node: node)
+
+            nodes[node] = sessionNode
+        })
+
+        let sessionEdges: [Edge<SessionRecipeStepNode>] = graph.edges.compactMap {
+            guard let sourceNode = sessionNodes[$0.source], let destinationNode = sessionNodes[$0.destination] else {
+                return nil
+            }
+
+            return Edge(source: sourceNode, destination: destinationNode)
+        }
+
+        self.graph = try DirectedAcyclicGraph(nodes: Array(sessionNodes.values), edges: sessionEdges)
+        updateNodes()
+    }
+
+    func toggleNode(_ node: SessionRecipeStepNode) {
+        guard graph.containsNode(node) else {
+            return
+        }
+
         node.isCompleted.toggle()
-        updateCompletableNodes()
+        updateNodes()
+    }
+
+    private func updateNodes() {
+        for node in graph.topologicallySortedNodes {
+            let areSourcesCompleted = edges.filter { $0.destination == node }.allSatisfy { $0.source.isCompleted }
+
+            node.isCompletable = areSourcesCompleted
+
+            if !areSourcesCompleted {
+                node.isCompleted = false
+            }
+        }
     }
 }

@@ -1,13 +1,18 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model for a view of a user profile.
+ */
 final class ProfileViewModel: ObservableObject {
-    private let storageManager = StorageManager()
+    /// The id of the user displayed in the profile view.
     private let userId: String
+
+    private let storageManager = StorageManager()
     private let settings: UserSettings
     @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
-    private var publishedRecipesCountCancellable: Any?
 
+    /// User profile details
     @Published private(set) var userName = "No name"
     @Published private(set) var publishedRecipesCount = 0
     @Published private(set) var followeeCount = 0
@@ -19,17 +24,22 @@ final class ProfileViewModel: ObservableObject {
         self.userId = userId
         self.settings = settings
         self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
-        publishedRecipesCountCancellable = recipesViewModel.$recipes
+
+        recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
-        load()
     }
 
+    /// Checks if the profile belongs to the current user.
     var isOwnProfile: Bool {
         userId == settings.userId
     }
 
+    /**
+     Adds the user as a followee of the current user.
+     If the current user is already following the user or if the profile belongs to the current user, do nothing.
+     */
     func addFollowee() {
         guard let ownId = settings.userId, !isOwnProfile, !isFollowedByUser else {
             return
@@ -43,6 +53,10 @@ final class ProfileViewModel: ObservableObject {
         }
     }
 
+    /**
+     Removes the user as a followee of the current user.
+     If the current user is not following the user or if the profile belongs to the current user, do nothing.
+     */
     func removeFollowee() {
         guard let ownId = settings.userId, !isOwnProfile, isFollowedByUser else {
             return
@@ -57,8 +71,6 @@ final class ProfileViewModel: ObservableObject {
     }
 
     func load() {
-        print("Load profile view")
-
         isLoading = true
         guard !isOwnProfile else {
             followeeCount = settings.user?.followees.count ?? 0

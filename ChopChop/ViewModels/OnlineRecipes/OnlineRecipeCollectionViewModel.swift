@@ -35,7 +35,13 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
                 self?.recipes.removeAll { $0.id == id }
                 self?.onlineRecipeCollectionEditor.onlineRecipeToDelete = nil
             }
+    }
 
+    init(recipe: OnlineRecipe, settings: UserSettings) {
+        self.recipes = [recipe]
+        self.settings = settings
+        self.userIds = nil
+        self.filter = nil
     }
 
     func load() {

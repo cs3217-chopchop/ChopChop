@@ -1,9 +1,10 @@
 import GRDB
 
-struct RecipeRecord: Equatable {
+struct RecipeRecord: Identifiable, Equatable {
     var id: Int64?
     var onlineId: String?
     var isImageUploaded: Bool?
+    var parentOnlineRecipeId: String?
     var recipeCategoryId: Int64?
     var name: String
     var servings: Double
@@ -16,6 +17,7 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
         static let id = Column(CodingKeys.id)
         static let onlineId = Column(CodingKeys.onlineId)
         static let isImageUploaded = Column(CodingKeys.isImageUploaded)
+        static let parentOnlineRecipeId = Column(CodingKeys.parentOnlineRecipeId)
         static let recipeCategoryId = Column(CodingKeys.recipeCategoryId)
         static let name = Column(CodingKeys.name)
         static let servings = Column(CodingKeys.servings)
@@ -54,9 +56,9 @@ extension DerivableRequest where RowDecoder == RecipeRecord {
         if ids == [nil] {
             return filter(RecipeRecord.Columns.recipeCategoryId == nil)
         } else if ids.contains(nil) {
-            return joining(optional: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(optional: RecipeRecord.category.filter(ids: ids.compactMap { $0 }))
         } else {
-            return joining(required: RecipeRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(required: RecipeRecord.category.filter(ids: ids.compactMap { $0 }))
         }
     }
 

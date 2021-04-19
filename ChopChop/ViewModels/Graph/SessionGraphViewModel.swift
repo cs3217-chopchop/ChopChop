@@ -2,11 +2,11 @@ import SwiftUI
 
 final class SessionGraphViewModel: ObservableObject {
     @Published var portalPosition = CGVector.zero
-    @Published var showTimerPanel = false
 
-    var graph: SessionRecipeStepGraph
+    let graph: SessionRecipeStepGraph
+    let proxy: ScrollViewProxy?
 
-    init(graph: SessionRecipeStepGraph) {
+    init(graph: SessionRecipeStepGraph, proxy: ScrollViewProxy? = nil) {
         let maxCount = graph.nodeLayers.reduce(into: 0) { $0 = max($0, $1.count) }
 
         for (layerIndex, layer) in graph.nodeLayers.enumerated() {
@@ -18,6 +18,7 @@ final class SessionGraphViewModel: ObservableObject {
         }
 
         self.graph = graph
+        self.proxy = proxy
     }
 
     func onDragPortal(_ value: DragGesture.Value) {

@@ -5,6 +5,7 @@ struct Recipe: Equatable {
     var id: Int64?
     var onlineId: String?
     var isImageUploaded: Bool?
+    var parentOnlineRecipeId: String?
     let name: String
     let category: RecipeCategory?
     let servings: Double
@@ -12,15 +13,16 @@ struct Recipe: Equatable {
     let ingredients: [RecipeIngredient]
     let stepGraph: RecipeStepGraph
 
-    var totalTimeTaken: Int {
+    var totalTimeTaken: TimeInterval {
         stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 
     // swiftlint:disable function_default_parameter_at_end
-    init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool? = nil,
+    init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool? = nil, parentOnlineRecipeId: String? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
          stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
+
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
@@ -38,6 +40,7 @@ struct Recipe: Equatable {
         self.id = id
         self.onlineId = onlineId
         self.isImageUploaded = isImageUploaded
+        self.parentOnlineRecipeId = parentOnlineRecipeId
         self.name = trimmedName
         self.category = category
         self.servings = servings
@@ -53,6 +56,7 @@ extension Recipe: FetchableRecord {
         id = row[RecipeRecord.Columns.id]
         onlineId = row[RecipeRecord.Columns.onlineId]
         isImageUploaded = row[RecipeRecord.Columns.isImageUploaded]
+        parentOnlineRecipeId = row[RecipeRecord.Columns.parentOnlineRecipeId]
         category = row["recipeCategory"]
         name = row[RecipeRecord.Columns.name]
         servings = row[RecipeRecord.Columns.servings]

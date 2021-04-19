@@ -9,6 +9,10 @@ final class SelectionHandler<T: Node>: ObservableObject {
     }
 
     func selectNode(_ node: T) {
+        guard !selectedNodeIds.contains(node.id) else {
+            return
+        }
+
         selectedNodeIds = [node.id]
     }
 

@@ -11,25 +11,6 @@ import SwiftUI
             linesView
 
             nodesView(nodes: viewModel.graph.topologicallySortedNodes)
-
-            if viewModel.showTimerPanel {
-                Rectangle()
-                    .fill(Color(UIColor.systemBackground))
-                    .overlay(Divider(), alignment: .bottom)
-                    .overlay(
-                        ScrollView(.horizontal) {
-                            HStack {
-                                ForEach(viewModel.graph.topologicallySortedNodes) { node in
-                                    TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.graph, node: node))
-                                }
-                            }
-                            .padding()
-                        }
-                    )
-                    .frame(height: 160)
-                    .transition(AnyTransition.move(edge: .top))
-                    .zIndex(1)
-            }
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         .contentShape(Rectangle())
@@ -47,17 +28,6 @@ import SwiftUI
                 }
                 .onEnded(viewModel.onDragPortal)
         )
-        .toolbar {
-            Button(action: {
-                withAnimation {
-                    viewModel.showTimerPanel.toggle()
-                }
-            }) {
-                HStack {
-                    Image(systemName: "timer")
-                }
-            }
-        }
     }
 
     var linesView: some View {
@@ -72,11 +42,12 @@ import SwiftUI
 
     func nodesView(nodes: [SessionRecipeStepNode]) -> some View {
         ForEach(nodes) { node in
-            SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node), selection: selection)
+            SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node, proxy: viewModel.proxy),
+                            selection: selection)
                 .position((node.position ?? .zero) + viewModel.portalPosition + portalDragOffset)
                 .onTapGesture {
                     withAnimation {
-                        selection.toggleNode(node)
+                        selection.selectNode(node)
                     }
                 }
         }
@@ -85,7 +56,7 @@ import SwiftUI
 
 struct SessionGraphView_Previews: PreviewProvider {
     static var previews: some View {
-        if let graph = SessionRecipeStepGraph(graph: RecipeStepGraph()) {
+        if let graph = try? SessionRecipeStepGraph(graph: RecipeStepGraph()) {
             SessionGraphView(viewModel: SessionGraphViewModel(graph: graph))
         }
     }

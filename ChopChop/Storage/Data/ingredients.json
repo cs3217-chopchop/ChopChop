@@ -1,0 +1,206 @@
+[
+    {
+        "name": "Flour",
+        "category": "Baking Goods",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 500,
+                "unit": "g"
+            },
+            {
+                "mass": 1,
+                "unit": "kg"
+            }
+        ]
+    },
+    {
+        "name": "Baking Powder",
+        "category": "Baking Goods",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 60,
+                "unit": "g"
+            },
+            {
+                "mass": 450,
+                "unit": "g"
+            }
+        ]
+    },
+    {
+        "name": "Salt",
+        "category": "Condiments",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 70,
+                "unit": "g"
+            },
+            {
+                "mass": 500,
+                "unit": "g"
+            }
+        ]
+    },
+    {
+        "name": "Sugar",
+        "category": "Condiments",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 650,
+                "unit": "g"
+            },
+            {
+                "mass": 1,
+                "unit": "kg"
+            }
+        ]
+    },
+    {
+        "name": "Milk",
+        "category": "Dairy",
+        "type": "volume",
+        "quantities": [
+            {
+                "volume": 1,
+                "unit": "L"
+            },
+            {
+                "volume": 2,
+                "unit": "L"
+            }
+        ]
+    },
+    {
+        "name": "Pork Chop",
+        "category": "Meat",
+        "type": "count",
+        "quantities": [
+            {
+                "count": 3,
+            },
+            {
+                "count": 5,
+            }
+        ]
+    },
+    {
+        "name": "Pepper",
+        "category": "Spices",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 80,
+                "unit": "g"
+            },
+            {
+                "mass": 500,
+                "unit": "g"
+            }
+        ]
+    },
+    {
+        "name": "Egg",
+        "category": "Meat",
+        "type": "count",
+        "quantities": [
+            {
+                "count": 10,
+            },
+            {
+                "count": 30,
+            }
+        ]
+    },
+    {
+        "name": "Panko",
+        "category": "Baking Goods",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 200,
+                "unit": "g"
+            },
+            {
+                "mass": 300,
+                "unit": "g"
+            }
+        ]
+    },
+    {
+        "name": "Soup Stock",
+        "category": "Condiments",
+        "type": "volume",
+        "quantities": [
+            {
+                "volume": 400,
+                "unit": "ml"
+            },
+            {
+                "volume": 500,
+                "unit": "ml"
+            }
+        ]
+    },
+    {
+        "name": "Soy Sauce",
+        "category": "Condiments",
+        "type": "volume",
+        "quantities": [
+            {
+                "volume": 500,
+                "unit": "ml"
+            },
+            {
+                "volume": 640,
+                "unit": "ml"
+            }
+        ]
+    },
+    {
+        "name": "Mirin",
+        "category": "Condiments",
+        "type": "volume",
+        "quantities": [
+            {
+                "volume": 320,
+                "unit": "ml"
+            },
+            {
+                "volume": 500,
+                "unit": "ml"
+            }
+        ]
+    },
+    {
+        "name": "Onion",
+        "category": "Vegetables",
+        "type": "count",
+        "quantities": [
+            {
+                "count": 3
+            },
+            {
+                "count": 12
+            }
+        ]
+    },
+    {
+        "name": "Rice",
+        "category": "Grains",
+        "type": "mass",
+        "quantities": [
+            {
+                "mass": 400,
+                "unit": "g"
+            },
+            {
+                "mass": 2,
+                "unit": "kg"
+            }
+        ]
+    }
+]

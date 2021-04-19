@@ -1,14 +1,14 @@
-import Combine
+import SwiftUI
 
 final class RecipeIngredientRowViewModel: ObservableObject {
     @Published var name: String
     @Published var quantity: String
-    @Published var type: QuantityType
+    @Published var unit: QuantityUnit
 
-    init(name: String = "", quantity: String = "", type: QuantityType = .count) {
+    init(name: String = "", quantity: String = "", unit: QuantityUnit = .count) {
         self.name = name
         self.quantity = quantity
-        self.type = type
+        self.unit = unit
     }
 
     func setQuantity(_ quantity: String) {
@@ -23,7 +23,7 @@ final class RecipeIngredientRowViewModel: ObservableObject {
             throw QuantityError.invalidQuantity
         }
 
-        return try RecipeIngredient(name: name, quantity: Quantity(type, value: value))
+        return try RecipeIngredient(name: name, quantity: Quantity(unit, value: value))
     }
 }
 

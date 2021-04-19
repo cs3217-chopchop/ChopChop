@@ -1,11 +1,19 @@
 import Foundation
 import GRDB
 
-struct IngredientRecord: Equatable {
+/**
+ Represents a record of an ingredient stored in the local database.
+ */
+struct IngredientRecord: Identifiable, Equatable {
     var id: Int64?
+
+    // MARK: - Specification Fields
+    /// The id of the category the ingredient belongs to, or `nil` if it does not belong to any category.
     var ingredientCategoryId: Int64?
+    /// The name of the ingredient.
     var name: String
-    var quantityType: BaseQuantityType
+    /// The type of the quantities of the ingredient.
+    var quantityType: QuantityType
 }
 
 extension IngredientRecord: Codable, FetchableRecord, MutablePersistableRecord {
@@ -42,16 +50,16 @@ extension DerivableRequest where RowDecoder == IngredientRecord {
 
     func orderedByExpiryDate() -> Self {
         annotated(with: IngredientRecord.batches.min(IngredientBatchRecord.Columns.expiryDate))
-            .order(SQLLiteral("minIngredientBatchExpiryDate").sqlExpression.ascNullsLast)
+            .order(SQL("minIngredientBatchExpiryDate").sqlExpression.ascNullsLast)
     }
 
     func filteredByCategory(ids: [Int64?]) -> Self {
         if ids == [nil] {
             return filter(IngredientRecord.Columns.ingredientCategoryId == nil)
         } else if ids.contains(nil) {
-            return joining(optional: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(optional: IngredientRecord.category.filter(ids: ids.compactMap { $0 }))
         } else {
-            return joining(required: IngredientRecord.category.filter(keys: ids.compactMap { $0 }))
+            return joining(required: IngredientRecord.category.filter(ids: ids.compactMap { $0 }))
         }
     }
 

@@ -6,12 +6,15 @@ class DownloadRecipeViewModel: ObservableObject {
     @Published var isShow = false
     @Published var errorMessage = ""
     private let storageManager = StorageManager()
+    @Published var isNewDownload = true
+    var forkedRecipesCheckList: CheckListViewModel<Recipe>?
 
     func setRecipe(recipe: OnlineRecipe) {
         recipeToDownload = recipe
         isShow = true
         recipeNameToSave = recipe.name
         errorMessage = ""
+        isNewDownload = true
     }
 
     func downloadRecipe() {
@@ -28,6 +31,32 @@ class DownloadRecipeViewModel: ObservableObject {
         } catch {
             errorMessage = "Invalid name"
         }
+    }
+
+    func updateRecipes() {
+        guard let recipe = recipeToDownload, let checkList = forkedRecipesCheckList else {
+            assertionFailure()
+            return
+        }
+        do {
+            for checkListItem in checkList.checkList where checkListItem.isChecked {
+                try storageManager.updateForkedRecipes(forked: checkListItem.item, original: recipe)
+            }
+            isShow = false
+            recipeToDownload = nil
+        } catch {
+            errorMessage = "Error updating recipes"
+        }
+    }
+
+    func updateForkedRecipes(recipes: [Recipe], onlineRecipe: OnlineRecipe) {
+        forkedRecipesCheckList = CheckListViewModel(checkList: recipes.map({
+            CheckListItem(item: $0, displayName: $0.name)
+        }))
+        errorMessage = ""
+        recipeToDownload = onlineRecipe
+        isShow = true
+        isNewDownload = false
     }
 
     private func resetFields() {

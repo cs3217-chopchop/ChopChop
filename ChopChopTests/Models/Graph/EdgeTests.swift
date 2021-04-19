@@ -34,7 +34,7 @@ class EdgeTests: XCTestCase {
         let node1 = TestNode("A")
         let node2 = TestNode("B")
         let edge = Edge(source: node1, destination: node2, weight: 3.0)
-        let reversedEdge = edge?.reversed()
+        let reversedEdge = edge?.reversed
 
         XCTAssertEqual(reversedEdge?.source, node2, "Reversed edge's source is not correct")
         XCTAssertEqual(reversedEdge?.destination, node1, "Reversed edges's destination is not correct")
@@ -45,7 +45,7 @@ class EdgeTests: XCTestCase {
         let node1 = TestNode("A")
         let node2 = TestNode("B")
         let edge = Edge(source: node1, destination: node2, weight: 3.0)
-        let twiceReversedEdge = edge?.reversed().reversed()
+        let twiceReversedEdge = edge?.reversed.reversed
 
         XCTAssertEqual(twiceReversedEdge, edge, "Twiced-reversed edge should be same as the original edge")
     }

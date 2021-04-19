@@ -1,16 +1,9 @@
-import Foundation
-
-class SessionRecipe {
-    private(set) var recipe: Recipe
-    private(set) var stepGraph: SessionRecipeStepGraph
-    private(set) var isCompleted = false
+struct SessionRecipe {
+    let recipe: Recipe
+    let stepGraph: SessionRecipeStepGraph
 
     init(recipe: Recipe) {
         self.recipe = recipe
-        stepGraph = SessionRecipeStepGraph(graph: recipe.stepGraph) ?? SessionRecipeStepGraph()
-    }
-
-    func updateCompleted() {
-        isCompleted = true
+        stepGraph = (try? SessionRecipeStepGraph(graph: recipe.stepGraph)) ?? SessionRecipeStepGraph()
     }
 }

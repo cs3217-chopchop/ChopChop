@@ -34,5 +34,4 @@ final class CreateUserProfileViewModel: ObservableObject {
 
         settings.userId = userId
     }
-
 }

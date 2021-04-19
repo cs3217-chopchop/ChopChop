@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnlineRecipeView: View {
     @ObservedObject var viewModel: OnlineRecipeViewModel
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
         ZStack {
@@ -22,10 +23,13 @@ struct OnlineRecipeView: View {
 
     var userBar: some View {
         NavigationLink(
-            destination: ProfileView(viewModel: ProfileViewModel(userId: viewModel.recipe.userId, settings: viewModel.settings))
+            destination: ProfileView(
+                viewModel: ProfileViewModel(
+                    userId: viewModel.recipe.userId,
+                    settings: viewModel.settings))
         ) {
             HStack {
-                Image("default-user")
+                Image("user")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 50, height: 50)
@@ -49,15 +53,20 @@ struct OnlineRecipeView: View {
 
     var recipeImageOverlay: some View {
         var recipeName: some View {
-            Text(viewModel.recipe.name)
-                .font(.title)
-                .foregroundColor(.white)
-                .lineLimit(1)
+            VStack {
+                Text(viewModel.recipe.name)
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                if let parentRecipe = viewModel.parentRecipe {
+                    getLinkToParentRecipe(parentRecipe: parentRecipe)
+                }
+            }
         }
 
         var recipeDetails: some View {
             VStack(alignment: .leading) {
-                Text("Serves \(viewModel.recipe.servings.removeZerosFromEnd()) \(viewModel.recipe.servings == 1 ? "person" : "people")")
+                Text("Serves \(viewModel.recipeServingText)")
                 HStack {
                     Text("Difficulty: ")
                     DifficultyView(difficulty: viewModel.recipe.difficulty)
@@ -96,6 +105,9 @@ struct OnlineRecipeView: View {
             Text(viewModel.ratingDetails)
             Spacer()
             downloadButton
+            if !viewModel.downloadedRecipes.isEmpty {
+                updateButton
+            }
         }.padding()
     }
 
@@ -146,7 +158,30 @@ struct OnlineRecipeView: View {
 
     var downloadButton: some View {
         Button(action: viewModel.setRecipe) {
-            Label("Download", systemImage: "square.and.arrow.down")
+            Label("Download New Copy", systemImage: "square.and.arrow.down")
+        }
+    }
+
+    var updateButton: some View {
+        Button(action: {
+            viewModel.updateForkedRecipes()
+        }) {
+            Label("Update Downloaded Copies", systemImage: "square.and.arrow.down")
+        }
+    }
+
+    private func getLinkToParentRecipe(parentRecipe: OnlineRecipe) -> some View {
+        NavigationLink(
+            destination: OnlineRecipeCollectionView(
+                viewModel: OnlineRecipeCollectionViewModel(
+                    recipe: parentRecipe,
+                    settings: settings
+                )
+            ) {
+                EmptyView()
+            }
+        ) {
+            Text("Adapted from here")
         }
     }
 }

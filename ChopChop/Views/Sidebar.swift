@@ -7,7 +7,6 @@ import SwiftUI
 
     var body: some View {
         List {
-            cookingSection
             recipesSection
             ingredientsSection
             recipeFeedSection
@@ -87,18 +86,6 @@ import SwiftUI
                     })
                 }
             }
-        }
-    }
-
-    var cookingSection: some View {
-        NavigationLink(
-            destination: CookingSelectionView(viewModel:
-                                                CookingSelectionViewModel(categoryIds: viewModel.recipeCategories
-                                                                            .compactMap { $0.id } + [nil]))
-        ) {
-            Text("Cooking")
-                .font(.title3)
-                .bold()
         }
     }
 
@@ -229,12 +216,6 @@ import SwiftUI
             ) {
                 Label("Followees", systemImage: "person.2")
             }
-
-            NavigationLink(
-                destination: NotFoundView(entityName: "Settings")
-            ) {
-                Label("Settings", systemImage: "gear")
-            }
         }
     }
 
@@ -249,7 +230,9 @@ import SwiftUI
 
     @ViewBuilder
     var followeesView: some View {
-        FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(settings: settings))
+        if let id = settings.userId {
+            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: id, settings: settings))
+        }
     }
 
     private var uncategorisedIngredientsTab: some View {

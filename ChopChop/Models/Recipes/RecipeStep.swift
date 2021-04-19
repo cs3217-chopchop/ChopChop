@@ -4,8 +4,8 @@ import GRDB
 struct RecipeStep: Hashable {
     let content: String
     let timers: [TimeInterval]
-    var timeTaken: Int {
-        RecipeStepParser.parseTimeTaken(step: content)
+    var timeTaken: TimeInterval {
+        timers.isEmpty ? TimeInterval(RecipeStepParser.parseTotalDuration(step: content)) : timers.reduce(0, +)
     }
 
     init(_ content: String, timers: [TimeInterval] = []) throws {

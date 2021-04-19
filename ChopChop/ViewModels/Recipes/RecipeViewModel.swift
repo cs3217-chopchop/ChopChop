@@ -5,13 +5,23 @@ final class RecipeViewModel: ObservableObject {
     @Published private(set) var recipe: Recipe?
     @Published private(set) var image: UIImage?
 
+    @Published var parentRecipe: OnlineRecipe?
+    @Published var showSessionRecipe = false
+    @Published var showRecipeForm = false
+    @Published var showParentRecipe = false
+
     var isPublished: Bool {
         recipe?.onlineId != nil
+    }
+
+    var isCookingDisabled: Bool {
+        (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
     }
 
     let timeFormatter: DateComponentsFormatter
     private let storageManager = StorageManager()
     private var recipeCancellable: AnyCancellable?
+    private var parentRecipeCancellable: AnyCancellable?
     private let settings: UserSettings
 
     init(id: Int64, settings: UserSettings) {
@@ -30,6 +40,14 @@ final class RecipeViewModel: ObservableObject {
                     self?.image = self?.storageManager.fetchRecipeImage(name: String(id))
                 }
             }
+
+        guard let parentId = recipe?.parentOnlineRecipeId else {
+            return
+        }
+        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+            self.parentRecipe = onlineRecipe
+        }
+
     }
 
     func publish() {

@@ -9,14 +9,19 @@ struct FirebaseDatabase {
     private let db = Firestore.firestore()
 
     // MARK: - FirebaseDatabase: Create/Update
-    func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
+    func addOnlineRecipe(recipe: OnlineRecipeRecord, isImageExist: Bool, completion: @escaping (Error?) -> Void) throws -> String {
         let recipeDocRef = db.collection(recipePath).document()
         let batch = db.batch()
         try batch.setData(from: recipe, forDocument: recipeDocRef)
 
-        let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creator: recipe.creator)
         let recipeInfoRef = db.collection(recipeInfoPath).document(recipeDocRef.documentID)
-        try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
+        if isImageExist {
+            let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creator: recipe.creator) // sets to timestamp
+            try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
+        } else {
+            let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creator: recipe.creator, imageUpdatedAt: nil) // sets to null
+            try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
+        }
 
         batch.commit { err in
             completion(err)
@@ -35,28 +40,27 @@ struct FirebaseDatabase {
             "name": recipe.name,
             "creator": recipe.creator,
             "servings": recipe.servings,
-            "difficulty": recipe.difficulty?.rawValue,
-            "cuisine": recipe.cuisine,
-            "steps": recipe.steps,
+            "difficulty": recipe.difficulty?.rawValue as Any,
+            "cuisine": recipe.cuisine as Any,
+            "steps": recipe.steps.map({ $0.asDict }),
+            "stepEdges": recipe.stepEdges.map({ $0.asDict }),
             "ingredients": recipe.ingredients.map({ $0.asDict })
         ], forDocument: recipeDocRef, merge: true)
 
         let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
-        if let isImageUploadedAlready = isImageUploadedAlready {
-            if isImageUploadedAlready {
-                batch.setData([
-                    "updatedAt": FieldValue.serverTimestamp()
-                ], forDocument: recipeInfoDocRef, merge: true)
-            } else {
-                batch.setData([
-                    "updatedAt": FieldValue.serverTimestamp(),
-                    "imageUpdatedAt": FieldValue.serverTimestamp()
-                ], forDocument: recipeInfoDocRef, merge: true)
-            }
-        } else {
+        if isImageUploadedAlready == nil {
             batch.setData([
                 "updatedAt": FieldValue.serverTimestamp(),
                 "imageUpdatedAt": nil
+            ], forDocument: recipeInfoDocRef, merge: true)
+        } else if isImageUploadedAlready == true {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        } else {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp(),
+                "imageUpdatedAt": FieldValue.serverTimestamp()
             ], forDocument: recipeInfoDocRef, merge: true)
         }
 

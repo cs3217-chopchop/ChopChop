@@ -5,33 +5,45 @@ struct RecipeStepTimerRowView: View {
 
     var body: some View {
         HStack {
-            HStack {
-                TextField("Hours", text: Binding(get: { viewModel.hours },
-                                                 set: viewModel.setHours))
-                    .multilineTextAlignment(.trailing)
-                    .keyboardType(.numberPad)
-                Text("h")
-            }
-            .frame(width: 60)
-            .padding(.trailing)
-            HStack {
-                TextField("Minutes", text: Binding(get: { viewModel.minutes },
-                                                   set: viewModel.setMinutes))
-                    .multilineTextAlignment(.trailing)
-                    .keyboardType(.numberPad)
-                Text("m")
-            }
-            .frame(width: 60)
-            .padding(.trailing)
-            HStack {
-                TextField("Seconds", text: Binding(get: { viewModel.seconds },
-                                                   set: viewModel.setSeconds))
-                    .multilineTextAlignment(.trailing)
-                    .keyboardType(.numberPad)
-                Text("s")
-            }
-            .frame(width: 60)
+            hours
+            minutes
+            seconds
         }
+    }
+
+    var hours: some View {
+        HStack {
+            TextField("Hours", text: Binding(get: { viewModel.hours },
+                                             set: viewModel.setHours))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.numberPad)
+            Text("h")
+        }
+        .frame(width: 60)
+        .padding(.trailing)
+    }
+
+    var minutes: some View {
+        HStack {
+            TextField("Minutes", text: Binding(get: { viewModel.minutes },
+                                               set: viewModel.setMinutes))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.numberPad)
+            Text("m")
+        }
+        .frame(width: 60)
+        .padding(.trailing)
+    }
+
+    var seconds: some View {
+        HStack {
+            TextField("Seconds", text: Binding(get: { viewModel.seconds },
+                                               set: viewModel.setSeconds))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.numberPad)
+            Text("s")
+        }
+        .frame(width: 60)
     }
 }
 
