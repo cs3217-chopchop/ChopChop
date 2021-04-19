@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct EditorNodeView: View {
-    @ObservedObject var viewModel: EditorNodeViewModel
+    @StateObject var viewModel: EditorNodeViewModel
     @ObservedObject var selection: SelectionHandler<RecipeStepNode>
 
     var isSelected: Bool {

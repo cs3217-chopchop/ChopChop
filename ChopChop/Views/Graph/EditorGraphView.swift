@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct EditorGraphView: View {
-    @ObservedObject var viewModel: EditorGraphViewModel
-    @ObservedObject var selection = SelectionHandler<RecipeStepNode>()
+    @StateObject var viewModel: EditorGraphViewModel
+    @StateObject var selection = SelectionHandler<RecipeStepNode>()
 
     @GestureState var portalDragOffset = CGVector.zero
     @GestureState var nodeDragOffset: EditorGraphViewModel.NodeDragInfo?

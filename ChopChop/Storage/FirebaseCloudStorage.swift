@@ -35,6 +35,6 @@ struct FirebaseCloudStorage {
 
     func deleteImage(name: String) {
         let imageRef = storageRef.child("images/\(name).png")
-        _ = imageRef.delete()
+        imageRef.delete()
     }
 }

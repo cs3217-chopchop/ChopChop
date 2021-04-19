@@ -8,7 +8,8 @@ struct User: Identifiable, CachableEntity {
     let createdAt: Date
     let updatedAt: Date
 
-    init(id: String, name: String, followees: [String], ratings: [UserRating], createdAt: Date, updatedAt: Date) throws {
+    init(id: String, name: String, followees: [String], ratings: [UserRating], createdAt: Date,
+         updatedAt: Date) throws {
         self.id = id
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {

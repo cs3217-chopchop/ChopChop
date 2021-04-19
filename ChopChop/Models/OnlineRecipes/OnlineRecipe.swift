@@ -14,7 +14,6 @@ struct OnlineRecipe: Identifiable, CachableEntity {
     let createdAt: Date
     let updatedAt: Date
 
-    // swiftlint:disable function_default_parameter_at_end
     init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating],
@@ -40,7 +39,6 @@ struct OnlineRecipe: Identifiable, CachableEntity {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension OnlineRecipe {

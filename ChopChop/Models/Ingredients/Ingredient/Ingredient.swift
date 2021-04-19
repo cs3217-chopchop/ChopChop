@@ -30,7 +30,6 @@ struct Ingredient {
         - `IngredientError.emptyName` if the given name trimmed is empty.
         - ` QuantityError.incompatibleTypes` if the types of the given batches do not match the given type.
      */
-    // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil,
          name: String,
          type: QuantityType,
@@ -53,7 +52,6 @@ struct Ingredient {
         self.batches = batches
         self.category = category
     }
-    // swiftlint:enable function_default_parameter_at_end
 
     // MARK: - Quantity Operations
 
