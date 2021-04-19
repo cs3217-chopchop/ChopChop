@@ -1,9 +1,13 @@
 import FirebaseFirestoreSwift
 
+/**
+ Represents the different rating scores that can be given to a recipe.
+ */
 enum RatingScore: Int {
     case poor = 1, fair, adequate, great, excellent
 }
 
+// MARK: CustomStringConvertible
 extension RatingScore: CustomStringConvertible {
     var description: String {
         switch self {
@@ -21,9 +25,11 @@ extension RatingScore: CustomStringConvertible {
     }
 }
 
+// MARK: Codable - Allows encoding to and decoding from firebase document fields
 extension RatingScore: Codable {
 }
 
+// MARK: CaseIterable
 extension RatingScore: CaseIterable {
     static var max: Int {
         RatingScore.allCases.map { $0.rawValue }.max() ?? 0
