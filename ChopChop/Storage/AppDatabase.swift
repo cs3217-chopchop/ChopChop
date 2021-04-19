@@ -576,6 +576,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.parentOnlineRecipeId == parentOnlineRecipeId)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps)
@@ -597,6 +598,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = IngredientRecord
                 .all()
+                .including(optional: IngredientRecord.category)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchAll(db, request)
@@ -607,6 +609,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = IngredientRecord
                 .filter(id: id)
+                .including(optional: IngredientRecord.category)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
