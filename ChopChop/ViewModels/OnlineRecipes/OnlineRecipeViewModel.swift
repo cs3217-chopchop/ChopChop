@@ -74,6 +74,7 @@ class OnlineRecipeViewModel: ObservableObject {
         updateCreatorName()
         updateRecipeServingText()
         updateParentOnlineRecipe()
+        updateDownloadedRecipes()
     }
 
     /**
@@ -91,6 +92,7 @@ class OnlineRecipeViewModel: ObservableObject {
             self.updateCreatorName()
             self.updateRecipeServingText()
             self.updateParentOnlineRecipe()
+            self.updateDownloadedRecipes()
         }
     }
 
@@ -98,6 +100,7 @@ class OnlineRecipeViewModel: ObservableObject {
      Updates all local recipes that were downloaded from the displayed recipe.
      */
     func updateForkedRecipes() {
+        updateDownloadedRecipes()
         downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
