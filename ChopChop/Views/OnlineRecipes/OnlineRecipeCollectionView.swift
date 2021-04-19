@@ -29,7 +29,7 @@ struct OnlineRecipeCollectionView<Content: View>: View {
                                         recipe: recipe,
                                         downloadRecipeViewModel: downloadRecipeViewModel,
                                         settings: settings,
-                                        editor: viewModel.onlineRecipeCollectionEditor
+                                        reload: viewModel.load
                                         ))
                             } else {
                                 OnlineRecipeByUserView(

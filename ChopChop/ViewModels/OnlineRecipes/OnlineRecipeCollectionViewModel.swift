@@ -13,9 +13,6 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
     @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
     @Published var isLoading = false
 
-    @ObservedObject private(set) var onlineRecipeCollectionEditor = OnlineRecipeCollectionEditor()
-    private var editorCancellable: AnyCancellable?
-
     init(filter: OnlineRecipeCollectionFilter, settings: UserSettings) {
         self.filter = filter
         self.userIds = nil
@@ -26,15 +23,6 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
         self.userIds = userIds
         self.filter = nil
         self.settings = settings
-
-        editorCancellable = onlineRecipeCollectionEditor.$onlineRecipeToDelete
-            .sink { [weak self] recipe in
-                guard let id = recipe?.id else {
-                    return
-                }
-                self?.recipes.removeAll { $0.id == id }
-                self?.onlineRecipeCollectionEditor.onlineRecipeToDelete = nil
-            }
     }
 
     init(recipe: OnlineRecipe, settings: UserSettings) {

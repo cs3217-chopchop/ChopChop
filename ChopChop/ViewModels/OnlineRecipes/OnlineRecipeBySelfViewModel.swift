@@ -2,10 +2,10 @@ import SwiftUI
 import Combine
 
 class OnlineRecipeBySelfViewModel: OnlineRecipeViewModel {
-    private let onlineRecipeCollectionEditor: OnlineRecipeCollectionEditor
+    private let reload: () -> Void
 
-    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings, editor: OnlineRecipeCollectionEditor) {
-        self.onlineRecipeCollectionEditor = editor
+    init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings, reload: @escaping () -> Void) {
+        self.reload = reload
         super.init(recipe: recipe, downloadRecipeViewModel: downloadRecipeViewModel, settings: settings)
     }
 
@@ -14,7 +14,7 @@ class OnlineRecipeBySelfViewModel: OnlineRecipeViewModel {
             guard err == nil else {
                 return
             }
-            self.onlineRecipeCollectionEditor.onlineRecipeToDelete = self.recipe
+            self.reload()
         }
 
     }
