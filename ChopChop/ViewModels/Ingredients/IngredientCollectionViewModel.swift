@@ -85,16 +85,6 @@ final class IngredientCollectionViewModel: ObservableObject {
         return storageManager.fetchIngredientImage(name: String(id))
     }
 
-    /**
-     Resets the search fields of the view model.
-     */
-    func resetSearchFields() {
-        query = ""
-        filterByExpiryDate = false
-        expiryDateStart = .today
-        expiryDateEnd = .today
-    }
-
     private var ingredientsPublisher: AnyPublisher<[IngredientInfo], Never> {
         $query.combineLatest($filterByExpiryDate, $expiryDateStart, $expiryDateEnd)
             .map { [self] query, filterByExpiryDate, expiryDateStart, expiryDateEnd

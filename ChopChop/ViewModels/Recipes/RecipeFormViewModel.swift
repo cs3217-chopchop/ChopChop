@@ -37,11 +37,11 @@ class RecipeFormViewModel: ObservableObject {
     private var categoriesCancellable: AnyCancellable?
     private let recipe: Recipe?
 
-    init(recipe: Recipe? = nil) {
+    init(recipe: Recipe? = nil, category: RecipeCategory? = nil) {
         self.recipe = recipe
 
         self.name = recipe?.name ?? ""
-        self.category = recipe?.category
+        self.category = recipe?.category ?? category
 
         if let servings = recipe?.servings {
             self.servings = servings.removeZerosFromEnd()
