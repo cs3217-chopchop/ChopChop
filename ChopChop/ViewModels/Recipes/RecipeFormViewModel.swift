@@ -36,6 +36,7 @@ class RecipeFormViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var categoriesCancellable: AnyCancellable?
     private let recipe: Recipe?
+    private let originalImage: UIImage
 
     init(recipe: Recipe? = nil, category: RecipeCategory? = nil) {
         self.recipe = recipe
@@ -58,10 +59,12 @@ class RecipeFormViewModel: ObservableObject {
         } ?? []
         self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
 
-        if let id = recipe?.id {
-            self.image = storageManager.fetchRecipeImage(name: String(id)) ?? UIImage()
+        if let id = recipe?.id, let image = storageManager.fetchRecipeImage(name: String(id)) {
+            self.image = image
+            self.originalImage = image
         } else {
             self.image = UIImage()
+            self.originalImage = UIImage()
         }
 
         categoriesCancellable = categoriesPublisher()
@@ -133,15 +136,9 @@ class RecipeFormViewModel: ObservableObject {
                 throw RecipeError.invalidServings
             }
 
-            var isImageUploaded = false
-            if let id = recipe?.id, storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData() {
-                // image no change or image is still null
-                isImageUploaded = true
-            }
-
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
-                                           isImageUploaded: isImageUploaded,
+                                           isImageUploaded: image.pngData() == originalImage.pngData(),
                                            parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,
