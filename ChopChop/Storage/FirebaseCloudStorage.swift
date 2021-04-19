@@ -6,12 +6,13 @@ import Combine
 struct FirebaseCloudStorage {
     private let storageRef = Storage.storage().reference()
     private static let imageMaxSize: Int64 = 1_000 * 1_024 * 1_024
+    private let compressionQuality: CGFloat = 0.3
 
     /// Uploads compressed jpg image to Storage
     func uploadImage(image: UIImage, name: String) {
         let uploadRef = getStorageRef(name)
         // compresses image for faster upload
-        guard let uploadData = image.jpegData(compressionQuality: 0.3) else {
+        guard let uploadData = image.jpegData(compressionQuality: compressionQuality) else {
             return
         }
         let metaData = StorageMetadata()
