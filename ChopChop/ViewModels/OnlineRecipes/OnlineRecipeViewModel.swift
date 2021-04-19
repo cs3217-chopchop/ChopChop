@@ -3,87 +3,29 @@ import Combine
 
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
-    private(set) var parentRecipe: OnlineRecipe?
-    private(set) var downloadedRecipes: [Recipe]
-    private var creatorCancellable: AnyCancellable?
 
-    private var recipeCancellable: AnyCancellable?
-    private var followeesCancellable: AnyCancellable?
-    private var firstRaterCancellable: AnyCancellable?
-    private var imageCancellable: AnyCancellable?
-    private var parentRecipeCancellable: AnyCancellable?
+    private(set) var parentRecipe: OnlineRecipe?
+    private(set) var downloadedRecipes: [Recipe] = []
+
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
-    @Published private(set) var creatorName = "No name"
+    @Published private(set) var creatorName = ""
 
-    @Published private var firstRater = "No name"
-    private var followeeIds: [String] = []
-
+    @Published private var firstRater = ""
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
     @Published var isShowingDetail = false
 
     let settings: UserSettings
-
     @Published var downloadRecipeViewModel: DownloadRecipeViewModel
+    @Published var isLoading = false
 
     init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
-
-        do {
-            self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentOnlineRecipeId: recipe.id)
-        } catch {
-            self.downloadedRecipes = []
-        }
-
-        if let parentOnlineRecipeId = recipe.parentOnlineRecipeId {
-            parentRecipeCancellable = storageManager.onlineRecipePublisher(id: parentOnlineRecipeId)
-                .sink(receiveCompletion: { completion in
-                    switch completion {
-                    case .finished:
-                        break
-                    case .failure:
-                        self.parentRecipe = nil
-                    }
-                }, receiveValue: { value in
-                    self.parentRecipe = value
-                })
-        }
-
-        creatorCancellable = creatorPublisher
-            .sink { [weak self] user in
-                self?.creatorName = user.name
-            }
-
-        followeesCancellable = followeesPublisher
-            .sink { [weak self] followees in
-                self?.followeeIds = followees.compactMap { $0.id }
-            }
-
-        recipeCancellable = onlineRecipePublisher
-            .sink { [weak self] recipe in
-                self?.recipe = recipe
-
-                let servings = recipe.servings.removeZerosFromEnd()
-                self?.recipeServingText = "\(servings) \(recipe.servings == 1 ? "person" : "people")"
-
-                guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
-                    return
-                }
-
-                self?.firstRaterCancellable = self?.firstRaterPublisher(firstRaterId: firstRaterId)
-                    .sink { [weak self] user in
-                        self?.firstRater = (settings.userId == firstRaterId ? "You" : user.name)
-                    }
-            }
-
-        imageCancellable = imagePublisher
-            .sink { [weak self] image in
-                self?.image = image
-            }
+        load()
     }
 
     var averageRating: Double {
@@ -109,6 +51,30 @@ class OnlineRecipeViewModel: ObservableObject {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
+    func load() {
+        isLoading = true
+        updateFirstRaterName()
+        updateImage()
+        updateCreatorName()
+        updateRecipeServingText()
+        updateParentOnlineRecipe()
+    }
+
+    func reload() {
+        isLoading = true
+        storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
+            guard let onlineRecipe = onlineRecipe else {
+                return
+            }
+            self.recipe = onlineRecipe
+            self.updateFirstRaterName()
+            self.updateImage()
+            self.updateCreatorName()
+            self.updateRecipeServingText()
+            self.updateParentOnlineRecipe()
+        }
+    }
+
     func updateForkedRecipes() {
         downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
@@ -117,50 +83,65 @@ class OnlineRecipeViewModel: ObservableObject {
         isShowingDetail.toggle()
     }
 
-    private var creatorPublisher: AnyPublisher<User, Never> {
-        storageManager.userByIdPublisher(userId: recipe.userId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
+    private func updateDownloadedRecipes() {
+        downloadedRecipes = (try? storageManager.fetchDownloadedRecipes(parentOnlineRecipeId: recipe.id)) ?? []
     }
 
-    private var onlineRecipePublisher: AnyPublisher<OnlineRecipe, Never> {
-        storageManager.onlineRecipeByIdPublisher(recipeId: recipe.id)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
-    }
-
-    private func firstRaterPublisher(firstRaterId: String) -> AnyPublisher<User, Never> {
-        storageManager.userByIdPublisher(userId: firstRaterId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
-    }
-
-    private var followeesPublisher: AnyPublisher<[User], Never> {
-        guard let userId = settings.userId else {
-            fatalError("No user id stored")
+    private func updateParentOnlineRecipe() {
+        guard let parentId = recipe.parentOnlineRecipeId else {
+            return
         }
-
-        return storageManager.followeesPublisher(userId: userId)
-            .catch { _ in
-                Just<[User]>([])
-            }
-            .eraseToAnyPublisher()
+        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+            self.parentRecipe = onlineRecipe
+        }
     }
 
-    private var imagePublisher: AnyPublisher<UIImage, Never> {
-        storageManager.onlineRecipeImagePublisher(recipeId: recipe.id)
-            .catch { _ in
-                Just<UIImage>(UIImage(imageLiteralResourceName: "recipe"))
+    private func updateRecipeServingText() {
+        recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
+    }
+
+    private func updateCreatorName() {
+        guard recipe.creatorId != settings.userId  else {
+            creatorName = settings.user?.name ?? ""
+            return
+        }
+        storageManager.fetchUser(id: recipe.creatorId) { user, err in
+            guard let name = user?.name, err == nil else {
+                return
             }
-            .eraseToAnyPublisher()
+            self.creatorName = name
+        }
+    }
+
+    private func updateImage() {
+        storageManager.fetchOnlineRecipeImage(recipeId: recipe.id) { data, err  in
+            guard let data = data, let image = UIImage(data: data), err == nil else {
+                self.image = UIImage(imageLiteralResourceName: "recipe")
+                self.isLoading = false // takes the longest
+                return
+            }
+            self.image = image
+            self.isLoading = false // takes the longest
+        }
+    }
+
+    private func updateFirstRaterName() {
+        guard let firstRaterId = getRaterId(recipe: recipe) else {
+            return
+        }
+        storageManager.fetchUser(id: firstRaterId) { user, err in
+            guard let name = user?.name, err == nil else {
+                return
+            }
+            self.firstRater = (self.settings.userId == firstRaterId ? "You" : name)
+        }
     }
 
     private func getRaterId(recipe: OnlineRecipe) -> String? {
-        guard let userId = settings.userId else {
-            assertionFailure()
+        guard let userId = settings.userId, let followees = settings.user?.followees else {
             return nil
         }
-        if let raterId = (recipe.ratings.first { followeeIds.contains($0.userId) })?.userId {
+        if let raterId = (recipe.ratings.first { followees.contains($0.userId) })?.userId {
             // return 1 of followees
             return raterId
         }

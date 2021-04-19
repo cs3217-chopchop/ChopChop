@@ -119,10 +119,12 @@ extension StorageManagerTests {
         XCTAssertNil(storageManager.fetchIngredientImage(name: imageName))
     }
 
-    func testRecipeImagePersistence() {
+    func testRecipeImagePersistence() throws {
         let image = UIImage(imageLiteralResourceName: "apple-pie")
 
         let imageName = "1"
+        var recipe = try Recipe(id: 1, name: "apple pie")
+        try storageManager.saveRecipe(&recipe)
         XCTAssertNoThrow(try storageManager.saveRecipeImage(image, name: imageName))
         let persistedImage = storageManager.fetchRecipeImage(name: imageName)
         XCTAssertNotNil(persistedImage)
@@ -132,9 +134,12 @@ extension StorageManagerTests {
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 
-    func testOverwriteExistingRecipeImage() {
+    func testOverwriteExistingRecipeImage() throws {
         let existingImage = UIImage(imageLiteralResourceName: "apple-pie")
         let newImage = UIImage(imageLiteralResourceName: "apple-pie-slice")
+
+        var recipe = try Recipe(id: 1, name: "apple pie")
+        try storageManager.saveRecipe(&recipe)
 
         let imageName = "1"
         XCTAssertNoThrow(try storageManager.saveRecipeImage(existingImage, name: imageName))

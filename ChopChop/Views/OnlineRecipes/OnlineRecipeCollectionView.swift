@@ -13,43 +13,40 @@ struct OnlineRecipeCollectionView<Content: View>: View {
     }
 
     var body: some View {
-        ScrollView {
-            content
+        ZStack {
+            ScrollView {
+                content
 
-            if viewModel.recipes.isEmpty {
-                NotFoundView(entityName: "Recipes")
-                    .padding()
-            } else {
-                VStack(spacing: 20) {
-                    ForEach(viewModel.recipes) { recipe in
-                        if recipe.userId == settings.userId {
-                            OnlineRecipeBySelfView(
-                                viewModel: OnlineRecipeBySelfViewModel(
-                                    recipe: recipe,
-                                    downloadRecipeViewModel: downloadRecipeViewModel,
-                                    settings: settings))
-                        } else {
-                            OnlineRecipeByUserView(
-                                viewModel: OnlineRecipeByUserViewModel(
-                                    recipe: recipe,
-                                    downloadRecipeViewModel: downloadRecipeViewModel,
-                                    settings: settings))
+                if viewModel.recipes.isEmpty {
+                    NotFoundView(entityName: "Recipes")
+                        .padding()
+                } else {
+                    VStack(spacing: 20) {
+                        ForEach(viewModel.recipes) { recipe in
+                            if recipe.creatorId == settings.userId {
+                                OnlineRecipeBySelfView(
+                                    viewModel: OnlineRecipeBySelfViewModel(
+                                        recipe: recipe,
+                                        downloadRecipeViewModel: downloadRecipeViewModel,
+                                        settings: settings,
+                                        reload: viewModel.load
+                                        ))
+                            } else {
+                                OnlineRecipeByUserView(
+                                    viewModel: OnlineRecipeByUserViewModel(
+                                        recipe: recipe,
+                                        downloadRecipeViewModel: downloadRecipeViewModel,
+                                        settings: settings))
+                            }
                         }
                     }
                 }
             }
+            ProgressView(isShow: $viewModel.isLoading)
         }.sheet(isPresented: $downloadRecipeViewModel.isShow) {
             DownloadRecipeView(viewModel: downloadRecipeViewModel)
-        }
-    }
-}
-
-struct OnlineRecipeCollectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        OnlineRecipeCollectionView(
-            viewModel: OnlineRecipeCollectionViewModel(
-                publisher: StorageManager().allRecipesPublisher())) {
-            EmptyView()
+        }.onAppear {
+            viewModel.load()
         }
     }
 }

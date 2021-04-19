@@ -41,32 +41,29 @@ final class RecipeViewModel: ObservableObject {
                 }
             }
 
-        if let id = recipe?.parentOnlineRecipeId {
-            parentRecipeCancellable = storageManager.onlineRecipePublisher(id: id)
-                .sink(receiveCompletion: { completion in
-                    switch completion {
-                    case .finished:
-                        break
-                    case .failure:
-                        self.parentRecipe = nil
-                    }
-                }, receiveValue: { value in
-                    self.parentRecipe = value
-                })
+        guard let parentId = recipe?.parentOnlineRecipeId else {
+            return
         }
+        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+            self.parentRecipe = onlineRecipe
+        }
+
     }
 
-    // TODO: Properly throw errors
     func publish() {
         guard var recipe = recipe, let userId = settings.userId else {
-            assertionFailure()
             return
         }
 
         if isPublished {
-            storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
+            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
+                _ in
+
+            }
         } else {
-            try? storageManager.publishRecipe(recipe: &recipe, userId: userId)
+            try? storageManager.addOnlineRecipe(recipe: &recipe, userId: userId) { _ in
+
+            }
         }
     }
 

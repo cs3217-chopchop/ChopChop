@@ -3,7 +3,7 @@ import Foundation
 import UIKit
 
 final class CreateUserProfileViewModel: ObservableObject {
-    private var settings: UserSettings
+    private let settings: UserSettings
 
     @Published var name: String = ""
     private let storageManager = StorageManager()
@@ -15,21 +15,20 @@ final class CreateUserProfileViewModel: ObservableObject {
 
     func onClick() {
         guard settings.userId == nil else {
-            assertionFailure()
             return
         }
 
-        guard let newUser = try? User(name: name) else {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
             errorMessage = "Empty name not accepted"
             return
         }
 
-        guard let userId = try? storageManager.createUser(user: newUser) else {
-            assertionFailure()
-            return
+        try? storageManager.addUser(name: trimmedName) { userId, err in
+            guard let userId = userId, err == nil else {
+                return
+            }
+            self.settings.userId = userId
         }
-
-        UserDefaults.standard.set(userId, forKey: "userId")
-        settings.userId = userId
     }
 }

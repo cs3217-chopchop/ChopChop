@@ -1,258 +1,433 @@
 import Firebase
 import Combine
-import CombineFirebase
 
 struct FirebaseDatabase {
     private let recipePath: String = "recipes"
+    private let recipeInfoPath: String = "recipeInfos"
     private let userPath: String = "users"
+    private let userInfoPath: String = "userInfos"
     private let db = Firestore.firestore()
 
-    func addRecipe(recipe: OnlineRecipeRecord) throws -> String {
-        do {
-            return try db.collection(recipePath).addDocument(from: recipe).documentID
-        } catch {
-            throw FirebaseError.addRecipeError(message: "Unable to add recipe: \(error.localizedDescription)")
+    // MARK: - FirebaseDatabase: Create/Update
+    func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
+        let recipeDocRef = db.collection(recipePath).document()
+        let batch = db.batch()
+        try batch.setData(from: recipe, forDocument: recipeDocRef)
+
+        let recipeInfoRef = db.collection(recipeInfoPath).document(recipeDocRef.documentID)
+        let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creatorId: recipe.creatorId) // sets to timestamp
+        try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
+
+        batch.commit { err in
+            completion(err)
         }
+        return recipeDocRef.documentID
     }
-    func removeRecipe(recipeId: String) throws {
-        // swiftlint:disable implicit_return
-        return db.collection(recipePath).document(recipeId).delete()
-    }
-    func updateRecipeDetails(recipe: OnlineRecipeRecord) {
+
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool, completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
 
-        return db.collection(recipePath).document(recipeId).setData([
+        let batch = db.batch()
+        let recipeDocRef = db.collection(recipePath).document(recipeId)
+        batch.setData([
             "name": recipe.name,
-            "creator": recipe.creator,
+            "creatorId": recipe.creatorId,
             "servings": recipe.servings,
             "difficulty": recipe.difficulty?.rawValue as Any,
             "cuisine": recipe.cuisine as Any,
             "steps": recipe.steps.map({ $0.asDict }),
             "stepEdges": recipe.stepEdges.map({ $0.asDict }),
             "ingredients": recipe.ingredients.map({ $0.asDict })
-        ], merge: true)
+        ], forDocument: recipeDocRef, merge: true)
+
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
+        if isImageUploadedAlready {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        } else {
+            batch.setData([
+                "updatedAt": FieldValue.serverTimestamp(),
+                "imageUpdatedAt": FieldValue.serverTimestamp()
+            ], forDocument: recipeInfoDocRef, merge: true)
+        }
+
+        batch.commit { err in
+            completion(err)
+        }
     }
 
-    func fetchOnlineRecipeIdByUsers(userIds: [String]) -> AnyPublisher<[OnlineRecipeRecord], Error> {
-        userIds.map({
-            db.collection(recipePath).whereField("creator", isEqualTo: $0)
-                .publisher()
-        })
-        .combineLatest
-        .map({
-            $0.reduce(into: [], {
-                $0 += $1.documents
-            })
-        })
-        .map({
-            $0.compactMap({
-                try? $0.data(as: OnlineRecipeRecord.self)
-            })
-        })
-        .eraseToAnyPublisher()
+    func addRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
+        let batch = db.batch()
+        let recipeRef = db.collection(recipePath).document(onlineRecipeId)
+        batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: recipeRef)
+
+        let recipeInfoRef = db.collection(recipeInfoPath).document(onlineRecipeId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoRef)
+
+        batch.commit { err in
+            completion(err)
+        }
     }
 
-    func fetchAllRecipes() -> AnyPublisher<[OnlineRecipeRecord], Error> {
-        db.collection(recipePath)
-            .publisher()
-            .map({
-                $0.documents
-                    .compactMap({
-                    try? $0.data(as: OnlineRecipeRecord.self)
-                })
-            })
-            .eraseToAnyPublisher()
+    func updateRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+                            completion: @escaping (Error?) -> Void) {
+        let docRef = db.collection(recipePath).document(recipeId)
+
+        let batch = db.batch()
+        batch.updateData(["ratings": FieldValue.arrayRemove([oldRating.asDict])], forDocument: docRef)
+        batch.updateData(["ratings": FieldValue.arrayUnion([newRating.asDict])], forDocument: docRef)
+
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoDocRef)
+
+        batch.commit { err in
+            completion(err)
+        }
     }
 
-    func fetchAllUsers(query: String = "") -> AnyPublisher<[User], Error> {
-        db.collection(userPath)
-            .publisher()
-            .map({
-                $0.documents.compactMap({
-                    try? $0.data(as: User.self)
-                })
-            })
-            .map {
-                $0.compactMap {
-                    $0
+    func addUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
+        let batch = db.batch()
+        let userRef = db.collection(userPath).document(userId)
+        batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: userRef)
+
+        let userInfoRef = db.collection(userInfoPath).document(userId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating, completion: @escaping (Error?) -> Void) {
+        let docRef = db.collection(userPath).document(userId)
+        let userInfoDocRef = db.collection(userInfoPath).document(userId)
+        let batch = db.batch()
+        batch.updateData(["ratings": FieldValue.arrayRemove([oldRating.asDict])], forDocument: docRef)
+        batch.updateData(["ratings": FieldValue.arrayUnion([newRating.asDict])], forDocument: docRef)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoDocRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    func addUser(user: UserRecord, completion: @escaping (String?, Error?) -> Void) throws {
+        let userRef = db.collection(userPath).document()
+        let batch = db.batch()
+        try batch.setData(from: user, forDocument: userRef)
+
+        let userInfo = UserInfoRecord(id: userRef.documentID)
+        let userInfoRef = db.collection(userInfoPath).document(userRef.documentID)
+        try batch.setData(from: userInfo, forDocument: userInfoRef)
+
+        batch.commit { err in
+            completion(userRef.documentID, err)
+        }
+    }
+
+    func addFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
+        let userRef = db.collection(userPath).document(userId)
+        let batch = db.batch()
+        batch.updateData(["followees": FieldValue.arrayUnion([followeeId])], forDocument: userRef)
+
+        let userInfoRef = db.collection(userInfoPath).document(userId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    // MARK: - FirebaseDatabase: Delete
+
+    func removeOnlineRecipe(recipeId: String, completion: @escaping (Error?) -> Void) throws {
+        let batch = db.batch()
+        let recipeDocRef = db.collection(recipePath).document(recipeId)
+        batch.deleteDocument(recipeDocRef)
+
+        let recipeInfoDocRef = db.collection(recipeInfoPath).document(recipeId)
+        batch.deleteDocument(recipeInfoDocRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    func removeRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
+        let batch = db.batch()
+        let recipeRef = db.collection(recipePath).document(onlineRecipeId)
+        batch.updateData(["ratings": FieldValue.arrayRemove([rating.asDict])], forDocument: recipeRef)
+
+        let recipeInfoRef = db.collection(recipeInfoPath).document(onlineRecipeId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: recipeInfoRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    func removeUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
+        let batch = db.batch()
+        let userRef = db.collection(userPath).document(userId)
+        batch.updateData(["ratings": FieldValue.arrayRemove([rating.asDict])], forDocument: userRef)
+
+        let userInfoRef = db.collection(userInfoPath).document(userId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
+        let userRef = db.collection(userPath).document(userId)
+        let batch = db.batch()
+        batch.updateData(["followees": FieldValue.arrayRemove([followeeId])], forDocument: userRef)
+
+        let userInfoRef = db.collection(userInfoPath).document(userId)
+        batch.updateData(["updatedAt": FieldValue.serverTimestamp()], forDocument: userInfoRef)
+
+        batch.commit { err in
+            completion(err)
+        }
+    }
+
+    // MARK: - FirebaseDatabase: Read
+
+    func fetchUserInfo(id: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
+        db.collection(userInfoPath).document(id).getDocument { document, err in
+            guard let userInfo = try? document?.data(as: UserInfoRecord.self), err == nil else {
+                completion(nil, err)
+                return
+            }
+            completion(userInfo, nil)
+        }
+    }
+
+    func fetchUser(id: String, completion: @escaping (UserRecord?, Error?) -> Void) {
+        db.collection(userPath).document(id).getDocument { document, err in
+            guard let user = try? document?.data(as: UserRecord.self), err == nil else {
+                completion(nil, err)
+                return
+            }
+            completion(user, nil)
+        }
+    }
+
+    func fetchOnlineRecipeInfos(userIds: [String], completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
+
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
+
+        let totalUserCount = userIds.count
+        let queryLimit = QueryLimiter(max: totalUserCount)
+        while queryLimit.hasNext {
+            let range = [] + userIds[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(recipeInfoPath).whereField("creatorId", in: range).getDocuments { snapshot, err in
+                guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }), err == nil else {
+                    completion(allOnlineRecipeInfoRecords, err)
+                    dispatchGroup.leave()
+                    return
                 }
-                .filter {
-                    guard !query.isEmpty else {
-                        return true
+
+                for recipeInfo in recipeInfoRecords {
+                    guard let id = recipeInfo.id else {
+                        continue
                     }
-
-                    return $0.name.contains(query)
+                    allOnlineRecipeInfoRecords[id] = recipeInfo
                 }
-            }
-            .eraseToAnyPublisher()
-    }
-
-    func fetchFolloweesId(userId: String) -> AnyPublisher<[String], Error> {
-        db.collection(userPath).document(userId)
-            .publisher()
-            .map({
-                try? $0.data(as: User.self)
-            })
-            .map({
-                $0?.followees ?? []
-            })
-            .eraseToAnyPublisher()
-    }
-
-    func fetchUsers(userId: [String], query: String = "") -> AnyPublisher<[User], Error> {
-        let docRefs = userId.map({
-            db.collection(userPath).document($0)
-        })
-        return docRefs.map({
-            $0.publisher().map({
-                try? $0.data(as: User.self)
-            })
-        })
-        .combineLatest
-        .map {
-            $0.compactMap {
-                $0
-            }
-            .filter {
-                guard !query.isEmpty else {
-                    return true
-                }
-
-                return $0.name.contains(query)
+                dispatchGroup.leave()
             }
         }
-        .eraseToAnyPublisher()
+
+        dispatchGroup.notify(queue: .main) {
+            completion(allOnlineRecipeInfoRecords, nil)
+        }
     }
 
-    func fetchUserRating(userId: String) -> AnyPublisher<[UserRating], Error> {
-        db.collection(userPath).document(userId)
-            .getDocument()
-            .compactMap({
-                try? $0.data(as: User.self)?.ratings
-            })
-            .eraseToAnyPublisher()
-    }
+    func fetchAllOnlineRecipeInfos(completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
+        db.collection(recipeInfoPath).getDocuments { snapshot, err in
+            var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
 
-    func updateRecipeRating(userId: String, recipeId: String, newScore: RatingScore) {
-        let docRef = db.collection(recipePath).document(recipeId)
-        _ = db.runTransction({ transaction -> Any? in
-            let document: DocumentSnapshot
-            do {
-                try document = transaction.getDocument(docRef)
-            } catch {
-                return nil
-            }
-            guard let recipeRatings = try? document.data(as: OnlineRecipeRecord.self)?.ratings else {
-                return nil
+            guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }), err == nil else {
+                completion(allOnlineRecipeInfoRecords, err)
+                return
             }
 
-            var newRatingList = [RecipeRating]()
-
-            for rating in recipeRatings {
-                if rating.userId == userId {
-                    newRatingList.append(RecipeRating(userId: userId, score: newScore))
-                } else {
-                    newRatingList.append(rating)
+            for recipeInfo in recipeInfoRecords {
+                guard let id = recipeInfo.id else {
+                    continue
                 }
+                allOnlineRecipeInfoRecords[id] = recipeInfo
             }
-
-            transaction.updateData(["ratings": newRatingList.map({ $0.asDict })], forDocument: docRef)
-            return nil
-        })
+            completion(allOnlineRecipeInfoRecords, nil)
+        }
     }
 
-    func updateUserRating(userId: String, recipeId: String, newScore: RatingScore) {
-        let docRef = db.collection(userPath).document(userId)
-        _ = db.runTransction({ transaction -> Any? in
-            let document: DocumentSnapshot
-            do {
-                try document = transaction.getDocument(docRef)
-            } catch {
-                return nil
-            }
-            guard let userRatings = try? document.data(as: User.self)?.ratings else {
-                return nil
-            }
+    func fetchOnlineRecipes(ids: [String], completion: @escaping ([OnlineRecipeRecord], Error?) -> Void) {
 
-            var newRatingList = [UserRating]()
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allOnlineRecipeRecords: [OnlineRecipeRecord] = []
 
-            for rating in userRatings {
-                if rating.recipeId == recipeId {
-                    newRatingList.append(UserRating(recipeOnlineId: recipeId, score: newScore))
-                } else {
-                    newRatingList.append(rating)
+        let queryLimit = QueryLimiter(max: ids.count)
+        while queryLimit.hasNext {
+            let range = [] + ids[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(recipePath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+                guard let recipeRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeRecord.self) }), err == nil else {
+                    completion([], err)
+                    dispatchGroup.leave()
+                    return
                 }
+
+                allOnlineRecipeRecords.append(contentsOf: recipeRecords)
+                dispatchGroup.leave()
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            completion(allOnlineRecipeRecords, nil)
+        }
+    }
+
+    func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipeRecord?, Error?) -> Void) {
+        db.collection(recipePath).document(id).getDocument { snapshot, err in
+            guard let recipeRecord = try? snapshot?.data(as: OnlineRecipeRecord.self), err == nil else {
+                completion(nil, err)
+                return
+            }
+            completion(recipeRecord, nil)
+        }
+    }
+
+    func fetchOnlineRecipeInfo(id: String, completion: @escaping (OnlineRecipeInfoRecord?, Error?) -> Void) {
+        db.collection(recipeInfoPath).document(id).getDocument { snapshot, err in
+            guard let recipeInfoRecord = try? snapshot?.data(as: OnlineRecipeInfoRecord.self), err == nil else {
+                completion(nil, err)
+                return
+            }
+            completion(recipeInfoRecord, nil)
+        }
+    }
+
+    func fetchAllUserInfos(completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
+        var allUserInfoRecords = [String: UserInfoRecord]()
+        db.collection(userInfoPath).getDocuments { snapshot, err in
+            guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }), err == nil else {
+                completion(allUserInfoRecords, err)
+                return
             }
 
-            transaction.updateData(["ratings": newRatingList.map({ $0.asDict })], forDocument: docRef)
-            return nil
-        })
-    }
-
-    func fetchOnlineRecipeById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
-
-        db.collection(recipePath).document(onlineRecipeId)
-            .publisher()
-            .compactMap({ try? $0.data(as: OnlineRecipeRecord.self) })
-            .eraseToAnyPublisher()
-    }
-
-    func fetchOnlineRecipeOnceById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
-        return db.collection(recipePath).document(onlineRecipeId)
-            .getDocument(as: OnlineRecipeRecord.self)
-            .compactMap {
-                $0
+            for userInfo in userInfoRecords {
+                guard let id = userInfo.id else {
+                    continue
+                }
+                allUserInfoRecords[id] = userInfo
             }
-            .eraseToAnyPublisher()
+            completion(allUserInfoRecords, nil)
+        }
     }
 
-    func addRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
+    // used for users page
+    func fetchUserInfos(ids: [String], completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allUserInfoRecords = [String: UserInfoRecord]()
 
-        return db.collection(recipePath).document(onlineRecipeId)
-            .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
-    }
-    func removeRecipeRating(onlineRecipeId: String, rating: RecipeRating) {
-        return db.collection(recipePath).document(onlineRecipeId)
-            .updateData(["ratings": FieldValue.arrayRemove([rating.asDict])])
-    }
+        let totalUserCount = ids.count
+        let queryLimit = QueryLimiter(max: totalUserCount)
+        while queryLimit.hasNext {
+            let range = [] + ids[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(userInfoPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+                guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }), err == nil else {
+                    completion(allUserInfoRecords, err)
+                    dispatchGroup.leave()
+                    return
+                }
 
-    func addUserRecipeRating(userId: String, rating: UserRating) {
-        return db.collection(userPath).document(userId)
-            .updateData(["ratings": FieldValue.arrayUnion([rating.asDict])])
-    }
-    func removeUserRecipeRating(userId: String, rating: UserRating) {
-        // swiftlint:disable implicit_return
-        return db.collection(userPath).document(userId)
-            .updateData(["ratings": FieldValue.arrayRemove([rating.asDict])])
-    }
+                for userInfo in userInfoRecords {
+                    guard let id = userInfo.id else {
+                        continue
+                    }
+                    allUserInfoRecords[id] = userInfo
+                }
+                dispatchGroup.leave()
+            }
+        }
 
-    func addUser(user: User) throws -> String {
-        try db.collection(userPath).addDocument(from: user).documentID
-    }
-    func removeUser(userId: String) throws {
-        return db.collection(userPath).document(userId).delete()
-    }
-    func fetchUserById(userId: String) -> AnyPublisher<User, Error> {
-        db.collection(userPath).document(userId)
-            .publisher()
-            .compactMap({
-                try? $0.data(as: User.self)
-            })
-            .eraseToAnyPublisher()
-    }
-    func addFollowee(userId: String, followeeId: String) {
-        return db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayUnion([followeeId])])
+        dispatchGroup.notify(queue: .main) {
+            completion(allUserInfoRecords, nil)
+        }
+
     }
 
-    func removeFollowee(userId: String, followeeId: String) {
-        return db.collection(userPath).document(userId).updateData(["followees": FieldValue.arrayRemove([followeeId])])
+    func fetchUsers(ids: [String], completion: @escaping ([UserRecord], Error?) -> Void) {
+        let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
+        var allUserRecords: [UserRecord] = []
+
+        let queryLimit = QueryLimiter(max: ids.count)
+        while queryLimit.hasNext {
+            let range = [] + ids[queryLimit.current..<queryLimit.next()]
+            dispatchGroup.enter()
+            db.collection(userPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
+                guard let userRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserRecord.self) }), err == nil else {
+                    completion([], err)
+                    dispatchGroup.leave()
+                    return
+                }
+
+                allUserRecords.append(contentsOf: userRecords)
+                dispatchGroup.leave()
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+           completion(allUserRecords, nil)
+        }
     }
+
+    // MARK: - FirebaseDatabase: Listeners
+
+    func userListener(id: String, onChange: @escaping (UserRecord) -> Void) {
+        db.collection(userPath).document(id)
+            .addSnapshotListener { documentSnapshot, _ in
+                guard let user = try? documentSnapshot?.data(as: UserRecord.self) else {
+                    return
+                }
+                onChange(user)
+            }
+    }
+
 }
 
 enum FirebaseError: Error {
     case addRecipeError(message: String), removeRecipeError(message: String),
          updateRecipeError(message: String), fetchRecipeError(message: String),
          addUserError(message: String), removeUserError(message: String), addRatingError(message: String)
+}
+
+class QueryLimiter {
+    private(set) var current = 0
+    private let queryLimit = 10
+    private let max: Int
+
+    init(max: Int) {
+        self.max = max
+    }
+
+    var hasNext: Bool {
+        current < max
+    }
+
+    func next() -> Int {
+        if current + queryLimit < max {
+            current += queryLimit
+        } else {
+            current = max
+        }
+        return current
+    }
 }

@@ -7,8 +7,10 @@ import Combine
 final class ProfileViewModel: ObservableObject {
     /// The id of the user displayed in the profile view.
     private let userId: String
-    /// The ids of the followees of the user.
-    private var followeeIds: [String] = []
+
+    private let storageManager = StorageManager()
+    private let settings: UserSettings
+    @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     /// User profile details
     @Published private(set) var userName = ""
@@ -16,37 +18,17 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var followeeCount = 0
     @Published private(set) var isFollowedByUser = false
 
-    private let settings: UserSettings
-    private let storageManager = StorageManager()
-    private var cancellables: Set<AnyCancellable> = []
-
-    @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
+    @Published var isLoading = false
 
     init(userId: String, settings: UserSettings) {
         self.userId = userId
         self.settings = settings
-        self.recipesViewModel = OnlineRecipeCollectionViewModel(
-            publisher: ProfileViewModel.getRecipesPublisher(userId: userId))
-
-        ownUserPublisher?
-            .sink { [weak self] ownUser in
-                self?.followeeIds = ownUser.followees
-                self?.isFollowedByUser = ownUser.followees.contains(userId)
-            }
-            .store(in: &cancellables)
-
-        userPublisher
-            .sink { [weak self ] user in
-                self?.userName = user.name
-                self?.followeeCount = user.followees.count
-            }
-            .store(in: &cancellables)
+        self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
 
         recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
-            .store(in: &cancellables)
     }
 
     /// Checks if the profile belongs to the current user.
@@ -63,7 +45,12 @@ final class ProfileViewModel: ObservableObject {
             return
         }
 
-        storageManager.addFollowee(userId: ownId, followeeId: userId)
+        storageManager.addFollowee(userId: ownId, followeeId: userId) { err in
+            guard err == nil else {
+                return
+            }
+            self.load()
+        }
     }
 
     /**
@@ -75,26 +62,52 @@ final class ProfileViewModel: ObservableObject {
             return
         }
 
-        storageManager.removeFollowee(userId: ownId, followeeId: userId)
-    }
-
-    private var ownUserPublisher: AnyPublisher<User, Never>? {
-        guard let ownId = settings.userId else {
-            return nil
+        storageManager.removeFollowee(userId: ownId, followeeId: userId) { err in
+            guard err == nil else {
+                return
+            }
+            self.load()
         }
-
-        return storageManager.userByIdPublisher(userId: ownId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
     }
 
-    private var userPublisher: AnyPublisher<User, Never> {
-        storageManager.userByIdPublisher(userId: userId)
-            .assertNoFailure()
-            .eraseToAnyPublisher()
+    func load() {
+        isLoading = true
+        guard !isOwnProfile else {
+            followeeCount = settings.user?.followees.count ?? 0
+            userName = settings.user?.name ?? ""
+            updateRecipeCount()
+            return
+        }
+        updateIsFollowedByUser()
+        updateUser()
+        updateRecipeCount()
     }
 
-    private static func getRecipesPublisher(userId: String) -> AnyPublisher<[OnlineRecipe], Error> {
-        StorageManager().allRecipesByUsersPublisher(userIds: [userId])
+    private func updateIsFollowedByUser() {
+        isFollowedByUser = settings.user?.followees.contains(userId) == true
     }
+
+    private func updateUser() {
+        storageManager.fetchUser(id: userId) { user, err in
+            guard let user = user, err == nil else {
+                self.isLoading = false
+                return
+            }
+            self.userName = user.name
+            self.followeeCount = user.followees.count
+            self.isLoading = false
+        }
+    }
+
+    private func updateRecipeCount() {
+        storageManager.fetchOnlineRecipes(userIds: [userId]) { onlineRecipes, err in
+            guard err == nil else {
+                self.isLoading = false
+                return
+            }
+            self.publishedRecipesCount = onlineRecipes.count
+            self.isLoading = false
+        }
+    }
+
 }

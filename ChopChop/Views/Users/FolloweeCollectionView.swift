@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a collection of followees.
  */
 struct FolloweeCollectionView: View {
-    @ObservedObject var viewModel: FolloweeCollectionViewModel
+    @StateObject var viewModel: FolloweeCollectionViewModel
 
     var body: some View {
         VStack {
@@ -19,10 +19,12 @@ struct FolloweeCollectionView: View {
             } else {
                 followeeList
             }
+
+            ProgressView(isShow: $viewModel.isLoading)
         }
         .navigationTitle(Text("Followees"))
         .onAppear {
-            viewModel.query = ""
+            viewModel.load()
         }
     }
 
@@ -53,22 +55,20 @@ struct FolloweeCollectionView: View {
     }
 
     @ViewBuilder
-    private func FolloweeRow(followee: User) -> some View {
-        if let id = followee.id {
-            NavigationLink(
-                destination: ProfileView(viewModel: ProfileViewModel(userId: id, settings: viewModel.settings))
-            ) {
-                HStack {
-                    Image("user")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 50, height: 50)
-                        .clipShape(Circle())
+    func FolloweeRow(followee: User) -> some View {
+        NavigationLink(
+            destination: ProfileView(viewModel: ProfileViewModel(userId: followee.id, settings: viewModel.settings))
+        ) {
+            HStack {
+                Image("user")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
 
-                    Text(followee.name)
-                }
-                .padding([.top, .bottom], 6)
+                Text(followee.name)
             }
+            .padding([.top, .bottom], 6)
         }
     }
 }

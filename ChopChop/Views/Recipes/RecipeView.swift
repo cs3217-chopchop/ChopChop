@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RecipeView: View {
     @ObservedObject var viewModel: RecipeViewModel
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
         if let recipe = viewModel.recipe {
@@ -31,7 +32,8 @@ struct RecipeView: View {
                         NavigationLink(
                             destination: OnlineRecipeCollectionView(
                                 viewModel: OnlineRecipeCollectionViewModel(
-                                    recipe: parentRecipe
+                                    recipe: parentRecipe,
+                                    settings: settings
                                 )
                             ) {
                                 EmptyView()

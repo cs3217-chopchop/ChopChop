@@ -13,20 +13,25 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        OnlineRecipeCollectionView(viewModel: recipesViewModel) {
-            VStack {
-                profileHeader
-
-                Divider()
-                    .padding()
-
-                if !viewModel.isOwnProfile {
-                    followUnfollowButton
+        ZStack {
+            OnlineRecipeCollectionView(viewModel: recipesViewModel) {
+                VStack {
+                    profileHeader
 
                     Divider()
                         .padding()
+
+                    if !viewModel.isOwnProfile {
+                        followUnfollowButton
+
+                        Divider()
+                            .padding()
+                    }
                 }
             }
+            ProgressView(isShow: $viewModel.isLoading)
+        }.onAppear {
+            viewModel.load()
         }
     }
 

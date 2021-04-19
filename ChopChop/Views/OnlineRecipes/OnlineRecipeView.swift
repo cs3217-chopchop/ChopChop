@@ -1,19 +1,23 @@
 import SwiftUI
 
 struct OnlineRecipeView: View {
-    @ObservedObject var viewModel: OnlineRecipeViewModel
+    @StateObject var viewModel: OnlineRecipeViewModel
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
-        VStack(spacing: 0) {
-            userBar
-            Divider()
-            recipeImage
-            averageRating
-            if viewModel.isShowingDetail {
-                recipeDetails
+        ZStack {
+            VStack(spacing: 0) {
+                userBar
+                Divider()
+                recipeImage
+                averageRating
+                if viewModel.isShowingDetail {
+                    recipeDetails
+                }
+                Divider()
+                showDetailBar
             }
-            Divider()
-            showDetailBar
+            ProgressView(isShow: $viewModel.isLoading)
         }
     }
 
@@ -21,7 +25,7 @@ struct OnlineRecipeView: View {
         NavigationLink(
             destination: ProfileView(
                 viewModel: ProfileViewModel(
-                    userId: viewModel.recipe.userId,
+                    userId: viewModel.recipe.creatorId,
                     settings: viewModel.settings))
         ) {
             HStack {
@@ -170,7 +174,8 @@ struct OnlineRecipeView: View {
         NavigationLink(
             destination: OnlineRecipeCollectionView(
                 viewModel: OnlineRecipeCollectionViewModel(
-                    recipe: parentRecipe
+                    recipe: parentRecipe,
+                    settings: settings
                 )
             ) {
                 EmptyView()
@@ -178,12 +183,5 @@ struct OnlineRecipeView: View {
         ) {
             Text("Adapted from here")
         }
-    }
-}
-
-struct OnlineRecipeView_Previews: PreviewProvider {
-    // swiftlint:disable force_try line_length
-    static var previews: some View {
-        OnlineRecipeView(viewModel: OnlineRecipeViewModel(recipe: try! OnlineRecipe(id: "1", userId: "1", name: "Pancakes", servings: 2, difficulty: Difficulty.hard, cuisine: "Chinese", stepGraph: RecipeStepGraph(), ingredients: [], ratings: [], created: Date()), downloadRecipeViewModel: DownloadRecipeViewModel(), settings: UserSettings()))
     }
 }
