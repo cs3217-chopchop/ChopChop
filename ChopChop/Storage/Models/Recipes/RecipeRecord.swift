@@ -9,7 +9,6 @@ struct RecipeRecord: Identifiable, Equatable {
     var name: String
     var servings: Double
     var difficulty: Difficulty?
-
 }
 
 extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
@@ -22,7 +21,6 @@ extension RecipeRecord: Codable, FetchableRecord, MutablePersistableRecord {
         static let name = Column(CodingKeys.name)
         static let servings = Column(CodingKeys.servings)
         static let difficulty = Column(CodingKeys.difficulty)
-
     }
 
     static let databaseTableName = "recipe"

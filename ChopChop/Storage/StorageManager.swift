@@ -18,7 +18,6 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
-
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
                                         isImageUploaded: recipe.isImageUploaded,
                                         parentOnlineRecipeId: recipe.parentOnlineRecipeId,
@@ -479,7 +478,6 @@ extension StorageManager {
                 cache.onlineRecipeCache[id] = onlineRecipe
                 completion(onlineRecipe, nil)
             }
-
         }
     }
 
@@ -507,7 +505,6 @@ extension StorageManager {
                 cache.userCache[id] = user
                 completion(user, nil)
             }
-
         }
     }
 
@@ -523,7 +520,6 @@ extension StorageManager {
         firebaseDatabase.fetchOnlineRecipeInfos(userIds: userIds) { recipeInfoRecords, err in
             fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
         }
-
     }
 
     // Fetch details of all users in the system
@@ -610,7 +606,6 @@ extension StorageManager {
                 completion(data, nil)
             }
         }
-
     }
 
     // MARK: - Storage Manager: Listen
@@ -713,7 +708,6 @@ extension StorageManager {
 
         }
     }
-
 }
 
 enum StorageError: Error {
