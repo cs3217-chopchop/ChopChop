@@ -2,6 +2,9 @@ import SwiftUI
 import FirebaseFirestore
 import Combine
 
+/**
+ Represents the main view of the application.
+ */
 struct MainView: View {
     @EnvironmentObject var settings: UserSettings
     @StateObject var viewModel: MainViewModel
