@@ -165,7 +165,8 @@ class RecipeFormViewModel: ObservableObject {
 
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
-                                           isImageUploaded: image.pngData() == originalImage.pngData() && recipe?.isImageUploaded == true,
+                                           isImageUploaded: image.pngData() == originalImage.pngData()
+                                            && recipe?.isImageUploaded == true,
                                            parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,
