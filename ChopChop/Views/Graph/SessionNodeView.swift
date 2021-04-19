@@ -1,12 +1,11 @@
 import SwiftUI
 
+/**
+ Represents a view of a step in the instructions of a recipe being made.
+ */
  struct SessionNodeView: View {
     @ObservedObject var viewModel: SessionNodeViewModel
     @ObservedObject var selection: SelectionHandler<SessionRecipeStepNode>
-
-    var isSelected: Bool {
-        selection.isNodeSelected(viewModel.node)
-    }
 
     var body: some View {
         TileView(isSelected: isSelected, isFaded: viewModel.node.isCompleted) {
@@ -23,8 +22,12 @@ import SwiftUI
         }
     }
 
+    private var isSelected: Bool {
+        selection.isNodeSelected(viewModel.node)
+    }
+
     @ViewBuilder
-    var stepText: some View {
+    private var stepText: some View {
         if let index = viewModel.index {
             Text("Step \(index + 1)")
                 .font(.headline)
@@ -33,7 +36,7 @@ import SwiftUI
         }
     }
 
-    var nodeView: some View {
+    private var nodeView: some View {
         ScrollView(isSelected ? [.vertical] : []) {
             VStack {
                 Text(viewModel.node.label.step.content)
@@ -43,21 +46,11 @@ import SwiftUI
         }
     }
 
-    var detailView: some View {
+    // MARK: - Detail
+
+    private var detailView: some View {
         HStack(spacing: 16) {
-            Button(action: {
-                withAnimation {
-                    viewModel.graph.toggleNode(viewModel.node)
-                    selection.deselectNode(viewModel.node)
-                }
-            }) {
-                Image(systemName: viewModel.node.isCompleted
-                        ? "checkmark.square"
-                        : viewModel.node.isCompletable
-                            ? "square"
-                            : "square.slash")
-            }
-            .disabled(!viewModel.node.isCompletable)
+            toggleCompleteButton
 
             if !viewModel.node.isCompletable {
                 Text("Previous step has not been completed")
@@ -68,16 +61,36 @@ import SwiftUI
             Spacer()
 
             if !viewModel.node.label.timers.isEmpty {
-                Button(action: {
-                    withAnimation {
-                        viewModel.proxy?.scrollTo(viewModel.node, anchor: .top)
-                    }
-                }) {
-                    Image(systemName: "timer")
-                }
+                scrollToTimersButton
             }
         }
         .padding(.top, 6)
+    }
+
+    private var toggleCompleteButton: some View {
+        Button(action: {
+            withAnimation {
+                viewModel.toggleNode()
+                selection.deselectNode(viewModel.node)
+            }
+        }) {
+            Image(systemName: viewModel.node.isCompleted
+                    ? "checkmark.square"
+                    : viewModel.node.isCompletable
+                        ? "square"
+                        : "square.slash")
+        }
+        .disabled(!viewModel.node.isCompletable)
+    }
+
+    private var scrollToTimersButton: some View {
+        Button(action: {
+            withAnimation {
+                viewModel.proxy?.scrollTo(viewModel.node, anchor: .top)
+            }
+        }) {
+            Image(systemName: "timer")
+        }
     }
  }
 

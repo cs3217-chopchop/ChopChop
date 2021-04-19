@@ -1,7 +1,7 @@
 import SwiftUI
 
 /**
- Represents a view model for a view of an ingredient to be deducted from the ingredient inventory after a recipe has been completed.
+ Represents a view model for a view of an ingredient to be deducted from the inventory after a recipe is completed.
  */
 final class DeductibleIngredientViewModel: ObservableObject {
     /// The ingredient that is being used to make the recipe.

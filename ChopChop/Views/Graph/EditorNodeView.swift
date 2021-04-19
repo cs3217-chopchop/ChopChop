@@ -1,12 +1,11 @@
 import SwiftUI
 
+/**
+ Represents a view of a step in the recipe instructions being edited.
+ */
 struct EditorNodeView: View {
     @ObservedObject var viewModel: EditorNodeViewModel
     @ObservedObject var selection: SelectionHandler<RecipeStepNode>
-
-    var isSelected: Bool {
-        selection.isNodeSelected(viewModel.node)
-    }
 
     var body: some View {
         TileView(isSelected: isSelected) {
@@ -42,8 +41,14 @@ struct EditorNodeView: View {
         }
     }
 
+    private var isSelected: Bool {
+        selection.isNodeSelected(viewModel.node)
+    }
+
+    // MARK: - Detail
+
     @ViewBuilder
-    var detailView: some View {
+    private var detailView: some View {
         if viewModel.isEditing {
             isEditingDetailView
         } else {
@@ -51,7 +56,7 @@ struct EditorNodeView: View {
         }
     }
 
-    var isEditingDetailView: some View {
+    private var isEditingDetailView: some View {
         HStack(spacing: 16) {
             Button(action: viewModel.saveAction) {
                 Text("Save")
@@ -67,7 +72,7 @@ struct EditorNodeView: View {
         .padding(.top, 6)
     }
 
-    var isNotEditingDetailView: some View {
+    private var isNotEditingDetailView: some View {
         HStack(spacing: 16) {
             if viewModel.isEditable {
                 Button(action: {
@@ -96,8 +101,10 @@ struct EditorNodeView: View {
         .padding(.top, 6)
     }
 
+    // MARK: - Timers
+
     @ViewBuilder
-    var timersView: some View {
+    private var timersView: some View {
         if isSelected && viewModel.showTimers {
             TileView(isSelected: true,
                      expandedSize: CGSize(width: RecipeStepNode.expandedSize.width / 2,
@@ -127,7 +134,7 @@ struct EditorNodeView: View {
     }
 
     @ViewBuilder
-    var timersList: some View {
+    private var timersList: some View {
         if viewModel.timers.isEmpty {
             Spacer()
             Text("No step timers")

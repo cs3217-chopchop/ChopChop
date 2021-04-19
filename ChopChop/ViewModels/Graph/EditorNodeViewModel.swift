@@ -1,24 +1,35 @@
 import Combine
 import Foundation
 
+/**
+ Represents a view model of a view of a step in the recipe instructions being edited.
+ */
 final class EditorNodeViewModel: ObservableObject {
-    @Published var isEditing = false
+    /// The step displayed in the view.
+    let node: RecipeStepNode
+    /// The index of the step.
+    let index: Int?
+    /// A flag representing whether the step can be edited or is only for display.
+    let isEditable: Bool
+    /// The graph that the step belongs to.
+    private var graph: RecipeStepGraph
+
+    /// Form fields
     @Published var content = ""
     @Published var timers: [TimeInterval] = []
+
+    /// Display flags
+    @Published var isEditing = false
     @Published var showTimers = false
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
-    private var graph: RecipeStepGraph
-    let node: RecipeStepNode
-    let index: Int?
-    let isEditable: Bool
     let timeFormatter: DateComponentsFormatter
-
     let recipeStepTimersViewModel: RecipeStepTimersViewModel
-    private var timersCancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(graph: RecipeStepGraph, node: RecipeStepNode, isEditable: Bool = true) {
         self.graph = graph
@@ -34,7 +45,7 @@ final class EditorNodeViewModel: ObservableObject {
         self.index = graph.topologicallySortedNodes.firstIndex(of: node)
 
         recipeStepTimersViewModel = RecipeStepTimersViewModel(node: node, timers: node.label.timers)
-        timersCancellable = recipeStepTimersViewModel.timersPublisher
+        recipeStepTimersViewModel.timersPublisher
             .sink { [weak self] timers in
                 guard let step = try? RecipeStep(node.label.content, timers: timers) else {
                     return
@@ -43,8 +54,13 @@ final class EditorNodeViewModel: ObservableObject {
                 self?.timers = timers
                 node.label = step
             }
+            .store(in: &cancellables)
     }
 
+    /**
+     Updates the step in the graph with the information in the form fields,
+     or updates the alert fields if at least one of the fields is invalid.
+     */
     func saveAction() {
         do {
             node.label = try RecipeStep(content, timers: node.label.timers)
@@ -62,6 +78,9 @@ final class EditorNodeViewModel: ObservableObject {
         }
     }
 
+    /**
+     Removes this step from the graph.
+     */
     func removeNode() {
         graph.removeNode(node)
     }

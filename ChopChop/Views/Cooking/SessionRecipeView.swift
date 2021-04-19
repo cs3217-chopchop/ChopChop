@@ -112,9 +112,11 @@ struct SessionRecipeView: View {
             ScrollView {
                 VStack {
                     ForEach(viewModel.sessionRecipe.stepGraph.topologicallySortedNodes) { node in
-                        TimerNodeView(viewModel: TimerNodeViewModel(graph: viewModel.sessionRecipe.stepGraph,
-                                                                    node: node,
-                                                                    proxy: proxy))
+                        TimerNodeView(
+                            viewModel: TimerNodeViewModel(
+                                graph: viewModel.sessionRecipe.stepGraph,
+                                node: node,
+                                proxy: proxy))
                             .id(node)
                     }
                 }
