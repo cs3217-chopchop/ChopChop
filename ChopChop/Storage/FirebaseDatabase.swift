@@ -2,9 +2,9 @@ import Firebase
 import Combine
 
 struct FirebaseDatabase {
-    private let recipePath: String = "recipes (chrystal test)" // TODO change
+    private let recipePath: String = "recipes"
     private let recipeInfoPath: String = "recipeInfos"
-    private let userPath: String = "users (chrystal test)"
+    private let userPath: String = "users"
     private let userInfoPath: String = "userInfos"
     private let db = Firestore.firestore()
 
@@ -227,7 +227,6 @@ struct FirebaseDatabase {
         }
     }
 
-    // TODO test ALOT
     func fetchOnlineRecipeInfos(userIds: [String], completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
 
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
@@ -407,7 +406,6 @@ struct FirebaseDatabase {
         db.collection(userPath).document(id)
             .addSnapshotListener { documentSnapshot, _ in
                 guard let user = try? documentSnapshot?.data(as: UserRecord.self) else {
-                    assertionFailure("No user")
                     return
                 }
                 onChange(user)
@@ -443,9 +441,4 @@ class QueryLimiter {
         }
         return current
     }
-}
-
-// to pass around, like a shared memory
-class DictionaryWrapper<T> {
-    var entities = [String: T]()
 }

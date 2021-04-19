@@ -231,7 +231,7 @@ class OnlineRecipeTests: XCTestCase {
             ratings: ratings
         )
 
-        let onlineRecipeInfoRecord = OnlineRecipeInfoRecord(id: "TestId", creator: "TestUserId", createdAt: Date(), updatedAt: Date(), imageUpdatedAt: Date())
+        let onlineRecipeInfoRecord = OnlineRecipeInfoRecord(id: "TestId", creator: "TestUserId", createdAt: currentDate, updatedAt: currentDate, imageUpdatedAt: currentDate)
 
         let onlineRecipe = try OnlineRecipe(from: onlineRecipeRecord, info: onlineRecipeInfoRecord)
 
@@ -245,6 +245,8 @@ class OnlineRecipeTests: XCTestCase {
         XCTAssertEqual(onlineRecipe.ingredients, ingredients)
         XCTAssertEqual(onlineRecipe.ratings, ratings)
         XCTAssertEqual(onlineRecipe.createdAt, currentDate)
+        XCTAssertEqual(onlineRecipe.updatedAt, currentDate)
+        XCTAssertNotEqual(onlineRecipe.imageUpdatedAt, currentDate)
 
     }
 
@@ -252,6 +254,7 @@ class OnlineRecipeTests: XCTestCase {
 
         let node1 = RecipeStepNode(try RecipeStep("Cook the pancakes"))
         let node2 = RecipeStepNode(try RecipeStep("Make the pancakes"))
+        let currentDate = Date()
 
         let onlineRecipe = try OnlineRecipe(
             from: OnlineRecipeRecord(
@@ -273,9 +276,8 @@ class OnlineRecipeTests: XCTestCase {
                 stepEdges: [
                     OnlineStepEdgeRecord(
                         sourceStepId: node1.id.uuidString,
-                        destinationStepId: node2.id.uuidString)],
-                created: Date()),
-                info: OnlineRecipeInfoRecord(id: "1", creator: "1", createdAt: nil, updatedAt: nil, imageUpdatedAt: nil))
+                        destinationStepId: node2.id.uuidString)]),
+                info: OnlineRecipeInfoRecord(id: "1", creator: "1", createdAt: currentDate, updatedAt: currentDate, imageUpdatedAt: nil))
 
         XCTAssertEqual(onlineRecipe.name, "Pancakes")
         XCTAssertEqual(onlineRecipe.servings, 2)

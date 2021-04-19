@@ -32,7 +32,7 @@ class AppDatabaseTests: XCTestCase {
             let columns = try db.columns(in: "recipe")
             let columnNames = Set(columns.map { $0.name })
 
-            XCTAssertEqual(columnNames, ["name", "servings", "onlineId", "difficulty", "id", "parentOnlineRecipeId", "recipeCategoryId"])
+            XCTAssertEqual(columnNames, ["name", "servings", "onlineId", "difficulty", "id", "parentOnlineRecipeId", "recipeCategoryId", "isImageUploaded"])
         }
     }
 

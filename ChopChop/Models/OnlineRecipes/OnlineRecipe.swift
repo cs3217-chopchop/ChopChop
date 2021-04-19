@@ -59,10 +59,6 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingUpdatedDate
         }
 
-        guard let imageUpdatedDate = info.updatedAt else {
-            throw OnlineRecipeRecordError.missingImageUpdatedDate
-        }
-
         var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
         record.steps.forEach({
             let step = try? RecipeStep($0.content)
