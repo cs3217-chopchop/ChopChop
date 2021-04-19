@@ -69,8 +69,10 @@ struct ImageStore {
      Saves the given image with the given name into the folder with the given folder name.
 
      - Throws:
-        - `ImageStoreError.imageCreationFailure` if the given image could not be converted into PNG data.
-        - `ImageStoreError.pathCreationFailure` if the path could not be created with the given image name and folder name.
+        - `ImageStoreError.imageCreationFailure`
+            if the given image could not be converted into PNG data.
+        - `ImageStoreError.pathCreationFailure`
+            if the path could not be created with the given image name and folder name.
      */
     static func save(image: UIImage, name: String, inFolderNamed folderName: String = "") throws {
         guard let imageData = image.png() else {

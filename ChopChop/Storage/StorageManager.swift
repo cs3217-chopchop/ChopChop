@@ -5,8 +5,9 @@ import UIKit
 import Combine
 
 /**
- An abstraction over `AppDatabase`, `FirebaseDatabase` and `FirebaseCloudStorage` that delegates methods used by the
- application to the appropiate database manager. It also manages the translation between runtime models and database record models.
+ An abstraction over `AppDatabase`, `FirebaseDatabase` and `FirebaseCloudStorage` that delegates
+ methods used by the application to the appropiate database manager.
+ It also manages the translation between runtime models and database record models.
  */
 struct StorageManager {
     /// Interacts with the local SQLite database using the GRDB.swift library to perform database operations.
@@ -463,25 +464,34 @@ extension StorageManager {
      Add a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
-    func addOnlineRecipeRating(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
+    func addOnlineRecipeRating(
+        recipeId: String,
+        userId: String,
+        rating: RatingScore,
+        completion: @escaping (Error?) -> Void) {
+
         firebaseDatabase.addUserRecipeRating(userId: userId,
                                              rating: UserRating(recipeOnlineId: recipeId, score: rating),
                                              completion: completion)
         firebaseDatabase.addOnlineRecipeRating(onlineRecipeId: recipeId,
-                                         rating: RecipeRating(userId: userId, score: rating),
-                                         completion: completion)
+                                               rating: RecipeRating(userId: userId, score: rating),
+                                               completion: completion)
     }
 
     /**
      Updates a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
-    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
-                      completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipeRating(
+        recipeId: String,
+        oldRating: RecipeRating,
+        newRating: RecipeRating,
+        completion: @escaping (Error?) -> Void) {
+
         firebaseDatabase.updateOnlineRecipeRating(recipeId: recipeId,
-                                            oldRating: oldRating,
-                                            newRating: newRating,
-                                            completion: completion)
+                                                  oldRating: oldRating,
+                                                  newRating: newRating,
+                                                  completion: completion)
         firebaseDatabase.updateUserRating(userId: newRating.userId,
                                           oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
                                           newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score),
@@ -490,7 +500,9 @@ extension StorageManager {
 
     /**
      Adds a user of that name.
-     Signals completion via a completion handler and returns the userId of the new user and error in completion handler if any.
+     Signals completion via a completion handler and returns:
+     - the `userId` of the new user
+     - error in completion handler if any.
      */
     func addUser(name: String, completion: @escaping (String?, Error?) -> Void) throws {
         try firebaseDatabase.addUser(user: UserRecord(name: name, followees: [], ratings: []), completion: completion)
@@ -574,7 +586,8 @@ extension StorageManager {
     // MARK: - Storage Manager: Delete
 
     /**
-     Delete an OnlineRecipe, effectively unpublishing the recipe. Removes the link from the respective local Recipe to the OnlineRecipe, if any.
+     Delete an OnlineRecipe, effectively unpublishing the recipe.
+     Removes the link from the respective local Recipe to the OnlineRecipe, if any.
      Signals completion via a completion handler and returns an error in completion handler if any.
      */
     func removeOnlineRecipe(recipe: OnlineRecipe, completion: @escaping (Error?) -> Void) throws {

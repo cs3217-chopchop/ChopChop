@@ -164,7 +164,10 @@ class RecipeFormViewModel: ObservableObject {
             }
 
             var isImageUploaded = false
-            if let id = recipe?.id, storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData(), recipe?.isImageUploaded == true {
+
+            if let id = recipe?.id,
+               storageManager.fetchRecipeImage(name: String(id))?.pngData() == image.pngData(),
+               recipe?.isImageUploaded == true {
                 // image no change or image is still null
                 isImageUploaded = true
             }
