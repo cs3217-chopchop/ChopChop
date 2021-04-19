@@ -1,28 +1,42 @@
-import FirebaseFirestore
-import FirebaseFirestoreSwift
+import Foundation
 
-final class User: Identifiable {
-    @DocumentID private(set) var id: String?
-    private(set) var name: String
-    private(set) var followees: [String]
-    private(set) var ratings: [UserRating]
+struct User: Identifiable, CachableEntity {
+    let id: String
+    let name: String
+    let followees: [String]
+    let ratings: [UserRating]
+    let createdAt: Date
+    let updatedAt: Date
 
-    // swiftlint:disable function_default_parameter_at_end
-    init(id: String? = nil, name: String, followees: [String] = [], ratings: [UserRating] = []) throws {
+    init(id: String, name: String, followees: [String], ratings: [UserRating], createdAt: Date, updatedAt: Date) throws {
         self.id = id
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-
         guard !trimmedName.isEmpty else {
             throw UserError.emptyName
         }
-
         self.name = trimmedName
+
         self.followees = followees
         self.ratings = ratings
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
+
 }
 
-extension User: Codable {
+extension User {
+    init?(from record: UserRecord, infoRecord: UserInfoRecord) {
+        guard let id = record.id, let createdAt = infoRecord.createdAt, let updatedAt = infoRecord.updatedAt else {
+            return nil // or throw errors?
+        }
+
+        self.id = id
+        self.name = record.name
+        self.followees = record.followees
+        self.ratings = record.ratings
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
 }
 
 enum UserError: Error {

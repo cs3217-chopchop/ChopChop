@@ -143,25 +143,24 @@ import SwiftUI
     private var followeeFeedLink: some View {
         NavigationLink(
             destination: OnlineRecipeCollectionView(
-                viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.followeesOnlineRecipesPublisher)) {
+                viewModel: OnlineRecipeCollectionViewModel(filter: .followees, settings: settings)) {
                 EmptyView()
             }
-                .navigationTitle("Recipes by Followees")
+                .navigationTitle(OnlineRecipeCollectionFilter.followees.rawValue)
         ) {
-            Label("Recipes by Followees", systemImage: "tray.2")
+            Label(OnlineRecipeCollectionFilter.followees.rawValue, systemImage: "person.2")
         }
-
     }
 
     private var discoverFeedLink: some View {
         NavigationLink(
             destination: OnlineRecipeCollectionView(
-                viewModel: OnlineRecipeCollectionViewModel(publisher: viewModel.allOnlineRecipesPublisher)) {
+                viewModel: OnlineRecipeCollectionViewModel(filter: .everyone, settings: settings)) {
                 EmptyView()
             }
-                .navigationTitle("Discover")
+                .navigationTitle(OnlineRecipeCollectionFilter.everyone.rawValue)
         ) {
-            Label("Discover", systemImage: "magnifyingglass")
+            Label(OnlineRecipeCollectionFilter.everyone.rawValue, systemImage: "magnifyingglass")
         }
     }
 
@@ -197,7 +196,7 @@ import SwiftUI
         if let userId = settings.userId {
             FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: userId, settings: settings))
         } else {
-            NotFoundView(entityName: "User")
+            NotFoundView(entityName: "Followees")
         }
     }
 

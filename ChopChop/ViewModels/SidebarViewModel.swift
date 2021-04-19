@@ -136,26 +136,6 @@ final class SidebarViewModel: ObservableObject {
             }
             .eraseToAnyPublisher()
     }
-
-    // MARK: - Online Recipe Publishers
-
-    /**
-     Returns a publisher that publishes all online recipes.
-     */
-    var allOnlineRecipesPublisher: AnyPublisher<[OnlineRecipe], Error> {
-        storageManager.allRecipesPublisher()
-    }
-
-    /**
-     Returns a publisher that publishes all online recipes by the user's followees.
-     */
-    var followeesOnlineRecipesPublisher: AnyPublisher<[OnlineRecipe], Error> {
-        guard let userId = settings.userId else {
-            fatalError("No user id stored")
-        }
-
-        return storageManager.allFolloweesRecipePublisher(userId: userId)
-    }
 }
 
 extension SidebarViewModel {

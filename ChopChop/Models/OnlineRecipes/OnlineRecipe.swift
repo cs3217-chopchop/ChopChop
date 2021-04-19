@@ -1,26 +1,26 @@
 import Foundation
-import FirebaseFirestoreSwift
 
-class OnlineRecipe: Identifiable {
-    private(set) var id: String
-    private(set) var userId: String
-    private(set) var parentOnlineRecipeId: String?
-
-    private(set) var name: String
-    private(set) var servings: Double
-    private(set) var cuisine: String?
-    private(set) var difficulty: Difficulty?
-    private(set) var stepGraph: RecipeStepGraph
-    private(set) var ingredients: [RecipeIngredient]
-    private(set) var ratings: [RecipeRating]
-    private(set) var created: Date
+struct OnlineRecipe: Identifiable, CachableEntity {
+    let id: String
+    let creatorId: String
+    let parentOnlineRecipeId: String?
+    let name: String
+    let servings: Double
+    let cuisine: String?
+    let difficulty: Difficulty?
+    let stepGraph: RecipeStepGraph
+    let ingredients: [RecipeIngredient]
+    let ratings: [RecipeRating]
+    let createdAt: Date
+    let updatedAt: Date
 
     // swiftlint:disable function_default_parameter_at_end
     init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
-         ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
+         ingredients: [RecipeIngredient], ratings: [RecipeRating],
+         createdAt: Date, updatedAt: Date) throws {
         self.id = id
-        self.userId = userId
+        self.creatorId = userId
         self.parentOnlineRecipeId = parentOnlineRecipeId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
@@ -37,19 +37,24 @@ class OnlineRecipe: Identifiable {
         self.stepGraph = stepGraph
         self.ingredients = ingredients
         self.ratings = ratings
-        self.created = created
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
     // swiftlint:enable function_default_parameter_at_end
 }
 
 extension OnlineRecipe {
-    convenience init(from record: OnlineRecipeRecord) throws {
+    init(from record: OnlineRecipeRecord, info: OnlineRecipeInfoRecord) throws {
         guard let id = record.id else {
             throw OnlineRecipeRecordError.missingId
         }
 
-        guard let createdDate = record.created else {
+        guard let createdDate = info.createdAt else {
             throw OnlineRecipeRecordError.missingCreatedDate
+        }
+
+        guard let updatedDate = info.updatedAt else {
+            throw OnlineRecipeRecordError.missingUpdatedDate
         }
 
         var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
@@ -80,7 +85,7 @@ extension OnlineRecipe {
 
         try self.init(
             id: id,
-            userId: record.creator,
+            userId: record.creatorId,
             parentOnlineRecipeId: record.parentOnlineRecipeId,
             name: record.name,
             servings: record.servings,
@@ -89,7 +94,8 @@ extension OnlineRecipe {
             stepGraph: stepGraph,
             ingredients: record.ingredients.compactMap({ try? RecipeIngredient(from: $0) }),
             ratings: record.ratings,
-            created: createdDate
+            createdAt: createdDate,
+            updatedAt: updatedDate
         )
     }
 }

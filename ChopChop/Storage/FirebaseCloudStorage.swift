@@ -22,20 +22,15 @@ struct FirebaseCloudStorage {
         }
     }
 
-    func downloadImage(name: String, onComplete: @escaping (_ data: Data?) -> Void) {
+    func fetchImage(name: String, completion: @escaping (Data?, Error?) -> Void) {
         let downloadRef = storageRef.child("images/\(name).png")
         downloadRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize) { data, error in
-            if error != nil {
-                onComplete(nil)
-            } else {
-                onComplete(data)
+            guard let data = data, error == nil else {
+                completion(nil, error)
+                return
             }
+            completion(data, nil)
         }
-    }
-
-    func fetchImage(name: String) -> AnyPublisher<Data, Error> {
-        let fetchRef = storageRef.child("images/\(name).png")
-        return fetchRef.getData(maxSize: FirebaseCloudStorage.imageMaxSize)
     }
 
     func deleteImage(name: String) {

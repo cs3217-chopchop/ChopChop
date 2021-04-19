@@ -33,6 +33,8 @@ struct AppDatabase {
                 t.column("onlineId", .text)
                     .unique()
                     .check { $0 != "" }
+                t.column("isImageUploaded", .boolean)
+                    .notNull()
                 t.column("parentOnlineRecipeId", .text)
                     .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
@@ -204,7 +206,7 @@ extension AppDatabase {
         }
 
         var recipeRecords = recipes.map { recipe in
-            RecipeRecord(recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+            RecipeRecord(isImageUploaded: false, recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
                          name: recipe.name,
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement())

@@ -4,51 +4,54 @@ import SwiftUI
  Represents a view of a collection of non followees.
  */
 struct NonFolloweeCollectionView: View {
-    @ObservedObject var viewModel: NonFolloweeCollectionViewModel
+    @StateObject var viewModel: NonFolloweeCollectionViewModel
+    @EnvironmentObject var settings: UserSettings
 
     var body: some View {
-        VStack {
-            SearchBar(text: $viewModel.query, placeholder: "Search...")
+        ZStack {
+            VStack {
+                SearchBar(text: $viewModel.query, placeholder: "Search...")
 
-            if viewModel.nonFollowees.isEmpty {
-                NotFoundView(entityName: "Users")
-            } else {
-                nonFolloweeList
+                if viewModel.nonFollowees.isEmpty {
+                    NotFoundView(entityName: "Non Followees")
+                } else {
+                    nonFolloweeList
+                }
             }
+
+            ProgressView(isShow: $viewModel.isLoading)
         }
         .navigationTitle(Text("Add Followees"))
         .onAppear {
-            viewModel.query = ""
+            viewModel.load()
         }
     }
 
     private var nonFolloweeList: some View {
         List {
             ForEach(viewModel.nonFollowees) { nonFollowee in
-                NonFolloweeRow(followee: nonFollowee)
+                AddFolloweeRow(followee: nonFollowee)
             }
         }
     }
 
     @ViewBuilder
-    private func NonFolloweeRow(followee: User) -> some View {
-        if let id = followee.id {
-            NavigationLink(
-                destination: ProfileView(viewModel: ProfileViewModel(userId: id, settings: viewModel.settings))
-            ) {
-                HStack {
-                    Image("user")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 50, height: 50)
-                        .clipShape(Circle())
+    func AddFolloweeRow(followee: User) -> some View {
+        NavigationLink(
+            destination: ProfileView(viewModel: ProfileViewModel(userId: followee.id, settings: settings))
+        ) {
+            HStack {
+                Image("user")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
 
-                    Text(followee.name)
+                Text(followee.name)
 
-                    Spacer()
-                }
+                Spacer()
             }
-            .padding([.top, .bottom], 6)
         }
+        .padding([.top, .bottom], 6)
     }
 }

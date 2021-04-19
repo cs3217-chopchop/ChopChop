@@ -14,29 +14,43 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
 
     func tapRating(_ ratingValue: Int) {
         guard let userId = settings.userId else {
-            assertionFailure()
             return
         }
 
         guard let rating = RatingScore(rawValue: ratingValue + 1) else {
-            assertionFailure()
             return
         }
 
-        guard ownRating != nil else {
-            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating)
+        guard let ownRating = ownRating else {
+            storageManager.rateRecipe(recipeId: recipe.id, userId: userId, rating: rating) { err in
+                guard err == nil else {
+                    return
+                }
+                self.reload()
+            }
             return
         }
-        storageManager.rerateRecipe(recipeId: recipe.id, newRating: RecipeRating(userId: userId, score: rating))
+        storageManager.rerateRecipe(recipeId: recipe.id, oldRating: ownRating,
+                                    newRating: RecipeRating(userId: userId, score: rating)) { err in
+            guard err == nil else {
+                return
+            }
+            self.reload()
+        }
     }
 
     func removeRating() {
         guard let ownRating = ownRating else {
-            assertionFailure()
             return
         }
 
-        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating)
+        storageManager.unrateRecipe(recipeId: recipe.id, rating: ownRating) { err in
+            guard err == nil else {
+                return
+            }
+            self.reload()
+        }
+
     }
 
     func toggleShowRating() {

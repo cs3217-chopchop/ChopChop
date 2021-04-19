@@ -4,7 +4,7 @@ import FirebaseFirestoreSwift
 struct OnlineRecipeRecord {
     @DocumentID var id: String?
     var name: String
-    var creator: String
+    var creatorId: String
     @ExplicitNull var parentOnlineRecipeId: String?
     var servings: Double
     @ExplicitNull var cuisine: String?
@@ -13,7 +13,6 @@ struct OnlineRecipeRecord {
     var steps: [OnlineStepRecord]
     var stepEdges: [OnlineStepEdgeRecord]
     var ratings: [RecipeRating] = []
-    @ServerTimestamp var created: Date?
 
 }
 
@@ -24,5 +23,5 @@ extension OnlineRecipeRecord: Codable {
 }
 
 enum OnlineRecipeRecordError: Error {
-    case missingId, missingCreatedDate
+    case missingId, missingCreatedDate, missingUpdatedDate
 }

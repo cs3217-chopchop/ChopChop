@@ -5,40 +5,40 @@ import Combine
  Represents a view model for a view of a collection of followees.
  */
 class FolloweeCollectionViewModel: ObservableObject {
+    private let storageManager = StorageManager()
+
     /// The id of the user who's followees are displayed.
     let userId: String
+
     let settings: UserSettings
+    @Published var isLoading = false
 
     /// The followees of the user.
     @Published private(set) var followees: [User] = []
 
-    /// Search bar field
-    @Published var query = ""
-
-    private let storageManager = StorageManager()
-    private var cancellables: Set<AnyCancellable> = []
+    @Published var query = "" {
+        didSet {
+            updateFollowees()
+        }
+    }
 
     init(userId: String, settings: UserSettings) {
         self.userId = userId
         self.settings = settings
-
-        followeesPublisher
-            .sink { [weak self] followees in
-                self?.followees = followees
-            }
-            .store(in: &cancellables)
     }
 
-    private var followeesPublisher: AnyPublisher<[User], Never> {
-        $query.map { [self] query -> AnyPublisher<[User], Error> in
-            storageManager.followeesPublisher(userId: userId, query: query)
-        }
-        .map {
-            $0.catch { _ in
-                Just<[User]>([])
+    private func updateFollowees() {
+        storageManager.fetchUser(id: userId) { user, _ in
+            self.storageManager.fetchUsers(ids: user?.followees ?? []) { users, _ in
+                self.followees = users.filter { self.query.isEmpty || $0.name.contains(self.query) }
+                self.isLoading = false
             }
         }
-        .switchToLatest()
-        .eraseToAnyPublisher()
     }
+
+    func load() {
+        isLoading = true
+        query = ""
+    }
+
 }

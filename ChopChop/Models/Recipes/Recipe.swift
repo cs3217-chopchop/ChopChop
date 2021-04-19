@@ -17,6 +17,8 @@ struct Recipe: Equatable {
     /// Identifies the document in the recipe collection in the cloud storage that this recipe represents.
     /// Is `nil` if the recipe is not published onto cloud storage.
     var onlineId: String?
+    /// A flag representing whether an image for this recipe has been uploaded.
+    var isImageUploaded: Bool
     /// Identifies the document in the recipe collection in the cloud storage that this recipe was downloaded from.
     /// Is `nil` if the recipe was not downloaded from an online recipe.
     var parentOnlineRecipeId: String?
@@ -48,7 +50,7 @@ struct Recipe: Equatable {
         - `RecipeError.duplicateIngredients` if the given ingredients contain duplicates.
      */
     // swiftlint:disable function_default_parameter_at_end
-    init(id: Int64? = nil, onlineId: String? = nil, parentOnlineRecipeId: String? = nil,
+    init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool = false, parentOnlineRecipeId: String? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
          stepGraph: RecipeStepGraph = RecipeStepGraph()) throws {
@@ -69,6 +71,7 @@ struct Recipe: Equatable {
 
         self.id = id
         self.onlineId = onlineId
+        self.isImageUploaded = isImageUploaded
         self.parentOnlineRecipeId = parentOnlineRecipeId
         self.name = trimmedName
         self.category = category
@@ -84,6 +87,7 @@ extension Recipe: FetchableRecord {
     init(row: Row) {
         id = row[RecipeRecord.Columns.id]
         onlineId = row[RecipeRecord.Columns.onlineId]
+        isImageUploaded = row[RecipeRecord.Columns.isImageUploaded]
         parentOnlineRecipeId = row[RecipeRecord.Columns.parentOnlineRecipeId]
         category = row["recipeCategory"]
         name = row[RecipeRecord.Columns.name]

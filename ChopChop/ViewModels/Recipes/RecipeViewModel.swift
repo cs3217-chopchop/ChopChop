@@ -57,26 +57,30 @@ final class RecipeViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        if let id = recipe?.parentOnlineRecipeId {
-            parentRecipePublisher(id: id)
-                .sink { [weak self] parentRecipe in
-                    self?.parentRecipe = parentRecipe
-                }
-                .store(in: &cancellables)
+        guard let parentId = recipe?.parentOnlineRecipeId else {
+            return
         }
+
+        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+            self.parentRecipe = onlineRecipe
+        }
+
     }
 
-    // TODO: Properly throw errors
     func publish() {
         guard var recipe = recipe, let userId = settings.userId else {
-            assertionFailure()
             return
         }
 
         if isPublished {
-            storageManager.updateOnlineRecipe(recipe: recipe, userId: userId)
+            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
+                _ in
+
+            }
         } else {
-            try? storageManager.publishRecipe(recipe: &recipe, userId: userId)
+            try? storageManager.addOnlineRecipe(recipe: &recipe, userId: userId) { _ in
+
+            }
         }
     }
 
@@ -84,14 +88,6 @@ final class RecipeViewModel: ObservableObject {
         storageManager.recipePublisher(id: id)
             .catch { _ in
                 Just<Recipe?>(nil)
-            }
-            .eraseToAnyPublisher()
-    }
-
-    private func parentRecipePublisher(id: String) -> AnyPublisher<OnlineRecipe?, Never> {
-        storageManager.onlineRecipePublisher(id: id)
-            .catch { _ in
-                Just<OnlineRecipe?>(nil)
             }
             .eraseToAnyPublisher()
     }
