@@ -744,7 +744,7 @@ extension AppDatabase {
     }
 
     /**
-     A publisher that emits the `RecipeCategoryRecords` matching the given `categoryIds`.
+     A publisher that emits the `RecipeIngredientRecords` found in the given `categoryIds`.
      */
     func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
