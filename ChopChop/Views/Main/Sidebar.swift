@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of the sidebar.
+ */
  struct Sidebar: View {
     @EnvironmentObject var settings: UserSettings
     @StateObject var viewModel: SidebarViewModel
@@ -14,82 +17,21 @@ import SwiftUI
         }
         .listStyle(SidebarListStyle())
         .toolbar {
-            HStack(spacing: 16) {
-                if editMode.isEditing {
-                    Menu {
-                        Button("Recipe Category", action: {
-                            viewModel.sheetIsPresented = true
-                            viewModel.categoryType = .recipe
-                        })
-                        Button("Ingredient Category", action: {
-                            viewModel.sheetIsPresented = true
-                            viewModel.categoryType = .ingredient
-                        })
-                    } label: {
-                        Text("Add")
-                    }
-                }
-
-                EditButton()
-            }
+            editToolbar
         }
         .navigationTitle(Text("ChopChop"))
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
         .sheet(isPresented: $viewModel.sheetIsPresented, onDismiss: viewModel.addCategory) {
-            switch viewModel.categoryType {
-            case .recipe:
-                addRecipeCategorySheet
-            case .ingredient:
-                addIngredientCategorySheet
-            case .none:
-                EmptyView()
-            }
+            sheetView
         }
         .environment(\.editMode, $editMode)
     }
 
-    @ViewBuilder
-    var addRecipeCategorySheet: some View {
-        VStack(alignment: .leading) {
-            Text("Add Recipe Category")
-                .font(.largeTitle)
-                .bold()
-                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
-            Form {
-                Section(header: Text("Recipe Category")) {
-                    TextField("Name", text: $viewModel.categoryName)
-                }
-                Section {
-                    Button("Done", action: {
-                        viewModel.sheetIsPresented = false
-                    })
-                }
-            }
-        }
-    }
+    // MARK: - Recipe Section
 
-    var addIngredientCategorySheet: some View {
-        VStack(alignment: .leading) {
-            Text("Add Ingredient Category")
-                .font(.largeTitle)
-                .bold()
-                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
-            Form {
-                Section(header: Text("Ingredient Category")) {
-                    TextField("Name", text: $viewModel.categoryName)
-                }
-                Section {
-                    Button("Done", action: {
-                        viewModel.sheetIsPresented = false
-                    })
-                }
-            }
-        }
-    }
-
-    var recipesSection: some View {
+    private var recipesSection: some View {
         Section(header: Text("Recipes")) {
             allRecipesTab
 
@@ -138,7 +80,9 @@ import SwiftUI
         }
     }
 
-    var ingredientsSection: some View {
+    // MARK: - Ingredient Section
+
+    private var ingredientsSection: some View {
         Section(header: Text("Ingredients")) {
             allIngredientsTab
 
@@ -179,31 +123,50 @@ import SwiftUI
         }
     }
 
-    var recipeFeedSection: some View {
-        Section(header: Text("Recipe Feed")) {
-            NavigationLink(
-                destination: OnlineRecipeCollectionView(
-                    viewModel: OnlineRecipeCollectionViewModel(filter: .everyone, settings: settings)) {
-                    EmptyView()
-                }
-                    .navigationTitle(OnlineRecipeCollectionFilter.everyone.rawValue)
-            ) {
-                Label(OnlineRecipeCollectionFilter.everyone.rawValue, systemImage: "tray.2")
-            }
-
-            NavigationLink(
-                destination: OnlineRecipeCollectionView(
-                    viewModel: OnlineRecipeCollectionViewModel(filter: .followees, settings: settings)) {
-                    EmptyView()
-                }
-                    .navigationTitle(OnlineRecipeCollectionFilter.followees.rawValue)
-            ) {
-                Label(OnlineRecipeCollectionFilter.followees.rawValue, systemImage: "magnifyingglass")
-            }
+    private var uncategorisedIngredientsTab: some View {
+        NavigationLink(
+            destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
+        ) {
+            Label("Uncategorised", systemImage: "questionmark.folder")
         }
     }
 
-    var accountSection: some View {
+    // MARK: - Recipe Feed Section
+
+    private var recipeFeedSection: some View {
+        Section(header: Text("Recipe Feed")) {
+            followeeFeedLink
+            discoverFeedLink
+        }
+    }
+
+    private var followeeFeedLink: some View {
+        NavigationLink(
+            destination: OnlineRecipeCollectionView(
+                viewModel: OnlineRecipeCollectionViewModel(filter: .followees, settings: settings)) {
+                EmptyView()
+            }
+                .navigationTitle(OnlineRecipeCollectionFilter.followees.rawValue)
+        ) {
+            Label(OnlineRecipeCollectionFilter.followees.rawValue, systemImage: "person.2")
+        }
+    }
+
+    private var discoverFeedLink: some View {
+        NavigationLink(
+            destination: OnlineRecipeCollectionView(
+                viewModel: OnlineRecipeCollectionViewModel(filter: .everyone, settings: settings)) {
+                EmptyView()
+            }
+                .navigationTitle(OnlineRecipeCollectionFilter.everyone.rawValue)
+        ) {
+            Label(OnlineRecipeCollectionFilter.everyone.rawValue, systemImage: "magnifyingglass")
+        }
+    }
+
+    // MARK: - Account Section
+
+    private var accountSection: some View {
         Section(header: Text("Account")) {
             NavigationLink(
                 destination: ownProfileView
@@ -220,7 +183,7 @@ import SwiftUI
     }
 
     @ViewBuilder
-    var ownProfileView: some View {
+    private var ownProfileView: some View {
         if let userId = settings.userId {
             ProfileView(viewModel: ProfileViewModel(userId: userId, settings: settings))
         } else {
@@ -229,17 +192,84 @@ import SwiftUI
     }
 
     @ViewBuilder
-    var followeesView: some View {
-        if let id = settings.userId {
-            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: id, settings: settings))
+    private var followeesView: some View {
+        if let userId = settings.userId {
+            FolloweeCollectionView(viewModel: FolloweeCollectionViewModel(userId: userId, settings: settings))
+        } else {
+            NotFoundView(entityName: "Followees")
         }
     }
 
-    private var uncategorisedIngredientsTab: some View {
-        NavigationLink(
-            destination: IngredientCollectionView(viewModel: IngredientCollectionViewModel(title: "Uncategorised"))
-        ) {
-            Label("Uncategorised", systemImage: "questionmark.folder")
+    private var editToolbar: some View {
+        HStack(spacing: 16) {
+            if editMode.isEditing {
+                Menu {
+                    Button("Recipe Category", action: {
+                        viewModel.sheetIsPresented = true
+                        viewModel.categoryType = .recipe
+                    })
+                    Button("Ingredient Category", action: {
+                        viewModel.sheetIsPresented = true
+                        viewModel.categoryType = .ingredient
+                    })
+                } label: {
+                    Text("Add")
+                }
+            }
+
+            EditButton()
+        }
+    }
+
+    // MARK: - Sheet Views
+
+    @ViewBuilder
+    private var sheetView: some View {
+        switch viewModel.categoryType {
+        case .recipe:
+            addRecipeCategorySheet
+        case .ingredient:
+            addIngredientCategorySheet
+        case .none:
+            EmptyView()
+        }
+    }
+
+    private var addRecipeCategorySheet: some View {
+        VStack(alignment: .leading) {
+            Text("Add Recipe Category")
+                .font(.largeTitle)
+                .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Recipe Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
+        }
+    }
+
+    private var addIngredientCategorySheet: some View {
+        VStack(alignment: .leading) {
+            Text("Add Ingredient Category")
+                .font(.largeTitle)
+                .bold()
+                .padding(EdgeInsets(top: 32, leading: 16, bottom: 0, trailing: 16))
+            Form {
+                Section(header: Text("Ingredient Category")) {
+                    TextField("Name", text: $viewModel.categoryName)
+                }
+                Section {
+                    Button("Done", action: {
+                        viewModel.sheetIsPresented = false
+                    })
+                }
+            }
         }
     }
  }

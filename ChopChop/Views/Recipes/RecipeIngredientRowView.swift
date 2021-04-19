@@ -1,6 +1,9 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view of an ingredient required to make a recipe.
+ */
 struct RecipeIngredientRowView: View {
     @StateObject var viewModel: RecipeIngredientRowViewModel
 

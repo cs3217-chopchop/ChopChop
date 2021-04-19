@@ -1,18 +1,16 @@
 import SwiftUI
 
+/**
+ Represents a view of a recipe published online by the current user.
+ */
 struct OnlineRecipeBySelfView: View {
     @StateObject var viewModel: OnlineRecipeBySelfViewModel
 
     var body: some View {
         VStack(spacing: 0) {
             OnlineRecipeView(viewModel: viewModel)
-
             Divider()
-            Button(action: viewModel.onDelete) {
-                Label("Unpublish", systemImage: "trash")
-                    .foregroundColor(.red)
-            }
-            .padding()
+            unpublishButton
         }
         .overlay(
             RoundedRectangle(cornerRadius: 40)
@@ -20,5 +18,13 @@ struct OnlineRecipeBySelfView: View {
         )
         .padding([.vertical], 50)
         .padding([.horizontal], 100)
+    }
+
+    private var unpublishButton: some View {
+        Button(action: viewModel.onDelete) {
+            Label("Unpublish", systemImage: "trash")
+                .foregroundColor(.red)
+        }
+        .padding()
     }
 }

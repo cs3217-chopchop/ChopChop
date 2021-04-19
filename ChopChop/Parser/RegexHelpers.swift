@@ -2,8 +2,11 @@
 
 import Foundation
 
-//https://www.hackingwithswift.com/articles/108/how-to-use-regular-expressions-in-swift
-//https://stackoverflow.com/questions/27880650/swift-extract-regex-matches
+/**
+ References:
+ - https://www.hackingwithswift.com/articles/108/how-to-use-regular-expressions-in-swift
+ - https://stackoverflow.com/questions/27880650/swift-extract-regex-matches
+ */
 func matchesWithIndex(for regex: String, in text: String) -> [(String, Int)] {
     do {
         let regex = try NSRegularExpression(pattern: regex, options: .caseInsensitive)

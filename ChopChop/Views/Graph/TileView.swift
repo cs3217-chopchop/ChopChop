@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a tile component that expands when selected.
+ */
 struct TileView<Content: View>: View {
     let isSelected: Bool
     let isFaded: Bool
@@ -20,24 +23,28 @@ struct TileView<Content: View>: View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)
             .fill(Color.accentColor)
             .shadow(color: isSelected && !isFaded ? .accentColor : .clear, radius: 6)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color(UIColor.systemBackground).opacity(isFaded ? 0.9 : 0.8))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .stroke(Color.accentColor, lineWidth: 1.5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .stroke(isFaded
-                                        ? Color(UIColor.systemBackground).opacity(0.6)
-                                        : Color.clear, lineWidth: 1.5)
-                    )
-            )
+            .overlay(firstOverlay)
+            .overlay(secondOverlay)
             .overlay(content)
             .frame(width: isSelected ? expandedSize.width : normalSize.width,
                    height: isSelected ? expandedSize.height : normalSize.height)
             .zIndex(isSelected ? 1 : 0)
+    }
+
+    private var firstOverlay: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color(UIColor.systemBackground).opacity(isFaded ? 0.9 : 0.8))
+    }
+
+    private var secondOverlay: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .stroke(Color.accentColor, lineWidth: 1.5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .stroke(isFaded
+                                ? Color(UIColor.systemBackground).opacity(0.6)
+                                : Color.clear, lineWidth: 1.5)
+            )
     }
 }
 

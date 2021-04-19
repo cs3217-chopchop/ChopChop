@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a form for downloading a published recipe.
+ */
 struct DownloadRecipeView: View {
     @ObservedObject var viewModel: DownloadRecipeViewModel
 
@@ -12,7 +15,7 @@ struct DownloadRecipeView: View {
 
     }
 
-    var downloadNewCopyView: some View {
+    private var downloadNewCopyView: some View {
         VStack {
             Text("Save as")
             TextField("New Recipe Name", text: $viewModel.recipeNameToSave)
@@ -29,7 +32,7 @@ struct DownloadRecipeView: View {
         }
     }
 
-    var updateExistingCopyView: some View {
+    private var updateExistingCopyView: some View {
         VStack {
             Text("""
                 Please select existing recipes to update. Note that the update will \

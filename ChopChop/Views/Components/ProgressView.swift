@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view displaying that an entity is in the process of being loaded.
+ */
 struct ProgressView: View {
     @Binding private var isShow: Bool
 

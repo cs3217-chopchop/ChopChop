@@ -20,6 +20,7 @@ struct IngredientFormView: View {
         .sheet(isPresented: $viewModel.isShowingPhotoLibrary) {
             ImagePicker(sourceType: viewModel.pickerSourceType, selectedImage: $viewModel.image)
         }
+        .navigationTitle("\(viewModel.isEdit ? "Edit" : "Add") Ingredient")
         .alert(item: $viewModel.alertIdentifier, content: handleAlert)
     }
 
@@ -92,7 +93,7 @@ struct IngredientFormView: View {
             do {
                 try viewModel.save()
                 presentationMode.wrappedValue.dismiss()
-            } catch IngredientError.emptyName {
+            } catch IngredientError.invalidName {
                 viewModel.setAlertState(.emptyName)
             } catch StorageError.saveImageFailure {
                 viewModel.setAlertState(.saveImageError)

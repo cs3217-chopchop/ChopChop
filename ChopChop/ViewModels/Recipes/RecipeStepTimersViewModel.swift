@@ -1,20 +1,23 @@
 import Combine
 import SwiftUI
 
+/**
+ Represents a view model for a view of a collection of timers for an instruction step.
+ */
 final class RecipeStepTimersViewModel: ObservableObject {
+    /// The node containing the step that owns the timers.
+    let node: RecipeStepNode
+    /// The collection of timers displayed.
     @Published var timers: [RecipeStepTimerRowViewModel]
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
+    /// Display flags
     @Published var actionSheetIsPresented = false
 
-    var timersPublisher: AnyPublisher<[TimeInterval], Never> {
-        subject.eraseToAnyPublisher()
-    }
-
-    let node: RecipeStepNode
     private let subject = PassthroughSubject<[TimeInterval], Never>()
 
     init(node: RecipeStepNode, timers: [TimeInterval]) {
@@ -22,6 +25,10 @@ final class RecipeStepTimersViewModel: ObservableObject {
         self.timers = timers.map(RecipeStepTimersViewModel.convertToViewModel)
     }
 
+    /**
+     Parses the content of the step to a collection of timers,
+     overwriting or appending to the current collection depending on the given flag.
+     */
     func parseTimers(shouldOverwrite: Bool = false) {
         let timers = RecipeStepParser.parseTimeStrings(step: node.label.content).map {
             TimeInterval(RecipeStepParser.parseDuration(timeString: $0))
@@ -34,6 +41,9 @@ final class RecipeStepTimersViewModel: ObservableObject {
         }
     }
 
+    /**
+     Saves the timers to local storage, or updates the alert fields if saving fails.
+     */
     func saveTimers() -> Bool {
         do {
             subject.send(try timers.map {
@@ -68,5 +78,9 @@ final class RecipeStepTimersViewModel: ObservableObject {
         let seconds = String(Int(duration.truncatingRemainder(dividingBy: 60)))
 
         return RecipeStepTimerRowViewModel(hours: hours, minutes: minutes, seconds: seconds)
+    }
+
+    var timersPublisher: AnyPublisher<[TimeInterval], Never> {
+        subject.eraseToAnyPublisher()
     }
 }

@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a search bar component that exposes a text binding to be used by database queries.
+ */
 struct SearchBar: UIViewRepresentable {
     @Binding var text: String
     let placeholder: String

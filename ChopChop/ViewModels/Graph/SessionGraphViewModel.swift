@@ -1,10 +1,14 @@
 import SwiftUI
 
+/**
+ Represents a view model of a view of the graph display of the instructions of a recipe being made.
+ */
 final class SessionGraphViewModel: ObservableObject {
-    @Published var portalPosition = CGVector.zero
-
+    /// The graph displayed in the view.
     let graph: SessionRecipeStepGraph
     let proxy: ScrollViewProxy?
+
+    @Published var portalPosition = CGVector.zero
 
     init(graph: SessionRecipeStepGraph, proxy: ScrollViewProxy? = nil) {
         let maxCount = graph.nodeLayers.reduce(into: 0) { $0 = max($0, $1.count) }

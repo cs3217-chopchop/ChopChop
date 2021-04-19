@@ -1,6 +1,10 @@
 import SwiftUI
 
+/**
+ Represents a view that displays the lack of an entity.
+ */
 struct NotFoundView: View {
+    /// The name of the entity.
     let entityName: String
 
     var body: some View {

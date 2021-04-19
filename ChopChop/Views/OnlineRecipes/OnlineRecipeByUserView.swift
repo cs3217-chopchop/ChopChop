@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a recipe published online by another user.
+ */
 struct OnlineRecipeByUserView: View {
     @StateObject var viewModel: OnlineRecipeByUserViewModel
 
@@ -23,7 +26,7 @@ struct OnlineRecipeByUserView: View {
         .padding([.horizontal], 100)
     }
 
-    var rateRecipeBar: some View {
+    private var rateRecipeBar: some View {
         HStack {
             StarsView(rating: Double(viewModel.ownRating?.score.rawValue ?? 0),
                       maxRating: RatingScore.max, onTap: viewModel.tapRating)
@@ -38,7 +41,7 @@ struct OnlineRecipeByUserView: View {
         .padding()
     }
 
-    var rateRecipeButton: some View {
+    private var rateRecipeButton: some View {
         Button(action: viewModel.toggleShowRating) {
             Label("Rate Recipe", systemImage: "star")
         }

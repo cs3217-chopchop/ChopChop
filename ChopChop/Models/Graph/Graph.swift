@@ -17,8 +17,8 @@
  Representation Invariants:
  - The graph is either directed or undirected
     - In an undirected graph, edges should come in pairs (their reverse)) except for loops.
- - All nodes must have unique labels.
- - Multiple edges with the same source and destination nodes must not have the same weight.
+ - All nodes have unique labels.
+ - Multiple edges with the same source and destination nodes do not have the same weight.
  */
 class Graph<N: Node> {
     typealias E = Edge<N>

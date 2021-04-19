@@ -1,6 +1,9 @@
 import SwiftUI
 import Firebase
 
+/**
+ Represents the application.
+ */
 @main
 struct ChopChopApp: App {
     @StateObject var settings = UserSettings()

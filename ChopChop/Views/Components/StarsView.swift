@@ -1,6 +1,10 @@
-// https://stackoverflow.com/questions/64379079/how-to-present-accurate-star-rating-using-swiftui/64389917
 import SwiftUI
 
+/**
+ Represents a view consisting of a number of stars representing a rating.
+ 
+ Reference: // https://stackoverflow.com/questions/64379079/how-to-present-accurate-star-rating-using-swiftui/64389917
+ */
 struct StarsView: View {
     var rating: Double
     var maxRating: Int

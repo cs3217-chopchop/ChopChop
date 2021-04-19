@@ -2,9 +2,12 @@ import Foundation
 
 /**
  Represents some quantity of an ingredient used to make a recipe.
+ 
+ Representation Invariants:
+ - Name is not empty.
+ - Quantity is non negative.
  */
 struct RecipeIngredient: Equatable {
-
     // MARK: - Specification Fields
     /// The name of the ingredient. Cannot be empty.
     let name: String

@@ -2,18 +2,52 @@ import Combine
 import Foundation
 import UIKit
 
+/**
+ Represents a view model for a view of a collection of recipes.
+ */
 final class RecipeCollectionViewModel: ObservableObject {
-    @Published var query = ""
+    /// The name of the collection of recipes.
+    let title: String
+    /// The recipes displayed in the view is the union of recipes in
+    /// each of the categories in this array, represented by their ids.
+    let categoryIds: [Int64?]
+
+    /// The collection of recipes displayed in the view.
     @Published private(set) var recipes: [RecipeInfo] = []
+    /// The ingredients required to make the displayed recipe.
     @Published private(set) var recipeIngredients: Set<String> = []
+
+    /// Search fields
+    @Published var query = ""
     @Published var selectedIngredients: Set<String> = []
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
-    let title: String
-    let categoryIds: [Int64?]
+    private let storageManager = StorageManager()
+    private var cancellables: Set<AnyCancellable> = []
+
+    init(title: String, categoryIds: [Int64?] = [nil]) {
+        self.title = title
+        self.categoryIds = categoryIds
+
+        recipesPublisher
+            .sink { [weak self] recipes in
+                self?.recipes = recipes
+            }
+            .store(in: &cancellables)
+
+        recipeIngredientsPublisher
+            .sink { [weak self] ingredients in
+                self?.recipeIngredients = Set(ingredients)
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Returns the category represented by the view model,
+    /// or `nil` if it represents all recipes or uncategorised recipes.
     var category: RecipeCategory? {
         guard categoryIds.compactMap({ $0 }).count == 1 else {
             return nil
@@ -22,24 +56,9 @@ final class RecipeCollectionViewModel: ObservableObject {
         return try? RecipeCategory(id: categoryIds.compactMap({ $0 }).first, name: title)
     }
 
-    private let storageManager = StorageManager()
-    private var recipesCancellable: AnyCancellable?
-    private var recipeIngredientsCancellable: AnyCancellable?
-
-    init(title: String, categoryIds: [Int64?] = [nil]) {
-        self.title = title
-        self.categoryIds = categoryIds
-
-        recipesCancellable = recipesPublisher()
-            .sink { [weak self] recipes in
-                self?.recipes = recipes
-            }
-        recipeIngredientsCancellable = recipeIngredientsPublisher()
-            .sink { [weak self] ingredients in
-                self?.recipeIngredients = Set(ingredients)
-            }
-    }
-
+    /**
+     Deletes the recipes at the given indices of the recipe array.
+     */
     func deleteRecipes(at offsets: IndexSet) {
         do {
             let ids = offsets.compactMap { recipes[$0].id }
@@ -52,6 +71,9 @@ final class RecipeCollectionViewModel: ObservableObject {
         }
     }
 
+    /**
+     Returns the corresponding image of the recipe, or `nil` if such an image does not exist in local storage.
+     */
     func getRecipeImage(recipe: RecipeInfo) -> UIImage? {
         guard let id = recipe.id else {
             return nil
@@ -60,7 +82,7 @@ final class RecipeCollectionViewModel: ObservableObject {
         return storageManager.fetchRecipeImage(name: String(id))
     }
 
-    private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
+    private var recipesPublisher: AnyPublisher<[RecipeInfo], Never> {
         $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients
             -> AnyPublisher<[RecipeInfo], Error> in
             storageManager.recipesPublisher(query: query,
@@ -76,7 +98,7 @@ final class RecipeCollectionViewModel: ObservableObject {
         .eraseToAnyPublisher()
     }
 
-    private func recipeIngredientsPublisher() -> AnyPublisher<[String], Never> {
+    private var recipeIngredientsPublisher: AnyPublisher<[String], Never> {
         storageManager.recipeIngredientsPublisher(categoryIds: categoryIds)
             .catch { _ in
                 Just<[String]>([])

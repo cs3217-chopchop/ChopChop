@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a recipe.
+ */
 struct RecipeView: View {
     @EnvironmentObject var settings: UserSettings
     @StateObject var viewModel: RecipeViewModel
@@ -14,73 +17,53 @@ struct RecipeView: View {
                 }
             }
             .navigationTitle(recipe.name)
-            .background(
-                ZStack {
-                    NavigationLink(
-                        destination: SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe)),
-                        isActive: $viewModel.showSessionRecipe
-                    ) {
-                        EmptyView()
-                    }
-                    NavigationLink(
-                        destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe)),
-                        isActive: $viewModel.showRecipeForm
-                    ) {
-                        EmptyView()
-                    }
-                    if let parentRecipe = viewModel.parentRecipe {
-                        NavigationLink(
-                            destination: OnlineRecipeCollectionView(
-                                viewModel: OnlineRecipeCollectionViewModel(
-                                    recipe: parentRecipe,
-                                    settings: settings
-                                )
-                            ) {
-                                EmptyView()
-                            },
-                            isActive: $viewModel.showParentRecipe
-                        ) {
-                            EmptyView()
-                        }
-                    }
-                }
-            )
+            .background(navigationLinks(recipe))
             .toolbar {
-                if viewModel.parentRecipe != nil {
-                    Button(action: {
-                        viewModel.showParentRecipe = true
-                    }) {
-                        Text("Adapted From")
-                    }
-                }
-                Button(action: {
-                    viewModel.showSessionRecipe = true
-                }) {
-                    Image(systemName: "flame")
-                }
-                .disabled(viewModel.isCookingDisabled)
-                Button(action: {
-                    viewModel.showRecipeForm = true
-                }) {
-                    Image(systemName: "square.and.pencil")
-                }
-                Menu {
-                    Button(action: viewModel.publish) {
-                        Label(viewModel.isPublished ? "Publish changes" : "Publish", systemImage: "icloud.and.arrow.up")
-                    }
-                } label: {
-                    Image(systemName: "paperplane")
-                        .imageScale(.large)
-                        .padding(.leading, 8)
-                }
+                parentRecipeButton
+                cookingButton
+                editButton
+                publishMenu
             }
         } else {
             NotFoundView(entityName: "Recipe")
         }
     }
 
+    // MARK: - Caption
+
+    private func CaptionView(recipe: Recipe) -> some View {
+        HStack {
+            Text("Serves \(recipe.servings.removeZerosFromEnd())")
+            Divider()
+            DifficultyView(difficulty: recipe.difficulty)
+            Divider()
+            Text(recipe.category?.name ?? "Uncategorised")
+                .lineLimit(1)
+            Divider()
+
+            if recipe.totalTimeTaken != 0 {
+                Text(viewModel.totalTimeTaken)
+                Divider()
+            }
+
+            if viewModel.isPublished {
+                Text("Published")
+                    .foregroundColor(.accentColor)
+            } else {
+                Text("Unpublished")
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+        .font(.subheadline)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding([.leading, .trailing])
+    }
+
+    // MARK: - Banner
     @ViewBuilder
-    var image: some View {
+    private var image: some View {
         if let image = viewModel.image {
             Image(uiImage: image)
                 .resizable()
@@ -90,7 +73,7 @@ struct RecipeView: View {
         }
     }
 
-    var banner: some View {
+    private var banner: some View {
         image
             .scaledToFill()
             .frame(height: 300)
@@ -111,37 +94,9 @@ struct RecipeView: View {
             )
     }
 
-    func CaptionView(recipe: Recipe) -> some View {
-        HStack {
-            Text("Serves \(recipe.servings.removeZerosFromEnd())")
-            Divider()
-            DifficultyView(difficulty: recipe.difficulty)
-            Divider()
-            Text(recipe.category?.name ?? "Uncategorised")
-                .lineLimit(1)
-            Divider()
+    // MARK: - Details
 
-            if recipe.totalTimeTaken != 0 {
-                Text(viewModel.timeFormatter.string(from: recipe.totalTimeTaken) ?? "")
-                Divider()
-            }
-
-            if viewModel.isPublished {
-                Text("Published")
-                    .foregroundColor(.accentColor)
-            } else {
-                Text("Unpublished")
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-        }
-        .font(.subheadline)
-        .fixedSize(horizontal: false, vertical: true)
-        .padding([.leading, .trailing])
-    }
-
-    func DetailsView(recipe: Recipe) -> some View {
+    private func DetailsView(recipe: Recipe) -> some View {
         VStack(alignment: .leading) {
             IngredientsView(recipe: recipe)
             StepsView(recipe: recipe)
@@ -149,7 +104,7 @@ struct RecipeView: View {
         .padding([.leading, .trailing])
     }
 
-    func IngredientsView(recipe: Recipe) -> some View {
+    private func IngredientsView(recipe: Recipe) -> some View {
         VStack(alignment: .leading) {
             Text("Ingredients")
                 .font(.title)
@@ -167,7 +122,7 @@ struct RecipeView: View {
         }
     }
 
-    func StepsView(recipe: Recipe) -> some View {
+    private func StepsView(recipe: Recipe) -> some View {
         VStack(alignment: .leading) {
             Text("Steps")
                 .font(.title)
@@ -190,7 +145,7 @@ struct RecipeView: View {
         }
     }
 
-    func detailedStepsButton(_ recipe: Recipe) -> some View {
+    private func detailedStepsButton(_ recipe: Recipe) -> some View {
         HStack {
             Spacer()
             NavigationLink(
@@ -201,6 +156,86 @@ struct RecipeView: View {
             }
             .padding()
             Spacer()
+        }
+    }
+
+    // MARK: - Navigation Links
+
+    private func navigationLinks(_ recipe: Recipe) -> some View {
+        ZStack {
+            NavigationLink(
+                destination: SessionRecipeView(viewModel: SessionRecipeViewModel(recipe: recipe)),
+                isActive: $viewModel.showSessionRecipe
+            ) {
+                EmptyView()
+            }
+            NavigationLink(
+                destination: RecipeFormView(viewModel: RecipeFormViewModel(recipe: recipe)),
+                isActive: $viewModel.showRecipeForm
+            ) {
+                EmptyView()
+            }
+            if let parentRecipe = viewModel.parentRecipe {
+                NavigationLink(
+                    destination: OnlineRecipeCollectionView(
+                        viewModel: OnlineRecipeCollectionViewModel(
+                            recipe: parentRecipe,
+                            settings: settings
+                        )
+                    ) {
+                        EmptyView()
+                    },
+                    isActive: $viewModel.showParentRecipe
+                ) {
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    // MARK: - Toolbar
+
+    @ViewBuilder
+    private var parentRecipeButton: some View {
+        if viewModel.parentRecipe != nil {
+            Button(action: {
+                viewModel.showParentRecipe = true
+            }) {
+                Text("Adapted From")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var cookingButton: some View {
+        Button(action: {
+            viewModel.showSessionRecipe = true
+        }) {
+            Image(systemName: "flame")
+        }
+        .disabled(viewModel.isCookingDisabled)
+    }
+
+    @ViewBuilder
+    private var editButton: some View {
+        Button(action: {
+            viewModel.showRecipeForm = true
+        }) {
+            Image(systemName: "square.and.pencil")
+        }
+    }
+
+    @ViewBuilder
+    private var publishMenu: some View {
+        Menu {
+            Button(action: viewModel.publish) {
+                Label(viewModel.isPublished ? "Publish changes" : "Publish",
+                      systemImage: "icloud.and.arrow.up")
+            }
+        } label: {
+            Image(systemName: "paperplane")
+                .imageScale(.large)
+                .padding(.leading, 8)
         }
     }
 }

@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of the recipe instructions being edited.
+ */
 struct EditorGraphView: View {
     @StateObject var viewModel: EditorGraphViewModel
     @StateObject var selection = SelectionHandler<RecipeStepNode>()
@@ -32,23 +35,12 @@ struct EditorGraphView: View {
                 selection.deselectAllNodes()
             }
         }
-        .gesture(
-            LongPressGesture()
-                .sequenced(before: DragGesture(minimumDistance: 0)
-                    .updating($placeholderNodePosition) { value, state, _ in
-                        state = value.location
-                    }
-                    .onEnded(viewModel.onLongPressPortal))
-                .exclusively(before: DragGesture()
-                    .updating($portalDragOffset) { value, state, _ in
-                        state = CGVector(dx: value.translation.width, dy: value.translation.height)
-                    }
-                    .onEnded(viewModel.onDragPortal)
-                )
-        )
+        .gesture(gesture)
     }
 
-    var linesView: some View {
+    // MARK: - Lines
+
+    private var linesView: some View {
         ForEach(viewModel.graph.edges, id: \.self) { edge in
             Line(from: (edge.source.position ?? .zero)
                     + viewModel.portalPosition + portalDragOffset
@@ -64,7 +56,7 @@ struct EditorGraphView: View {
         }
     }
 
-    func placeholderLineView(info: EditorGraphViewModel.LineDragInfo) -> some View {
+    private func placeholderLineView(info: EditorGraphViewModel.LineDragInfo) -> some View {
         Line(from: info.from, to: info.to)
             .stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.8,
                                                         dash: [10],
@@ -76,7 +68,9 @@ struct EditorGraphView: View {
             }
     }
 
-    func nodesView(nodes: [RecipeStepNode]) -> some View {
+    // MARK: - Nodes
+
+    private func nodesView(nodes: [RecipeStepNode]) -> some View {
         ForEach(nodes) { node in
             EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph,
                                                           node: node,
@@ -92,6 +86,20 @@ struct EditorGraphView: View {
                 .gesture(getNodeGesture(node))
         }
     }
+
+    private func placeholderNodeView(position: CGPoint) -> some View {
+        guard let step = try? RecipeStep("Add step details...") else {
+            return AnyView(EmptyView())
+        }
+
+        return AnyView(EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph,
+                                                                     node: RecipeStepNode(step)),
+                       selection: selection)
+            .position(position)
+            .opacity(0.4))
+    }
+
+    // MARK: - Gestures
 
     private func getNodeGesture(_ node: RecipeStepNode) -> some Gesture {
         LongPressGesture()
@@ -122,16 +130,19 @@ struct EditorGraphView: View {
             )
     }
 
-    func placeholderNodeView(position: CGPoint) -> some View {
-        guard let step = try? RecipeStep("Add step details...") else {
-            return AnyView(EmptyView())
-        }
-
-        return AnyView(EditorNodeView(viewModel: EditorNodeViewModel(graph: viewModel.graph,
-                                                                     node: RecipeStepNode(step)),
-                       selection: selection)
-            .position(position)
-            .opacity(0.4))
+    private var gesture: some Gesture {
+        LongPressGesture()
+            .sequenced(before: DragGesture(minimumDistance: 0)
+                .updating($placeholderNodePosition) { value, state, _ in
+                    state = value.location
+                }
+                .onEnded(viewModel.onLongPressPortal))
+            .exclusively(before: DragGesture()
+                .updating($portalDragOffset) { value, state, _ in
+                    state = CGVector(dx: value.translation.width, dy: value.translation.height)
+                }
+                .onEnded(viewModel.onDragPortal)
+            )
     }
 }
 
