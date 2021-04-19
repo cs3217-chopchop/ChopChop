@@ -11,6 +11,11 @@ struct FirebaseDatabase {
     private let db = Firestore.firestore()
 
     // MARK: - FirebaseDatabase: Create/Update
+
+    /**
+     Creates OnlineRecipeRecord and OnlineRecipeInfoRecord in Firebase
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func addOnlineRecipe(recipe: OnlineRecipeRecord, completion: @escaping (Error?) -> Void) throws -> String {
         let recipeDocRef = db.collection(recipePath).document()
         let batch = db.batch()
@@ -26,6 +31,10 @@ struct FirebaseDatabase {
         return recipeDocRef.documentID
     }
 
+    /**
+     Updates OnlineRecipeRecord and timestamps in OnlineRecipeInfoRecord in Firebase
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool,
                             completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
@@ -62,7 +71,11 @@ struct FirebaseDatabase {
         }
     }
 
-    func addRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
+    /**
+     Add a rating of an OnlineRecipe and updates timestamp in OnlineRecipeInfoRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
+    func addOnlineRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let recipeRef = db.collection(recipePath).document(onlineRecipeId)
         batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: recipeRef)
@@ -75,7 +88,11 @@ struct FirebaseDatabase {
         }
     }
 
-    func updateRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+    /**
+     Updates a rating of an OnlineRecipe and updates timestamp in OnlineRecipeInfoRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
+    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
                             completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(recipePath).document(recipeId)
 
@@ -91,6 +108,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Add a UserRating to the User and updates timestamp in the UserRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func addUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let userRef = db.collection(userPath).document(userId)
@@ -104,6 +125,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Updates a UserRating of the User and updates timestamp in the UserRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating,
                           completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(userPath).document(userId)
@@ -118,6 +143,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Adds a UserRecord and UserInfoRecord to Firebase.
+     Signals completion via a completion handler and returns the userId of the new user and error in completion handler if any.
+     */
     func addUser(user: UserRecord, completion: @escaping (String?, Error?) -> Void) throws {
         let userRef = db.collection(userPath).document()
         let batch = db.batch()
@@ -132,6 +161,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Adds a followee of that followeeId to the user of that userId
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
     func addFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
         let userRef = db.collection(userPath).document(userId)
         let batch = db.batch()
@@ -146,6 +179,10 @@ struct FirebaseDatabase {
 
     // MARK: - FirebaseDatabase: Delete
 
+    /**
+     Delete an OnlineRecipeRecord and OnlineRecipeInfoRecord, effectively unpublishing the recipe.
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
     func removeOnlineRecipe(recipeId: String, completion: @escaping (Error?) -> Void) throws {
         let batch = db.batch()
         let recipeDocRef = db.collection(recipePath).document(recipeId)
@@ -159,6 +196,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Removes a rating of an OnlineRecipeRecord and update timestamp in OnlineRecipeInfoRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func removeRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let recipeRef = db.collection(recipePath).document(onlineRecipeId)
@@ -172,6 +213,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Removes a UserRating of an User and update timestamp in UserInfoRecord.
+     Signals completion via a completion handler and returns error in completion handler if any.
+     */
     func removeUserRecipeRating(userId: String, rating: UserRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let userRef = db.collection(userPath).document(userId)
@@ -185,6 +230,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Removes a followee of that followeeId from user of that userId and and update timestamp in UserInfoRecord.
+     Signals completion via a completion handler and returns an error in completion handler if any.
+     */
     func removeFollowee(userId: String, followeeId: String, completion: @escaping (Error?) -> Void) {
         let userRef = db.collection(userPath).document(userId)
         let batch = db.batch()
@@ -200,6 +249,10 @@ struct FirebaseDatabase {
 
     // MARK: - FirebaseDatabase: Read
 
+    /**
+     Fetches UserInfo of that id
+     Signals completion via a completion handler and returns the UserInfoRecord and error in completion handler if any.
+     */
     func fetchUserInfo(id: String, completion: @escaping (UserInfoRecord?, Error?) -> Void) {
         db.collection(userInfoPath).document(id).getDocument { document, err in
             guard let userInfo = try? document?.data(as: UserInfoRecord.self), err == nil else {
@@ -210,6 +263,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches user of that id
+     Signals completion via a completion handler and returns the UserRecord and error in completion handler if any.
+     */
     func fetchUser(id: String, completion: @escaping (UserRecord?, Error?) -> Void) {
         db.collection(userPath).document(id).getDocument { document, err in
             guard let user = try? document?.data(as: UserRecord.self), err == nil else {
@@ -220,6 +277,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches OnlineRecipeInfos whose creatorId is included in userIds
+     Signals completion via a completion handler and returns the OnlineRecipeInfoRecords and error in completion handler if any.
+     */
     func fetchOnlineRecipeInfos(userIds: [String],
                                 completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
 
@@ -255,6 +316,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches all OnlineRecipeInfos
+     Signals completion via a completion handler and returns the OnlineRecipeInfoRecords and error in completion handler if any.
+     */
     func fetchAllOnlineRecipeInfos(completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
         db.collection(recipeInfoPath).getDocuments { snapshot, err in
             var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
@@ -276,6 +341,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches OnlineRecipeRecords whose ids are included in ids
+     Signals completion via a completion handler and returns the OnlineRecipeRecords and error in completion handler if any.
+     */
     func fetchOnlineRecipes(ids: [String], completion: @escaping ([OnlineRecipeRecord], Error?) -> Void) {
 
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
@@ -304,6 +373,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches OnlineRecipe of that id
+     Signals completion via a completion handler and returns the OnlineRecipeRecord and error in completion handler if any.
+     */
     func fetchOnlineRecipe(id: String, completion: @escaping (OnlineRecipeRecord?, Error?) -> Void) {
         db.collection(recipePath).document(id).getDocument { snapshot, err in
             guard let recipeRecord = try? snapshot?.data(as: OnlineRecipeRecord.self), err == nil else {
@@ -314,6 +387,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches OnlineRecipeInfo of that id
+     Signals completion via a completion handler and returns the OnlineRecipeInfoRecord and error in completion handler if any.
+     */
     func fetchOnlineRecipeInfo(id: String, completion: @escaping (OnlineRecipeInfoRecord?, Error?) -> Void) {
         db.collection(recipeInfoPath).document(id).getDocument { snapshot, err in
             guard let recipeInfoRecord = try? snapshot?.data(as: OnlineRecipeInfoRecord.self), err == nil else {
@@ -324,6 +401,10 @@ struct FirebaseDatabase {
         }
     }
 
+    /**
+     Fetches all UserInfos
+     Signals completion via a completion handler and returns the UserInfoRecords and error in completion handler if any.
+     */
     func fetchAllUserInfos(completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
         var allUserInfoRecords = [String: UserInfoRecord]()
         db.collection(userInfoPath).getDocuments { snapshot, err in
@@ -344,7 +425,10 @@ struct FirebaseDatabase {
         }
     }
 
-    // used for users page
+    /**
+     Fetches UserInfos whose ids are in ids
+     Signals completion via a completion handler and returns the UserInfoRecords and error in completion handler if any.
+     */
     func fetchUserInfos(ids: [String], completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
         var allUserInfoRecords = [String: UserInfoRecord]()
@@ -379,6 +463,10 @@ struct FirebaseDatabase {
 
     }
 
+    /**
+     Fetches all Users whos ids are in ids
+     Signals completion via a completion handler and returns the UserRecords and error in completion handler if any.
+     */
     func fetchUsers(ids: [String], completion: @escaping ([UserRecord], Error?) -> Void) {
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
         var allUserRecords: [UserRecord] = []
@@ -408,6 +496,9 @@ struct FirebaseDatabase {
 
     // MARK: - FirebaseDatabase: Listeners
 
+    /**
+     Listens to the details of a single user.
+     */
     func userListener(id: String, onChange: @escaping (UserRecord) -> Void) {
         db.collection(userPath).document(id)
             .addSnapshotListener { documentSnapshot, _ in

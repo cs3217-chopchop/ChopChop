@@ -116,5 +116,4 @@ final class ProfileViewModel: ObservableObject {
             self.isLoading = false
         }
     }
-
 }

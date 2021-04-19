@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a recipe published online by another user.
  */
 struct OnlineRecipeByUserView: View {
-    @ObservedObject var viewModel: OnlineRecipeByUserViewModel
+    @StateObject var viewModel: OnlineRecipeByUserViewModel
 
     var body: some View {
         VStack(spacing: 0) {
