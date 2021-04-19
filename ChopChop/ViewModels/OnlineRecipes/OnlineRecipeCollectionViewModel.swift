@@ -2,14 +2,23 @@ import Foundation
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model of a view of a collection of recipes published online.
+ */
 final class OnlineRecipeCollectionViewModel: ObservableObject {
-    private let filter: OnlineRecipeCollectionFilter?
-    private let userIds: [String]?
+    /// The recipes displayed in the view.
     @Published private(set) var recipes: [OnlineRecipe] = []
+    /// The filter applied to the collection of all published recipes.
+    /// Is `nil` if this collection of recipes is not filtered in this way.
+    private let filter: OnlineRecipeCollectionFilter?
+    /// The recipes displayed is the union of all recipes published by the users identified by their ids in this array.
+    /// Is `nil` if this collection of recipes is not obtained in this way.
+    private let userIds: [String]?
 
     private let storageManager = StorageManager()
     private let settings: UserSettings
 
+    /// The view model in charge of downloading recipes.
     @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
     @Published var isLoading = false
 
@@ -20,18 +29,21 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
     }
 
     init(userIds: [String], settings: UserSettings) {
-        self.userIds = userIds
         self.filter = nil
+        self.userIds = userIds
         self.settings = settings
     }
 
     init(recipe: OnlineRecipe, settings: UserSettings) {
+        self.filter = nil
+        self.userIds = nil
         self.recipes = [recipe]
         self.settings = settings
-        self.userIds = nil
-        self.filter = nil
     }
 
+    /**
+     Loads the recipes in the collection.
+     */
     func load() {
         isLoading = true
         if let userIds = userIds {
@@ -52,7 +64,6 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
             }
         }
     }
-
 }
 
 enum OnlineRecipeCollectionFilter: String {

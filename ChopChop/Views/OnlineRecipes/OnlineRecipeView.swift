@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a recipe published online.
+ */
 struct OnlineRecipeView: View {
     @StateObject var viewModel: OnlineRecipeViewModel
     @EnvironmentObject var settings: UserSettings
@@ -21,7 +24,9 @@ struct OnlineRecipeView: View {
         }
     }
 
-    var userBar: some View {
+    // MARK: - User
+
+    private var userBar: some View {
         NavigationLink(
             destination: ProfileView(
                 viewModel: ProfileViewModel(
@@ -42,7 +47,9 @@ struct OnlineRecipeView: View {
         .zIndex(1)
     }
 
-    var recipeImage: some View {
+    // MARK: - Image
+
+    private var recipeImage: some View {
         Image(uiImage: viewModel.image)
             .resizable()
             .scaledToFill()
@@ -51,36 +58,8 @@ struct OnlineRecipeView: View {
             .overlay(recipeImageOverlay)
     }
 
-    var recipeImageOverlay: some View {
-        var recipeName: some View {
-            VStack {
-                Text(viewModel.recipe.name)
-                    .font(.title)
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                if let parentRecipe = viewModel.parentRecipe {
-                    getLinkToParentRecipe(parentRecipe: parentRecipe)
-                }
-            }
-        }
-
-        var recipeDetails: some View {
-            VStack(alignment: .leading) {
-                Text("Serves \(viewModel.recipeServingText)")
-                HStack {
-                    Text("Difficulty: ")
-                    DifficultyView(difficulty: viewModel.recipe.difficulty)
-                }
-                HStack {
-                    Text("Cuisine: ")
-                    Text(viewModel.recipe.cuisine ?? "Unspecified")
-                }
-            }
-            .font(.caption)
-            .foregroundColor(.white)
-        }
-
-        return ZStack(alignment: .bottomLeading) {
+    private var recipeImageOverlay: some View {
+        ZStack(alignment: .bottomLeading) {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(
@@ -91,13 +70,43 @@ struct OnlineRecipeView: View {
             HStack {
                 recipeName
                 Spacer()
-                recipeDetails
+                recipeInfo
             }
             .padding()
         }
     }
 
-    var averageRating: some View {
+    private var recipeName: some View {
+        VStack {
+            Text(viewModel.recipe.name)
+                .font(.title)
+                .foregroundColor(.white)
+                .lineLimit(1)
+            if let parentRecipe = viewModel.parentRecipe {
+                getLinkToParentRecipe(parentRecipe: parentRecipe)
+            }
+        }
+    }
+
+    private var recipeInfo: some View {
+        VStack(alignment: .leading) {
+            Text("Serves \(viewModel.recipeServingText)")
+            HStack {
+                Text("Difficulty: ")
+                DifficultyView(difficulty: viewModel.recipe.difficulty)
+            }
+            HStack {
+                Text("Cuisine: ")
+                Text(viewModel.recipe.cuisine ?? "Unspecified")
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.white)
+    }
+
+    // MARK: - Rating
+
+    private var averageRating: some View {
         HStack {
             Text("Rating: ")
             StarsView(rating: viewModel.averageRating, maxRating: RatingScore.max)
@@ -111,14 +120,16 @@ struct OnlineRecipeView: View {
         }.padding()
     }
 
-    var recipeDetails: some View {
+    // MARK: - Details
+
+    private var recipeDetails: some View {
         HStack {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Ingredients").font(.title).underline()
-                ingredient
+                ingredients
                 Spacer()
                 Text("Instructions").font(.title).underline()
-                instruction
+                instructions
             }
             .padding()
 
@@ -126,7 +137,7 @@ struct OnlineRecipeView: View {
         }
     }
 
-    var ingredient: some View {
+    private var ingredients: some View {
         VStack(alignment: .leading) {
             ForEach(viewModel.recipe.ingredients, id: \.self.description) { ingredient in
                 Text("• \(ingredient.description)")
@@ -134,7 +145,7 @@ struct OnlineRecipeView: View {
         }.font(.body)
     }
 
-    var instruction: some View {
+    private var instructions: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(0..<viewModel.recipe.stepGraph.nodes.count, id: \.self) { idx in
                 HStack(alignment: .top) {
@@ -146,7 +157,9 @@ struct OnlineRecipeView: View {
         }
     }
 
-    var showDetailBar: some View {
+    // MARK: - Buttons
+
+    private var showDetailBar: some View {
         Button(action: viewModel.toggleShowDetail) {
             HStack {
                 Image(systemName: viewModel.isShowingDetail ? "chevron.up" : "chevron.down")
@@ -156,19 +169,21 @@ struct OnlineRecipeView: View {
         .padding()
     }
 
-    var downloadButton: some View {
-        Button(action: viewModel.setRecipe) {
+    private var downloadButton: some View {
+        Button(action: viewModel.setRecipeToBeDownloaded) {
             Label("Download New Copy", systemImage: "square.and.arrow.down")
         }
     }
 
-    var updateButton: some View {
+    private var updateButton: some View {
         Button(action: {
             viewModel.updateForkedRecipes()
         }) {
             Label("Update Downloaded Copies", systemImage: "square.and.arrow.down")
         }
     }
+
+    // MARK: - Parent Recipe
 
     private func getLinkToParentRecipe(parentRecipe: OnlineRecipe) -> some View {
         NavigationLink(
