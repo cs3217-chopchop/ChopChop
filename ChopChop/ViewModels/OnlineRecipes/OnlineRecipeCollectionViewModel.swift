@@ -20,6 +20,7 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
 
     /// The view model in charge of downloading recipes.
     @Published var downloadRecipeViewModel = DownloadRecipeViewModel()
+    /// A flag representing whether the data is still being loaded from storage.
     @Published var isLoading = false
 
     init(filter: OnlineRecipeCollectionFilter, settings: UserSettings) {

@@ -55,7 +55,7 @@ struct FolloweeCollectionView: View {
     }
 
     @ViewBuilder
-    func FolloweeRow(followee: User) -> some View {
+    private func FolloweeRow(followee: User) -> some View {
         NavigationLink(
             destination: ProfileView(viewModel: ProfileViewModel(userId: followee.id, settings: viewModel.settings))
         ) {

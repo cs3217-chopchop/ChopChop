@@ -7,10 +7,7 @@ import Combine
 final class ProfileViewModel: ObservableObject {
     /// The id of the user displayed in the profile view.
     private let userId: String
-
-    private let storageManager = StorageManager()
-    private let settings: UserSettings
-    private var recipeCountCancellabe: AnyCancellable?
+    /// The view model containing the recipes published by the displayed user.
     @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     /// User profile details
@@ -19,17 +16,23 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var followeeCount = 0
     @Published private(set) var isFollowedByUser = false
 
+    /// A flag representing whether the data is still being loaded from storage.
     @Published var isLoading = false
+
+    private let settings: UserSettings
+    private let storageManager = StorageManager()
+    private var cancellables: Set<AnyCancellable> = []
 
     init(userId: String, settings: UserSettings) {
         self.userId = userId
         self.settings = settings
         self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
 
-        recipeCountCancellabe = recipesViewModel.$recipes
+        recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
+            .store(in: &cancellables)
     }
 
     /// Checks if the profile belongs to the current user.
@@ -71,6 +74,9 @@ final class ProfileViewModel: ObservableObject {
         }
     }
 
+    /**
+     Loads the profile of the user.
+     */
     func load() {
         isLoading = true
         guard !isOwnProfile else {
