@@ -11,7 +11,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
     @Published private(set) var recipeServingText = ""
     @Published private(set) var creatorName = ""
-
+    @Published private var ratings: [RecipeRating] = []
     @Published private var firstRater = ""
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
@@ -25,7 +25,7 @@ class OnlineRecipeViewModel: ObservableObject {
         self.recipe = recipe
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
-        load()
+        reload()
     }
 
     var averageRating: Double {
@@ -53,7 +53,7 @@ class OnlineRecipeViewModel: ObservableObject {
 
     func load() {
         isLoading = true
-        updateFirstRaterName()
+        updateRating()
         updateImage()
         updateCreatorName()
         updateRecipeServingText()
@@ -67,7 +67,7 @@ class OnlineRecipeViewModel: ObservableObject {
                 return
             }
             self.recipe = onlineRecipe
-            self.updateFirstRaterName()
+            self.updateRating()
             self.updateImage()
             self.updateCreatorName()
             self.updateRecipeServingText()
@@ -125,7 +125,8 @@ class OnlineRecipeViewModel: ObservableObject {
         }
     }
 
-    private func updateFirstRaterName() {
+    private func updateRating() {
+        ratings = recipe.ratings
         guard let firstRaterId = getRaterId(recipe: recipe) else {
             return
         }

@@ -59,7 +59,7 @@ struct FirebaseDatabase {
         }
     }
 
-    func addRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
+    func addOnlineRecipeRating(onlineRecipeId: String, rating: RecipeRating, completion: @escaping (Error?) -> Void) {
         let batch = db.batch()
         let recipeRef = db.collection(recipePath).document(onlineRecipeId)
         batch.updateData(["ratings": FieldValue.arrayUnion([rating.asDict])], forDocument: recipeRef)
@@ -72,7 +72,7 @@ struct FirebaseDatabase {
         }
     }
 
-    func updateRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
                             completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(recipePath).document(recipeId)
 

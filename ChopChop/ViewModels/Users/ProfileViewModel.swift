@@ -18,6 +18,7 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var followeeCount = 0
     @Published private(set) var isFollowedByUser = false
 
+    private var publishedRecipesCountCancellable: AnyCancellable?
     @Published var isLoading = false
 
     init(userId: String, settings: UserSettings) {
@@ -25,7 +26,7 @@ final class ProfileViewModel: ObservableObject {
         self.settings = settings
         self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
 
-        recipesViewModel.$recipes
+        publishedRecipesCountCancellable = recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }
