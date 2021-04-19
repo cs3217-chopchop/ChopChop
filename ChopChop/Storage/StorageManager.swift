@@ -4,7 +4,12 @@ import Foundation
 import UIKit
 import Combine
 
+/**
+ An abstraction over `AppDatabase`, `FirebaseDatabase` and `FirebaseCloudStorage` that delegates methods used by the
+ application to the appropiate database manager. It also manages the translation between runtime models and database record models.
+ */
 struct StorageManager {
+    /// Interacts with the local SQLite database using the GRDB.swift library to perform database operations.
     let appDatabase: AppDatabase
     let firebaseDatabase = FirebaseDatabase()
     let firebaseStorage = FirebaseCloudStorage()
@@ -17,6 +22,10 @@ struct StorageManager {
 
     // MARK: - Storage Manager: Create/Update
 
+    /**
+     Translate the given `Recipe` into its database record models before saving it.
+     The `id` of the given `Recipe` is also updated after saving.
+     */
     func saveRecipe(_ recipe: inout Recipe) throws {
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
                                         isImageUploaded: recipe.isImageUploaded,
@@ -33,6 +42,10 @@ struct StorageManager {
         recipe.id = recipeRecord.id
     }
 
+    /**
+     Translate the given `RecipeCategory` into its database record models before saving it.
+     The `id` of the given `RecipeCategory` is also updated after saving.
+     */
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {
         var recipeCategoryRecord = RecipeCategoryRecord(id: recipeCategory.id, name: recipeCategory.name)
 
@@ -41,6 +54,11 @@ struct StorageManager {
         recipeCategory.id = recipeCategoryRecord.id
     }
 
+    /**
+     Translate the given `Ingredients` into their database record models before saving them.
+     The underlying method called ensures the atomicity of this operation.
+     The `ids` of the given `Ingredients` are also updated after saving.
+     */
     func saveIngredients(_ ingredients: inout [Ingredient]) throws {
         var records: [(IngredientRecord, [IngredientBatchRecord])] = ingredients.map { ingredient in
             let ingredientRecord = IngredientRecord(id: ingredient.id,
@@ -63,6 +81,10 @@ struct StorageManager {
         }
     }
 
+    /**
+     Translate the given `Ingredient` into its database record models before saving it.
+     The `id` of the given `Ingredient` is also updated after saving.
+     */
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.category?.id,
@@ -79,6 +101,10 @@ struct StorageManager {
         ingredient.id = ingredientRecord.id
     }
 
+    /**
+     Translate the given `IngredientCategory` into its database record models before saving it.
+     The `id` of the given `IngredientCategory` is also updated after saving.
+     */
     func saveIngredientCategory(_ ingredientCategory: inout IngredientCategory) throws {
         var ingredientCategoryRecord = IngredientCategoryRecord(id: ingredientCategory.id,
                                                                 name: ingredientCategory.name)
@@ -90,44 +116,75 @@ struct StorageManager {
 
     // MARK: - StorageManager: Delete
 
+    /**
+     Deletes the `Recipes` matching the given `ids` and their corresponding images.
+     */
     func deleteRecipes(ids: [Int64]) throws {
         try appDatabase.deleteRecipes(ids: ids)
 
         ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.recipeFolderName)
     }
 
+    /**
+     Deletes all `Recipes` and corresponding images
+     */
     func deleteAllRecipes() throws {
         try appDatabase.deleteAllRecipes()
 
         ImageStore.deleteAll(inFolderNamed: StorageManager.recipeFolderName)
     }
 
+    /**
+     Deletes the `RecipeCategories` matching the given `ids`.
+     */
     func deleteRecipeCategories(ids: [Int64]) throws {
         try appDatabase.deleteRecipeCategories(ids: ids)
     }
 
+    /**
+     Deletes all `RecipeCategories`.
+     */
     func deleteAllRecipeCategories() throws {
         try appDatabase.deleteAllRecipeCategories()
     }
 
+    /**
+     Deletes the `Ingredients` matching the given `ids` and their corresponding images.
+     */
     func deleteIngredients(ids: [Int64]) throws {
         try appDatabase.deleteIngredients(ids: ids)
+        
+        ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.ingredientFolderName)
     }
 
+    /**
+     Deletes all `Ingredients` and corresponding images
+     */
     func deleteAllIngredients() throws {
         try appDatabase.deleteAllIngredients()
+        
+        ImageStore.deleteAll(inFolderNamed: StorageManager.ingredientFolderName)
     }
 
+    /**
+     Deletes the `IngredientCategories` matching the given `ids`.
+     */
     func deleteIngredientCategories(ids: [Int64]) throws {
         try appDatabase.deleteIngredientCategories(ids: ids)
     }
 
+    /**
+     Deletes all `IngredientCategories`.
+     */
     func deleteAllIngredientCategories() throws {
         try appDatabase.deleteAllIngredientCategories()
     }
 
     // MARK: - Storage Manager: Read
 
+    /**
+     Fetches the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try appDatabase.fetchRecipe(id: id)
     }
@@ -136,14 +193,23 @@ struct StorageManager {
         try appDatabase.fetchRecipe(onlineId: onlineId)
     }
 
+    /**
+     Fetches the `RecipeCategory` corresponding to the given `name`, or `nil` if it does not exist.
+     */
     func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try appDatabase.fetchRecipeCategory(name: name)
     }
 
+    /**
+     Fetches all `Ingredients`.
+     */
     func fetchIngredients() throws -> [Ingredient] {
         try appDatabase.fetchIngredients()
     }
 
+    /**
+     Fetches the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try appDatabase.fetchIngredient(id: id)
     }
@@ -154,10 +220,16 @@ struct StorageManager {
 
     // MARK: - Database Access: Publishers
 
+    /**
+     A publisher that emits the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
         appDatabase.recipePublisher(id: id)
     }
 
+    /**
+     A publisher that emits the `RecipeInfo` matching the given `query`, `categoryIds` and `Ingredients`.
+     */
     func recipesPublisher(query: String,
                           categoryIds: [Int64?],
                           ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
@@ -166,34 +238,53 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `RecipeCategories`.
+     */
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesPublisher()
             .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the names of the `RecipeIngredients` found in the given `categoryIds`.
+     */
     func recipeIngredientsPublisher(categoryIds: [Int64?]) -> AnyPublisher<[String], Error> {
         appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
             .map { Array(Set($0.map { $0.name })).sorted() }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Error> {
         appDatabase.ingredientPublisher(id: id)
     }
 
+    /**
+     A publisher that emits all `IngredientInfos`.
+     */
     func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher()
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `IngredientInfos` matching the given `query` and `categoryIds`.
+     */
     func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `IngredientInfos` matching the given `query`, `categoryIds`
+     and expiring between `expiresAfter` and `expiresBefore`.
+     */
     func ingredientsPublisher(query: String,
                               categoryIds: [Int64?],
                               expiresAfter: Date,
@@ -206,6 +297,9 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `IngredientCategoryRecords`.
+     */
     func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Error> {
         appDatabase.ingredientCategoriesPublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
