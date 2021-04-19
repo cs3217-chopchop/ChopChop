@@ -154,7 +154,7 @@ class RecipeFormViewModel: ObservableObject {
 
             if let id = updatedRecipe.id {
                 if image == UIImage() {
-                    try storageManager.deleteRecipeImage(name: String(id))
+                    storageManager.deleteRecipeImage(name: String(id))
                 } else {
                     try storageManager.saveRecipeImage(image, name: String(id))
                 }

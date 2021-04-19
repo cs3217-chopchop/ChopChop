@@ -219,7 +219,7 @@ extension StorageManager {
     static let ingredientFolderName = "Ingredient"
     static let recipeFolderName = "Recipe"
 
-    func deleteRecipeImage(name: String) throws {
+    func deleteRecipeImage(name: String) {
         ImageStore.delete(imageNamed: name, inFolderNamed: StorageManager.recipeFolderName)
     }
 

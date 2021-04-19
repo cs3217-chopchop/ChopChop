@@ -130,7 +130,7 @@ extension StorageManagerTests {
         XCTAssertNotNil(persistedImage)
         XCTAssertEqual(persistedImage?.pngData(), image.pngData())
 
-        try storageManager.deleteRecipeImage(name: imageName)
+        storageManager.deleteRecipeImage(name: imageName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 
@@ -150,7 +150,7 @@ extension StorageManagerTests {
         XCTAssertNotEqual(persistedImage?.pngData(), existingImage.pngData())
         XCTAssertEqual(persistedImage?.pngData(), newImage.pngData())
 
-        try storageManager.deleteRecipeImage(name: imageName)
+        storageManager.deleteRecipeImage(name: imageName)
         XCTAssertNil(storageManager.fetchRecipeImage(name: imageName))
     }
 }
