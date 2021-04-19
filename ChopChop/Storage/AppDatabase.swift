@@ -5,9 +5,14 @@ import Foundation
 import GRDB
 import UIKit
 
+/**
+ Interacts with the local SQLite database using the GRDB.swift library to perform database operations.
+ */
 struct AppDatabase {
+    /// A class that provides access to the SQLite database
     private let dbWriter: DatabaseWriter
 
+    /// A class to facilitate SQL migrations
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
@@ -27,6 +32,7 @@ struct AppDatabase {
             }
         }
 
+        // swiftlint:disable closure_body_length
         migrator.registerMigration("CreateRecipe") { db in
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
@@ -52,6 +58,7 @@ struct AppDatabase {
                     .check { Difficulty.allCases.map { $0.rawValue }.contains($0) }
             }
         }
+        // swiftlint:enable closure_body_length
 
         migrator.registerMigration("CreateRecipeIngredient") { db in
             try db.create(table: "recipeIngredient") { t in
@@ -177,7 +184,12 @@ struct AppDatabase {
 }
 
 // MARK: - Database: Preloaded Recipes
+
 extension AppDatabase {
+    /**
+     Creates preloaded recipes if the application does not have any recipes and recipe categories.
+     Preloaded recipe information is found in `Storage/Data/recipes.json`.
+     */
     func createPreloadedRecipesIfEmpty() throws {
         try dbWriter.write { db in
             if try RecipeRecord.fetchCount(db) == 0 && RecipeCategoryRecord.fetchCount(db) == 0 {
@@ -206,7 +218,8 @@ extension AppDatabase {
         }
 
         var recipeRecords = recipes.map { recipe in
-            RecipeRecord(isImageUploaded: false, recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+            RecipeRecord(isImageUploaded: false,
+                         recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
                          name: recipe.name,
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement())
@@ -285,7 +298,12 @@ extension AppDatabase {
 }
 
 // MARK: - Database: Preloaded Ingredients
+
 extension AppDatabase {
+    /**
+     Creates preloaded ingredients if the application does not have any ingredients and ingredient categories.
+     Preloaded ingredient information is found in `Storage/Data/ingredients.json`.
+     */
     func createPreloadedIngredientsIfEmpty() throws {
         try dbWriter.write { db in
             if try IngredientRecord.fetchCount(db) == 0 && IngredientCategoryRecord.fetchCount(db) == 0 {
@@ -351,6 +369,9 @@ extension AppDatabase {
 // MARK: - Database Access: Create/Update
 
 extension AppDatabase {
+    /**
+     Saves the given `RecipeRecord`.
+     */
     func saveRecipe(_ recipe: inout RecipeRecord) throws {
         var ingredients: [RecipeIngredientRecord] = []
         var stepGraph = RecipeStepGraph()
@@ -358,6 +379,9 @@ extension AppDatabase {
         try saveRecipe(&recipe, ingredients: &ingredients, stepGraph: &stepGraph)
     }
 
+    /**
+     Saves the given `RecipeRecord`, along with its corresponding `RecipeIngredientRecords` and `RecipeStepGraph`.
+     */
     func saveRecipe(_ recipe: inout RecipeRecord, ingredients: inout [RecipeIngredientRecord],
                     stepGraph: inout RecipeStepGraph) throws {
         // swiftlint:disable closure_body_length
@@ -412,13 +436,19 @@ extension AppDatabase {
         // swiftlint:enable closure_body_length
     }
 
+    /**
+     Saves the given `RecipeCategoryRecord`.
+     */
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategoryRecord) throws {
         try dbWriter.write { db in
             try recipeCategory.save(db)
         }
     }
 
-    // For saving multiple ingredients in one transaction
+    /**
+     Saves the given `IngredientRecords`, along with their corresponding `IngredientBatchRecords`.
+     This function ensures that the operation is done in one transaction to ensure atomicity.
+     */
     func saveIngredients(_ ingredients: inout [(IngredientRecord, [IngredientBatchRecord])]) throws {
         try dbWriter.write { db in
             for index in ingredients.indices {
@@ -449,12 +479,18 @@ extension AppDatabase {
         }
     }
 
+    /**
+     Saves the given `IngredientRecord`.
+     */
     func saveIngredient(_ ingredient: inout IngredientRecord) throws {
         var batches: [IngredientBatchRecord] = []
 
         try saveIngredient(&ingredient, batches: &batches)
     }
 
+    /**
+     Saves the given `IngredientRecord`, along with its corresponding `IngredientBatchRecords`.
+     */
     func saveIngredient(_ ingredient: inout IngredientRecord, batches: inout [IngredientBatchRecord]) throws {
         try dbWriter.write { db in
             guard batches.allSatisfy({ $0.quantity.type == ingredient.quantityType }) else {
@@ -480,6 +516,9 @@ extension AppDatabase {
         }
     }
 
+    /**
+     Saves the given `IngredientCategoryRecord`.
+     */
     func saveIngredientCategory(_ ingredientCategory: inout IngredientCategoryRecord) throws {
         try dbWriter.write { db in
             try ingredientCategory.save(db)
@@ -490,48 +529,72 @@ extension AppDatabase {
 // MARK: - Database Access: Delete
 
 extension AppDatabase {
+    /**
+     Deletes the `RecipeRecords` matching the given `ids`.
+     */
     func deleteRecipes(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try RecipeRecord.deleteAll(db, ids: ids)
         }
     }
 
+    /**
+     Deletes all `RecipeRecords`.
+     */
     func deleteAllRecipes() throws {
         try dbWriter.write { db in
             _ = try RecipeRecord.deleteAll(db)
         }
     }
 
+    /**
+     Deletes the `RecipeCategoryRecords` matching the given `ids`.
+     */
     func deleteRecipeCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try RecipeCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
+    /**
+     Deletes all `RecipeCategoryRecords`.
+     */
     func deleteAllRecipeCategories() throws {
         try dbWriter.write { db in
             _ = try RecipeCategoryRecord.deleteAll(db)
         }
     }
 
+    /**
+     Deletes the `IngredientRecords` matching the given `ids`.
+     */
     func deleteIngredients(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try IngredientRecord.deleteAll(db, ids: ids)
         }
     }
 
+    /**
+     Deletes all `IngredientRecords`.
+     */
     func deleteAllIngredients() throws {
         try dbWriter.write { db in
             _ = try IngredientRecord.deleteAll(db)
         }
     }
 
+    /**
+     Deletes the `IngredientCategoryRecords` matching the given `ids`.
+     */
     func deleteIngredientCategories(ids: [Int64]) throws {
         try dbWriter.write { db in
             _ = try IngredientCategoryRecord.deleteAll(db, ids: ids)
         }
     }
 
+    /**
+     Deletes all `IngredientCategoryRecords`.
+     */
     func deleteAllIngredientCategories() throws {
         try dbWriter.write { db in
             _ = try IngredientCategoryRecord.deleteAll(db)
@@ -542,6 +605,9 @@ extension AppDatabase {
 // MARK: - Database Access: Read
 
 extension AppDatabase {
+    /**
+     Fetches the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try dbWriter.read { db in
             let request = RecipeRecord
@@ -576,6 +642,7 @@ extension AppDatabase {
         try dbWriter.read { db in
             let request = RecipeRecord
                 .filter(RecipeRecord.Columns.parentOnlineRecipeId == parentOnlineRecipeId)
+                .including(optional: RecipeRecord.category)
                 .including(all: RecipeRecord.ingredients)
                 .including(required: RecipeRecord.stepGraph
                     .including(all: RecipeStepGraphRecord.steps)
@@ -584,6 +651,9 @@ extension AppDatabase {
         }
     }
 
+    /**
+     Fetches the `RecipeCategory` corresponding to the given `name`, or `nil` if it does not exist.
+     */
     func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try dbWriter.read { db in
             let request = RecipeCategoryRecord
@@ -593,20 +663,28 @@ extension AppDatabase {
         }
     }
 
+    /**
+     Fetches all `Ingredients`.
+     */
     func fetchIngredients() throws -> [Ingredient] {
         try dbWriter.read { db in
             let request = IngredientRecord
                 .all()
+                .including(optional: IngredientRecord.category)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchAll(db, request)
         }
     }
 
+    /**
+     Fetches the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try dbWriter.read { db in
             let request = IngredientRecord
                 .filter(id: id)
+                .including(optional: IngredientRecord.category)
                 .including(all: IngredientRecord.batches)
 
             return try Ingredient.fetchOne(db, request)
@@ -617,6 +695,9 @@ extension AppDatabase {
 // MARK: - Database Access: Publishers
 
 extension AppDatabase {
+    /**
+     A publisher that emits the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
         ValueObservation
             .tracking({ db in
@@ -635,6 +716,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Recipes` matching the given `query`, `categoryIds` and `Ingredients`.
+     */
     func recipesPublisher(query: String = "",
                           categoryIds: [Int64?] = [nil],
                           ingredients: [String] = []) -> AnyPublisher<[RecipeRecord], Error> {
@@ -649,6 +733,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `RecipeCategoryRecords`.
+     */
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategoryRecord], Error> {
         ValueObservation
             .tracking(RecipeCategoryRecord.all().orderedByName().fetchAll)
@@ -656,6 +743,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `RecipeIngredientRecords` found in the given `categoryIds`.
+     */
     func recipeIngredientsPublisher(categoryIds: [Int64?] = []) -> AnyPublisher<[RecipeIngredientRecord], Error> {
         ValueObservation
             .tracking(RecipeIngredientRecord.all().filteredByCategory(ids: categoryIds).fetchAll)
@@ -663,6 +753,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Error> {
         ValueObservation
             .tracking({ db in
@@ -677,6 +770,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `Ingredients`.
+     */
     func ingredientsPublisher() -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
             .tracking({ db in
@@ -690,6 +786,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Ingredients` matching the given `query` and `categoryIds`.
+     */
     func ingredientsPublisher(query: String = "",
                               categoryIds: [Int64?] = [nil]) -> AnyPublisher<[Ingredient], Error> {
         ValueObservation
@@ -706,6 +805,10 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Ingredients` matching the given `query`, `categoryIds`
+     and expiring between `expiresAfter` and `expiresBefore`.
+     */
     func ingredientsPublisher(expiresAfter: Date,
                               expiresBefore: Date,
                               query: String = "",
@@ -725,6 +828,9 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `IngredientCategoryRecords`.
+     */
     func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategoryRecord], Error> {
         ValueObservation
             .tracking(IngredientCategoryRecord.all().orderedByName().fetchAll)

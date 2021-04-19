@@ -5,7 +5,7 @@ import SwiftUI
  */
 struct IngredientCollectionView: View {
     @EnvironmentObject var settings: UserSettings
-    @ObservedObject var viewModel: IngredientCollectionViewModel
+    @StateObject var viewModel: IngredientCollectionViewModel
 
     var body: some View {
         VStack {
@@ -34,7 +34,6 @@ struct IngredientCollectionView: View {
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear(perform: viewModel.resetSearchFields)
     }
 
     // MARK: - Toolbars
@@ -62,7 +61,7 @@ struct IngredientCollectionView: View {
         NavigationLink(
             destination: IngredientFormView(
                 viewModel: IngredientFormViewModel(
-                    addToCategory: viewModel.categoryId))) {
+                    addToCategory: viewModel.category))) {
             Image(systemName: "plus")
         }
     }

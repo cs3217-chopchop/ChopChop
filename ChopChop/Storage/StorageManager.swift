@@ -4,7 +4,12 @@ import Foundation
 import UIKit
 import Combine
 
+/**
+ An abstraction over `AppDatabase`, `FirebaseDatabase` and `FirebaseCloudStorage` that delegates methods used by the
+ application to the appropiate database manager. It also manages the translation between runtime models and database record models.
+ */
 struct StorageManager {
+    /// Interacts with the local SQLite database using the GRDB.swift library to perform database operations.
     let appDatabase: AppDatabase
     let firebaseDatabase = FirebaseDatabase()
     let firebaseStorage = FirebaseCloudStorage()
@@ -17,8 +22,11 @@ struct StorageManager {
 
     // MARK: - Storage Manager: Create/Update
 
+    /**
+     Translate the given `Recipe` into its database record models before saving it.
+     The `id` of the given `Recipe` is also updated after saving.
+     */
     func saveRecipe(_ recipe: inout Recipe) throws {
-
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
                                         isImageUploaded: recipe.isImageUploaded,
                                         parentOnlineRecipeId: recipe.parentOnlineRecipeId,
@@ -34,6 +42,10 @@ struct StorageManager {
         recipe.id = recipeRecord.id
     }
 
+    /**
+     Translate the given `RecipeCategory` into its database record models before saving it.
+     The `id` of the given `RecipeCategory` is also updated after saving.
+     */
     func saveRecipeCategory(_ recipeCategory: inout RecipeCategory) throws {
         var recipeCategoryRecord = RecipeCategoryRecord(id: recipeCategory.id, name: recipeCategory.name)
 
@@ -42,6 +54,11 @@ struct StorageManager {
         recipeCategory.id = recipeCategoryRecord.id
     }
 
+    /**
+     Translate the given `Ingredients` into their database record models before saving them.
+     The underlying method called ensures the atomicity of this operation.
+     The `ids` of the given `Ingredients` are also updated after saving.
+     */
     func saveIngredients(_ ingredients: inout [Ingredient]) throws {
         var records: [(IngredientRecord, [IngredientBatchRecord])] = ingredients.map { ingredient in
             let ingredientRecord = IngredientRecord(id: ingredient.id,
@@ -64,6 +81,10 @@ struct StorageManager {
         }
     }
 
+    /**
+     Translate the given `Ingredient` into its database record models before saving it.
+     The `id` of the given `Ingredient` is also updated after saving.
+     */
     func saveIngredient(_ ingredient: inout Ingredient) throws {
         var ingredientRecord = IngredientRecord(id: ingredient.id,
                                                 ingredientCategoryId: ingredient.category?.id,
@@ -80,6 +101,10 @@ struct StorageManager {
         ingredient.id = ingredientRecord.id
     }
 
+    /**
+     Translate the given `IngredientCategory` into its database record models before saving it.
+     The `id` of the given `IngredientCategory` is also updated after saving.
+     */
     func saveIngredientCategory(_ ingredientCategory: inout IngredientCategory) throws {
         var ingredientCategoryRecord = IngredientCategoryRecord(id: ingredientCategory.id,
                                                                 name: ingredientCategory.name)
@@ -91,44 +116,75 @@ struct StorageManager {
 
     // MARK: - StorageManager: Delete
 
+    /**
+     Deletes the `Recipes` matching the given `ids` and their corresponding images.
+     */
     func deleteRecipes(ids: [Int64]) throws {
         try appDatabase.deleteRecipes(ids: ids)
 
         ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.recipeFolderName)
     }
 
+    /**
+     Deletes all `Recipes` and corresponding images
+     */
     func deleteAllRecipes() throws {
         try appDatabase.deleteAllRecipes()
 
         ImageStore.deleteAll(inFolderNamed: StorageManager.recipeFolderName)
     }
 
+    /**
+     Deletes the `RecipeCategories` matching the given `ids`.
+     */
     func deleteRecipeCategories(ids: [Int64]) throws {
         try appDatabase.deleteRecipeCategories(ids: ids)
     }
 
+    /**
+     Deletes all `RecipeCategories`.
+     */
     func deleteAllRecipeCategories() throws {
         try appDatabase.deleteAllRecipeCategories()
     }
 
+    /**
+     Deletes the `Ingredients` matching the given `ids` and their corresponding images.
+     */
     func deleteIngredients(ids: [Int64]) throws {
         try appDatabase.deleteIngredients(ids: ids)
+
+        ImageStore.delete(imagesNamed: ids.map { String($0) }, inFolderNamed: StorageManager.ingredientFolderName)
     }
 
+    /**
+     Deletes all `Ingredients` and corresponding images
+     */
     func deleteAllIngredients() throws {
         try appDatabase.deleteAllIngredients()
+
+        ImageStore.deleteAll(inFolderNamed: StorageManager.ingredientFolderName)
     }
 
+    /**
+     Deletes the `IngredientCategories` matching the given `ids`.
+     */
     func deleteIngredientCategories(ids: [Int64]) throws {
         try appDatabase.deleteIngredientCategories(ids: ids)
     }
 
+    /**
+     Deletes all `IngredientCategories`.
+     */
     func deleteAllIngredientCategories() throws {
         try appDatabase.deleteAllIngredientCategories()
     }
 
     // MARK: - Storage Manager: Read
 
+    /**
+     Fetches the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchRecipe(id: Int64) throws -> Recipe? {
         try appDatabase.fetchRecipe(id: id)
     }
@@ -137,14 +193,23 @@ struct StorageManager {
         try appDatabase.fetchRecipe(onlineId: onlineId)
     }
 
+    /**
+     Fetches the `RecipeCategory` corresponding to the given `name`, or `nil` if it does not exist.
+     */
     func fetchRecipeCategory(name: String) throws -> RecipeCategory? {
         try appDatabase.fetchRecipeCategory(name: name)
     }
 
+    /**
+     Fetches all `Ingredients`.
+     */
     func fetchIngredients() throws -> [Ingredient] {
         try appDatabase.fetchIngredients()
     }
 
+    /**
+     Fetches the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func fetchIngredient(id: Int64) throws -> Ingredient? {
         try appDatabase.fetchIngredient(id: id)
     }
@@ -155,10 +220,16 @@ struct StorageManager {
 
     // MARK: - Database Access: Publishers
 
+    /**
+     A publisher that emits the `Recipe` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
         appDatabase.recipePublisher(id: id)
     }
 
+    /**
+     A publisher that emits the `RecipeInfo` matching the given `query`, `categoryIds` and `Ingredients`.
+     */
     func recipesPublisher(query: String,
                           categoryIds: [Int64?],
                           ingredients: [String]) -> AnyPublisher<[RecipeInfo], Error> {
@@ -167,34 +238,53 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `RecipeCategories`.
+     */
     func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Error> {
         appDatabase.recipeCategoriesPublisher()
             .map { $0.compactMap { try? RecipeCategory(id: $0.id, name: $0.name) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the names of the `RecipeIngredients` found in the given `categoryIds`.
+     */
     func recipeIngredientsPublisher(categoryIds: [Int64?]) -> AnyPublisher<[String], Error> {
         appDatabase.recipeIngredientsPublisher(categoryIds: categoryIds)
             .map { Array(Set($0.map { $0.name })).sorted() }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `Ingredient` corresponding to the given `id`, or `nil` if it does not exist.
+     */
     func ingredientPublisher(id: Int64) -> AnyPublisher<Ingredient?, Error> {
         appDatabase.ingredientPublisher(id: id)
     }
 
+    /**
+     A publisher that emits all `IngredientInfos`.
+     */
     func ingredientsPublisher() -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher()
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `IngredientInfos` matching the given `query` and `categoryIds`.
+     */
     func ingredientsPublisher(query: String, categoryIds: [Int64?]) -> AnyPublisher<[IngredientInfo], Error> {
         appDatabase.ingredientsPublisher(query: query, categoryIds: categoryIds)
             .map { $0.map { IngredientInfo(id: $0.id, name: $0.name, quantity: String($0.totalQuantityDescription)) } }
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits the `IngredientInfos` matching the given `query`, `categoryIds`
+     and expiring between `expiresAfter` and `expiresBefore`.
+     */
     func ingredientsPublisher(query: String,
                               categoryIds: [Int64?],
                               expiresAfter: Date,
@@ -207,6 +297,9 @@ struct StorageManager {
             .eraseToAnyPublisher()
     }
 
+    /**
+     A publisher that emits all `IngredientCategoryRecords`.
+     */
     func ingredientCategoriesPublisher() -> AnyPublisher<[IngredientCategory], Error> {
         appDatabase.ingredientCategoriesPublisher()
             .map { $0.compactMap { try? IngredientCategory(name: $0.name, id: $0.id) } }
@@ -343,10 +436,12 @@ extension StorageManager {
             return
         }
 
-        let isImageUploaded = recipe.isImageUploaded // true if dont need upload image, false if need upload/update image
+        let isImageUploaded = recipe.isImageUploaded
         let image = fetchRecipeImage(name: String(id))
 
-        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploadedAlready: isImageUploaded, completion: completion)
+        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord,
+                                            isImageUploadedAlready: isImageUploaded,
+                                            completion: completion)
 
         guard !isImageUploaded else {
             return
@@ -369,19 +464,28 @@ extension StorageManager {
      Signals completion via a completion handler and returns error in completion handler if any.
      */
     func addOnlineRecipeRating(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating), completion: completion)
-        firebaseDatabase.addOnlineRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
+        firebaseDatabase.addUserRecipeRating(userId: userId,
+                                             rating: UserRating(recipeOnlineId: recipeId, score: rating),
+                                             completion: completion)
+        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId,
+                                         rating: RecipeRating(userId: userId, score: rating),
+                                         completion: completion)
     }
 
     /**
      Updates a rating of an OnlineRecipe. Updates both OnlineRecipe's ratings and involved User's user ratings.
      Signals completion via a completion handler and returns error in completion handler if any.
      */
-    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.updateOnlineRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
+    func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+                      completion: @escaping (Error?) -> Void) {
+        firebaseDatabase.updateRecipeRating(recipeId: recipeId,
+                                            oldRating: oldRating,
+                                            newRating: newRating,
+                                            completion: completion)
         firebaseDatabase.updateUserRating(userId: newRating.userId,
                                           oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
-                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score), completion: completion)
+                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score),
+                                          completion: completion)
     }
 
     /**
@@ -530,21 +634,22 @@ extension StorageManager {
             }
 
             if let updatedAt = recipeInfoRecord.updatedAt,
-               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
+               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id,
+                                                                                          updatedDate: updatedAt) {
                 completion(cachedOnlineRecipe, nil)
                 return
             }
 
             firebaseDatabase.fetchOnlineRecipe(id: id) { onlineRecipeRecord, err in
                 guard let recipeRecord = onlineRecipeRecord,
-                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord), err == nil else {
+                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord),
+                      err == nil else {
                     completion(nil, err)
                     return
                 }
                 cache.onlineRecipeCache[id] = onlineRecipe
                 completion(onlineRecipe, nil)
             }
-
         }
     }
 
@@ -566,14 +671,15 @@ extension StorageManager {
             }
 
             firebaseDatabase.fetchUser(id: id) { userRecord, err in
-                guard let userRecord = userRecord, let user = User(from: userRecord, infoRecord: userInfoRecord), err == nil else {
+                guard let userRecord = userRecord,
+                      let user = User(from: userRecord, infoRecord: userInfoRecord),
+                      err == nil else {
                     completion(nil, err)
                     return
                 }
                 cache.userCache[id] = user
                 completion(user, nil)
             }
-
         }
     }
 
@@ -595,7 +701,6 @@ extension StorageManager {
         firebaseDatabase.fetchOnlineRecipeInfos(userIds: userIds) { recipeInfoRecords, err in
             fetchOnlineRecipes(recipeInfoRecords: recipeInfoRecords, err: err, completion: completion)
         }
-
     }
 
     /**
@@ -631,7 +736,8 @@ extension StorageManager {
                 return
             }
 
-            if let data = cache.onlineRecipeImageCache.getEntityIfCachedAndValid(id: recipeId, updatedDate: imageUpdatedAt) {
+            if let data = cache.onlineRecipeImageCache.getEntityIfCachedAndValid(id: recipeId,
+                                                                                 updatedDate: imageUpdatedAt) {
                 completion(data.data, nil)
                 return
             }
@@ -642,11 +748,11 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
+                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data),
+                                                    forKey: recipeId)
                 completion(data, nil)
-                cache.onlineRecipeImageCache.insert(CachableData(updatedAt: imageUpdatedAt, data: data), forKey: recipeId)
             }
         }
-
     }
 
     // MARK: - Storage Manager: Listen
@@ -668,7 +774,8 @@ extension StorageManager {
 
     /**
      Fetches the OnlineRecipes whose ids are in recipeInfoRecords.
-     Each OnlineRecipeInfoRecord is checked against the corresponding OnlineRecipe in cache, and only OnlineRecipes that are not in cache or are outdated are fetched from Firebase.
+     Each OnlineRecipeInfoRecord is checked against the corresponding OnlineRecipe in cache,
+     and only OnlineRecipes that are not in cache or are outdated are fetched from Firebase.
      Signals completion via a completion handler and returns the OnlineRecipes and error in completion handler if any.
      */
     private func fetchOnlineRecipes(recipeInfoRecords: [String: OnlineRecipeInfoRecord], err: Error?,
@@ -681,7 +788,8 @@ extension StorageManager {
         // figure out which recipes actually need to fetch
         let recipeIdsToFetch = recipeInfoRecords.keys.filter { recipeInfoId in
             guard let updatedAt = recipeInfoRecords[recipeInfoId]?.updatedAt,
-                  let _ = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId, updatedDate: updatedAt) else {
+                  cache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId,
+                                                                    updatedDate: updatedAt) != nil else {
                 return true
             }
             return false
@@ -717,7 +825,8 @@ extension StorageManager {
 
     /**
      Fetches the Users whose ids are in userInfoRecords.
-     Each UserInfoRecord is checked against the corresponding User in cache, and only Users that are not in cache or are outdated are fetched from Firebase.
+     Each UserInfoRecord is checked against the corresponding User in cache,
+     and only Users that are not in cache or are outdated are fetched from Firebase.
      Signals completion via a completion handler and returns the Users and error in completion handler if any.
      */
     private func fetchUsers(userInfoRecords: [String: UserInfoRecord], err: Error?,
@@ -729,7 +838,7 @@ extension StorageManager {
 
         let userIdsToFetch = userInfoRecords.keys.filter { userInfoId in
             guard let updatedAt = userInfoRecords[userInfoId]?.updatedAt,
-                  let _ = cache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) else {
+                  cache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) != nil else {
                 return true
             }
             return false
@@ -749,7 +858,8 @@ extension StorageManager {
 
             for userRecord in userRecords {
                 guard let id = userRecord.id,
-                      let userInfoRecord = userInfoRecords[id], let user = User(from: userRecord, infoRecord: userInfoRecord) else {
+                      let userInfoRecord = userInfoRecords[id],
+                      let user = User(from: userRecord, infoRecord: userInfoRecord) else {
                     continue
                 }
                 cache.userCache.insert(user, forKey: id)
@@ -760,7 +870,6 @@ extension StorageManager {
 
         }
     }
-
 }
 
 enum StorageError: Error {

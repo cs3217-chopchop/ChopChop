@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct RecipeView: View {
-    @ObservedObject var viewModel: RecipeViewModel
     @EnvironmentObject var settings: UserSettings
+    @StateObject var viewModel: RecipeViewModel
 
     var body: some View {
         if let recipe = viewModel.recipe {

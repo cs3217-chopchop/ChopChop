@@ -36,12 +36,13 @@ class RecipeFormViewModel: ObservableObject {
     private let storageManager = StorageManager()
     private var categoriesCancellable: AnyCancellable?
     private let recipe: Recipe?
+    private let originalImage: UIImage
 
-    init(recipe: Recipe? = nil) {
+    init(recipe: Recipe? = nil, category: RecipeCategory? = nil) {
         self.recipe = recipe
 
         self.name = recipe?.name ?? ""
-        self.category = recipe?.category
+        self.category = recipe?.category ?? category
 
         if let servings = recipe?.servings {
             self.servings = servings.removeZerosFromEnd()
@@ -58,10 +59,12 @@ class RecipeFormViewModel: ObservableObject {
         } ?? []
         self.stepGraph = recipe?.stepGraph.copy() ?? RecipeStepGraph()
 
-        if let id = recipe?.id {
-            self.image = storageManager.fetchRecipeImage(name: String(id)) ?? UIImage()
+        if let id = recipe?.id, let image = storageManager.fetchRecipeImage(name: String(id)) {
+            self.image = image
+            self.originalImage = image
         } else {
             self.image = UIImage()
+            self.originalImage = UIImage()
         }
 
         categoriesCancellable = categoriesPublisher()

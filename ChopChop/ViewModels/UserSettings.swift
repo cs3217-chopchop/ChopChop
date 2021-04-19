@@ -27,7 +27,6 @@ final class UserSettings: ObservableObject {
             self.user = user
         }
     }
-
 }
 
 extension UserSettings {

@@ -30,7 +30,7 @@ class NonFolloweeCollectionViewModel: ObservableObject {
     private func updateNonFollowees() {
         isLoading = true
         storageManager.fetchAllUsers { users, _ in
-            guard let followees = users.first { $0.id == self.userId }?.followees else {
+            guard let followees = users.first(where: { $0.id == self.userId })?.followees else {
                 return
             }
 

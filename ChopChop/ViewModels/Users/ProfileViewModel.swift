@@ -10,6 +10,7 @@ final class ProfileViewModel: ObservableObject {
 
     private let storageManager = StorageManager()
     private let settings: UserSettings
+    private var recipeCountCancellabe: AnyCancellable?
     @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     /// User profile details
@@ -18,7 +19,6 @@ final class ProfileViewModel: ObservableObject {
     @Published private(set) var followeeCount = 0
     @Published private(set) var isFollowedByUser = false
 
-    private var publishedRecipesCountCancellable: AnyCancellable?
     @Published var isLoading = false
 
     init(userId: String, settings: UserSettings) {
@@ -26,7 +26,7 @@ final class ProfileViewModel: ObservableObject {
         self.settings = settings
         self.recipesViewModel = OnlineRecipeCollectionViewModel(userIds: [userId], settings: settings)
 
-        publishedRecipesCountCancellable = recipesViewModel.$recipes
+        recipeCountCancellable = recipesViewModel.$recipes
             .sink { [weak self] recipes in
                 self?.publishedRecipesCount = recipes.count
             }

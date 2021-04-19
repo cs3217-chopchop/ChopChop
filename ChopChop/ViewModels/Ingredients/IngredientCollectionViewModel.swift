@@ -30,6 +30,15 @@ final class IngredientCollectionViewModel: ObservableObject {
     /// The ingredients displayed in the view is the union of ingredients in
     /// each of the categories in this array, represented by their ids.
     let categoryIds: [Int64?]
+    /// Returns the category represented by the view model,
+    /// or `nil` if it represents all ingredients or uncategorised ingredients.
+    var category: IngredientCategory? {
+        guard categoryIds.compactMap({ $0 }).count == 1 else {
+            return nil
+        }
+
+        return try? IngredientCategory(name: title, id: categoryIds.compactMap({ $0 }).first)
+    }
 
     private let storageManager = StorageManager()
     private var cancellables: Set<AnyCancellable> = []
@@ -43,20 +52,6 @@ final class IngredientCollectionViewModel: ObservableObject {
                 self?.ingredients = ingredients
             }
             .store(in: &cancellables)
-    }
-
-    /// Returns the id of the category represented by the view model,
-    /// or `nil` if it represents all ingredients or uncategorised ingredients.
-    var categoryId: Int64? {
-        guard !categoryIds.isEmpty else {
-            return nil
-        }
-
-        guard categoryIds.count == 1, let id = categoryIds.first else {
-            return nil
-        }
-
-        return id
     }
 
     /**
@@ -83,16 +78,6 @@ final class IngredientCollectionViewModel: ObservableObject {
         }
 
         return storageManager.fetchIngredientImage(name: String(id))
-    }
-
-    /**
-     Resets the search fields of the view model.
-     */
-    func resetSearchFields() {
-        query = ""
-        filterByExpiryDate = false
-        expiryDateStart = .today
-        expiryDateEnd = .today
     }
 
     private var ingredientsPublisher: AnyPublisher<[IngredientInfo], Never> {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TimerNodeView: View {
-    @ObservedObject var viewModel: TimerNodeViewModel
+    @StateObject var viewModel: TimerNodeViewModel
 
     var body: some View {
         if viewModel.hasTimers {

@@ -17,7 +17,6 @@ struct Recipe: Equatable {
         stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 
-    // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil, onlineId: String? = nil, isImageUploaded: Bool = false, parentOnlineRecipeId: String? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,
          difficulty: Difficulty? = nil, ingredients: [RecipeIngredient] = [],
@@ -48,7 +47,6 @@ struct Recipe: Equatable {
         self.ingredients = ingredients
         self.stepGraph = stepGraph
     }
-    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension Recipe: FetchableRecord {

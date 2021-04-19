@@ -45,9 +45,10 @@ class IngredientFormViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    init(addToCategory categoryId: Int64?) {
+    init(addToCategory category: IngredientCategory?) {
         self.isEdit = false
         self.ingredient = nil
+        self.category = category
 
         self.quantityType = .count
         self.name = ""

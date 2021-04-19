@@ -2,7 +2,7 @@ import SwiftUI
 
 struct RecipeCollectionView: View {
     @EnvironmentObject var settings: UserSettings
-    @ObservedObject var viewModel: RecipeCollectionViewModel
+    @StateObject var viewModel: RecipeCollectionViewModel
 
     let columns = [
         GridItem(),
@@ -14,7 +14,8 @@ struct RecipeCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
-                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
+                NavigationLink(destination: RecipeFormView(viewModel:
+                                                            RecipeFormViewModel(category: viewModel.category))) {
                     Image(systemName: "plus")
                 }
                 Spacer()
@@ -48,7 +49,6 @@ struct RecipeCollectionView: View {
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
         }
-        .onAppear(perform: viewModel.resetSearchFields)
     }
 
     var listView: some View {

@@ -40,7 +40,7 @@ struct FirebaseCloudStorage {
     /// Deletes image from Storage
     func deleteImage(name: String) {
         let imageRef = getStorageRef(name)
-        _ = imageRef.delete()
+        imageRef.delete()
     }
 
     private func getStorageRef(_ fileName: String) -> StorageReference {
