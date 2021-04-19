@@ -10,7 +10,7 @@ final class ProfileViewModel: ObservableObject {
 
     private let storageManager = StorageManager()
     private let settings: UserSettings
-    private var recipeCountCancellabe: AnyCancellable?
+    private var recipeCountCancellable: AnyCancellable?
     @ObservedObject private(set) var recipesViewModel: OnlineRecipeCollectionViewModel
 
     /// User profile details

@@ -467,7 +467,7 @@ extension StorageManager {
         firebaseDatabase.addUserRecipeRating(userId: userId,
                                              rating: UserRating(recipeOnlineId: recipeId, score: rating),
                                              completion: completion)
-        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId,
+        firebaseDatabase.addOnlineRecipeRating(onlineRecipeId: recipeId,
                                          rating: RecipeRating(userId: userId, score: rating),
                                          completion: completion)
     }
@@ -478,7 +478,7 @@ extension StorageManager {
      */
     func updateOnlineRecipeRating(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
                       completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.updateRecipeRating(recipeId: recipeId,
+        firebaseDatabase.updateOnlineRecipeRating(recipeId: recipeId,
                                             oldRating: oldRating,
                                             newRating: newRating,
                                             completion: completion)
@@ -540,7 +540,7 @@ extension StorageManager {
 
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
-        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "userId")
+        let isRecipeOwner = recipe.creatorId == UserDefaults.standard.string(forKey: "creatorId")
         let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
@@ -748,7 +748,7 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
-                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data),
+                cache.onlineRecipeImageCache.insert(CachableData(updatedAt: imageUpdatedAt, data: data),
                                                     forKey: recipeId)
                 completion(data, nil)
             }
