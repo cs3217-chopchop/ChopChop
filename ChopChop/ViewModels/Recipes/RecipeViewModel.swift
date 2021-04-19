@@ -56,8 +56,7 @@ final class RecipeViewModel: ObservableObject {
         }
 
         if isPublished {
-            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
-                _ in
+            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) { _ in
 
             }
         } else {

@@ -335,10 +335,12 @@ extension StorageManager {
             return
         }
 
-        let isImageUploaded = recipe.isImageUploaded // true if dont need upload image, false if need upload/update image
+        let isImageUploaded = recipe.isImageUploaded
         let image = fetchRecipeImage(name: String(id))
 
-        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord, isImageUploadedAlready: isImageUploaded, completion: completion)
+        firebaseDatabase.updateOnlineRecipe(recipe: recipeRecord,
+                                            isImageUploadedAlready: isImageUploaded,
+                                            completion: completion)
 
         guard !isImageUploaded else {
             return
@@ -358,16 +360,25 @@ extension StorageManager {
 
     // rate a recipe
     func rateRecipe(recipeId: String, userId: String, rating: RatingScore, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.addUserRecipeRating(userId: userId, rating: UserRating(recipeOnlineId: recipeId, score: rating), completion: completion)
-        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId, rating: RecipeRating(userId: userId, score: rating), completion: completion)
+        firebaseDatabase.addUserRecipeRating(userId: userId,
+                                             rating: UserRating(recipeOnlineId: recipeId, score: rating),
+                                             completion: completion)
+        firebaseDatabase.addRecipeRating(onlineRecipeId: recipeId,
+                                         rating: RecipeRating(userId: userId, score: rating),
+                                         completion: completion)
     }
 
     // change the rating of a recipe you have rated before
-    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating, completion: @escaping (Error?) -> Void) {
-        firebaseDatabase.updateRecipeRating(recipeId: recipeId, oldRating: oldRating, newRating: newRating, completion: completion)
+    func rerateRecipe(recipeId: String, oldRating: RecipeRating, newRating: RecipeRating,
+                      completion: @escaping (Error?) -> Void) {
+        firebaseDatabase.updateRecipeRating(recipeId: recipeId,
+                                            oldRating: oldRating,
+                                            newRating: newRating,
+                                            completion: completion)
         firebaseDatabase.updateUserRating(userId: newRating.userId,
                                           oldRating: UserRating(recipeOnlineId: recipeId, score: oldRating.score),
-                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score), completion: completion)
+                                          newRating: UserRating(recipeOnlineId: recipeId, score: newRating.score),
+                                          completion: completion)
     }
 
     // this should only be called once when the app first launched
@@ -452,14 +463,16 @@ extension StorageManager {
             }
 
             if let updatedAt = recipeInfoRecord.updatedAt,
-               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id, updatedDate: updatedAt) {
+               let cachedOnlineRecipe = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: id,
+                                                                                          updatedDate: updatedAt) {
                 completion(cachedOnlineRecipe, nil)
                 return
             }
 
             firebaseDatabase.fetchOnlineRecipe(id: id) { onlineRecipeRecord, err in
                 guard let recipeRecord = onlineRecipeRecord,
-                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord), err == nil else {
+                      let onlineRecipe = try? OnlineRecipe(from: recipeRecord, info: recipeInfoRecord),
+                      err == nil else {
                     completion(nil, err)
                     return
                 }
@@ -485,7 +498,9 @@ extension StorageManager {
             }
 
             firebaseDatabase.fetchUser(id: id) { userRecord, err in
-                guard let userRecord = userRecord, let user = User(from: userRecord, infoRecord: userInfoRecord), err == nil else {
+                guard let userRecord = userRecord,
+                      let user = User(from: userRecord, infoRecord: userInfoRecord),
+                      err == nil else {
                     completion(nil, err)
                     return
                 }
@@ -578,7 +593,8 @@ extension StorageManager {
                 return
             }
 
-            if let data = cache.onlineRecipeImageCache.getEntityIfCachedAndValid(id: recipeId, updatedDate: imageUpdatedAt) {
+            if let data = cache.onlineRecipeImageCache.getEntityIfCachedAndValid(id: recipeId,
+                                                                                 updatedDate: imageUpdatedAt) {
                 completion(data.data, nil)
                 return
             }
@@ -589,7 +605,8 @@ extension StorageManager {
                     completion(nil, err)
                     return
                 }
-                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data), forKey: recipeId)
+                cache.onlineRecipeImageCache.insert(CachableData(id: recipeId, updatedAt: imageUpdatedAt, data: data),
+                                                    forKey: recipeId)
                 completion(data, nil)
             }
         }
@@ -621,7 +638,8 @@ extension StorageManager {
         // figure out which recipes actually need to fetch
         let recipeIdsToFetch = recipeInfoRecords.keys.filter { recipeInfoId in
             guard let updatedAt = recipeInfoRecords[recipeInfoId]?.updatedAt,
-                  let _ = cache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId, updatedDate: updatedAt) else {
+                  cache.onlineRecipeCache.getEntityIfCachedAndValid(id: recipeInfoId,
+                                                                    updatedDate: updatedAt) != nil else {
                 return true
             }
             return false
@@ -663,7 +681,7 @@ extension StorageManager {
 
         let userIdsToFetch = userInfoRecords.keys.filter { userInfoId in
             guard let updatedAt = userInfoRecords[userInfoId]?.updatedAt,
-                  let _ = cache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) else {
+                  cache.userCache.getEntityIfCachedAndValid(id: userInfoId, updatedDate: updatedAt) != nil else {
                 return true
             }
             return false
@@ -683,7 +701,8 @@ extension StorageManager {
 
             for userRecord in userRecords {
                 guard let id = userRecord.id,
-                      let userInfoRecord = userInfoRecords[id], let user = User(from: userRecord, infoRecord: userInfoRecord) else {
+                      let userInfoRecord = userInfoRecords[id],
+                      let user = User(from: userRecord, infoRecord: userInfoRecord) else {
                     continue
                 }
                 cache.userCache.insert(user, forKey: id)

@@ -1,3 +1,5 @@
+// swiftlint:disable file_length type_body_length
+
 import Firebase
 import Combine
 
@@ -15,7 +17,7 @@ struct FirebaseDatabase {
         try batch.setData(from: recipe, forDocument: recipeDocRef)
 
         let recipeInfoRef = db.collection(recipeInfoPath).document(recipeDocRef.documentID)
-        let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creatorId: recipe.creatorId) // sets to timestamp
+        let recipeInfo = OnlineRecipeInfoRecord(id: recipeDocRef.documentID, creatorId: recipe.creatorId)
         try batch.setData(from: recipeInfo, forDocument: recipeInfoRef)
 
         batch.commit { err in
@@ -24,7 +26,8 @@ struct FirebaseDatabase {
         return recipeDocRef.documentID
     }
 
-    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool, completion: @escaping (Error?) -> Void) {
+    func updateOnlineRecipe(recipe: OnlineRecipeRecord, isImageUploadedAlready: Bool,
+                            completion: @escaping (Error?) -> Void) {
         guard let recipeId = recipe.id else {
             fatalError("Recipe does not have reference to online Id.")
         }
@@ -101,7 +104,8 @@ struct FirebaseDatabase {
         }
     }
 
-    func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating, completion: @escaping (Error?) -> Void) {
+    func updateUserRating(userId: String, oldRating: UserRating, newRating: UserRating,
+                          completion: @escaping (Error?) -> Void) {
         let docRef = db.collection(userPath).document(userId)
         let userInfoDocRef = db.collection(userInfoPath).document(userId)
         let batch = db.batch()
@@ -216,7 +220,8 @@ struct FirebaseDatabase {
         }
     }
 
-    func fetchOnlineRecipeInfos(userIds: [String], completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
+    func fetchOnlineRecipeInfos(userIds: [String],
+                                completion: @escaping ([String: OnlineRecipeInfoRecord], Error?) -> Void) {
 
         let dispatchGroup = DispatchGroup() // make sure its all collected before calling completion handler
         var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
@@ -227,7 +232,9 @@ struct FirebaseDatabase {
             let range = [] + userIds[queryLimit.current..<queryLimit.next()]
             dispatchGroup.enter()
             db.collection(recipeInfoPath).whereField("creatorId", in: range).getDocuments { snapshot, err in
-                guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }), err == nil else {
+                guard let recipeInfoRecords = (snapshot?.documents
+                                                .compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }),
+                      err == nil else {
                     completion(allOnlineRecipeInfoRecords, err)
                     dispatchGroup.leave()
                     return
@@ -252,7 +259,9 @@ struct FirebaseDatabase {
         db.collection(recipeInfoPath).getDocuments { snapshot, err in
             var allOnlineRecipeInfoRecords = [String: OnlineRecipeInfoRecord]()
 
-            guard let recipeInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }), err == nil else {
+            guard let recipeInfoRecords = (snapshot?.documents
+                                            .compactMap { try? $0.data(as: OnlineRecipeInfoRecord.self) }),
+                  err == nil else {
                 completion(allOnlineRecipeInfoRecords, err)
                 return
             }
@@ -277,7 +286,9 @@ struct FirebaseDatabase {
             let range = [] + ids[queryLimit.current..<queryLimit.next()]
             dispatchGroup.enter()
             db.collection(recipePath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
-                guard let recipeRecords = (snapshot?.documents.compactMap { try? $0.data(as: OnlineRecipeRecord.self) }), err == nil else {
+                guard let recipeRecords = (snapshot?.documents
+                                            .compactMap { try? $0.data(as: OnlineRecipeRecord.self) }),
+                      err == nil else {
                     completion([], err)
                     dispatchGroup.leave()
                     return
@@ -316,7 +327,9 @@ struct FirebaseDatabase {
     func fetchAllUserInfos(completion: @escaping ([String: UserInfoRecord], Error?) -> Void) {
         var allUserInfoRecords = [String: UserInfoRecord]()
         db.collection(userInfoPath).getDocuments { snapshot, err in
-            guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }), err == nil else {
+            guard let userInfoRecords = (snapshot?.documents
+                                            .compactMap { try? $0.data(as: UserInfoRecord.self) }),
+                  err == nil else {
                 completion(allUserInfoRecords, err)
                 return
             }
@@ -342,7 +355,9 @@ struct FirebaseDatabase {
             let range = [] + ids[queryLimit.current..<queryLimit.next()]
             dispatchGroup.enter()
             db.collection(userInfoPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
-                guard let userInfoRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserInfoRecord.self) }), err == nil else {
+                guard let userInfoRecords = (snapshot?.documents
+                                                .compactMap { try? $0.data(as: UserInfoRecord.self) }),
+                      err == nil else {
                     completion(allUserInfoRecords, err)
                     dispatchGroup.leave()
                     return
@@ -373,7 +388,9 @@ struct FirebaseDatabase {
             let range = [] + ids[queryLimit.current..<queryLimit.next()]
             dispatchGroup.enter()
             db.collection(userPath).whereField(FieldPath.documentID(), in: range).getDocuments { snapshot, err in
-                guard let userRecords = (snapshot?.documents.compactMap { try? $0.data(as: UserRecord.self) }), err == nil else {
+                guard let userRecords = (snapshot?.documents
+                                            .compactMap { try? $0.data(as: UserRecord.self) }),
+                      err == nil else {
                     completion([], err)
                     dispatchGroup.leave()
                     return

@@ -27,6 +27,7 @@ struct AppDatabase {
             }
         }
 
+        // swiftlint:disable closure_body_length
         migrator.registerMigration("CreateRecipe") { db in
             try db.create(table: "recipe") { t in
                 t.autoIncrementedPrimaryKey("id")
@@ -52,6 +53,7 @@ struct AppDatabase {
                     .check { Difficulty.allCases.map { $0.rawValue }.contains($0) }
             }
         }
+        // swiftlint:enable closure_body_length
 
         migrator.registerMigration("CreateRecipeIngredient") { db in
             try db.create(table: "recipeIngredient") { t in
@@ -206,7 +208,8 @@ extension AppDatabase {
         }
 
         var recipeRecords = recipes.map { recipe in
-            RecipeRecord(isImageUploaded: false, recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+            RecipeRecord(isImageUploaded: false,
+                         recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
                          name: recipe.name,
                          servings: Double(Int.random(in: 1...5)),
                          difficulty: Difficulty.allCases.randomElement())
