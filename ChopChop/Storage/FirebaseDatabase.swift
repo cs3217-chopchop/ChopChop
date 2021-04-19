@@ -192,7 +192,6 @@ struct FirebaseDatabase {
     }
 
     func fetchOnlineRecipeById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
-
         db.collection(recipePath).document(onlineRecipeId)
             .publisher()
             .compactMap({ try? $0.data(as: OnlineRecipeRecord.self) })
@@ -200,11 +199,9 @@ struct FirebaseDatabase {
     }
 
     func fetchOnlineRecipeOnceById(onlineRecipeId: String) -> AnyPublisher<OnlineRecipeRecord, Error> {
-        return db.collection(recipePath).document(onlineRecipeId)
+        db.collection(recipePath).document(onlineRecipeId)
             .getDocument(as: OnlineRecipeRecord.self)
-            .compactMap {
-                $0
-            }
+            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
 

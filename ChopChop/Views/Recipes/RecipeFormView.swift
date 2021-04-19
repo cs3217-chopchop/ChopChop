@@ -1,6 +1,9 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view for the form for adding or editing a recipe.
+ */
 struct RecipeFormView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: RecipeFormViewModel
@@ -22,21 +25,23 @@ struct RecipeFormView: View {
         }
     }
 
+    // MARK: - General
+
     @ViewBuilder
-    var generalSection: some View {
+    private var generalSection: some View {
         nameField
         servingsField
         categoryField
         difficultyField
     }
 
-    var nameField: some View {
+    private var nameField: some View {
         Section(header: Text("Name"), footer: formError("name")) {
             TextField("Name", text: $viewModel.name)
         }
     }
 
-    var servingsField: some View {
+    private var servingsField: some View {
         Section(header: Text("Serving size"), footer: formError("servings")) {
             TextField("Serving size", text: Binding(get: { viewModel.servings },
                                                     set: viewModel.setServings))
@@ -44,7 +49,7 @@ struct RecipeFormView: View {
         }
     }
 
-    var categoryField: some View {
+    private var categoryField: some View {
         Section(header: Text("Category")) {
             Picker(viewModel.category?.name ?? "Uncategorised", selection: $viewModel.category) {
                 Text("Uncategorised").tag(nil as RecipeCategory?)
@@ -56,7 +61,7 @@ struct RecipeFormView: View {
         }
     }
 
-    var difficultyField: some View {
+    private var difficultyField: some View {
         Section(header: Text("Difficulty")) {
             Picker(viewModel.difficulty?.description ?? "None", selection: $viewModel.difficulty) {
                 Text("None").tag(nil as Difficulty?)
@@ -68,7 +73,9 @@ struct RecipeFormView: View {
         }
     }
 
-    var imageSection: some View {
+    // MARK: - Image
+
+    private var imageSection: some View {
         Section(header: Text("Image")) {
             if viewModel.image != UIImage() {
                 Image(uiImage: viewModel.image)
@@ -97,7 +104,9 @@ struct RecipeFormView: View {
         }
     }
 
-    var ingredientsSection: some View {
+    // MARK: - Ingredients
+
+    private var ingredientsSection: some View {
         Section(header: Text("Ingredients"), footer: formError("ingredients")) {
             ForEach(viewModel.ingredients, id: \.self) { ingredientRowViewModel in
                 HStack {
@@ -117,7 +126,7 @@ struct RecipeFormView: View {
     }
 
     @ViewBuilder
-    var ingredientsActions: some View {
+    private var ingredientsActions: some View {
         if viewModel.isParsingIngredients {
             TextEditor(text: $viewModel.ingredientsToBeParsed)
             Button("Add ingredients") {
@@ -146,7 +155,9 @@ struct RecipeFormView: View {
         }
     }
 
-    var stepsSection: some View {
+    // MARK: - Steps
+
+    private var stepsSection: some View {
         Section(header: Text("Steps")) {
             NavigationLink("Edit steps",
                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: viewModel.stepGraph)),
@@ -175,7 +186,7 @@ struct RecipeFormView: View {
         }
     }
 
-    var actionButton: some View {
+    private var actionButton: some View {
         Section {
             Button(viewModel.isEditing ? "Save Recipe" : "Add Recipe") {
                 if viewModel.saveRecipe() {
@@ -186,7 +197,7 @@ struct RecipeFormView: View {
     }
 
     @ViewBuilder
-    func formError(_ key: String) -> some View {
+    private func formError(_ key: String) -> some View {
         if let errors = viewModel.formErrors[key] {
             Text(errors.joined(separator: "\n"))
                 .foregroundColor(.red)

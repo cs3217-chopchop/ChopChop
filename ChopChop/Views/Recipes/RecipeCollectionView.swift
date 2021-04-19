@@ -1,28 +1,16 @@
 import SwiftUI
 
+/**
+ Represents a view of a collection of recipes.
+ */
 struct RecipeCollectionView: View {
     @EnvironmentObject var settings: UserSettings
     @ObservedObject var viewModel: RecipeCollectionViewModel
 
-    let columns = [
-        GridItem(),
-        GridItem(),
-        GridItem()
-    ]
-
     var body: some View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
-            HStack {
-                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
-                    Image(systemName: "plus")
-                }
-                Spacer()
-                MultiselectPicker("Filter by ingredient",
-                                  selections: $viewModel.selectedIngredients,
-                                  options: viewModel.recipeIngredients)
-            }
-            .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+            recipeToolbar
 
             if viewModel.recipes.isEmpty {
                 NotFoundView(entityName: "Recipes")
@@ -37,13 +25,7 @@ struct RecipeCollectionView: View {
         }
         .navigationTitle(Text(viewModel.title))
         .toolbar {
-            HStack {
-                Text("View type:")
-                Picker("View by", selection: $settings.viewType) {
-                    Text("List").tag(UserSettings.ViewType.list)
-                    Text("Grid").tag(UserSettings.ViewType.grid)
-                }
-            }
+            viewPicker
         }
         .alert(isPresented: $viewModel.alertIsPresented) {
             Alert(title: Text(viewModel.alertTitle), message: Text(viewModel.alertMessage))
@@ -51,39 +33,43 @@ struct RecipeCollectionView: View {
         .onAppear(perform: viewModel.resetSearchFields)
     }
 
-    var listView: some View {
-        List {
-            ForEach(viewModel.recipes) { recipe in
-                RecipeRow(recipe: recipe)
+    // MARK: - Toolbars
+
+    private var viewPicker: some View {
+        HStack {
+            Text("View type:")
+            Picker("View by", selection: $settings.viewType) {
+                Text("List").tag(UserSettings.ViewType.list)
+                Text("Grid").tag(UserSettings.ViewType.grid)
             }
-            .onDelete(perform: viewModel.deleteRecipes)
         }
     }
 
-    var gridView: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 24) {
-                ForEach(viewModel.recipes) { recipe in
-                    GridTile(recipe: recipe)
-                        .contextMenu {
-                            Button(action: {
-                                guard let index = viewModel.recipes.firstIndex(where: { $0.id == recipe.id }) else {
-                                    return
-                                }
+    private var recipeToolbar: some View {
+        HStack {
+            addRecipeButton
+            Spacer()
+            ingredientPicker
+        }
+        .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+    }
 
-                                viewModel.deleteRecipes(at: [index])
-                            }) {
-                                Label("Delete Recipe", systemImage: "trash")
-                            }
-                        }
-                }
-            }
-            .padding([.bottom, .leading, .trailing])
+    private var addRecipeButton: some View {
+        NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel())) {
+            Image(systemName: "plus")
         }
     }
+
+    private var ingredientPicker: some View {
+        MultiselectPicker("Filter by ingredient",
+                          selections: $viewModel.selectedIngredients,
+                          options: viewModel.recipeIngredients)
+    }
+
+    // MARK: - Image
 
     @ViewBuilder
-    func RecipeImage(recipe: RecipeInfo) -> some View {
+    private func RecipeImage(recipe: RecipeInfo) -> some View {
         if let image = viewModel.getRecipeImage(recipe: recipe) {
             Image(uiImage: image)
                 .resizable()
@@ -93,8 +79,19 @@ struct RecipeCollectionView: View {
         }
     }
 
+    // MARK: - List
+
+    private var listView: some View {
+        List {
+            ForEach(viewModel.recipes) { recipe in
+                RecipeRow(recipe: recipe)
+            }
+            .onDelete(perform: viewModel.deleteRecipes)
+        }
+    }
+
     @ViewBuilder
-    func RecipeRow(recipe: RecipeInfo) -> some View {
+    private func RecipeRow(recipe: RecipeInfo) -> some View {
         if let id = recipe.id {
             NavigationLink(
                 destination: RecipeView(viewModel: RecipeViewModel(id: id, settings: settings))
@@ -118,8 +115,38 @@ struct RecipeCollectionView: View {
         }
     }
 
+    // MARK: - Grid
+
+    private var gridView: some View {
+        let columns = [
+            GridItem(),
+            GridItem(),
+            GridItem()
+        ]
+
+        return ScrollView {
+            LazyVGrid(columns: columns, spacing: 24) {
+                ForEach(viewModel.recipes) { recipe in
+                    GridTile(recipe: recipe)
+                        .contextMenu {
+                            Button(action: {
+                                guard let index = viewModel.recipes.firstIndex(where: { $0.id == recipe.id }) else {
+                                    return
+                                }
+
+                                viewModel.deleteRecipes(at: [index])
+                            }) {
+                                Label("Delete Recipe", systemImage: "trash")
+                            }
+                        }
+                }
+            }
+            .padding([.bottom, .leading, .trailing])
+        }
+    }
+
     @ViewBuilder
-    func GridTile(recipe: RecipeInfo) -> some View {
+    private func GridTile(recipe: RecipeInfo) -> some View {
         if let id = recipe.id {
             NavigationLink(
                 destination: RecipeView(viewModel: RecipeViewModel(id: id, settings: settings))
@@ -130,7 +157,7 @@ struct RecipeCollectionView: View {
     }
 
     @ViewBuilder
-    func GridTileImage(recipe: RecipeInfo) -> some View {
+    private func GridTileImage(recipe: RecipeInfo) -> some View {
         RecipeImage(recipe: recipe)
             .scaledToFill()
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
@@ -143,7 +170,7 @@ struct RecipeCollectionView: View {
             .padding([.leading, .trailing], 8)
     }
 
-    func GridTileOverlay(recipe: RecipeInfo) -> some View {
+    private func GridTileOverlay(recipe: RecipeInfo) -> some View {
         ZStack(alignment: .bottomLeading) {
             Rectangle()
                 .foregroundColor(.clear)
@@ -163,7 +190,7 @@ struct RecipeCollectionView: View {
         }
     }
 
-    func RecipeCaption(recipe: RecipeInfo) -> some View {
+    private func RecipeCaption(recipe: RecipeInfo) -> some View {
         VStack(alignment: .leading) {
             Text("""
                 Serves \(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")

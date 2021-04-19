@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a timer of a step in the recipe instructions.
+ */
 struct RecipeStepTimerRowView: View {
     @ObservedObject var viewModel: RecipeStepTimerRowViewModel
 
@@ -11,7 +14,7 @@ struct RecipeStepTimerRowView: View {
         }
     }
 
-    var hours: some View {
+    private var hours: some View {
         HStack {
             TextField("Hours", text: Binding(get: { viewModel.hours },
                                              set: viewModel.setHours))
@@ -23,7 +26,7 @@ struct RecipeStepTimerRowView: View {
         .padding(.trailing)
     }
 
-    var minutes: some View {
+    private var minutes: some View {
         HStack {
             TextField("Minutes", text: Binding(get: { viewModel.minutes },
                                                set: viewModel.setMinutes))
@@ -35,7 +38,7 @@ struct RecipeStepTimerRowView: View {
         .padding(.trailing)
     }
 
-    var seconds: some View {
+    private var seconds: some View {
         HStack {
             TextField("Seconds", text: Binding(get: { viewModel.seconds },
                                                set: viewModel.setSeconds))

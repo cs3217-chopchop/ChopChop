@@ -2,37 +2,53 @@ import Combine
 import Foundation
 import UIKit
 
+/**
+ Represents a view model for a view of a collection of recipes.
+ */
 final class RecipeCollectionViewModel: ObservableObject {
-    @Published var query = ""
+    /// The name of the collection of recipes.
+    let title: String
+    /// The recipes displayed in the view is the union of recipes in
+    /// each of the categories in this array, represented by their ids.
+    let categoryIds: [Int64?]
+
+    /// The collection of recipes displayed in the view.
     @Published private(set) var recipes: [RecipeInfo] = []
+    /// The ingredients required to make the displayed recipe.
     @Published private(set) var recipeIngredients: Set<String> = []
+
+    /// Search fields
+    @Published var query = ""
     @Published var selectedIngredients: Set<String> = []
 
+    /// Alert fields
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
 
-    let title: String
-    let categoryIds: [Int64?]
-
     private let storageManager = StorageManager()
-    private var recipesCancellable: AnyCancellable?
-    private var recipeIngredientsCancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(title: String, categoryIds: [Int64?] = [nil]) {
         self.title = title
         self.categoryIds = categoryIds
 
-        recipesCancellable = recipesPublisher()
+        recipesPublisher
             .sink { [weak self] recipes in
                 self?.recipes = recipes
             }
-        recipeIngredientsCancellable = recipeIngredientsPublisher()
+            .store(in: &cancellables)
+
+        recipeIngredientsPublisher
             .sink { [weak self] ingredients in
                 self?.recipeIngredients = Set(ingredients)
             }
+            .store(in: &cancellables)
     }
 
+    /**
+     Deletes the recipes at the given indices of the recipe array.
+     */
     func deleteRecipes(at offsets: IndexSet) {
         do {
             let ids = offsets.compactMap { recipes[$0].id }
@@ -45,6 +61,9 @@ final class RecipeCollectionViewModel: ObservableObject {
         }
     }
 
+    /**
+     Returns the corresponding image of the recipe, or `nil` if such an image does not exist in local storage.
+     */
     func getRecipeImage(recipe: RecipeInfo) -> UIImage? {
         guard let id = recipe.id else {
             return nil
@@ -53,12 +72,15 @@ final class RecipeCollectionViewModel: ObservableObject {
         return storageManager.fetchRecipeImage(name: String(id))
     }
 
+    /**
+     Resets the search fields to their default values.
+     */
     func resetSearchFields() {
         query = ""
         selectedIngredients.removeAll()
     }
 
-    private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
+    private var recipesPublisher: AnyPublisher<[RecipeInfo], Never> {
         $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients
             -> AnyPublisher<[RecipeInfo], Error> in
             storageManager.recipesPublisher(query: query,
@@ -74,7 +96,7 @@ final class RecipeCollectionViewModel: ObservableObject {
         .eraseToAnyPublisher()
     }
 
-    private func recipeIngredientsPublisher() -> AnyPublisher<[String], Never> {
+    private var recipeIngredientsPublisher: AnyPublisher<[String], Never> {
         storageManager.recipeIngredientsPublisher(categoryIds: categoryIds)
             .catch { _ in
                 Just<[String]>([])

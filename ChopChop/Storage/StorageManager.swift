@@ -367,9 +367,9 @@ extension StorageManager {
             .eraseToAnyPublisher()
     }
 
-    func onlineRecipePublisher(id: String) -> AnyPublisher<OnlineRecipe, Error> {
+    func onlineRecipePublisher(id: String) -> AnyPublisher<OnlineRecipe?, Error> {
         firebase.fetchOnlineRecipeOnceById(onlineRecipeId: id)
-            .compactMap({
+            .map({
                 try? OnlineRecipe(from: $0)
             })
             .eraseToAnyPublisher()

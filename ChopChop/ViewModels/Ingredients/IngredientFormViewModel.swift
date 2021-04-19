@@ -10,10 +10,12 @@ class IngredientFormViewModel: ObservableObject {
     /// The ingredient edited by the form, or `nil` if the form adds a new ingredient.
     private let ingredient: Ingredient?
 
+    /// A collection of ingredient categories.
+    @Published var categories: [IngredientCategory] = []
+
     /// Form fields
     @Published var quantityType: QuantityType
     @Published var name: String
-    @Published var categories: [IngredientCategory] = []
     @Published var category: IngredientCategory?
     @Published var image: UIImage
 

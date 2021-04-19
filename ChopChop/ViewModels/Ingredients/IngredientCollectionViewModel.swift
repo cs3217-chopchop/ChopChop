@@ -6,6 +6,12 @@ import UIKit
  Represents a view model for a view of a collection of ingredients.
  */
 final class IngredientCollectionViewModel: ObservableObject {
+    /// The name of the collection of ingredients.
+    let title: String
+    /// The ingredients displayed in the view is the union of ingredients in
+    /// each of the categories in this array, represented by their ids.
+    let categoryIds: [Int64?]
+
     /// The collection of ingredients displayed in the view.
     @Published private(set) var ingredients: [IngredientInfo] = []
 
@@ -24,12 +30,6 @@ final class IngredientCollectionViewModel: ObservableObject {
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
-
-    /// The name of the collection of ingredients.
-    let title: String
-    /// The ingredients displayed in the view is the union of ingredients in
-    /// each of the categories in this array, represented by their ids.
-    let categoryIds: [Int64?]
 
     private let storageManager = StorageManager()
     private var cancellables: Set<AnyCancellable> = []
@@ -86,7 +86,7 @@ final class IngredientCollectionViewModel: ObservableObject {
     }
 
     /**
-     Resets the search fields of the view model.
+     Resets the search fields to their default values.
      */
     func resetSearchFields() {
         query = ""

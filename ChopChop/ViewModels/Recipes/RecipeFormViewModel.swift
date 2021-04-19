@@ -2,9 +2,17 @@ import Combine
 import GRDB
 import UIKit
 
+/**
+ Represents the view model for a view of a form for adding or editing a recipe.
+ */
 class RecipeFormViewModel: ObservableObject {
+    /// The recipe edited by the form, or `nil` if the form adds a new recipe.
+    private let recipe: Recipe?
+
+    /// A collection of recipe categories.
     @Published var categories: [RecipeCategory] = []
 
+    /// Form fields
     @Published var name: String
     @Published var category: RecipeCategory?
     @Published var servings: String
@@ -13,6 +21,10 @@ class RecipeFormViewModel: ObservableObject {
     @Published var stepGraph: RecipeStepGraph
     @Published var image: UIImage
 
+    /// Form errors
+    @Published var formErrors: [String: [String]] = [:]
+
+    /// Display flags
     @Published var isParsingIngredients = false
     @Published var isParsingSteps = false
     @Published var ingredientsToBeParsed = ""
@@ -21,21 +33,14 @@ class RecipeFormViewModel: ObservableObject {
     @Published var ingredientActionSheetIsPresented = false
     @Published var stepActionSheetIsPresented = false
 
-    @Published var imagePickerIsPresented = false
     @Published var alertIsPresented = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
-
-    @Published var formErrors: [String: [String]] = [:]
-
+    @Published var imagePickerIsPresented = false
     var pickerSourceType: UIImagePickerController.SourceType = .photoLibrary
-    var isEditing: Bool {
-        recipe != nil
-    }
 
     private let storageManager = StorageManager()
-    private var categoriesCancellable: AnyCancellable?
-    private let recipe: Recipe?
+    private var cancellables: Set<AnyCancellable> = []
 
     init(recipe: Recipe? = nil) {
         self.recipe = recipe
@@ -64,12 +69,20 @@ class RecipeFormViewModel: ObservableObject {
             self.image = UIImage()
         }
 
-        categoriesCancellable = categoriesPublisher()
+        categoriesPublisher
             .sink { [weak self] categories in
                 self?.categories = categories
             }
+            .store(in: &cancellables)
     }
 
+    var isEditing: Bool {
+        recipe != nil
+    }
+
+    /**
+     Updates the servings of the recipe that is being updated in the form.
+     */
     func setServings(_ servings: String) {
         self.servings = String(servings.filter { "0123456789.".contains($0) })
             .components(separatedBy: ".")
@@ -77,6 +90,10 @@ class RecipeFormViewModel: ObservableObject {
             .joined(separator: ".")
     }
 
+    /**
+     Parses the ingredient text in the text field to a collection of ingredients,
+     overwriting or appending to the current collection depending on the given flag.
+     */
     func parseIngredients(shouldOverwrite: Bool = false) {
         let parsedIngredients = RecipeParser.parseIngredientText(ingredientText: ingredientsToBeParsed)
             .map({
@@ -97,6 +114,9 @@ class RecipeFormViewModel: ObservableObject {
         ingredientsToBeParsed = ""
     }
 
+    /**
+     Parses the steps text in the text field to a collection of steps.
+     */
     func parseSteps() {
         let parsedSteps = RecipeParser.parseInstructions(instructions: stepsToBeParsed)
         let nodes: [RecipeStepNode] = parsedSteps.compactMap { content in
@@ -123,6 +143,9 @@ class RecipeFormViewModel: ObservableObject {
         stepGraphIsPresented = true
     }
 
+    /**
+     Saves the recipe to local storage.
+     */
     func saveRecipe() -> Bool {
         guard validateRecipe() else {
             return false
@@ -209,7 +232,7 @@ class RecipeFormViewModel: ObservableObject {
         return formErrors.isEmpty
     }
 
-    private func categoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
+    private var categoriesPublisher: AnyPublisher<[RecipeCategory], Never> {
         storageManager.recipeCategoriesPublisher()
             .catch { _ in
                 Just<[RecipeCategory]>([])

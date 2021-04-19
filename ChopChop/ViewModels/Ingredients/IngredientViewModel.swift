@@ -8,7 +8,7 @@ import Combine
 class IngredientViewModel: ObservableObject {
     /// The ingredient displayed by the view.
     @Published private(set) var ingredient: Ingredient?
-    /// The image corresponding to the ingredient.
+    /// The image corresponding to the displayed ingredient.
     @Published private(set) var image: UIImage?
 
     @Published var activeFormView: FormView?

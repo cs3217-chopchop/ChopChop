@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a collection of timers for an instruction step.
+ */
 struct RecipeStepTimersView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: RecipeStepTimersViewModel
@@ -8,32 +11,15 @@ struct RecipeStepTimersView: View {
         Form {
             Section {
                 ForEach(viewModel.timers, id: \.self) { timerRowViewModel in
-                    HStack {
-                        RecipeStepTimerRowView(viewModel: timerRowViewModel)
-                        Spacer()
-                        Button(action: {
-                            viewModel.timers.removeAll(where: { $0 === timerRowViewModel })
-                        }) {
-                            Image(systemName: "trash")
-                                .foregroundColor(.red)
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
-                    }
+                    stepTimer(timerRowViewModel)
                 }
 
-                Button("Add timer") {
-                    viewModel.timers.append(RecipeStepTimerRowViewModel())
-                }
-
+                addTimerButton
                 parseButton
             }
 
             Section {
-                Button("Save timers") {
-                    if viewModel.saveTimers() {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
+                saveButton
             }
         }
         .navigationTitle("Timers")
@@ -42,22 +28,51 @@ struct RecipeStepTimersView: View {
         }
     }
 
-    var parseButton: some View {
+    private func stepTimer(_ timerRowViewModel: RecipeStepTimerRowViewModel) -> some View {
+        HStack {
+            RecipeStepTimerRowView(viewModel: timerRowViewModel)
+            Spacer()
+            Button(action: {
+                viewModel.timers.removeAll(where: { $0 === timerRowViewModel })
+            }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            .buttonStyle(BorderlessButtonStyle())
+        }
+    }
+
+    private var addTimerButton: some View {
+        Button("Add timer") {
+            viewModel.timers.append(RecipeStepTimerRowViewModel())
+        }
+    }
+
+    private var parseButton: some View {
         Button("Parse timers") {
             viewModel.actionSheetIsPresented = true
         }
         .actionSheet(isPresented: $viewModel.actionSheetIsPresented) {
-            ActionSheet(title: Text("Parse step timers"),
-                        message: Text("Step: \(viewModel.node.label.content)"),
-                        buttons: [
-                            .cancel(),
-                            .destructive(Text("Overwrite current timers")) {
-                                viewModel.parseTimers(shouldOverwrite: true)
-                            },
-                            .default(Text("Append to current timers")) {
-                                viewModel.parseTimers(shouldOverwrite: false)
-                            }
-                        ])
+            ActionSheet(
+                title: Text("Parse step timers"),
+                message: Text("Step: \(viewModel.node.label.content)"),
+                buttons: [
+                    .cancel(),
+                    .destructive(Text("Overwrite current timers")) {
+                        viewModel.parseTimers(shouldOverwrite: true)
+                    },
+                    .default(Text("Append to current timers")) {
+                        viewModel.parseTimers(shouldOverwrite: false)
+                    }
+                ])
+        }
+    }
+
+    private var saveButton: some View {
+        Button("Save timers") {
+            if viewModel.saveTimers() {
+                presentationMode.wrappedValue.dismiss()
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ struct IngredientFormView: View {
         .sheet(isPresented: $viewModel.isShowingPhotoLibrary) {
             ImagePicker(sourceType: viewModel.pickerSourceType, selectedImage: $viewModel.image)
         }
+        .navigationTitle("\(viewModel.isEdit ? "Edit" : "Add") Ingredient")
         .alert(item: $viewModel.alertIdentifier, content: handleAlert)
     }
 
