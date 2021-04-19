@@ -4,11 +4,14 @@ import Foundation
 
 /**
  Represents a collection of ingredients.
+ 
+ Representation Invariants:
+ - Name is not empty.
  */
 struct IngredientCategory: Identifiable, Hashable {
-    var id: Int64?
-
     // MARK: - Specification Fields
+    /// Identifies which row in the ingredient category table in local storage this category represents.
+    var id: Int64?
     /// The name of the category. Cannot be empty.
     let name: String
 

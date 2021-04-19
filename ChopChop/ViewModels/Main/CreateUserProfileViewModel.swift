@@ -2,17 +2,26 @@ import Combine
 import Foundation
 import UIKit
 
+/**
+ Represents a view model for the view of the initial user profile creation.
+ */
 final class CreateUserProfileViewModel: ObservableObject {
-    private let settings: UserSettings
-
+    /// Form fields
     @Published var name: String = ""
-    private let storageManager = StorageManager()
+
+    /// Error fields
     @Published var errorMessage = ""
+
+    private let settings: UserSettings
+    private let storageManager = StorageManager()
 
     init(settings: UserSettings) {
         self.settings = settings
     }
 
+    /**
+     Handles the submission of the user profile creation form.
+     */
     func onClick() {
         guard settings.userId == nil else {
             return

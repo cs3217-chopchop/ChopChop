@@ -1,6 +1,9 @@
 import SwiftUI
 
- struct SessionGraphView: View {
+/**
+ Represents a view of the graph display of the instructions of a recipe being made.
+ */
+struct SessionGraphView: View {
     @StateObject var viewModel: SessionGraphViewModel
     @StateObject var selection = SelectionHandler<SessionRecipeStepNode>()
 
@@ -9,7 +12,6 @@ import SwiftUI
     var body: some View {
         ZStack(alignment: .top) {
             linesView
-
             nodesView(nodes: viewModel.graph.topologicallySortedNodes)
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
@@ -21,16 +23,10 @@ import SwiftUI
                 selection.deselectAllNodes()
             }
         }
-        .gesture(
-            DragGesture()
-                .updating($portalDragOffset) { value, state, _ in
-                    state = CGVector(dx: value.translation.width, dy: value.translation.height)
-                }
-                .onEnded(viewModel.onDragPortal)
-        )
+        .gesture(gesture)
     }
 
-    var linesView: some View {
+    private var linesView: some View {
         ForEach(viewModel.graph.edges, id: \.self) { edge in
             Line(from: (edge.source.position ?? .zero)
                     + viewModel.portalPosition + portalDragOffset,
@@ -40,7 +36,7 @@ import SwiftUI
         }
     }
 
-    func nodesView(nodes: [SessionRecipeStepNode]) -> some View {
+    private func nodesView(nodes: [SessionRecipeStepNode]) -> some View {
         ForEach(nodes) { node in
             SessionNodeView(viewModel: SessionNodeViewModel(graph: viewModel.graph, node: node, proxy: viewModel.proxy),
                             selection: selection)
@@ -51,6 +47,14 @@ import SwiftUI
                     }
                 }
         }
+    }
+
+    private var gesture: some Gesture {
+        DragGesture()
+            .updating($portalDragOffset) { value, state, _ in
+                state = CGVector(dx: value.translation.width, dy: value.translation.height)
+            }
+            .onEnded(viewModel.onDragPortal)
     }
  }
 

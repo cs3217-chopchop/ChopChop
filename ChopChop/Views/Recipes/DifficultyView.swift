@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of the difficulty of making a recipe.
+ */
 struct DifficultyView: View {
     let difficulty: Difficulty?
 

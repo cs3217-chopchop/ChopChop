@@ -1,20 +1,25 @@
 import Combine
 import Foundation
 
+/**
+ Represents a view model for the main view of the application.
+ */
 final class MainViewModel: ObservableObject {
+    /// A collection of recipe categories.
     @Published private(set) var recipeCategories: [RecipeCategory] = []
 
     private let storageManager = StorageManager()
-    private var recipeCategoriesCancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     init() {
-        recipeCategoriesCancellable = recipeCategoriesPublisher()
+        recipeCategoriesPublisher
             .sink { [weak self] categories in
                 self?.recipeCategories = categories
             }
+            .store(in: &cancellables)
     }
 
-    private func recipeCategoriesPublisher() -> AnyPublisher<[RecipeCategory], Never> {
+    private var recipeCategoriesPublisher: AnyPublisher<[RecipeCategory], Never> {
         storageManager.recipeCategoriesPublisher()
             .catch { _ in
                 Just<[RecipeCategory]>([])

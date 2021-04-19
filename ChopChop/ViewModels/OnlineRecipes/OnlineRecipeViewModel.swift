@@ -1,25 +1,35 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model of a view of a recipe published online.
+ */
 class OnlineRecipeViewModel: ObservableObject {
+    /// The published recipe displayed in the view.
     private(set) var recipe: OnlineRecipe
-
+    /// The recipe from which the displayed recipe was downloaded from
+    /// Is `nil` if the displayed recipe was not downloaded from another published recipe.
     private(set) var parentRecipe: OnlineRecipe?
+    /// The recipes that were downloaded from the displayed recipe.
     private(set) var downloadedRecipes: [Recipe] = []
 
-    let storageManager = StorageManager()
+    /// The view model in charge of downloading recipes.
+    @Published var downloadRecipeViewModel: DownloadRecipeViewModel
+    /// A flag representing whether the data is still being loaded from storage.
+    @Published var isLoading = false
 
+    /// Displayed recipe details
     @Published private(set) var recipeServingText = ""
     @Published private(set) var creatorName = ""
     @Published private var ratings: [RecipeRating] = []
     @Published private var firstRater = ""
     @Published private(set) var image = UIImage(imageLiteralResourceName: "recipe")
 
+    /// Display flags
     @Published var isShowingDetail = false
 
     let settings: UserSettings
-    @Published var downloadRecipeViewModel: DownloadRecipeViewModel
-    @Published var isLoading = false
+    let storageManager = StorageManager()
 
     init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
         self.recipe = recipe
@@ -47,10 +57,16 @@ class OnlineRecipeViewModel: ObservableObject {
         }
     }
 
-    func setRecipe() {
+    /**
+     Sets the displayed recipe to be downloaded.
+     */
+    func setRecipeToBeDownloaded() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
     }
 
+    /**
+     Loads the recipe to be displayed.
+     */
     func load() {
         isLoading = true
         updateRating()
@@ -60,6 +76,9 @@ class OnlineRecipeViewModel: ObservableObject {
         updateParentOnlineRecipe()
     }
 
+    /**
+     Reloads the recipe to be displayed.
+     */
     func reload() {
         isLoading = true
         storageManager.fetchOnlineRecipe(id: recipe.id) { onlineRecipe, _ in
@@ -75,6 +94,9 @@ class OnlineRecipeViewModel: ObservableObject {
         }
     }
 
+    /**
+     Updates all local recipes that were downloaded from the displayed recipe.
+     */
     func updateForkedRecipes() {
         downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
@@ -105,6 +127,7 @@ class OnlineRecipeViewModel: ObservableObject {
             creatorName = settings.user?.name ?? ""
             return
         }
+
         storageManager.fetchUser(id: recipe.creatorId) { user, err in
             guard let name = user?.name, err == nil else {
                 return
@@ -127,9 +150,11 @@ class OnlineRecipeViewModel: ObservableObject {
 
     private func updateRating() {
         ratings = recipe.ratings
+
         guard let firstRaterId = getRaterId(recipe: recipe) else {
             return
         }
+
         storageManager.fetchUser(id: firstRaterId) { user, err in
             guard let name = user?.name, err == nil else {
                 return
@@ -138,22 +163,31 @@ class OnlineRecipeViewModel: ObservableObject {
         }
     }
 
+    /**
+     Returns the id of a user who rated the displayed recipe, or `nil` if the recipe has not been rated by any user.
+
+     If multiple users have rated the recipe, the id returned follows this list with decreasing priority:
+     - A random followee of the current user.
+     - A random user.
+     - The current user.
+     */
     private func getRaterId(recipe: OnlineRecipe) -> String? {
         guard let userId = settings.userId, let followees = settings.user?.followees else {
             return nil
         }
-        if let raterId = (recipe.ratings.first { followees.contains($0.userId) })?.userId {
-            // return 1 of followees
+
+        if let raterId = (ratings.first { followees.contains($0.userId) })?.userId {
             return raterId
         }
-        if let raterId = (recipe.ratings.first { $0.userId != userId })?.userId {
-            // return any rater thats not ownself
+
+        if let raterId = (ratings.first { $0.userId != userId })?.userId {
             return raterId
         }
-        if (recipe.ratings.contains { $0.userId == userId }) {
+
+        if (ratings.contains { $0.userId == userId }) {
             return userId
         }
+
         return nil
     }
-
 }

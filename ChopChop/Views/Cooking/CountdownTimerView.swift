@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a timer.
+ */
 struct CountdownTimerView: View {
     @StateObject var viewModel: CountdownTimerViewModel
     @State var animationState = true
@@ -25,7 +28,7 @@ struct CountdownTimerView: View {
     }
 
     @ViewBuilder
-    var stoppedView: some View {
+    private var stoppedView: some View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
@@ -41,7 +44,7 @@ struct CountdownTimerView: View {
     }
 
     @ViewBuilder
-    var runningView: some View {
+    private var runningView: some View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
@@ -54,7 +57,7 @@ struct CountdownTimerView: View {
     }
 
     @ViewBuilder
-    var pausedView: some View {
+    private var pausedView: some View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
@@ -75,7 +78,7 @@ struct CountdownTimerView: View {
     }
 
     @ViewBuilder
-    var endedView: some View {
+    private var endedView: some View {
         Text(viewModel.timeRemaining)
             .font(Font.body.monospacedDigit())
             .padding()
@@ -93,7 +96,7 @@ struct CountdownTimerView: View {
     }
 
     @ViewBuilder
-    var background: some View {
+    private var background: some View {
         switch viewModel.status {
         case .running, .paused:
             ZStack(alignment: .leading) {

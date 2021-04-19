@@ -1,11 +1,27 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a graph that models the instructions to make a recipe.
+ 
+ Representation Invariants:
+ - The graph fulfills the invariants of `DirectedAcyclicGraph`.
+ */
 final class RecipeStepGraph: DirectedAcyclicGraph<RecipeStepNode> {
+    /**
+     Initialises an empty graph.
+     */
     override init() {
         super.init()
     }
 
+    /**
+     Initialises a graph with the given nodes and edges.
+
+     - Throws:
+        - `GraphError.repeatedEdge` if the given edges contain duplicates.
+        - `DirectedAcyclicGraphError.addedEdgeFormsCycle` if the given edges form a cycle.
+     */
     override init(nodes: [RecipeStepNode], edges: [E]) throws {
         super.init()
 

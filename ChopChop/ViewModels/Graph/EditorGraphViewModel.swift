@@ -1,11 +1,16 @@
 import SwiftUI
 
+/**
+ Represents a view model of a view of the recipe instructions being edited.
+ */
 final class EditorGraphViewModel: ObservableObject {
+    /// The graph of the recipe instructions displayed in the view.
+    let graph: RecipeStepGraph
+    /// A flag representing whether the graph can be edited or is only for display.
+    let isEditable: Bool
+
     @Published var portalPosition = CGVector.zero
     @Published var linePhase = CGFloat.zero
-
-    let graph: RecipeStepGraph
-    let isEditable: Bool
 
     init(graph: RecipeStepGraph, isEditable: Bool = true) {
         let maxCount = graph.nodeLayers.reduce(into: 0) { $0 = max($0, $1.count) }
@@ -21,6 +26,8 @@ final class EditorGraphViewModel: ObservableObject {
         self.graph = graph
         self.isEditable = isEditable
     }
+
+    // MARK: - Gesture Functions
 
     func onDragPortal(_ value: DragGesture.Value) {
         portalPosition += CGVector(dx: value.translation.width, dy: value.translation.height)

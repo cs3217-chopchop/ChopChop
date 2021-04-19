@@ -97,7 +97,7 @@ struct IngredientCollectionView: View {
         .padding(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
     }
 
-    // MARK: - Ingredient Image
+    // MARK: - Image
 
     @ViewBuilder
     private func IngredientImage(ingredient: IngredientInfo) -> some View {
@@ -110,7 +110,7 @@ struct IngredientCollectionView: View {
         }
     }
 
-    // MARK: - Ingredient List View
+    // MARK: - List
 
     private var listView: some View {
         List {
@@ -147,7 +147,7 @@ struct IngredientCollectionView: View {
         }
     }
 
-    // MARK: - Ingredient Grid View
+    // MARK: - Grid
 
     private var gridView: some View {
         let columns = [

@@ -2,7 +2,11 @@
 
 import SwiftUI
 
-// https://swiftwithmajid.com/2020/03/04/customizing-toggle-in-swiftui/
+/**
+ Represents a checkbox component that can be toggled.
+ 
+ Reference: https://swiftwithmajid.com/2020/03/04/customizing-toggle-in-swiftui/
+ */
 struct CheckboxToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {

@@ -3,11 +3,14 @@ import GRDB
 
 /**
  Represents a collection of recipes.
+ 
+ Representation Invariants:
+ - Name is not empty.
  */
 struct RecipeCategory: Identifiable, Hashable {
-    var id: Int64?
-
     // MARK: - Specification Fields
+    /// Identifies which row in the recipe category table in local storage this category represents.
+    var id: Int64?
     /// The name of the category. Cannot be empty.
     let name: String
 

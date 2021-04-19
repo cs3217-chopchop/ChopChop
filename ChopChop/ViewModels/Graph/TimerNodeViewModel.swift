@@ -1,20 +1,19 @@
 import Combine
 import SwiftUI
 
+/**
+ Represents a view model of a view of a collection of timers in an instruction step.
+ */
 final class TimerNodeViewModel: ObservableObject {
-    var graph: SessionRecipeStepGraph
+    /// The step that owns the collection of timers displayed in the view.
     let node: SessionRecipeStepNode
+    /// The index of the step.
     let index: Int?
 
-    let proxy: ScrollViewProxy?
-    var cancellables = Set<AnyCancellable>()
-
-    var hasTimers: Bool {
-        !node.label.timers.isEmpty
-    }
+    private let proxy: ScrollViewProxy?
+    private var cancellables = Set<AnyCancellable>()
 
     init(graph: SessionRecipeStepGraph, node: SessionRecipeStepNode, proxy: ScrollViewProxy? = nil) {
-        self.graph = graph
         self.node = node
         self.index = graph.topologicallySortedNodes.firstIndex(of: node)
         self.proxy = proxy
@@ -36,5 +35,13 @@ final class TimerNodeViewModel: ObservableObject {
                 }
                 .store(in: &cancellables)
         }
+    }
+
+    var timers: [CountdownTimer] {
+        node.label.timers
+    }
+
+    var hasTimers: Bool {
+        !node.label.timers.isEmpty
     }
 }

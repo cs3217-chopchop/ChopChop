@@ -1,8 +1,9 @@
-//https://github.com/CombineHarvesters/FoundationCombine
-
 import Combine
 import Foundation
 
+/**
+ Reference: https://github.com/CombineHarvesters/FoundationCombine
+ */
 extension Collection where Element: Publisher {
 
     /// Combine the array of publishers to give a single publisher of an array

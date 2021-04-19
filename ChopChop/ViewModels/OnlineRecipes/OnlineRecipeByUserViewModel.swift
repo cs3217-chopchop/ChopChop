@@ -1,7 +1,11 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model of a view of a recipe published online by another user.
+ */
 class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
+    /// Display flags
     @Published var isShowingRating = false
 
     override init(recipe: OnlineRecipe, downloadRecipeViewModel: DownloadRecipeViewModel, settings: UserSettings) {
@@ -12,6 +16,9 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
         recipe.ratings.first(where: { $0.userId == settings.userId })
     }
 
+    /**
+     Rates the displayed recipe with the given value.
+     */
     func tapRating(_ ratingValue: Int) {
         guard let userId = settings.userId else {
             return
@@ -30,15 +37,24 @@ class OnlineRecipeByUserViewModel: OnlineRecipeViewModel {
             }
             return
         }
-        storageManager.updateOnlineRecipeRating(recipeId: recipe.id, oldRating: ownRating,
-                                    newRating: RecipeRating(userId: userId, score: rating)) { err in
+
+        storageManager.updateOnlineRecipeRating(
+            recipeId: recipe.id,
+            oldRating: ownRating,
+            newRating: RecipeRating(userId: userId, score: rating)) { err in
+
             guard err == nil else {
                 return
             }
+
             self.reload()
         }
     }
 
+    /**
+     Unrates the previously given rating.
+     If the user has yet to rate the recipe, do nothing.
+     */
     func removeRating() {
         guard let ownRating = ownRating else {
             return

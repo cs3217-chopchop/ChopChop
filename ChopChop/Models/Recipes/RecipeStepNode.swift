@@ -1,9 +1,18 @@
 import CoreGraphics
 import Foundation
 
+/**
+ Represents a node in the recipe step graph.
+ 
+ Representation Invariants:
+ - Label is valid.
+ */
 final class RecipeStepNode: Node {
-    let id = UUID()
+    // MARK: - Specification Fields
+    /// The step that the node represents.
     var label: RecipeStep
+
+    let id = UUID()
     var position: CGPoint?
 
     init(_ label: RecipeStep, position: CGPoint? = nil) {

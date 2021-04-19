@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a check list of items.
+ */
 struct CheckListView<T>: View {
     @StateObject var viewModel: CheckListViewModel<T>
 
@@ -16,7 +19,6 @@ struct CheckListView<T>: View {
                 }
             }
         }
-
     }
 }
 

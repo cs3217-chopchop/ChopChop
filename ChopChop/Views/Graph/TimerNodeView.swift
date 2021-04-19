@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of a collection of timers in an instruction step.
+ */
 struct TimerNodeView: View {
     @StateObject var viewModel: TimerNodeViewModel
 
@@ -12,7 +15,7 @@ struct TimerNodeView: View {
                         .padding([.top, .bottom], 8)
                 }
 
-                ForEach(viewModel.node.label.timers, id: \.self) { timer in
+                ForEach(viewModel.timers, id: \.self) { timer in
                     CountdownTimerView(viewModel: CountdownTimerViewModel(timer: timer))
                         .id(timer)
                 }

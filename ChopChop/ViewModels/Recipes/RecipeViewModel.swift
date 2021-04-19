@@ -1,11 +1,21 @@
 import SwiftUI
 import Combine
 
+/**
+ Represents a view model for a view of a recipe.
+ */
 final class RecipeViewModel: ObservableObject {
+    /// The recipe displayed by the view.
     @Published private(set) var recipe: Recipe?
+    /// The image corresponding to the displayed recipe.
     @Published private(set) var image: UIImage?
+    /// The recipe from which the displayed recipe was downloaded from.
+    /// Is `nil` if the displayed recipe was not downloaded from an online recipe.
+    @Published private(set) var parentRecipe: OnlineRecipe?
+    /// The total time taken to make the recipe.
+    @Published private(set) var totalTimeTaken: String = ""
 
-    @Published var parentRecipe: OnlineRecipe?
+    /// Display flags
     @Published var showSessionRecipe = false
     @Published var showRecipeForm = false
     @Published var showParentRecipe = false
@@ -18,11 +28,10 @@ final class RecipeViewModel: ObservableObject {
         (recipe?.ingredients.isEmpty ?? false) && (recipe?.stepGraph.nodes.isEmpty ?? false)
     }
 
-    let timeFormatter: DateComponentsFormatter
-    private let storageManager = StorageManager()
-    private var recipeCancellable: AnyCancellable?
-    private var parentRecipeCancellable: AnyCancellable?
+    private let timeFormatter: DateComponentsFormatter
     private let settings: UserSettings
+    private let storageManager = StorageManager()
+    private var cancellables: Set<AnyCancellable> = []
 
     init(id: Int64, settings: UserSettings) {
         self.settings = settings
@@ -32,14 +41,21 @@ final class RecipeViewModel: ObservableObject {
         timeFormatter.includesApproximationPhrase = true
         timeFormatter.unitsStyle = .abbreviated
 
-        recipeCancellable = recipePublisher(id: id)
+        recipePublisher(id: id)
             .sink { [weak self] recipe in
                 self?.recipe = recipe
+
+                if let recipe = recipe {
+                    self?.totalTimeTaken = self?.timeFormatter.string(from: recipe.totalTimeTaken) ?? ""
+                } else {
+                    self?.totalTimeTaken = ""
+                }
 
                 if let recipe = recipe, let id = recipe.id {
                     self?.image = self?.storageManager.fetchRecipeImage(name: String(id))
                 }
             }
+            .store(in: &cancellables)
 
         if let parentId = recipe?.parentOnlineRecipeId {
             storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
