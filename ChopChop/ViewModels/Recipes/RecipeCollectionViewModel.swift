@@ -14,7 +14,13 @@ final class RecipeCollectionViewModel: ObservableObject {
 
     let title: String
     let categoryIds: [Int64?]
-    let category: RecipeCategory?
+    var category: RecipeCategory? {
+        guard categoryIds.compactMap({ $0 }).count == 1 else {
+            return nil
+        }
+
+        return try? RecipeCategory(id: categoryIds.compactMap({ $0 }).first, name: title)
+    }
 
     private let storageManager = StorageManager()
     private var recipesCancellable: AnyCancellable?
@@ -23,12 +29,6 @@ final class RecipeCollectionViewModel: ObservableObject {
     init(title: String, categoryIds: [Int64?] = [nil]) {
         self.title = title
         self.categoryIds = categoryIds
-
-        if categoryIds.compactMap({ $0 }).count == 1 {
-            self.category = try? RecipeCategory(id: categoryIds.compactMap { $0 }.first, name: title)
-        } else {
-            self.category = nil
-        }
 
         recipesCancellable = recipesPublisher()
             .sink { [weak self] recipes in

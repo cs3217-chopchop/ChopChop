@@ -61,7 +61,7 @@ struct IngredientCollectionView: View {
         NavigationLink(
             destination: IngredientFormView(
                 viewModel: IngredientFormViewModel(
-                    addToCategory: viewModel.categoryId))) {
+                    addToCategory: viewModel.category))) {
             Image(systemName: "plus")
         }
     }

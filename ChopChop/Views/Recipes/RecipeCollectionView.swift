@@ -14,7 +14,8 @@ struct RecipeCollectionView: View {
         VStack {
             SearchBar(text: $viewModel.query, placeholder: "Search recipes...")
             HStack {
-                NavigationLink(destination: RecipeFormView(viewModel: RecipeFormViewModel(category: viewModel.category))) {
+                NavigationLink(destination: RecipeFormView(viewModel:
+                                                            RecipeFormViewModel(category: viewModel.category))) {
                     Image(systemName: "plus")
                 }
                 Spacer()
