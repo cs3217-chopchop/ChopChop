@@ -1,7 +1,11 @@
 import Combine
 import InflectorKit
 
+/**
+ Represents a view model for a view of the completion of a recipe being made.
+ */
 final class CompleteSessionRecipeViewModel: ObservableObject {
+    /// The ingredients to be deducted from the ingredient inventory.
     @Published var deductibleIngredients: [DeductibleIngredientViewModel] = []
 
     private let storageManager = StorageManager()
@@ -27,6 +31,9 @@ final class CompleteSessionRecipeViewModel: ObservableObject {
         }
     }
 
+    /**
+     Completes the recipe being made and saves the updates to the ingredient inventory.
+     */
     func completeRecipe() -> Bool {
         guard validateIngredients() else {
             return false

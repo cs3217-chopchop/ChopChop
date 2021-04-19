@@ -1,11 +1,17 @@
 import SwiftUI
 
+/**
+ Represents a view model of a view of a recipe being made.
+ */
 class SessionRecipeViewModel: ObservableObject {
-    @Published var showDetailsPanel = true
-    @Published var sheetIsPresented = false
+    /// The recipe displayed in the view.
+    let sessionRecipe: SessionRecipe
+    /// A flag representing whether the recipe being made is complete.
     @Published var isComplete = false
 
-    let sessionRecipe: SessionRecipe
+    /// Display flags
+    @Published var showDetailsPanel = true
+    @Published var sheetIsPresented = false
 
     init(recipe: Recipe) {
         sessionRecipe = SessionRecipe(recipe: recipe)

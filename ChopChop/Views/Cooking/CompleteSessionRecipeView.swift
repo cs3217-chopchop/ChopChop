@@ -1,5 +1,8 @@
 import SwiftUI
 
+/**
+ Represents a view of the completion of a recipe being made.
+ */
 struct CompleteSessionRecipeView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: CompleteSessionRecipeViewModel
