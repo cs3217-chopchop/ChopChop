@@ -1,21 +1,52 @@
 import Foundation
 import GRDB
 
+/**
+ Represents a recipe.
+ 
+ Representation Invariants:
+ - Name is not empty.
+ - Servings is a positive number.
+ - Ingredients do not contain duplicates, identified by name.
+ - Step graph is valid.
+ */
 struct Recipe: Equatable {
+    // MARK: - Specification Fields
+    /// Identifies the row in the recipe table in the local storage that this recipe represents.
     var id: Int64?
+    /// Identifies the document in the recipe collection in the cloud storage that this recipe represents.
+    /// Is `nil` if the recipe is not published onto cloud storage.
     var onlineId: String?
+    /// Identifies the document in the recipe collection in the cloud storage that this recipe was downloaded from.
+    /// Is `nil` if the recipe was not downloaded from an online recipe.
     var parentOnlineRecipeId: String?
+    /// The name of the recipe. Cannot be empty.
     let name: String
+    /// The category which the recipe belongs to.
+    /// Is `nil` if the recipe does not belong to any category.
     let category: RecipeCategory?
+    /// The number of people this recipe is designed to feed.
     let servings: Double
+    /// A measure of the difficulty to make the recipe.
+    /// Is `nil` if there is no associated difficulty.
     let difficulty: Difficulty?
+    /// The ingredients required to make the recipe.
     let ingredients: [RecipeIngredient]
+    /// The instructions to make the recipe, modeled as a graph.
     let stepGraph: RecipeStepGraph
 
     var totalTimeTaken: TimeInterval {
         stepGraph.nodes.map { $0.label.timeTaken }.reduce(0, +)
     }
 
+    /**
+     Instantiates a recipe with the given parameters.
+
+     - Throws:
+        - `RecipeError.invalidName` if the given name trimmed is empty.
+        - `RecipeError.invalidServings` if the given serving size is non positive.
+        - `RecipeError.duplicateIngredients` if the given ingredients contain duplicates.
+     */
     // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil, onlineId: String? = nil, parentOnlineRecipeId: String? = nil,
          name: String, category: RecipeCategory? = nil, servings: Double = 1,

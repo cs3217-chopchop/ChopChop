@@ -16,7 +16,10 @@ class DirectedAcyclicGraph<N: Node>: Graph<N> {
 
     /**
      Initialises a DAG with the given nodes and edges.
-     Fails if the given nodes and edges do not result in a valid DAG.
+
+     - Throws:
+        - `GraphError.repeatedEdge` if the given edges contain duplicates.
+        - `DirectedAcyclicGraphError.addedEdgeFormsCycle` if the given edges form a cycle.
      */
     init(nodes: [N], edges: [E]) throws {
         super.init(isDirected: true)

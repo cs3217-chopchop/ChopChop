@@ -6,29 +6,31 @@ import GRDB
  Represents an ingredient, consisting of batches grouped by expiry date.
  
  Representation Invariants:
+ - Name is not empty.
  - All quantities have non negative value.
  - All quantities are of the same type.
  - Each batch has a unique expiry date.
  */
 struct Ingredient {
-    var id: Int64?
-
     // MARK: - Specification Fields
+    /// Identifies the row in the ingredient table in the local storage that this ingredient represents.
+    var id: Int64?
     /// The name of the ingredient. Cannot be empty.
     let name: String
     /// The type of the quantities of the ingredient.
     let quantityType: QuantityType
     /// The batches of the ingredient, grouped by expiry date.
     var batches: [IngredientBatch]
-    /// The category which the ingredient belongs to, or `nil` if the ingredient does not belong to any category.
+    /// The category which the ingredient belongs to.
+    /// Is `nil` if the ingredient does not belong to any category.
     let category: IngredientCategory?
 
     /**
      Instantiates an ingredient with the given name, type, batches and category.
      
      - Throws:
-        - `IngredientError.emptyName` if the given name trimmed is empty.
-        - ` QuantityError.incompatibleTypes` if the types of the given batches do not match the given type.
+        - `IngredientError.invalidName` if the given name trimmed is empty.
+        - `QuantityError.incompatibleTypes` if the types of the given batches do not match the given type.
      */
     // swiftlint:disable function_default_parameter_at_end
     init(id: Int64? = nil,
@@ -40,7 +42,7 @@ struct Ingredient {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            throw IngredientError.emptyName
+            throw IngredientError.invalidName
         }
 
         for batch in batches where batch.quantity.type != type {
@@ -289,7 +291,7 @@ extension Ingredient: Equatable {
 }
 
 enum IngredientError: String, Error {
-    case emptyName = "Ingredient name cannot be empty."
+    case invalidName = "Ingredient name cannot be empty."
     case nonExistentBatch = "Ingredient batch is non-existent."
     case insufficientQuantity = "Ingredient has insufficient quantity."
     case differentIngredients = "Ingredients are different."

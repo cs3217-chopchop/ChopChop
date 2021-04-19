@@ -3,6 +3,9 @@ import SwiftUI
 
 /**
  Represents some quantity of an ingredient with the same expiry date.
+ 
+ Representation Invariants:
+ - Quantity is non negative.
  */
 struct IngredientBatch {
     // MARK: - Specification Fields

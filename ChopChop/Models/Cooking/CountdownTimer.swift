@@ -1,20 +1,27 @@
 import Combine
 import Foundation
 
-// State machine is as follows:
-//
-// .stopped - [ play() ] -> .running
-// .stopped - [ reset() ] -> .stopped
-// .running - [ pause() ] -> .paused
-// .running - [ timeRemaining <= 0 ] -> .ended
-// .paused - [ resume() ] -> .running
-// .paused - [ reset() ] -> .stopped
-// .ended - [ reset() ] -> .stopped
+/**
+ Represents a timer for a duration in a recipe step, modeled as a finite state machine.
+ 
+ The state machine has the following transitions:
+ - `.stopped` - ( `start()` ) -> `.running`
+ - `.stopped` - ( `reset()` ) -> `.stopped`
+ - `.running` - ( `pause()` ) -> `.paused`
+ - `.running` - ( `timeRemaining <= 0` ) -> `.ended`
+ - `.paused` - ( `resume()` ) -> `.running`
+ - `.paused` - ( `reset()` ) -> `.stopped`
+ - `.ended` - ( `reset()` ) -> `.stopped`
+ */
 final class CountdownTimer {
+    // MARK: - Specification Fields
+    /// The time remaining before the timer ends.
     @Published private(set) var timeRemaining: TimeInterval
+    /// The current status of the timer.
     @Published private(set) var status: Status = .stopped
-
+    /// The total duration of the timer.
     let duration: TimeInterval
+
     private var durationRemaining: TimeInterval
     private var startDate: Date?
 
@@ -29,8 +36,12 @@ final class CountdownTimer {
         self.durationRemaining = duration
     }
 
+    /**
+     Starts the timer.
+     If the timer was not stopped, do nothing.
+     */
     func start() {
-        guard status == .paused || status == .stopped else {
+        guard status.wasStopped else {
             return
         }
 
@@ -57,6 +68,10 @@ final class CountdownTimer {
             }
     }
 
+    /**
+     Pauses the timer.
+     If the timer is not running, do nothing.
+     */
     func pause() {
         guard status == .running, let startDate = startDate else {
             return
@@ -67,6 +82,10 @@ final class CountdownTimer {
         cancellable?.cancel()
     }
 
+    /**
+     Resumes the timer.
+     If the timer is not paused, do nothing.
+     */
     func resume() {
         guard status == .paused else {
             return
@@ -75,6 +94,10 @@ final class CountdownTimer {
         start()
     }
 
+    /**
+     Resets the timer.
+     If the timer is running, do nothing.
+     */
     func reset() {
         guard status != .running else {
             return
@@ -102,5 +125,14 @@ extension CountdownTimer: Hashable {
 extension CountdownTimer {
     enum Status {
         case stopped, running, paused, ended
+
+        var wasStopped: Bool {
+            switch self {
+            case .stopped, .paused:
+                return true
+            case .running, .ended:
+                return false
+            }
+        }
     }
 }
