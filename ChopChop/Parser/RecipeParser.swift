@@ -114,7 +114,7 @@ struct RecipeParser {
     /**
      Parses an ingredient string into a pair containing its name and quantity.
      */
-    private static func parseIngredient(ingredientString: String) -> (name: String, quantity: Quantity) {
+    static func parseIngredient(ingredientString: String) -> (name: String, quantity: Quantity) {
         // checks if the text has both a number and a fraction, e.g. 1 1/2 gram of potato
         var parseResult = matchMixedFractionFormat(text: ingredientString)
         if let ingredients = parseResult {

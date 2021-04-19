@@ -53,6 +53,11 @@ final class RecipeCollectionViewModel: ObservableObject {
         return storageManager.fetchRecipeImage(name: String(id))
     }
 
+    func resetSearchFields() {
+        query = ""
+        selectedIngredients.removeAll()
+    }
+
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {
         $query.combineLatest($selectedIngredients).map { [self] query, selectedIngredients
             -> AnyPublisher<[RecipeInfo], Error> in

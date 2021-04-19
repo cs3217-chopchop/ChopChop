@@ -4,19 +4,33 @@ struct CreateUserProfileView: View {
     @ObservedObject var viewModel: CreateUserProfileViewModel
 
     var body: some View {
-        Text("Welcome to chopchop!")
-            .font(.largeTitle)
-            .padding()
-        TextField("Name", text: $viewModel.name)
-            .frame(width: 400, height: 50, alignment: .center)
-            .border(Color.primary, width: 1)
-            .multilineTextAlignment(.center)
-        Text(viewModel.errorMessage)
-            .foregroundColor(.red)
-        Button(action: {
-            viewModel.onClick()
-        }) {
-            Text("Create Account")
+        VStack {
+            Image("chopchop")
+                .resizable()
+                .frame(width: 320, height: 320)
+            Text("Welcome to ChopChop!")
+                .font(.largeTitle)
+            Text("Please enter a username")
+                .foregroundColor(.secondary)
+
+            Form {
+                Section(header: Text("Name"), footer: errorMessage) {
+                    TextField("Name", text: $viewModel.name)
+                }
+
+                Button(action: viewModel.onClick) {
+                    Text("Create Account")
+                }
+            }
+            .frame(width: 400, height: 200)
+        }
+    }
+
+    @ViewBuilder
+    var errorMessage: some View {
+        if !viewModel.errorMessage.isEmpty {
+            Text(viewModel.errorMessage)
+                .foregroundColor(.red)
         }
     }
 }

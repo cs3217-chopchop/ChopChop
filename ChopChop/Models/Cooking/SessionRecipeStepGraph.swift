@@ -49,6 +49,10 @@ final class SessionRecipeStepGraph {
     }
 
     func toggleNode(_ node: SessionRecipeStepNode) {
+        guard graph.containsNode(node) else {
+            return
+        }
+
         node.isCompleted.toggle()
         updateNodes()
     }

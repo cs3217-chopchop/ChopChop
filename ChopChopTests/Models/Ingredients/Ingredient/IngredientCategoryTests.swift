@@ -40,22 +40,3 @@ extension IngredientCategoryTests {
         XCTAssertThrowsError(try IngredientCategory(name: invalidName))
     }
 }
-
-// MARK: - Rename
-extension IngredientCategoryTests {
-    func testRename_validName_nameTrimmed() {
-        let validName = "  Spices\n"
-        XCTAssertNoThrow(try category.rename(validName))
-
-        let trimmedName = validName.trimmingCharacters(in: .whitespacesAndNewlines)
-        XCTAssertEqual(category.name, trimmedName)
-    }
-
-    func testRename_emptyName_throwsError() {
-        let emptyName = ""
-        XCTAssertThrowsError(try category.rename(emptyName))
-
-        let nameWithOnlyWhitespace = " "
-        XCTAssertThrowsError(try category.rename(nameWithOnlyWhitespace))
-    }
-}

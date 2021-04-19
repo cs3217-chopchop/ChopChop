@@ -4,18 +4,49 @@ struct DownloadRecipeView: View {
     @ObservedObject var viewModel: DownloadRecipeViewModel
 
     var body: some View {
-        Text("Save as")
-        TextField("New Recipe Name", text: $viewModel.recipeNameToSave)
-            .frame(width: 400, height: 50, alignment: .center)
-            .border(Color.primary, width: 1)
-            .multilineTextAlignment(.center)
-        Text(viewModel.errorMessage)
-            .foregroundColor(.red)
-        Button(action: {
-            viewModel.downloadRecipe()
-        }, label: {
-            Text("Download Recipe")
-        })
+        if viewModel.isNewDownload {
+            downloadNewCopyView
+        } else {
+            updateExistingCopyView
+        }
+
+    }
+
+    var downloadNewCopyView: some View {
+        VStack {
+            Text("Save as")
+            TextField("New Recipe Name", text: $viewModel.recipeNameToSave)
+                .frame(width: 400, height: 50, alignment: .center)
+                .border(Color.primary, width: 1)
+                .multilineTextAlignment(.center)
+            Text(viewModel.errorMessage)
+                .foregroundColor(.red)
+            Button(action: {
+                viewModel.downloadRecipe()
+            }, label: {
+                Text("Download Recipe")
+            })
+        }
+    }
+
+    var updateExistingCopyView: some View {
+        VStack {
+            Text("""
+                Please select existing recipes to update. Note that the update will \
+                override all changes you have made to selected recipes.
+                """
+            )
+            CheckListView(
+                viewModel: viewModel.forkedRecipesCheckList ?? CheckListViewModel(checkList: [])
+            )
+            Text(viewModel.errorMessage)
+                .foregroundColor(.red)
+            Button(action: {
+                viewModel.updateRecipes()
+            }, label: {
+                Text("Update Recipes")
+            })
+        }
     }
 }
 

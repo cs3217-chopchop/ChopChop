@@ -72,6 +72,18 @@ extension QuantityTests {
             try? Quantity(.volume(.quart), value: 1 * 0.5 / 0.95 + 1))
     }
 
+    func testPlus_massMetricImperialUnits_convertedToBaseUnit() {
+        XCTAssertEqual(
+            try? Quantity(.mass(.gram), value: 1) + Quantity(.mass(.ounce), value: 1),
+            try? Quantity(.mass(.kilogram), value: 0.029))
+    }
+
+    func testPlus_volumeMetricImperialUnits_convertedToBaseUnit() {
+        XCTAssertEqual(
+            try? Quantity(.volume(.milliliter), value: 1) + Quantity(.volume(.pint), value: 1),
+            try? Quantity(.volume(.liter), value: 0.501))
+    }
+
     func testPlus_massAndVolume_convertedToLeftUnit() {
         XCTAssertEqual(
             try? Quantity(.mass(.gram), value: 300) + Quantity(.volume(.milliliter), value: 200),

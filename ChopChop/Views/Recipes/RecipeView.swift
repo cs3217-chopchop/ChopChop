@@ -27,9 +27,30 @@ struct RecipeView: View {
                     ) {
                         EmptyView()
                     }
+                    if let parentRecipe = viewModel.parentRecipe {
+                        NavigationLink(
+                            destination: OnlineRecipeCollectionView(
+                                viewModel: OnlineRecipeCollectionViewModel(
+                                    recipe: parentRecipe
+                                )
+                            ) {
+                                EmptyView()
+                            },
+                            isActive: $viewModel.showParentRecipe
+                        ) {
+                            EmptyView()
+                        }
+                    }
                 }
             )
             .toolbar {
+                if viewModel.parentRecipe != nil {
+                    Button(action: {
+                        viewModel.showParentRecipe = true
+                    }) {
+                        Text("Adapted From")
+                    }
+                }
                 Button(action: {
                     viewModel.showSessionRecipe = true
                 }) {
@@ -160,20 +181,24 @@ struct RecipeView: View {
                             Text(recipe.stepGraph.topologicallySortedNodes[idx].label.content)
                         }
                     }
-                    HStack {
-                        Spacer()
-                        NavigationLink(
-                            destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
-                                                                                         isEditable: false))
-                        ) {
-                            Label("View detailed steps", systemImage: "rectangle.expand.vertical")
-                        }
-                        .padding()
-                        Spacer()
-                    }
+                    detailedStepsButton(recipe)
                 }
             }
             .padding(.bottom)
+        }
+    }
+
+    func detailedStepsButton(_ recipe: Recipe) -> some View {
+        HStack {
+            Spacer()
+            NavigationLink(
+                destination: EditorGraphView(viewModel: EditorGraphViewModel(graph: recipe.stepGraph,
+                                                                             isEditable: false))
+            ) {
+                Label("View detailed steps", systemImage: "rectangle.expand.vertical")
+            }
+            .padding()
+            Spacer()
         }
     }
 }

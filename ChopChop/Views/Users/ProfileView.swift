@@ -33,7 +33,7 @@ struct ProfileView: View {
     private var profileHeader: some View {
         HStack {
             VStack {
-                Image("default-user")
+                Image("user")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 100, height: 100)

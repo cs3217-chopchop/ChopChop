@@ -3,6 +3,7 @@
 import Combine
 import Foundation
 import GRDB
+import UIKit
 
 struct AppDatabase {
     private let dbWriter: DatabaseWriter
@@ -31,6 +32,8 @@ struct AppDatabase {
                 t.autoIncrementedPrimaryKey("id")
                 t.column("onlineId", .text)
                     .unique()
+                    .check { $0 != "" }
+                t.column("parentOnlineRecipeId", .text)
                     .check { $0 != "" }
                 t.column("recipeCategoryId", .integer)
                     .indexed()
@@ -181,147 +184,102 @@ extension AppDatabase {
         }
     }
 
+    // swiftlint:disable cyclomatic_complexity
     private func createPreloadedRecipes(_ db: Database) throws {
-        var categories = [
-            RecipeCategoryRecord(name: "Japanese"),
-            RecipeCategoryRecord(name: "Italian"),
-            RecipeCategoryRecord(name: "American"),
-            RecipeCategoryRecord(name: "A Really Really Really Really Really Really Really Really Really Long Category")
-        ]
-
-        for index in categories.indices {
-            try categories[index].save(db)
+        guard let path = Bundle.main.path(forResource: "recipes", ofType: "json"),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
+            return
         }
 
-        var recipes = [
-            RecipeRecord(recipeCategoryId: categories[2].id,
-                         name: "Pancakes",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[1].id,
-                         name: "Carbonara",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id,
-                         name: "Scrambled Eggs",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[2].id,
-                         name: "Pizza",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[0].id,
-                         name: "Ramen",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(recipeCategoryId: categories[0].id,
-                         name: "Katsudon",
-                         servings: Double(Int.random(in: 1...5)),
-                         difficulty: Difficulty.allCases.randomElement()),
-            RecipeRecord(name: "Some Really Really Really Really Really Really Really Really Long Uncategorised Recipe",
-                         servings: Double(Int.random(in: 1...5)))
-        ]
+        let decoder = JSONDecoder()
 
-        for index in recipes.indices {
-            try recipes[index].save(db)
+        guard let recipes = try? decoder.decode([RecipeData].self, from: data) else {
+            return
         }
 
-        var ingredients = [
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Milk", quantity: .volume(500, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Flour", quantity: .mass(200, unit: .gram)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Butter", quantity: .count(1)),
-            RecipeIngredientRecord(recipeId: recipes[1].id, name: "Milk", quantity: .volume(600, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[0].id, name: "Egg", quantity: .count(1)),
-            RecipeIngredientRecord(recipeId: recipes[2].id, name: "Egg", quantity: .count(2)),
-            RecipeIngredientRecord(recipeId: recipes[6].id, name: "Chocolate", quantity: .mass(200, unit: .gram)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pork Chop", quantity: .mass(100, unit: .ounce)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Egg", quantity: .count(3)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Salt", quantity: .count(0)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Pepper", quantity: .count(0)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Oil", quantity: .volume(10, unit: .milliliter)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Onion", quantity: .count(3)),
-            RecipeIngredientRecord(recipeId: recipes[5].id, name: "Rice", quantity: .count(3))
-        ]
+        var categoryRecords = Set(recipes.map { $0.category }).map { RecipeCategoryRecord(name: $0) }
 
-        for index in ingredients.indices {
-            try ingredients[index].save(db)
+        for index in categoryRecords.indices {
+            try categoryRecords[index].save(db)
         }
 
-        var graphs = recipes.map { RecipeStepGraphRecord(recipeId: $0.id) }
-
-        for index in graphs.indices {
-            try graphs[index].save(db)
+        var recipeRecords = recipes.map { recipe in
+            RecipeRecord(recipeCategoryId: categoryRecords.first(where: { $0.name == recipe.category })?.id,
+                         name: recipe.name,
+                         servings: Double(Int.random(in: 1...5)),
+                         difficulty: Difficulty.allCases.randomElement())
         }
 
-        var steps = [
-            // pancakes
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                In a large bowl, mix dry ingredients together until well-blended.
-                """),
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                Add milk and mix well until smooth.
-                """),
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                Separate the egg, placing the whites in a medium bowl and the yolks in the batter. Mix well.
-                """),
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                Beat whites until stiff and then fold into batter gently.
-                """),
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                Pour ladles of the mixture into a non-stick pan, one at a time.
-                """),
-            RecipeStepRecord(graphId: graphs[0].id, content: """
-                Cook until the edges are dry and bubbles appear on surface. Flip; cook until golden. Yields 12 to 14 \
-                pancakes.
-                """),
-            // katusdon
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                Gather the ingredients.
-                """),
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                Season the pounded pork chops with salt and pepper.
-                """),
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                In one shallow bowl, beat 1 of the eggs. Put the panko into another shallow bowl.
-                """),
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                Add a thin, even layer of oil to a cast-iron pan or skillet over medium heat for 2 1/2 minutes.
-                """),
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                Lay the pork chops in the hot oil and cook for 5 to 6 minutes on one side, until golden brown. \
-                Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through. \
-                Again, Flip and cook the other side for another 5 to 6 minutes, or until browned and cooked through. \
-                Lastly, Flip and cook the other side for another 10 to 15 minutes, or until browned and cooked through.
-                """),
-            RecipeStepRecord(graphId: graphs[5].id, content: """
-                To cook 1 serving of katsudon, put 1/4 of the soup and 1/4 of the sliced onion in a small skillet. \
-                Simmer for a few minutes on medium heat. \
-                Serve by placing 1 serving of steamed rice in a large rice bowl. \
-                Repeat to make 3 more servings.
-                """)
-        ]
-
-        for index in steps.indices {
-            try steps[index].save(db)
+        for index in recipeRecords.indices {
+            try recipeRecords[index].save(db)
         }
 
-        var edges = [
-            RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[0].id, destinationId: steps[1].id),
-            RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[1].id, destinationId: steps[2].id),
-            RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[2].id, destinationId: steps[3].id),
-            RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[3].id, destinationId: steps[4].id),
-            RecipeStepEdgeRecord(graphId: graphs[0].id, sourceId: steps[4].id, destinationId: steps[5].id),
-            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[6].id, destinationId: steps[7].id),
-            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[7].id, destinationId: steps[8].id),
-            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[8].id, destinationId: steps[9].id),
-            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[9].id, destinationId: steps[10].id),
-            RecipeStepEdgeRecord(graphId: graphs[5].id, sourceId: steps[10].id, destinationId: steps[11].id)
-        ]
+        for recipe in recipeRecords {
+            guard let id = recipe.id else {
+                continue
+            }
 
-        for index in edges.indices {
-            try edges[index].save(db)
+            try? ImageStore.save(image: UIImage(imageLiteralResourceName: recipe.name.lowercased()
+                                                    .components(separatedBy: .whitespaces)
+                                                    .joined(separator: "-")),
+                                 name: String(id),
+                                 inFolderNamed: StorageManager.recipeFolderName)
+        }
+
+        var ingredientRecords = recipes.flatMap { recipe in
+            recipe.ingredients.map { ingredient in
+                RecipeIngredientRecord(recipeId: recipeRecords.first(where: { $0.name == recipe.name })?.id,
+                                       name: ingredient.name,
+                                       quantity: ingredient.quantity)
+            }
+        }
+
+        for index in ingredientRecords.indices {
+            try ingredientRecords[index].save(db)
+        }
+
+        var graphRecords = recipeRecords.map { RecipeStepGraphRecord(recipeId: $0.id) }
+
+        for index in graphRecords.indices {
+            try graphRecords[index].save(db)
+        }
+
+        var stepRecords = recipes.flatMap { recipe in
+            recipe.steps.map { content in
+                RecipeStepRecord(graphId: recipeRecords.first(where: { $0.name == recipe.name })?.id,
+                                 content: content)
+            }
+        }
+
+        for index in stepRecords.indices {
+            try stepRecords[index].save(db)
+
+            let timers = RecipeStepParser.parseTimeStrings(step: stepRecords[index].content).map {
+                TimeInterval(RecipeStepParser.parseDuration(timeString: $0))
+            }
+
+            for timer in timers {
+                var timer = RecipeStepTimerRecord(stepId: stepRecords[index].id, duration: timer)
+
+                try timer.save(db)
+            }
+        }
+
+        var edgeRecords: [RecipeStepEdgeRecord] = stepRecords.indices.dropLast().compactMap { index in
+            guard stepRecords[index].graphId == stepRecords[index + 1].graphId else {
+                return nil
+            }
+
+            return RecipeStepEdgeRecord(graphId: stepRecords[index].graphId,
+                                        sourceId: stepRecords[index].id,
+                                        destinationId: stepRecords[index + 1].id)
+        }
+
+        for index in edgeRecords.indices {
+            try edgeRecords[index].save(db)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }
 
 // MARK: - Database: Preloaded Ingredients
@@ -335,70 +293,55 @@ extension AppDatabase {
     }
 
     private func createPreloadedIngredients(_ db: Database) throws {
-        var categories = [
-            IngredientCategoryRecord(name: "Spices"),
-            IngredientCategoryRecord(name: "Dairy"),
-            IngredientCategoryRecord(name: "Grains")
-        ]
-
-        for index in categories.indices {
-            try categories[index].save(db)
+        guard let path = Bundle.main.path(forResource: "ingredients", ofType: "json"),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe) else {
+            return
         }
 
-        var ingredients = [
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Pepper", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Cinnamon", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Milk", quantityType: .volume),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Cheese", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[2].id, name: "Rice", quantityType: .mass),
-            IngredientRecord(name: "Uncategorised Ingredient", quantityType: .count),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Butter", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[1].id, name: "Egg", quantityType: .count),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Salt", quantityType: .mass),
-            IngredientRecord(ingredientCategoryId: categories[0].id, name: "Oil", quantityType: .volume)
-        ]
+        let decoder = JSONDecoder()
 
-        for index in ingredients.indices {
-            try ingredients[index].save(db)
+        guard let ingredients = try? decoder.decode([IngredientData].self, from: data) else {
+            return
         }
 
-        var batches = [
-            IngredientBatchRecord(ingredientId: ingredients[0].id, quantity: .mass(500, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[1].id, quantity: .mass(200, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: .today,
-                                  quantity: .volume(2, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7).startOfDay,
-                                  quantity: .volume(1.5, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[2].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .volume(3, unit: .liter)),
-            IngredientBatchRecord(ingredientId: ingredients[3].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(1, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[4].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(2, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[6].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(20, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[6].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .mass(0.05, unit: .kilogram)),
-            IngredientBatchRecord(ingredientId: ingredients[7].id,
-                                  expiryDate: Date(timeIntervalSinceNow: 60 * 60 * 24 * 7 * 4).startOfDay,
-                                  quantity: .count(3)),
-            IngredientBatchRecord(ingredientId: ingredients[8].id,
-                                  expiryDate: .today,
-                                  quantity: .mass(20, unit: .gram)),
-            IngredientBatchRecord(ingredientId: ingredients[9].id,
-                                  expiryDate: .today,
-                                  quantity: .volume(20, unit: .pint))
-        ]
+        var categoryRecords = Set(ingredients.map { $0.category }).map { IngredientCategoryRecord(name: $0) }
 
-        for index in batches.indices {
-            try batches[index].save(db)
+        for index in categoryRecords.indices {
+            try categoryRecords[index].save(db)
+        }
+
+        var ingredientRecords = ingredients.map { ingredient in
+            IngredientRecord(ingredientCategoryId: categoryRecords.first(where: { $0.name == ingredient.category })?.id,
+                             name: ingredient.name,
+                             quantityType: ingredient.type)
+        }
+
+        for index in ingredientRecords.indices {
+            try ingredientRecords[index].save(db)
+        }
+
+        for ingredient in ingredientRecords {
+            guard let id = ingredient.id else {
+                continue
+            }
+
+            try? ImageStore.save(image: UIImage(imageLiteralResourceName: ingredient.name.lowercased()
+                                                    .components(separatedBy: .whitespaces)
+                                                    .joined(separator: "-")),
+                                 name: String(id),
+                                 inFolderNamed: StorageManager.ingredientFolderName)
+        }
+
+        var batchRecords = ingredients.flatMap { ingredient in
+            ingredient.quantities.indices.map { index in
+                IngredientBatchRecord(ingredientId: ingredientRecords.first(where: { $0.name == ingredient.name })?.id,
+                                      expiryDate: Date(timeIntervalSinceNow: 86_400 * TimeInterval(index + 1)),
+                                      quantity: ingredient.quantities[index])
+            }
+        }
+
+        for index in batchRecords.indices {
+            try batchRecords[index].save(db)
         }
     }
 }
@@ -478,7 +421,8 @@ extension AppDatabase {
         try dbWriter.write { db in
             for index in ingredients.indices {
                 guard ingredients[index].1.allSatisfy({ $0.quantity.type == ingredients[index].0.quantityType }) else {
-                    throw DatabaseError(message: "Ingredient and ingredient batches do not have the same quantity type.")
+                    throw DatabaseError(message:
+                                            "Ingredient and ingredient batches do not have the same quantity type.")
                 }
 
                 // Save ingredient
@@ -623,6 +567,18 @@ extension AppDatabase {
                     .including(all: RecipeStepGraphRecord.edges))
 
             return try Recipe.fetchOne(db, request)
+        }
+    }
+
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
+        try dbWriter.read { db in
+            let request = RecipeRecord
+                .filter(RecipeRecord.Columns.parentOnlineRecipeId == parentOnlineRecipeId)
+                .including(all: RecipeRecord.ingredients)
+                .including(required: RecipeRecord.stepGraph
+                    .including(all: RecipeStepGraphRecord.steps)
+                    .including(all: RecipeStepGraphRecord.edges))
+            return try Recipe.fetchAll(db, request)
         }
     }
 

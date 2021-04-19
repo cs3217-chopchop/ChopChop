@@ -179,7 +179,7 @@ extension GraphTests {
         let source = IntNode(1)
         let destination = IntNode(2)
         let addedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
-        let reverseEdge = addedEdge.reversed()
+        let reverseEdge = addedEdge.reversed
 
         let graph = makeGraphWithNodes(isDirected: false, source, destination)
 
@@ -226,7 +226,7 @@ extension GraphTests {
         let source = IntNode(1)
         let destination = IntNode(2)
         let removedEdge = try XCTUnwrap(Edge(source: source, destination: destination))
-        let reverseEdge = removedEdge.reversed()
+        let reverseEdge = removedEdge.reversed
 
         let graph = makeGraphWithEdges(isDirected: false, removedEdge)
 
@@ -256,7 +256,7 @@ extension GraphTests {
 
     func testContainsEdge_undirectedGraphWithEdge_containsReverseEdge() throws {
         let existingEdge = try XCTUnwrap(Edge(source: IntNode(1), destination: IntNode(2)))
-        let reverseEdge = existingEdge.reversed()
+        let reverseEdge = existingEdge.reversed
 
         let graph = makeGraphWithEdges(isDirected: false, existingEdge)
 
@@ -316,7 +316,7 @@ extension GraphTests {
 
         let graph = makeGraphWithEdges(isDirected: false, testEdge)
 
-        let expectedEdges = [testEdge, testEdge.reversed()]
+        let expectedEdges = [testEdge, testEdge.reversed]
 
         XCTAssertEqual(Set(graph.edges), Set(expectedEdges),
                        "All contained edges including reverse edges should be returned")

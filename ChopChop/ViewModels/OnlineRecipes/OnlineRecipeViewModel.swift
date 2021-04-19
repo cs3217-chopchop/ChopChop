@@ -3,12 +3,15 @@ import Combine
 
 class OnlineRecipeViewModel: ObservableObject {
     private(set) var recipe: OnlineRecipe
-
+    private(set) var parentRecipe: OnlineRecipe?
+    private(set) var downloadedRecipes: [Recipe]
     private var creatorCancellable: AnyCancellable?
+
     private var recipeCancellable: AnyCancellable?
     private var followeesCancellable: AnyCancellable?
     private var firstRaterCancellable: AnyCancellable?
     private var imageCancellable: AnyCancellable?
+    private var parentRecipeCancellable: AnyCancellable?
     let storageManager = StorageManager()
 
     @Published private(set) var recipeServingText = ""
@@ -30,6 +33,26 @@ class OnlineRecipeViewModel: ObservableObject {
         self.downloadRecipeViewModel = downloadRecipeViewModel
         self.settings = settings
 
+        do {
+            self.downloadedRecipes = try storageManager.fetchDownloadedRecipes(parentOnlineRecipeId: recipe.id)
+        } catch {
+            self.downloadedRecipes = []
+        }
+
+        if let parentOnlineRecipeId = recipe.parentOnlineRecipeId {
+            parentRecipeCancellable = storageManager.onlineRecipePublisher(id: parentOnlineRecipeId)
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .finished:
+                        break
+                    case .failure:
+                        self.parentRecipe = nil
+                    }
+                }, receiveValue: { value in
+                    self.parentRecipe = value
+                })
+        }
+
         creatorCancellable = creatorPublisher
             .sink { [weak self] user in
                 self?.creatorName = user.name
@@ -44,7 +67,8 @@ class OnlineRecipeViewModel: ObservableObject {
             .sink { [weak self] recipe in
                 self?.recipe = recipe
 
-                self?.recipeServingText = "\(recipe.servings.removeZerosFromEnd()) \(recipe.servings == 1 ? "person" : "people")"
+                let servings = recipe.servings.removeZerosFromEnd()
+                self?.recipeServingText = "\(servings) \(recipe.servings == 1 ? "person" : "people")"
 
                 guard let firstRaterId = self?.getRaterId(recipe: recipe) else {
                     return
@@ -83,6 +107,10 @@ class OnlineRecipeViewModel: ObservableObject {
 
     func setRecipe() {
         downloadRecipeViewModel.setRecipe(recipe: recipe)
+    }
+
+    func updateForkedRecipes() {
+        downloadRecipeViewModel.updateForkedRecipes(recipes: downloadedRecipes, onlineRecipe: recipe)
     }
 
     func toggleShowDetail() {

@@ -20,4 +20,8 @@ final class OnlineRecipeCollectionViewModel: ObservableObject {
             }
     }
 
+    init(recipe: OnlineRecipe) {
+        self.recipes = [recipe]
+    }
+
 }

@@ -135,6 +135,7 @@ class RecipeFormViewModel: ObservableObject {
 
             var updatedRecipe = try Recipe(id: recipe?.id,
                                            onlineId: recipe?.onlineId,
+                                           parentOnlineRecipeId: recipe?.parentOnlineRecipeId,
                                            name: name,
                                            category: category,
                                            servings: servings,

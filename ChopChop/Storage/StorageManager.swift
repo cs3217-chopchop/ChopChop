@@ -16,7 +16,9 @@ struct StorageManager {
     // MARK: - Storage Manager: Create/Update
 
     func saveRecipe(_ recipe: inout Recipe) throws {
+
         var recipeRecord = RecipeRecord(id: recipe.id, onlineId: recipe.onlineId,
+                                        parentOnlineRecipeId: recipe.parentOnlineRecipeId,
                                         recipeCategoryId: recipe.category?.id, name: recipe.name,
                                         servings: recipe.servings, difficulty: recipe.difficulty)
         var ingredientRecords = recipe.ingredients.map { ingredient in
@@ -144,6 +146,10 @@ struct StorageManager {
         try appDatabase.fetchIngredient(id: id)
     }
 
+    func fetchDownloadedRecipes(parentOnlineRecipeId: String) throws -> [Recipe] {
+        try appDatabase.fetchDownloadedRecipes(parentOnlineRecipeId: parentOnlineRecipeId)
+    }
+
     // MARK: - Database Access: Publishers
 
     func recipePublisher(id: Int64) -> AnyPublisher<Recipe?, Error> {
@@ -254,14 +260,17 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -297,15 +306,18 @@ extension StorageManager {
         })
         let stepGraph = recipe.stepGraph
         let nodes = stepGraph.nodes.map({
-            $0.label.content
+            OnlineStepRecord(id: $0.id.uuidString, content: $0.label.content)
         })
+
         let edgeRecords = stepGraph.edges.map({
-            OnlineStepEdgeRecord(sourceStep: $0.source.label.content, destinationStep: $0.destination.label.content)
+            OnlineStepEdgeRecord(sourceStepId: $0.source.id.uuidString, destinationStepId: $0.destination.id.uuidString)
         })
+
         let recipeRecord = OnlineRecipeRecord(
             id: recipe.onlineId,
             name: recipe.name,
             creator: userId,
+            parentOnlineRecipeId: recipe.parentOnlineRecipeId,
             servings: recipe.servings,
             cuisine: cuisine,
             difficulty: recipe.difficulty,
@@ -349,6 +361,14 @@ extension StorageManager {
     // fetch the details of a single recipe
     func onlineRecipeByIdPublisher(recipeId: String) -> AnyPublisher<OnlineRecipe, Error> {
         firebase.fetchOnlineRecipeById(onlineRecipeId: recipeId)
+            .compactMap({
+                try? OnlineRecipe(from: $0)
+            })
+            .eraseToAnyPublisher()
+    }
+
+    func onlineRecipePublisher(id: String) -> AnyPublisher<OnlineRecipe, Error> {
+        firebase.fetchOnlineRecipeOnceById(onlineRecipeId: id)
             .compactMap({
                 try? OnlineRecipe(from: $0)
             })
@@ -457,11 +477,12 @@ extension StorageManager {
         // must be both original owner and not have any local recipes currently connected to this online recipe
         // in order to establish a connection to this online recipe after download
         let isRecipeOwner = recipe.userId == UserDefaults.standard.string(forKey: "userId")
-        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) == nil
+        let isRecipeAlreadyConnected = (try? fetchRecipe(onlineId: recipe.id)) != nil
         let newOnlineId = (isRecipeOwner && !isRecipeAlreadyConnected) ? recipe.id : nil
 
         var localRecipe = try Recipe(
             onlineId: newOnlineId,
+            parentOnlineRecipeId: isRecipeOwner ? nil : recipe.id,
             name: newName,
             category: cuisine,
             servings: recipe.servings,
@@ -485,6 +506,27 @@ extension StorageManager {
             }
             try? self.saveRecipeImage(fetchedImage, name: String(id))
         }
+    }
+
+    func updateForkedRecipes(forked: Recipe, original: OnlineRecipe) throws {
+        var cuisineCategory: RecipeCategory?
+        if let cuisine = original.cuisine {
+            cuisineCategory = try? self.fetchRecipeCategory(name: cuisine)
+        }
+
+        var localRecipe = try Recipe(
+            id: forked.id,
+            onlineId: forked.onlineId,
+            parentOnlineRecipeId: forked.parentOnlineRecipeId,
+            name: forked.name,
+            category: cuisineCategory,
+            servings: original.servings,
+            difficulty: original.difficulty,
+            ingredients: original.ingredients,
+            stepGraph: original.stepGraph
+        )
+
+        try self.saveRecipe(&localRecipe)
     }
 
     func onlineRecipeImagePublisher(recipeId: String) -> AnyPublisher<UIImage, Error> {

@@ -4,6 +4,7 @@ import FirebaseFirestoreSwift
 class OnlineRecipe: Identifiable {
     private(set) var id: String
     private(set) var userId: String
+    private(set) var parentOnlineRecipeId: String?
 
     private(set) var name: String
     private(set) var servings: Double
@@ -14,11 +15,13 @@ class OnlineRecipe: Identifiable {
     private(set) var ratings: [RecipeRating]
     private(set) var created: Date
 
-    init(id: String, userId: String, name: String, servings: Double,
+    // swiftlint:disable function_default_parameter_at_end
+    init(id: String, userId: String, parentOnlineRecipeId: String? = nil, name: String, servings: Double,
          difficulty: Difficulty?, cuisine: String?, stepGraph: RecipeStepGraph,
          ingredients: [RecipeIngredient], ratings: [RecipeRating], created: Date) throws {
         self.id = id
         self.userId = userId
+        self.parentOnlineRecipeId = parentOnlineRecipeId
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeError.invalidName
@@ -36,6 +39,7 @@ class OnlineRecipe: Identifiable {
         self.ratings = ratings
         self.created = created
     }
+    // swiftlint:enable function_default_parameter_at_end
 }
 
 extension OnlineRecipe {
@@ -48,44 +52,36 @@ extension OnlineRecipe {
             throw OnlineRecipeRecordError.missingCreatedDate
         }
 
-        let stepGraphNodes = try record.steps.compactMap({
-            try RecipeStep($0)
-        })
-        .map({
-            RecipeStepNode($0)
+        var uuidToRecipeStepNodeMap = [String: RecipeStepNode]()
+        record.steps.forEach({
+            let step = try? RecipeStep($0.content)
+            guard let recipeStep = step else {
+                return
+            }
+            uuidToRecipeStepNodeMap[$0.id] = RecipeStepNode(recipeStep)
         })
 
         var stepGraphEdges = [Edge<RecipeStepNode>]()
         record.stepEdges.forEach {
-            var source: RecipeStep?
-            var destination: RecipeStep?
-            for node in stepGraphNodes {
-                if source == nil && node.label.content == $0.sourceStep {
-                    source = node.label
-                } else if destination == nil && node.label.content == $0.destinationStep {
-                    destination = node.label
-                }
-                if source != nil && destination != nil {
-                    break
-                }
-            }
-            guard let sourceStep = source, let destinationStep = destination else {
+            let source = uuidToRecipeStepNodeMap[$0.sourceStepId]
+            let destination = uuidToRecipeStepNodeMap[$0.destinationStepId]
+            guard let sourceStepNode = source, let destinationStepNode = destination else {
                 return
             }
 
-            let stepNodeSource = RecipeStepNode(sourceStep)
-            let stepNodeDestination = RecipeStepNode(destinationStep)
-            guard let edge = Edge<RecipeStepNode>(source: stepNodeSource, destination: stepNodeDestination) else {
+            guard let edge = Edge<RecipeStepNode>(source: sourceStepNode, destination: destinationStepNode) else {
                 return
             }
             stepGraphEdges.append(edge)
         }
 
-        let stepGraph = (try? RecipeStepGraph(nodes: stepGraphNodes, edges: stepGraphEdges)) ?? RecipeStepGraph()
+        let stepGraph = (try? RecipeStepGraph(nodes: Array(uuidToRecipeStepNodeMap.values), edges: stepGraphEdges))
+            ?? RecipeStepGraph()
 
         try self.init(
             id: id,
             userId: record.creator,
+            parentOnlineRecipeId: record.parentOnlineRecipeId,
             name: record.name,
             servings: record.servings,
             difficulty: record.difficulty,

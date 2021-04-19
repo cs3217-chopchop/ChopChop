@@ -23,12 +23,13 @@ final class CreateUserProfileViewModel: ObservableObject {
             errorMessage = "Empty name not accepted"
             return
         }
+
         guard let userId = try? storageManager.createUser(user: newUser) else {
             assertionFailure()
             return
         }
+
         UserDefaults.standard.set(userId, forKey: "userId")
         settings.userId = userId
     }
-
 }
