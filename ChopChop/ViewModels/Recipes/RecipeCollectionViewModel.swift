@@ -14,6 +14,13 @@ final class RecipeCollectionViewModel: ObservableObject {
 
     let title: String
     let categoryIds: [Int64?]
+    var category: RecipeCategory? {
+        guard categoryIds.compactMap({ $0 }).count == 1 else {
+            return nil
+        }
+
+        return try? RecipeCategory(id: categoryIds.compactMap({ $0 }).first, name: title)
+    }
 
     private let storageManager = StorageManager()
     private var recipesCancellable: AnyCancellable?
@@ -51,11 +58,6 @@ final class RecipeCollectionViewModel: ObservableObject {
         }
 
         return storageManager.fetchRecipeImage(name: String(id))
-    }
-
-    func resetSearchFields() {
-        query = ""
-        selectedIngredients.removeAll()
     }
 
     private func recipesPublisher() -> AnyPublisher<[RecipeInfo], Never> {

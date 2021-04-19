@@ -79,7 +79,6 @@ struct OnlineRecipe: Identifiable, CachableEntity {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-    // swiftlint:enable function_default_parameter_at_end
 }
 // MARK: Firebase-dependent initialization
 extension OnlineRecipe {

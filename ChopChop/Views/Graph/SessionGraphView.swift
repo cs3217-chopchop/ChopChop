@@ -1,8 +1,8 @@
 import SwiftUI
 
  struct SessionGraphView: View {
-    @ObservedObject var viewModel: SessionGraphViewModel
-    @ObservedObject var selection = SelectionHandler<SessionRecipeStepNode>()
+    @StateObject var viewModel: SessionGraphViewModel
+    @StateObject var selection = SelectionHandler<SessionRecipeStepNode>()
 
     @GestureState var portalDragOffset = CGVector.zero
 

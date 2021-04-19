@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CreateUserProfileView: View {
-    @ObservedObject var viewModel: CreateUserProfileViewModel
+    @StateObject var viewModel: CreateUserProfileViewModel
 
     var body: some View {
         VStack {

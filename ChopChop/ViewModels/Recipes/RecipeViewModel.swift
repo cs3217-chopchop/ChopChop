@@ -41,13 +41,11 @@ final class RecipeViewModel: ObservableObject {
                 }
             }
 
-        guard let parentId = recipe?.parentOnlineRecipeId else {
-            return
+        if let parentId = recipe?.parentOnlineRecipeId {
+            storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
+                self.parentRecipe = onlineRecipe
+            }
         }
-        storageManager.fetchOnlineRecipe(id: parentId) { onlineRecipe, _ in
-            self.parentRecipe = onlineRecipe
-        }
-
     }
 
     func publish() {
@@ -56,14 +54,9 @@ final class RecipeViewModel: ObservableObject {
         }
 
         if isPublished {
-            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) {
-                _ in
-
-            }
+            try? storageManager.updateOnlineRecipe(recipe: recipe, userId: userId) { _ in }
         } else {
-            try? storageManager.addOnlineRecipe(recipe: &recipe, userId: userId) { _ in
-
-            }
+            try? storageManager.addOnlineRecipe(recipe: &recipe, userId: userId) { _ in }
         }
     }
 

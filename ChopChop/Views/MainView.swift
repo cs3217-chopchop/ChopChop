@@ -3,9 +3,9 @@ import FirebaseFirestore
 import Combine
 
 struct MainView: View {
-    @ObservedObject var viewModel: MainViewModel
-    @State var editMode = EditMode.inactive
     @EnvironmentObject var settings: UserSettings
+    @StateObject var viewModel: MainViewModel
+    @State var editMode = EditMode.inactive
 
     var body: some View {
         Sidebar(viewModel: SidebarViewModel(settings: settings), editMode: $editMode)

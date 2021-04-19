@@ -4,7 +4,7 @@ import SwiftUI
  Represents a view of a batch of an ingredient.
  */
 struct IngredientBatchCardView: View {
-    let viewModel: IngredientBatchViewModel
+    @ObservedObject var viewModel: IngredientBatchViewModel
 
     var body: some View {
         HStack {
