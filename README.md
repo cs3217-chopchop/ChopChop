@@ -20,4 +20,15 @@ cd ChopChop
 xcodegen
 ```
 
-> Note: Remember to download and place the provided `GoogleService-Info.plist` in the main `ChopChop` directory (the directory containing the `Info.plist` file).
+Set up Firebase:
+* Create a Firebase project [here](https://console.firebase.google.com/)
+* Add an IOS app. Enter your app's bundle ID in the iOS bundle ID field when prompted.
+* Download and place the provided `GoogleService-Info.plist` in the main `ChopChop` directory (the directory containing the `Info.plist` file).
+* On the Firebase console, enable Firestore and Storage. Setup security rules for both Firestore and Storage.
+
+Refer to [official website](https://firebase.google.com/docs/ios/setup) for any issues
+
+
+> Note: A valid `GoogleService-Info.plist` file is necessary to run the app.
+
+
