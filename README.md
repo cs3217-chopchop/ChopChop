@@ -14,7 +14,7 @@ ChopChop is an application on the iPad for people who cook. It comes with featur
 
 After installing all dependencies:
 
-```
+```bash
 git clone https://github.com/cs3217-chopchop/ChopChop.git
 cd ChopChop
 xcodegen
