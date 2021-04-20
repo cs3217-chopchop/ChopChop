@@ -20,4 +20,4 @@ cd ChopChop
 xcodegen
 ```
 
-> Note: Remember to download and place the provided `GoogleService-Info.plist` in the main `ChopChop` directory (the directory containing the `Info.plist` file.
+> Note: Remember to download and place the provided `GoogleService-Info.plist` in the main `ChopChop` directory (the directory containing the `Info.plist` file).
